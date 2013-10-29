@@ -10,13 +10,16 @@
 
 #include "Absyn.h"
 
+#include<vector>
+using namespace std;
+
 namespace swift {
 
-virtual class Expr: public swift::Absyn {
+class Expr: public swift::Absyn {
 public:
   Expr(int l, int c) : Absyn(l, c) {}
   virtual ~Expr();
-  Expr[] args;
+  vector<Expr> args;
 };
 
 } /* namespace swift */
