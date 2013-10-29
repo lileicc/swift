@@ -12,8 +12,10 @@ namespace swift {
 
 class Absyn {
 public:
-  Absyn();
+  Absyn(int l, int c) : line(l), col(c) {}
   virtual ~Absyn();
+  int line; // line number in original file
+  int col; // column number in original file
 };
 
 } /* namespace swift */

@@ -1,15 +1,15 @@
 /*
- * Absyn.cpp
+ * IfExpr.cpp
  *
  *  Created on: Oct 28, 2013
  *      Author: leili
  */
 
-#include "Absyn.h"
+#include "IfExpr.h"
 
 namespace swift {
 
-Absyn::~Absyn() {
+IfExpr::~IfExpr() {
   // TODO Auto-generated destructor stub
 }
 
