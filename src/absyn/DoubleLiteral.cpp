@@ -1,0 +1,23 @@
+/*
+* DoubleLiteral.cpp
+*
+*  Created on: Oct 29, 2013
+*      Author: yiwu
+*/
+
+#include "DoubleLiteral.h"
+
+namespace swift{
+
+DoubleLiteral::DoubleLiteral(int l, int c, double value)
+	:Literal(l, c, AbsynLiteralConstant::DOUBLE), value(value) {
+}
+
+DoubleLiteral::~DoubleLiteral() {
+}
+
+double DoubleLiteral::getValue() {
+	return value;
+}
+
+}

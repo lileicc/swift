@@ -9,13 +9,20 @@
 #define FUNCAPP_H_
 
 #include "Expr.h"
+#include "Symbol.h"
+
+namespace swift{
 
 class FuncApp :
 	public swift::Expr
 {
+	Symbol func;
 public:
-	FuncApp();
+	FuncApp(int l, int c, Symbol func);
 	virtual ~FuncApp();
+
+	const Symbol& getFunc();
 };
 
+}
 #endif

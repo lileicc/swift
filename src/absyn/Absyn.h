@@ -17,6 +17,17 @@ enum AbsynOpExprConstant {
 	SUB
 };
 
+enum AbsynLiteralConstant {
+	INT, DOUBLE, BOOL, STRING,
+	TIMESTAMP,
+	NULLEXPR
+};
+
+enum AbsynDeclConstant {
+	TYPE, DISTINCT, NUMBERSTMT, ORIGIN, 
+	FUNCTION, QUERY, OBS
+};
+
 class Absyn {
 public:
   Absyn(int l, int c) : line(l), col(c) {}

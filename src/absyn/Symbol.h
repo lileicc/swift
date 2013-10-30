@@ -1,8 +1,8 @@
 /*
-* OpExpr.h
+* Symbol.h
 *
 *  Created on: Oct 29, 2013
-*      Author: leili
+*      Author: yiwu
 */
 
 #ifndef SYMBOL_H_
@@ -10,6 +10,7 @@
 
 #include<string>
 using std::string;
+
 namespace swift {
 
 class Symbol
@@ -19,7 +20,7 @@ public:
 	Symbol(string v="");
 	virtual ~Symbol();
 
-	string getValue();
+	const string& getValue();
 };
 
 }

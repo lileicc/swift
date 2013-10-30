@@ -15,7 +15,7 @@ Symbol::Symbol(string v) :value(v) {
 Symbol::~Symbol() {
 }
 
-string Symbol::getValue() {
+const string& Symbol::getValue() {
 	return value;
 }
 
