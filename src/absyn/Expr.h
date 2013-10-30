@@ -11,7 +11,6 @@
 #include "Absyn.h"
 
 #include<vector>
-using namespace std;
 
 namespace swift {
 
@@ -19,7 +18,7 @@ class Expr: public swift::Absyn {
 public:
   Expr(int l, int c) : Absyn(l, c) {}
   virtual ~Expr();
-  vector<Expr> args;
+  std::vector<Expr> args;
 };
 
 } /* namespace swift */
