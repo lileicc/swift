@@ -10,8 +10,11 @@
 
 namespace swift {
 
-enum AbsynConstant {
-  ADD, MINUS
+enum AbsynOpExprConstant {
+	PLUS, MINUS, MUL, DIV, POWER, MOD,
+	EQ, NEQ, LT, GT, LE, GE,
+	AND, OR, NOT, IMPLY,
+	SUB
 };
 
 class Absyn {

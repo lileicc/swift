@@ -9,8 +9,25 @@
 
 namespace swift {
 
+Expr::Expr(int l, int c) :Absyn(l, c) {
+}
+
 Expr::~Expr() {
-  // TODO Auto-generated destructor stub
+	for (int i = 0; i < args.size(); i++)
+		if (args[i] != NULL)
+			delete args[i];
+}
+
+void Expr::add(Expr* e) {
+	args.push_back(e);
+}
+
+Expr* Expr::get(int id) {
+	return args[id];
+}
+
+int Expr::size() {
+	return args.size();
 }
 
 } /* namespace swift */
