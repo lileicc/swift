@@ -14,7 +14,7 @@ namespace swift {
 
 class OpExpr: public swift::Expr {
 public:
-  OpExpr(int l, int c, int op, Expr left, Expr right);
+  OpExpr(int l, int c, int op, Expr* left, Expr* right);
   virtual ~OpExpr();
 };
 

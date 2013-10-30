@@ -12,7 +12,7 @@ namespace swift {
 
 enum AbsynConstant {
   ADD, MINUS
-} ABSYN_CONSTANT;
+};
 
 class Absyn {
 public:

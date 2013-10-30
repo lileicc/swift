@@ -9,7 +9,7 @@
 
 namespace swift {
 
-OpExpr::OpExpr(int l, int c, int op, Expr left, Expr right) {
+OpExpr::OpExpr(int l, int c, int op, Expr* left, Expr* right):Expr(l,c) {
   // TODO Auto-generated constructor stub
 
 }
