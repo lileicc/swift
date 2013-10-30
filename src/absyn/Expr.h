@@ -17,6 +17,7 @@ class Expr: public swift::Absyn {
 public:
   Expr(int l, int c) : Absyn(l, c) {}
   virtual ~Expr();
+protected:
   std::vector<Expr> args;
 };
 
