@@ -27,8 +27,8 @@ public:
 	virtual ~DistinctDecl();
 
 	int size();
-	const Symbol& getTyp();
-	const Symbol& getVar(int k);
+	Symbol& getTyp();
+	Symbol& getVar(int k);
 	int getRep(int k);
 	void add(Symbol v, int r = 1);
 };

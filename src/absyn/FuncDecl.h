@@ -29,12 +29,12 @@ public:
 	FuncDecl(int l, int c, bool random, Symbol func, Expr* expr);
 	virtual ~FuncDecl();
 
-	const Symbol& getFunc();
+	Symbol& getFunc();
 	Expr* getExpr();
 	bool isRandom();
 	int argSize();
 	void addArg(VarDecl var);
-	const VarDecl& getArg(int k);
+	VarDecl& getArg(int k);
 };
 
 }

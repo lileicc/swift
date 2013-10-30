@@ -22,8 +22,8 @@ public:
 	OriginDecl(int l, int c, Symbol func, Symbol arg);
 	virtual ~OriginDecl();
 
-	const Symbol& getFunc();
-	const Symbol& getArg();
+	Symbol& getFunc();
+	Symbol& getArg();
 };
 
 }

@@ -21,7 +21,7 @@ public:
 	DistrExpr(int l, int c, Symbol distr);
 	virtual ~DistrExpr();
 
-	const Symbol& getDistr();
+	Symbol& getDistr();
 };
 
 }

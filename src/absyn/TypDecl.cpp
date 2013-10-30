@@ -24,7 +24,7 @@ void TypDecl::add(Symbol sym) {
 	args.push_back(sym);
 }
 
-const Symbol& TypDecl::get(int k) {
+Symbol& TypDecl::get(int k) {
 	return args[k];
 }
 

@@ -21,7 +21,7 @@ public:
 	FuncApp(int l, int c, Symbol func);
 	virtual ~FuncApp();
 
-	const Symbol& getFunc();
+	Symbol& getFunc();
 };
 
 }

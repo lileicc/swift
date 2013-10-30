@@ -16,7 +16,7 @@ FuncApp::FuncApp(int l, int c, Symbol func)
 FuncApp::~FuncApp() {
 }
 
-const Symbol& FuncApp::getFunc() {
+Symbol& FuncApp::getFunc() {
 	return func;
 }
 

@@ -21,7 +21,7 @@ public:
 	VarRef(int l, int c, Symbol var);
 	virtual ~VarRef();
 
-	const Symbol& getVar();
+	Symbol& getVar();
 };
 
 }

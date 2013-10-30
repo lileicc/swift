@@ -18,7 +18,7 @@ FuncDecl::~FuncDecl() {
 	if (expr != NULL) delete expr;
 }
 
-const Symbol& FuncDecl::getFunc() {
+Symbol& FuncDecl::getFunc() {
 	return func;
 }
 
@@ -34,7 +34,7 @@ int FuncDecl::argSize() {
 	return args.size();
 }
 
-const VarDecl& FuncDecl::getArg(int k) {
+VarDecl& FuncDecl::getArg(int k) {
 	return args[k];
 }
 

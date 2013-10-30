@@ -16,11 +16,11 @@ OriginDecl::OriginDecl(int l, int c, Symbol func, Symbol arg)
 OriginDecl::~OriginDecl() {
 }
 
-const Symbol& OriginDecl::getArg() {
+Symbol& OriginDecl::getArg() {
 	return arg;
 }
 
-const Symbol& OriginDecl::getFunc() {
+Symbol& OriginDecl::getFunc() {
 	return func;
 }
 

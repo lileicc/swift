@@ -17,7 +17,7 @@ DistrExpr::DistrExpr(int l,int r,Symbol distr)
 DistrExpr::~DistrExpr() {
 }
 
-const Symbol& DistrExpr::getDistr(){
+Symbol& DistrExpr::getDistr(){
 	return distr;
 }
 

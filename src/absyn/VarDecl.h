@@ -25,8 +25,8 @@ public:
 	VarDecl(int l, int c, Symbol typ, Symbol var);
 	virtual ~VarDecl();
 
-	const Symbol& getVar();
-	const Symbol& getTyp();
+	Symbol& getVar();
+	Symbol& getTyp();
 };
 
 }

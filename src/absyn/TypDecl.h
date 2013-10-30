@@ -26,7 +26,7 @@ public:
 
 	int size();
 	void add(Symbol typ);
-	const Symbol& get(int k);
+	Symbol& get(int k);
 };
 
 }

@@ -29,10 +29,10 @@ public:
 	virtual ~NumStDecl();
 
 	Expr* getExpr();
-	const Symbol& getTyp();
+	Symbol& getTyp();
 	int argSize();
-	const Symbol& getArgOrigin(int k);
-	const Symbol& getArgVar(int k);
+	Symbol& getArgOrigin(int k);
+	Symbol& getArgVar(int k);
 	void add(Symbol o, Symbol v);
 };
 

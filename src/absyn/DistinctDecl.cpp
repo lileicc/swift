@@ -25,11 +25,11 @@ int DistinctDecl::size() {
 	return var.size();
 }
 
-const Symbol& DistinctDecl::getTyp() {
+Symbol& DistinctDecl::getTyp() {
 	return typ;
 }
 
-const Symbol& DistinctDecl::getVar(int k) {
+Symbol& DistinctDecl::getVar(int k) {
 	return var[k];
 }
 

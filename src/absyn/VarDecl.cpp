@@ -17,11 +17,11 @@ VarDecl::VarDecl(int l, int c, Symbol typ, Symbol var)
 VarDecl::~VarDecl() {
 }
 
-const Symbol& VarDecl::getTyp() {
+Symbol& VarDecl::getTyp() {
 	return typ;
 }
 
-const Symbol& VarDecl::getVar() {
+Symbol& VarDecl::getVar() {
 	return var;
 }
 
