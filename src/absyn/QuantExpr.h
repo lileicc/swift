@@ -17,14 +17,14 @@ namespace swift {
 class QuantExpr :
 	public swift::Expr
 {
-	AbsynQuantExprConstant typ;
+	AbsynConstant typ;
 	VarDecl var;
 public:
 	QuantExpr(int l, int c, 
-			AbsynQuantExprConstant typ, VarDecl var, Expr* cond);
+			AbsynConstant typ, VarDecl var, Expr* cond);
 	virtual ~QuantExpr();
 
-	AbsynQuantExprConstant getTyp();
+	AbsynConstant getTyp();
 	VarDecl& getVar();
 	Expr* getCond();
 

@@ -17,12 +17,12 @@
 namespace swift {
 
 class OpExpr: public swift::Expr {
-	AbsynOpExprConstant op;
+	AbsynConstant op;
 public:
-  OpExpr(int l, int c, AbsynOpExprConstant op, Expr* left, Expr* right);
+  OpExpr(int l, int c, AbsynConstant op, Expr* left, Expr* right);
 	virtual ~OpExpr();
 
-	AbsynOpExprConstant getOp();
+	AbsynConstant getOp();
 	Expr* getLeft();
 	Expr* getRight();
 

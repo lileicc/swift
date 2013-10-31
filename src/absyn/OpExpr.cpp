@@ -9,7 +9,7 @@
 
 namespace swift {
 
-OpExpr::OpExpr(int l, int c, AbsynOpExprConstant op, Expr* left, Expr* right)
+OpExpr::OpExpr(int l, int c, AbsynConstant op, Expr* left, Expr* right)
 	:Expr(l,c),op(op) {
 		args.push_back(left);
 		args.push_back(right);
@@ -18,7 +18,7 @@ OpExpr::OpExpr(int l, int c, AbsynOpExprConstant op, Expr* left, Expr* right)
 OpExpr::~OpExpr() {
 }
 
-AbsynOpExprConstant OpExpr::getOp() {
+AbsynConstant OpExpr::getOp() {
 	return op;
 }
 

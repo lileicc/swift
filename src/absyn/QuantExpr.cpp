@@ -10,7 +10,7 @@
 namespace swift {
 
 QuantExpr::QuantExpr(int l, int c, 
-	AbsynQuantExprConstant typ, VarDecl var, Expr* cond)
+	AbsynConstant typ, VarDecl var, Expr* cond)
 	:Expr(l, c), typ(typ), var(var){
 		args.push_back(cond);
 }
@@ -18,7 +18,7 @@ QuantExpr::QuantExpr(int l, int c,
 QuantExpr::~QuantExpr() {
 }
 
-AbsynQuantExprConstant QuantExpr::getTyp() {
+AbsynConstant QuantExpr::getTyp() {
 	return typ;
 }
 

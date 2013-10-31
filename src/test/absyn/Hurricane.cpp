@@ -62,7 +62,7 @@ void Hurricane::build(){
 	{
 		Expr *cond, *thn, *els;
 		{ // Cond
-			OpExpr *eq = new OpExpr(0, 0, AbsynOpExprConstant::EQ,
+			OpExpr *eq = new OpExpr(0, 0, AbsynConstant::EQ,
 				new VarRef(0, 0, Symbol("First")), new VarRef(0, 0, Symbol("c")));
 
 			cond = eq;
