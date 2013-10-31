@@ -30,7 +30,7 @@ enum class AbsynDeclConstant {
 	FUNCTION, QUERY, OBS
 };
 
-enum AbsynQuantExprConstant {
+enum class AbsynQuantExprConstant {
 	FORALL, EXISTS
 };
 
