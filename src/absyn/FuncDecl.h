@@ -21,11 +21,12 @@ namespace swift {
 class FuncDecl :
 	public swift::Decl
 {
-	Symbol typ;
+  bool random;
+  Symbol typ;
 	Symbol func;
-	vector<VarDecl> args;
 	Expr* expr;
-	bool random;
+	vector<VarDecl> args;
+
 public:
 	FuncDecl(int l, int c, bool random, Symbol typ, Symbol func, Expr* expr);
 	virtual ~FuncDecl();
