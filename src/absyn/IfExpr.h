@@ -15,7 +15,7 @@ namespace swift {
 class IfExpr: public swift::Expr {
 public:
 	IfExpr(int l, int c, Expr* cond, Expr* then_clause, Expr* else_clause = NULL);
-  virtual ~IfExpr();
+	virtual ~IfExpr();
 
 	Expr* getCond();
 	Expr* getThen();

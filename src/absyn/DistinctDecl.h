@@ -26,7 +26,7 @@ public:
 	DistinctDecl(int l, int c, Symbol typ);
 	virtual ~DistinctDecl();
 
-	int size();
+	size_t size();
 	Symbol& getTyp();
 	Symbol& getVar(int k);
 	int getRep(int k);

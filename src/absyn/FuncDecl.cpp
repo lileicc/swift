@@ -9,13 +9,17 @@
 
 namespace swift {
 
-FuncDecl::FuncDecl(int l, int c, bool random, Symbol func, Expr* expr)
+FuncDecl::FuncDecl(int l, int c, bool random, Symbol typ, Symbol func, Expr* expr)
 	:Decl(l, c, AbsynDeclConstant::FUNCTION), 
-	 random(random), func(func), expr(expr) {
+	 random(random), typ(typ), func(func), expr(expr) {
 }
 
 FuncDecl::~FuncDecl() {
 	if (expr != NULL) delete expr;
+}
+
+Symbol& FuncDecl::getTyp() {
+	return typ;
 }
 
 Symbol& FuncDecl::getFunc() {
@@ -30,7 +34,7 @@ Expr* FuncDecl::getExpr() {
 	return expr;
 }
 
-int FuncDecl::argSize() {
+size_t FuncDecl::argSize() {
 	return args.size();
 }
 
@@ -45,13 +49,20 @@ void FuncDecl::addArg(VarDecl var) {
 // For Debugging Use
 void FuncDecl::print(FILE* file, int indent) {
 	fprintf(file, "%*s(FuncDecl:\n", indent, "");
-	fprintf(file, "%*s:type %s\n", indent + 2, "", 
+	fprintf(file, "%*s:kind %s\n", indent + 2, "", 
 															(random ? "random" : "fixed"));
+	fprintf(file, "%*s:type %s\n", indent + 2, "", typ.getValue().c_str());
 	fprintf(file, "%*s:func %s\n", indent + 2, "", func.getValue().c_str());
-	fprintf(file, "%*s(args:\n", indent + 2, "");
-	for (int i = 0; i < args.size(); i++)
-		args[i].print(file, indent + 4);
-	fprintf(file, "%*s)\n", indent + 2, "");
+	if (args.size() > 0) {
+		fprintf(file, "%*s(args:\n", indent + 2, "");
+		for (size_t i = 0; i < args.size(); i++)
+			args[i].print(file, indent + 4);
+		fprintf(file, "%*s)\n", indent + 2, "");
+	}
+	if (expr != NULL) {
+		fprintf(file, "%*sexpr:\n", indent + 2, "");
+		expr->print(file, indent + 4);
+	}
 	fprintf(file, "%*s)\n", indent, "");
 }
 

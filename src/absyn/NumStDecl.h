@@ -30,7 +30,7 @@ public:
 
 	Expr* getExpr();
 	Symbol& getTyp();
-	int argSize();
+	size_t argSize();
 	Symbol& getArgOrigin(int k);
 	Symbol& getArgVar(int k);
 	void add(Symbol o, Symbol v);

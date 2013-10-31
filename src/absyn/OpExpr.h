@@ -20,7 +20,7 @@ class OpExpr: public swift::Expr {
 	AbsynOpExprConstant op;
 public:
   OpExpr(int l, int c, AbsynOpExprConstant op, Expr* left, Expr* right);
-  virtual ~OpExpr();
+	virtual ~OpExpr();
 
 	AbsynOpExprConstant getOp();
 	Expr* getLeft();

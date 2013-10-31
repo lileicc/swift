@@ -18,7 +18,7 @@ class Symbol
 	string value;
 public:
 	Symbol(string v="");
-	virtual ~Symbol();
+	~Symbol();
 
 	const string& getValue();
 };

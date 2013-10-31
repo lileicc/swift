@@ -25,7 +25,7 @@ Expr* NumStDecl::getExpr() {
 	return expr;
 }
 
-int NumStDecl::argSize() {
+size_t NumStDecl::argSize() {
 	return origin.size();
 }
 
@@ -48,7 +48,7 @@ void NumStDecl::print(FILE* file, int indent) {
 	fprintf(file, "%*s:type %s\n", indent + 2, "", typ.getValue().c_str());
 	if (origin.size() > 0) {
 		fprintf(file, "%*s(args:\n", indent + 2, "");
-		for (int i = 0; i < origin.size(); i++)
+		for (size_t i = 0; i < origin.size(); i++)
 		{
 			fprintf(file, "%*sorigin#%d: %s", indent + 4, "", origin[i].getValue().c_str());
 			fprintf(file, "%*svar#%d: %s", indent + 4, "", var[i].getValue().c_str());

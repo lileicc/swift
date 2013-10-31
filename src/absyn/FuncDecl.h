@@ -21,18 +21,20 @@ namespace swift {
 class FuncDecl :
 	public swift::Decl
 {
+	Symbol typ;
 	Symbol func;
 	vector<VarDecl> args;
 	Expr* expr;
 	bool random;
 public:
-	FuncDecl(int l, int c, bool random, Symbol func, Expr* expr);
+	FuncDecl(int l, int c, bool random, Symbol typ, Symbol func, Expr* expr);
 	virtual ~FuncDecl();
 
 	Symbol& getFunc();
+	Symbol& getTyp();
 	Expr* getExpr();
 	bool isRandom();
-	int argSize();
+	size_t argSize();
 	void addArg(VarDecl var);
 	VarDecl& getArg(int k);
 

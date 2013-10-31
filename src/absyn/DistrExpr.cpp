@@ -26,7 +26,7 @@ void DistrExpr::print(FILE* file, int indent) {
 	fprintf(file, "%*s(DistrExpr:\n", indent, "");
 	fprintf(file, "%*s:distr %s\n", indent + 2, "", distr.getValue().c_str());
 	fprintf(file, "%*s(args:\n", indent + 2, "");
-	for (int i = 0; i < args.size(); i++)
+	for (size_t i = 0; i < args.size(); i++)
 	if (args[i] != NULL)
 		args[i]->print(file, indent + 4);
 	fprintf(file, "%*s)\n", indent + 2, "");

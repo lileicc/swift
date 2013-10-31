@@ -30,6 +30,10 @@ enum AbsynDeclConstant {
 	FUNCTION, QUERY, OBS
 };
 
+enum AbsynQuantExprConstant {
+	FORALL, EXISTS
+};
+
 class Absyn {
 public:
   Absyn(int l, int c) : line(l), col(c) {}

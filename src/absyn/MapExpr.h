@@ -19,7 +19,7 @@ public:
 	MapExpr(int l, int c);
 	virtual ~MapExpr();
 
-	int mapSize();
+	size_t mapSize();
 	Expr* getFrom(int k);
 	Expr* getTo(int k);
 	void addMap(Expr* from, Expr* to);

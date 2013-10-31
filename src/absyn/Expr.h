@@ -16,11 +16,11 @@ namespace swift {
 class Expr: public swift::Absyn {
 public:
 	Expr(int l, int c);
-  virtual ~Expr();
+	virtual ~Expr();
 
 	void add(Expr* e);
 	Expr* get(int id);
-	int size();
+	size_t size();
 
 protected:
   std::vector<Expr*> args;

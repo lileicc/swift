@@ -19,14 +19,12 @@ namespace swift {
 class TypDecl :
 	public swift::Decl
 {
-	vector<Symbol> args;
+	Symbol arg;
 public:
-	TypDecl(int l, int c);
+	TypDecl(int l, int c, Symbol arg);
 	virtual ~TypDecl();
 
-	int size();
-	void add(Symbol typ);
-	Symbol& get(int k);
+	Symbol& get();
 
 	// For Debugging Use
 	void print(FILE* file, int indent);

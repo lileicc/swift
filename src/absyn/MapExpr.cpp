@@ -15,8 +15,8 @@ MapExpr::MapExpr(int l, int c) :Expr(l, c) {
 MapExpr::~MapExpr() {
 }
 
-int MapExpr::mapSize() {
-	return args.size() / 2;
+size_t MapExpr::mapSize() {
+	return args.size() >> (size_t)1;
 }
 
 Expr* MapExpr::getFrom(int k) {
@@ -35,7 +35,7 @@ void MapExpr::addMap(Expr* from, Expr* to) {
 // For Debugging Use
 void MapExpr::print(FILE* file, int indent) {
 	fprintf(file, "%*s(MapExpr:\n", indent, "");
-	for (int i = 0; i < mapSize(); i++)
+	for (size_t i = 0; i < mapSize(); i++)
 	{
 		fprintf(file, "%*s:from#%d\n", indent + 2, "", i);
 		getFrom(i)->print(file, indent + 4);

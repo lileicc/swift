@@ -9,33 +9,20 @@
 
 namespace swift {
 
-TypDecl::TypDecl(int l, int c)
-	:Decl(l, c, AbsynDeclConstant::TYPE) {
+TypDecl::TypDecl(int l, int c, Symbol arg)
+	:Decl(l, c, AbsynDeclConstant::TYPE), arg(arg) {
 }
 
 TypDecl::~TypDecl() {
 }
 
-int TypDecl::size() {
-	return args.size();
-}
-
-void TypDecl::add(Symbol sym) {
-	args.push_back(sym);
-}
-
-Symbol& TypDecl::get(int k) {
-	return args[k];
+Symbol& TypDecl::get() {
+	return arg;
 }
 
 // For Debugging Use
 void TypDecl::print(FILE* file, int indent) {
-	fprintf(file, "%*s(TypDecl:\n", indent, "");
-	fprintf(file, "%*s(:", indent + 2, "");
-	for (int i = 0; i < args.size(); i++)
-		fprintf(file, " %s", args[i].getValue().c_str());
-	fprintf(file, " )\n");
-	fprintf(file, "%*s)\n", indent, "");
+	fprintf(file, "%*s(TypDecl: %s )\n", indent, "", arg.getValue().c_str());
 }
 
 }

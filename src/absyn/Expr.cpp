@@ -13,7 +13,7 @@ Expr::Expr(int l, int c) :Absyn(l, c) {
 }
 
 Expr::~Expr() {
-	for (int i = 0; i < args.size(); i++)
+	for (size_t i = 0; i < args.size(); i++)
 		if (args[i] != NULL)
 			delete args[i];
 }
@@ -26,7 +26,7 @@ Expr* Expr::get(int id) {
 	return args[id];
 }
 
-int Expr::size() {
+size_t Expr::size() {
 	return args.size();
 }
 
