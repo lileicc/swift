@@ -12,20 +12,20 @@
 
 namespace swift {
 
-enum AbsynOpExprConstant {
+enum class AbsynOpExprConstant {
 	PLUS, MINUS, MUL, DIV, POWER, MOD,
 	EQ, NEQ, LT, GT, LE, GE,
 	AND, OR, NOT, IMPLY,
 	SUB
 };
 
-enum AbsynLiteralConstant {
+enum class AbsynLiteralConstant {
 	INT, DOUBLE, BOOL, STRING,
 	TIMESTAMP,
 	NULLEXPR
 };
 
-enum AbsynDeclConstant {
+enum class AbsynDeclConstant {
 	TYPE, DISTINCT, NUMBERSTMT, ORIGIN, 
 	FUNCTION, QUERY, OBS
 };
