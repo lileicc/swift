@@ -17,8 +17,8 @@
 
 namespace swift{
 
-class VarDecl :
-	public swift::Expr
+class VarDecl
+	:public swift::Expr
 {
 	Symbol typ, var;
 public:
@@ -27,6 +27,9 @@ public:
 
 	Symbol& getVar();
 	Symbol& getTyp();
+
+	//For Debugging Use
+	void print(FILE *file, int indent);
 };
 
 }

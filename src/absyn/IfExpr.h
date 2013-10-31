@@ -20,6 +20,9 @@ public:
 	Expr* getCond();
 	Expr* getThen();
 	Expr* getElse();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 } /* namespace swift */

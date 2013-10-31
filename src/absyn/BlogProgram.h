@@ -31,6 +31,9 @@ public:
 	int size();
 	void add(Decl* decl);
 	Decl* get(int k);
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

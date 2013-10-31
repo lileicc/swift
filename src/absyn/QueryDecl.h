@@ -22,6 +22,9 @@ public:
 	virtual ~QueryDecl();
 
 	Expr* getExpr();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

@@ -21,4 +21,15 @@ Expr* QueryDecl::getExpr() {
 	return expr;
 }
 
+// For Debugging Use
+void QueryDecl::print(FILE* file, int indent) {
+	fprintf(file, "%*s(QueryDecl:\n", indent, "");
+	if (expr != NULL)
+	{
+		fprintf(file, "%*s:expr\n", indent + 2, "");
+		expr->print(file, indent + 4);
+	}
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 }

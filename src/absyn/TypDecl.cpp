@@ -28,4 +28,14 @@ Symbol& TypDecl::get(int k) {
 	return args[k];
 }
 
+// For Debugging Use
+void TypDecl::print(FILE* file, int indent) {
+	fprintf(file, "%*s(TypDecl:\n", indent, "");
+	fprintf(file, "%*s(:", indent + 2, "");
+	for (int i = 0; i < args.size(); i++)
+		fprintf(file, " %s", args[i].getValue().c_str());
+	fprintf(file, " )\n");
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 }

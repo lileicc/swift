@@ -34,6 +34,9 @@ public:
 	Symbol& getArgOrigin(int k);
 	Symbol& getArgVar(int k);
 	void add(Symbol o, Symbol v);
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

@@ -8,6 +8,8 @@
 #ifndef ABSYN_H_
 #define ABSYN_H_
 
+#include <cstdio>
+
 namespace swift {
 
 enum AbsynOpExprConstant {
@@ -34,6 +36,9 @@ public:
   virtual ~Absyn();
   int line; // line number in original file
   int col; // column number in original file
+
+	// For Debugging Use
+	virtual void print(FILE* file, int indent = 0) = 0;
 };
 
 } /* namespace swift */

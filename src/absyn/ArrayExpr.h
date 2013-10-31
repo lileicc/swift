@@ -21,6 +21,9 @@ public:
 	virtual ~ArrayExpr();
 
 	int getDim();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

@@ -30,4 +30,25 @@ Expr* IfExpr::getElse() {
 	return args[2];
 }
 
+// For Debugging Use
+void IfExpr::print(FILE* file, int indent) {
+	fprintf(file, "%*s(IfExpr:\n", indent, "");
+	if (getCond() != NULL)
+	{
+		fprintf(file, "%*s:cond\n", indent + 2, "");
+		getCond()->print(file, indent + 4);
+	}
+	if (getThen() != NULL)
+	{
+		fprintf(file, "%*s:then\n", indent + 2, "");
+		getThen()->print(file, indent + 4);
+	}
+	if (getElse() != NULL)
+	{
+		fprintf(file, "%*s:else\n", indent + 2, "");
+		getElse()->print(file, indent + 4);
+	}
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 } /* namespace swift */

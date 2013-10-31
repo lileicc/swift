@@ -27,6 +27,9 @@ public:
 	int size();
 	void add(Symbol typ);
 	Symbol& get(int k);
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

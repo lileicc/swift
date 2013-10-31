@@ -20,4 +20,9 @@ int IntLiteral::getValue() {
 	return value;
 }
 
+// For Debugging Use
+void IntLiteral::print(FILE* file, int indent) {
+	fprintf(file, "%*s(IntLiteral: %d )\n", indent, "", value);
+}
+
 }

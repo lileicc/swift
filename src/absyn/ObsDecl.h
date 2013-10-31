@@ -24,6 +24,9 @@ public:
 	
 	Expr* getLeft();
 	Expr* getRight();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

@@ -20,4 +20,9 @@ const string& StringLiteral::getValue() {
 	return value;
 }
 
+// For Debugging Use
+void StringLiteral::print(FILE* file, int indent) {
+	fprintf(file, "%*s(StringLiteral: %s )\n", indent, "", value.c_str());
+}
+
 }

@@ -21,6 +21,9 @@ public:
 	virtual ~TimeStampLiteral();
 
 	int getValue();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

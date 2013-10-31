@@ -26,4 +26,20 @@ Expr* ObsDecl::getRight() {
 	return right;
 }
 
+// For Debugging Use
+void ObsDecl::print(FILE* file, int indent) {
+	fprintf(file, "%*s(ObsDecl:\n", indent, "");
+	if (left != NULL)
+	{
+		fprintf(file, "%*s:left\n", indent + 2, "");
+		left->print(file, indent + 4);
+	}
+	if (right != NULL)
+	{
+		fprintf(file, "%*s:right\n", indent + 2, "");
+		left->print(file, indent + 4);
+	}
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 }

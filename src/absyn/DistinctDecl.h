@@ -31,6 +31,9 @@ public:
 	Symbol& getVar(int k);
 	int getRep(int k);
 	void add(Symbol v, int r = 1);
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

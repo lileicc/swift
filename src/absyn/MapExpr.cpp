@@ -32,4 +32,17 @@ void MapExpr::addMap(Expr* from, Expr* to) {
 	args.push_back(to);
 }
 
+// For Debugging Use
+void MapExpr::print(FILE* file, int indent) {
+	fprintf(file, "%*s(MapExpr:\n", indent, "");
+	for (int i = 0; i < mapSize(); i++)
+	{
+		fprintf(file, "%*s:from#%d\n", indent + 2, "", i);
+		getFrom(i)->print(file, indent + 4);
+		fprintf(file, "%*s:to#%d\n", indent + 2, "", i);
+		getTo(i)->print(file, indent + 4);
+	}
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 }

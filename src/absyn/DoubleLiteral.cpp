@@ -20,4 +20,9 @@ double DoubleLiteral::getValue() {
 	return value;
 }
 
+// For Debugging Use
+void DoubleLiteral::print(FILE* file, int indent) {
+	fprintf(file, "%*s(DoubleLiteral: %f )\n", indent, "", value);
+}
+
 }

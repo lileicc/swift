@@ -31,4 +31,15 @@ Decl* BlogProgram::get(int k) {
 	return args[k];
 }
 
+// For Debugging Use
+void BlogProgram::print(FILE* file, int indent) {
+	fprintf(file, "%*s(BlogProgram:\n", indent, "");
+	fprintf(file, "%*s(args:\n", indent + 2, "");
+	for (int i = 0; i < args.size(); i++)
+		if (args[i] != NULL)
+			args[i]->print(file, indent + 4);
+	fprintf(file, "%*s)\n", indent + 2, "");
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 }

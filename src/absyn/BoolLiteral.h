@@ -21,6 +21,9 @@ public:
 	virtual ~BoolLiteral();
 
 	bool getValue();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

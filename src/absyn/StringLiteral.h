@@ -24,6 +24,9 @@ public:
 	virtual ~StringLiteral();
 
 	const string& getValue();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

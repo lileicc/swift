@@ -18,6 +18,9 @@ class NullLiteral :
 public:
 	NullLiteral(int l, int c);
 	virtual ~NullLiteral();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

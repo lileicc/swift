@@ -17,4 +17,12 @@ NumStRef::NumStRef(int l, int c, Expr* e)
 NumStRef::~NumStRef() {
 }
 
+// For Debugging Use
+void NumStRef::print(FILE* file, int indent) {
+	fprintf(file, "%*s(NumStRef:\n", indent, "");
+	if (args[0] != NULL)
+		args[0]->print(file, indent + 2);
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 }

@@ -35,6 +35,9 @@ public:
 	int argSize();
 	void addArg(VarDecl var);
 	VarDecl& getArg(int k);
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

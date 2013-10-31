@@ -25,4 +25,10 @@ Symbol& VarDecl::getVar() {
 	return var;
 }
 
+// For Debugging Use
+void VarDecl::print(FILE* file, int indent) {
+	fprintf(file, "%*s(VarDecl: (: %s %s ) )\n", indent, "",
+			typ.getValue().c_str(), var.getValue().c_str());
+}
+
 }

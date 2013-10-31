@@ -33,6 +33,9 @@ public:
 	Symbol* getTyp();
 	Symbol* getVar();
 	Expr* getCond();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

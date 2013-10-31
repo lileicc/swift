@@ -42,4 +42,24 @@ void NumStDecl::add(Symbol o, Symbol v) {
 	var.push_back(v);
 }
 
+// For Debugging Use
+void NumStDecl::print(FILE* file, int indent) {
+	fprintf(file, "%*s(NumStDecl:\n", indent, "");
+	fprintf(file, "%*s:type %s\n", indent + 2, "", typ.getValue().c_str());
+	if (origin.size() > 0) {
+		fprintf(file, "%*s(args:\n", indent + 2, "");
+		for (int i = 0; i < origin.size(); i++)
+		{
+			fprintf(file, "%*sorigin#%d: %s", indent + 4, "", origin[i].getValue().c_str());
+			fprintf(file, "%*svar#%d: %s", indent + 4, "", var[i].getValue().c_str());
+		}
+		fprintf(file, "%*s)\n", indent + 2, "");
+	}
+	if (expr != NULL) {
+		fprintf(file, "%*s:expr\n", indent + 2, "");
+		expr->print(file, indent + 4);
+	}
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 }

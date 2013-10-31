@@ -20,4 +20,10 @@ bool BoolLiteral::getValue() {
 	return value;
 }
 
+// For Debugging Use
+void BoolLiteral::print(FILE* file, int indent) {
+	fprintf(file, "%*s(BoolLiteral: %s )\n", indent, "",
+								(value ? "true" : "false"));
+}
+
 }

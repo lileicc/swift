@@ -37,4 +37,15 @@ int DistinctDecl::getRep(int k) {
 	return rep[k];
 }
 
+// For Debugging Use
+void DistinctDecl::print(FILE* file, int indent) {
+	fprintf(file, "%*s(DistinctDecl:\n", indent, "");
+	fprintf(file, "%*s:type %s\n", indent + 2 , "", typ.getValue().c_str());
+	fprintf(file, "%*s:var (:", indent + 2, "");
+	for (int i = 0; i < var.size(); i++)
+		fprintf(file, " %s", var[i].getValue().c_str());
+	fprintf(file, " )\n");
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 }

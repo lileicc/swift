@@ -23,6 +23,9 @@ public:
 	Expr* getFrom(int k);
 	Expr* getTo(int k);
 	void addMap(Expr* from, Expr* to);
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

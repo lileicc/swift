@@ -22,6 +22,9 @@ public:
 	virtual ~VarRef();
 
 	Symbol& getVar();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

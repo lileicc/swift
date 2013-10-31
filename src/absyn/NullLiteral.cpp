@@ -16,4 +16,9 @@ NullLiteral::NullLiteral(int l, int c)
 NullLiteral::~NullLiteral() {
 }
 
+// For Debugging Use
+void NullLiteral::print(FILE* file, int indent) {
+	fprintf(file, "%*s(NullLiteral: NULL )\n", indent, "");
+}
+
 }

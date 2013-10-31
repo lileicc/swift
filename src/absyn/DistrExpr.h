@@ -22,6 +22,9 @@ public:
 	virtual ~DistrExpr();
 
 	Symbol& getDistr();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

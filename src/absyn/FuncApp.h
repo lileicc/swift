@@ -22,6 +22,9 @@ public:
 	virtual ~FuncApp();
 
 	Symbol& getFunc();
+
+	// For Debugging Use
+	void print(FILE* file, int indent);
 };
 
 }

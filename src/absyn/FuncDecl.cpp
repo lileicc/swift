@@ -42,4 +42,17 @@ void FuncDecl::addArg(VarDecl var) {
 	args.push_back(var);
 }
 
+// For Debugging Use
+void FuncDecl::print(FILE* file, int indent) {
+	fprintf(file, "%*s(FuncDecl:\n", indent, "");
+	fprintf(file, "%*s:type %s\n", indent + 2, "", 
+															(random ? "random" : "fixed"));
+	fprintf(file, "%*s:func %s\n", indent + 2, "", func.getValue().c_str());
+	fprintf(file, "%*s(args:\n", indent + 2, "");
+	for (int i = 0; i < args.size(); i++)
+		args[i].print(file, indent + 4);
+	fprintf(file, "%*s)\n", indent + 2, "");
+	fprintf(file, "%*s)\n", indent, "");
+}
+
 }

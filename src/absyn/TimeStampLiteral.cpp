@@ -20,4 +20,9 @@ int TimeStampLiteral::getValue() {
 	return value;
 }
 
+// For Debugging Use
+void TimeStampLiteral::print(FILE* file, int indent) {
+	fprintf(file, "%*s(TimeStampLiteral: @%d )\n", indent, "", value);
+}
+
 }
