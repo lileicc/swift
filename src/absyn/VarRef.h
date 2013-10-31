@@ -5,8 +5,7 @@
 *      Author: yiwu
 */
 
-#ifndef VARREF_H_
-#define VARREF_H_
+#pragma once
 
 #include "Expr.h"
 #include "Symbol.h"
@@ -14,19 +13,17 @@
 namespace swift{
 
 class VarRef :
-	public swift::Expr
+  public swift::Expr
 {
-	Symbol var;
+  Symbol var;
 public:
-	VarRef(int l, int c, Symbol var);
-	virtual ~VarRef();
+  VarRef(int l, int c, Symbol var);
+  virtual ~VarRef();
 
-	Symbol& getVar();
+  Symbol& getVar();
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif

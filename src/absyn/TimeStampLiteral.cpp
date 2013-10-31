@@ -10,19 +10,19 @@
 namespace swift{
 
 TimeStampLiteral::TimeStampLiteral(int l, int c, int value)
-	:Literal(l, c), value(value) {
+  :Literal(l, c), value(value) {
 }
 
 TimeStampLiteral::~TimeStampLiteral() {
 }
 
 int TimeStampLiteral::getValue() {
-	return value;
+  return value;
 }
 
 // For Debugging Use
 void TimeStampLiteral::print(FILE* file, int indent) {
-	fprintf(file, "%*s(TimeStampLiteral: @%d )\n", indent, "", value);
+  fprintf(file, "%*s(TimeStampLiteral: @%d )\n", indent, "", value);
 }
 
 }

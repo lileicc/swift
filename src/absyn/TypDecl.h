@@ -5,11 +5,9 @@
 *      Author: yiwu
 */
 
-#ifndef TYPDECL_H_
-#define TYPDECL_H_
+#pragma once
 
 #include<vector>
-using std::vector;
 
 #include "Decl.h"
 #include "Symbol.h"
@@ -17,19 +15,17 @@ using std::vector;
 namespace swift {
 
 class TypDecl :
-	public swift::Decl
+  public swift::Decl
 {
-	Symbol arg;
+  Symbol arg;
 public:
-	TypDecl(int l, int c, Symbol arg);
-	virtual ~TypDecl();
+  TypDecl(int l, int c, Symbol arg);
+  virtual ~TypDecl();
 
-	Symbol& get();
+  Symbol& get();
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif

@@ -5,27 +5,24 @@
 *      Author: yiwu
 */
 
-#ifndef DOUBLELITERAL_H_
-#define DOUBLELITERAL_H_
+#pragma once
 
 #include "Literal.h"
 
 namespace swift {
 
 class DoubleLiteral :
-	public swift::Literal
+  public swift::Literal
 {
-	double value;
+  double value;
 public:
-	DoubleLiteral(int l, int c, double value);
-	virtual ~DoubleLiteral();
+  DoubleLiteral(int l, int c, double value);
+  virtual ~DoubleLiteral();
 
-	double getValue();
+  double getValue();
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif

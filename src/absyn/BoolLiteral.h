@@ -5,27 +5,24 @@
 *      Author: yiwu
 */
 
-#ifndef BOOLLITERAL_H_
-#define BOOLLITERAL_H_
+#pragma once
 
 #include "Literal.h"
 
 namespace swift {
 
 class BoolLiteral :
-	public swift::Literal
+  public swift::Literal
 {
-	bool value;
+  bool value;
 public:
-	BoolLiteral(int l, int c, bool value);
-	virtual ~BoolLiteral();
+  BoolLiteral(int l, int c, bool value);
+  virtual ~BoolLiteral();
 
-	bool getValue();
+  bool getValue();
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif

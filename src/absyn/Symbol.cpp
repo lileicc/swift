@@ -9,14 +9,14 @@
 
 namespace swift{
 
-Symbol::Symbol(string v) :value(v) {
+Symbol::Symbol(std::string v) :value(v) {
 }
 
 Symbol::~Symbol() {
 }
 
-const string& Symbol::getValue() {
-	return value;
+const std::string& Symbol::getValue() {
+  return value;
 }
 
 }

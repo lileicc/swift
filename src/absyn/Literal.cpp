@@ -10,7 +10,7 @@
 namespace swift {
 
 Literal::Literal(int l, int c)
-	:Expr(l,c) {
+  :Expr(l,c) {
 }
 
 Literal::~Literal()

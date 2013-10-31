@@ -5,8 +5,7 @@
 *      Author: yiwu
 */
 
-#ifndef ORIGINDECL_H_
-#define ORIGINDECL_H_
+#pragma once
 
 #include "Decl.h"
 #include "Symbol.h"
@@ -14,23 +13,21 @@
 namespace swift {
 
 class OriginDecl :
-	public swift::Decl
+  public swift::Decl
 {
-	Symbol func;
-	Symbol arg;
-	Symbol typ;
+  Symbol func;
+  Symbol arg;
+  Symbol typ;
 public:
-	OriginDecl(int l, int c, Symbol typ, Symbol func, Symbol arg);
-	virtual ~OriginDecl();
+  OriginDecl(int l, int c, Symbol typ, Symbol func, Symbol arg);
+  virtual ~OriginDecl();
 
-	Symbol& getFunc();
-	Symbol& getArg();
-	Symbol& getTyp();
+  Symbol& getFunc();
+  Symbol& getArg();
+  Symbol& getTyp();
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif

@@ -10,19 +10,19 @@
 namespace swift{
 
 IntLiteral::IntLiteral(int l, int c, int value)
-	:Literal(l, c), value(value) {
+  :Literal(l, c), value(value) {
 }
 
 IntLiteral::~IntLiteral() {
 }
 
 int IntLiteral::getValue() {
-	return value;
+  return value;
 }
 
 // For Debugging Use
 void IntLiteral::print(FILE* file, int indent) {
-	fprintf(file, "%*s(IntLiteral: %d )\n", indent, "", value);
+  fprintf(file, "%*s(IntLiteral: %d )\n", indent, "", value);
 }
 
 }

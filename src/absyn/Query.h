@@ -1,5 +1,5 @@
 /*
-* ArrayExpr.h
+* Query.h
 *
 *  Created on: Oct 30, 2013
 *      Author: yiwu
@@ -8,18 +8,19 @@
 #pragma once
 
 #include "Expr.h"
+#include "Stmt.h"
 
 namespace swift {
 
-class ArrayExpr :
-  public swift::Expr
+class Query :
+  public swift::Stmt
 {
-  int dim;
+  Expr* expr;
 public:
-  ArrayExpr(int l, int c, int dim = 1);
-  virtual ~ArrayExpr();
+  Query(int l, int c, Expr* expr);
+  virtual ~Query();
 
-  int getDim();
+  Expr* getExpr();
 
   // For Debugging Use
   void print(FILE* file, int indent);

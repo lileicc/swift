@@ -5,30 +5,26 @@
 *      Author: yiwu
 */
 
-#ifndef STRINGLITERAL_H_
-#define STRINGLITERAL_H_
+#pragma once
 
 #include<string>
-using std::string;
 
 #include "Literal.h"
 
 namespace swift {
 
 class StringLiteral :
-	public swift::Literal
+  public swift::Literal
 {
-	string value;
+  std::string value;
 public:
-	StringLiteral(int l, int c, string value);
-	virtual ~StringLiteral();
+  StringLiteral(int l, int c, std::string value);
+  virtual ~StringLiteral();
 
-	const string& getValue();
+  const std::string& getValue();
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif

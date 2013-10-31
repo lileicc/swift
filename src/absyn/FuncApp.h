@@ -5,8 +5,7 @@
 *      Author: yiwu
 */
 
-#ifndef FUNCAPP_H_
-#define FUNCAPP_H_
+#pragma once
 
 #include "Expr.h"
 #include "Symbol.h"
@@ -14,18 +13,17 @@
 namespace swift{
 
 class FuncApp :
-	public swift::Expr
+  public swift::Expr
 {
-	Symbol func;
+  Symbol func;
 public:
-	FuncApp(int l, int c, Symbol func);
-	virtual ~FuncApp();
+  FuncApp(int l, int c, Symbol func);
+  virtual ~FuncApp();
 
-	Symbol& getFunc();
+  Symbol& getFuncName();
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-#endif

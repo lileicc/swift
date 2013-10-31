@@ -5,11 +5,9 @@
 *      Author: yiwu
 */
 
-#ifndef DISTINCTDECL_H_
-#define DISTINCTDECL_H_
+#pragma once
 
 #include <vector>
-using std::vector;
 
 #include "Decl.h"
 #include "Symbol.h"
@@ -17,25 +15,23 @@ using std::vector;
 namespace swift {
 
 class DistinctDecl :
-	public swift::Decl
+  public swift::Decl
 {
-	Symbol typ;
-	vector<Symbol> var;
-	vector<int> rep;
+  Symbol typ;
+  std::vector<Symbol> var;
+  std::vector<int> len;
 public:
-	DistinctDecl(int l, int c, Symbol typ);
-	virtual ~DistinctDecl();
+  DistinctDecl(int l, int c, Symbol typ);
+  virtual ~DistinctDecl();
 
-	size_t size();
-	Symbol& getTyp();
-	Symbol& getVar(int k);
-	int getRep(int k);
-	void add(Symbol v, int r = 1);
+  size_t size();
+  Symbol& getTyp();
+  Symbol& getVar(int k);
+  int getLen(int k);
+  void add(Symbol v, int l = 1);
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif

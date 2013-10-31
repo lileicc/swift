@@ -5,21 +5,19 @@
 *      Author: yiwu
 */
 
-#ifndef DECL_H_
-#define DECL_H_
+#pragma once
 
 #include "Absyn.h"
+#include "Stmt.h"
 
 namespace swift {
 
 class Decl :
-	public swift::Absyn
+  public swift::Stmt
 {
 public:
-	Decl(int l, int c);
-	virtual ~Decl();
+  Decl(int l, int c);
+  virtual ~Decl();
 };
 
 }
-
-#endif

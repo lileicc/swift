@@ -5,8 +5,7 @@
 *      Author: yiwu
 */
 
-#ifndef DISTREXPR_H_
-#define DISTREXPR_H_
+#pragma once
 
 #include "Expr.h"
 #include "Symbol.h"
@@ -14,18 +13,17 @@
 namespace swift{
 
 class DistrExpr :
-	public swift::Expr
+  public swift::Expr
 {
-	Symbol distr;
+  Symbol distr;
 public:
-	DistrExpr(int l, int c, Symbol distr);
-	virtual ~DistrExpr();
+  DistrExpr(int l, int c, Symbol distr);
+  virtual ~DistrExpr();
 
-	Symbol& getDistr();
+  Symbol& getDistrName();
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-#endif

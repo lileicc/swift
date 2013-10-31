@@ -10,7 +10,7 @@
 namespace swift {
 
 NullLiteral::NullLiteral(int l, int c)
-	:Literal(l, c) {
+  :Literal(l, c) {
 }
 
 NullLiteral::~NullLiteral() {
@@ -18,7 +18,7 @@ NullLiteral::~NullLiteral() {
 
 // For Debugging Use
 void NullLiteral::print(FILE* file, int indent) {
-	fprintf(file, "%*s(NullLiteral: NULL )\n", indent, "");
+  fprintf(file, "%*s(NullLiteral: NULL )\n", indent, "");
 }
 
 }

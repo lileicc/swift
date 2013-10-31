@@ -10,7 +10,7 @@
 namespace swift{
 
 VarDecl::VarDecl(int l, int c, Symbol typ, Symbol var)
-	:Expr(l, c), typ(typ), var(var) {
+  :Expr(l, c), typ(typ), var(var) {
 }
 
 
@@ -18,17 +18,17 @@ VarDecl::~VarDecl() {
 }
 
 Symbol& VarDecl::getTyp() {
-	return typ;
+  return typ;
 }
 
 Symbol& VarDecl::getVar() {
-	return var;
+  return var;
 }
 
 // For Debugging Use
 void VarDecl::print(FILE* file, int indent) {
-	fprintf(file, "%*s(VarDecl: (: %s %s ) )\n", indent, "",
-			typ.getValue().c_str(), var.getValue().c_str());
+  fprintf(file, "%*s(VarDecl: (: %s %s ) )\n", indent, "",
+    typ.getValue().c_str(), var.getValue().c_str());
 }
 
 }

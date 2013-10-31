@@ -5,24 +5,20 @@
 *      Author: yiwu
 */
 
-#ifndef SYMBOL_H_
-#define SYMBOL_H_
+#pragma once
 
 #include<string>
-using std::string;
 
 namespace swift {
 
 class Symbol
 {
-	string value;
+  std::string value;
 public:
-	Symbol(string v="");
-	~Symbol();
+  Symbol(std::string v = "");
+  ~Symbol();
 
-	const string& getValue();
+  const std::string& getValue();
 };
 
 }
-
-#endif

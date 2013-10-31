@@ -5,8 +5,7 @@
 *      Author: yiwu
 */
 
-#ifndef QUANTExprDECL_H_
-#define QUANTDECL_H_
+#pragma once
 
 #include "Expr.h"
 #include "Symbol.h"
@@ -15,23 +14,21 @@
 namespace swift {
 
 class QuantExpr :
-	public swift::Expr
+  public swift::Expr
 {
-	AbsynConstant typ;
-	VarDecl var;
+  AbsynConstant typ;
+  VarDecl var;
 public:
-	QuantExpr(int l, int c, 
-			AbsynConstant typ, VarDecl var, Expr* cond);
-	virtual ~QuantExpr();
+  QuantExpr(int l, int c, 
+      AbsynConstant typ, VarDecl var, Expr* cond);
+  virtual ~QuantExpr();
 
-	AbsynConstant getTyp();
-	VarDecl& getVar();
-	Expr* getCond();
+  AbsynConstant getTyp();
+  VarDecl& getVar();
+  Expr* getCond();
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif

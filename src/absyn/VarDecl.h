@@ -9,8 +9,7 @@
 *
 */
 
-#ifndef VARDECL_H_
-#define VARDECL_H_
+#pragma once
 
 #include "Expr.h"
 #include "Symbol.h"
@@ -18,20 +17,18 @@
 namespace swift{
 
 class VarDecl
-	:public swift::Expr
+  :public swift::Expr
 {
-	Symbol typ, var;
+  Symbol typ, var;
 public:
-	VarDecl(int l, int c, Symbol typ, Symbol var);
-	virtual ~VarDecl();
+  VarDecl(int l, int c, Symbol typ = Symbol(), Symbol var = Symbol());
+  virtual ~VarDecl();
 
-	Symbol& getVar();
-	Symbol& getTyp();
+  Symbol& getVar();
+  Symbol& getTyp();
 
-	//For Debugging Use
-	void print(FILE *file, int indent);
+  //For Debugging Use
+  void print(FILE *file, int indent);
 };
 
 }
-
-#endif

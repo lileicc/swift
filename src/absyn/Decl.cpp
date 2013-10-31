@@ -10,7 +10,7 @@
 namespace swift {
 
 Decl::Decl(int l, int c)
-	:Absyn(l, c) {
+  :Stmt(l, c) {
 }
 
 Decl::~Decl() {

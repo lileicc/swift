@@ -5,11 +5,9 @@
 *      Author: yiwu
 */
 
-#ifndef NUMSTDECL_H_
-#define NUMSTDECL_H_
+#pragma once
 
 #include <vector>
-using std::vector;
 
 #include "Decl.h"
 #include "Expr.h"
@@ -18,27 +16,25 @@ using std::vector;
 namespace swift {
 
 class NumStDecl :
-	public swift::Decl
+  public swift::Decl
 {
-	Symbol typ;
-	vector<Symbol> origin;
-	vector<Symbol> var;
-	Expr* expr;
+  Symbol typ;
+  std::vector<Symbol> origin;
+  std::vector<Symbol> var;
+  Expr* expr;
 public:
-	NumStDecl(int l, int c, Symbol typ, Expr* expr);
-	virtual ~NumStDecl();
+  NumStDecl(int l, int c, Symbol typ, Expr* expr);
+  virtual ~NumStDecl();
 
-	Expr* getExpr();
-	Symbol& getTyp();
-	size_t argSize();
-	Symbol& getArgOrigin(int k);
-	Symbol& getArgVar(int k);
-	void add(Symbol o, Symbol v);
+  Expr* getExpr();
+  Symbol& getTyp();
+  size_t argSize();
+  Symbol& getArgOrigin(int k);
+  Symbol& getArgVar(int k);
+  void add(Symbol o, Symbol v);
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif

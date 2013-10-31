@@ -1,0 +1,31 @@
+/*
+* CondSet.h
+*
+*  Created on: Oct 31, 2013
+*      Author: yiwu
+*/
+
+#pragma once
+
+#include "SetExpr.h"
+#include "VarDecl.h"
+
+namespace swift {
+
+class CondSet :
+  public swift::SetExpr
+{
+  VarDecl var;
+  Expr* cond;
+public:
+  CondSet(int l, int c, VarDecl var, Expr *cond = NULL);
+  virtual ~CondSet();
+
+  Expr* getCond();
+  VarDecl& getVar();
+
+  // For Debugging Use
+  void print(FILE *file, int indent);
+};
+
+}

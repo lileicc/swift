@@ -1,20 +1,17 @@
-#ifndef HURRICANE_H_
-#define HURRICANE_H_
+#pragma once
 
 #include "../../absyn/BlogProgram.h"
-using namespace swift;
 
 namespace test_absyn {
 
 class Hurricane {
-	Absyn* root;
-	void build();
+  swift::Absyn* root;
 public:
-	Hurricane();
-	~Hurricane();
-	void test(FILE *file);
+  Hurricane();
+  ~Hurricane();
+  void test(FILE *file);
+  void build();
+  swift::Absyn* getRoot();
 };
 
 }
-
-#endif

@@ -5,11 +5,9 @@
 *      Author: yiwu
 */
 
-#ifndef FUNCDECL_H_
-#define FUNCDECL_H_
+#pragma once
 
 #include <vector>
-using std::vector;
 
 #include "Decl.h"
 #include "Expr.h"
@@ -19,30 +17,28 @@ using std::vector;
 namespace swift {
 
 class FuncDecl :
-	public swift::Decl
+  public swift::Decl
 {
   bool random;
   Symbol typ;
-	Symbol func;
-	Expr* expr;
-	vector<VarDecl> args;
+  Symbol func;
+  Expr* expr;
+  std::vector<VarDecl> args;
 
 public:
-	FuncDecl(int l, int c, bool random, Symbol typ, Symbol func, Expr* expr);
-	virtual ~FuncDecl();
+  FuncDecl(int l, int c, bool random, Symbol typ, Symbol func, Expr* expr);
+  virtual ~FuncDecl();
 
-	Symbol& getFunc();
-	Symbol& getTyp();
-	Expr* getExpr();
-	bool isRandom();
-	size_t argSize();
-	void addArg(VarDecl var);
-	VarDecl& getArg(int k);
+  Symbol& getFuncName();
+  Symbol& getRetTyp();
+  Expr* getExpr();
+  bool isRandom();
+  size_t argSize();
+  void addArg(VarDecl var);
+  VarDecl& getArg(int k);
 
-	// For Debugging Use
-	void print(FILE* file, int indent);
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }
-
-#endif
