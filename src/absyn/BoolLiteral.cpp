@@ -10,7 +10,7 @@
 namespace swift{
 
 BoolLiteral::BoolLiteral(int l, int c, bool value)
-	:Literal(l, c, AbsynLiteralConstant::BOOL), value(value) {
+	:Literal(l, c), value(value) {
 }
 
 BoolLiteral::~BoolLiteral() {

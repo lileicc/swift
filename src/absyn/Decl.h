@@ -15,9 +15,8 @@ namespace swift {
 class Decl :
 	public swift::Absyn
 {
-	AbsynDeclConstant typ;
 public:
-	Decl(int l, int c, AbsynDeclConstant typ);
+	Decl(int l, int c);
 	virtual ~Decl();
 };
 

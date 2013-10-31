@@ -10,7 +10,7 @@
 namespace swift {
 
 ObsDecl::ObsDecl(int l, int c, Expr* left, Expr* right)
-	:Decl(l, c, AbsynDeclConstant::OBS), left(left), right(right) {
+	:Decl(l, c), left(left), right(right) {
 }
 
 ObsDecl::~ObsDecl() {

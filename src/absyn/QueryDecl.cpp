@@ -10,7 +10,7 @@
 namespace swift {
 
 QueryDecl::QueryDecl(int l, int c, Expr* expr)
-	:Decl(l, c, AbsynDeclConstant::QUERY), expr(expr) {
+	:Decl(l, c), expr(expr) {
 }
 
 QueryDecl::~QueryDecl() {

@@ -4,7 +4,7 @@
 #include "../../absyn/BlogProgram.h"
 using namespace swift;
 
-namespace unitest_absyn {
+namespace test_absyn {
 
 class Hurricane {
 	Absyn* root;

@@ -10,7 +10,7 @@
 namespace swift {
 
 FuncDecl::FuncDecl(int l, int c, bool random, Symbol typ, Symbol func, Expr* expr)
-	:Decl(l, c, AbsynDeclConstant::FUNCTION), 
+	:Decl(l, c), 
 	 random(random), typ(typ), func(func), expr(expr) {
 }
 

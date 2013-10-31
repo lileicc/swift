@@ -10,7 +10,7 @@
 namespace swift {
 
 NullLiteral::NullLiteral(int l, int c)
-	:Literal(l, c, AbsynLiteralConstant::NULLEXPR) {
+	:Literal(l, c) {
 }
 
 NullLiteral::~NullLiteral() {

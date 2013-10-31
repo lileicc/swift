@@ -10,7 +10,7 @@
 namespace swift{
 
 DoubleLiteral::DoubleLiteral(int l, int c, double value)
-	:Literal(l, c, AbsynLiteralConstant::DOUBLE), value(value) {
+	:Literal(l, c), value(value) {
 }
 
 DoubleLiteral::~DoubleLiteral() {

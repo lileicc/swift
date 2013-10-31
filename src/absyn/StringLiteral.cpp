@@ -10,7 +10,7 @@
 namespace swift{
 
 StringLiteral::StringLiteral(int l, int c, string value)
-	:Literal(l, c, AbsynLiteralConstant::STRING), value(value) {
+	:Literal(l, c), value(value) {
 }
 
 StringLiteral::~StringLiteral() {

@@ -10,7 +10,7 @@
 namespace swift {
 
 OriginDecl::OriginDecl(int l, int c, Symbol typ, Symbol func, Symbol arg)
-	:Decl(l, c, AbsynDeclConstant::ORIGIN), typ(typ), func(func), arg(arg) {
+	:Decl(l, c), typ(typ), func(func), arg(arg) {
 }
 
 OriginDecl::~OriginDecl() {

@@ -10,7 +10,7 @@
 namespace swift {
 
 TypDecl::TypDecl(int l, int c, Symbol arg)
-	:Decl(l, c, AbsynDeclConstant::TYPE), arg(arg) {
+	:Decl(l, c), arg(arg) {
 }
 
 TypDecl::~TypDecl() {

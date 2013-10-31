@@ -19,17 +19,6 @@ enum class AbsynOpExprConstant {
 	SUB
 };
 
-enum class AbsynLiteralConstant {
-	INT, DOUBLE, BOOL, STRING,
-	TIMESTAMP,
-	NULLEXPR
-};
-
-enum class AbsynDeclConstant {
-	TYPE, DISTINCT, NUMBERSTMT, ORIGIN, 
-	FUNCTION, QUERY, OBS
-};
-
 enum class AbsynQuantExprConstant {
 	FORALL, EXISTS
 };

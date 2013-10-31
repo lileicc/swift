@@ -10,7 +10,7 @@
 namespace swift {
 
 NumStDecl::NumStDecl(int l, int c, Symbol typ, Expr* expr)
-	:Decl(l, c, AbsynDeclConstant::NUMBERSTMT), typ(typ), expr(expr) {
+	:Decl(l, c), typ(typ), expr(expr) {
 }
 
 NumStDecl::~NumStDecl() {

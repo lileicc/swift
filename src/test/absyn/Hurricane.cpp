@@ -1,6 +1,6 @@
 #include "hurricane.h"
 
-namespace unitest_absyn {
+namespace test_absyn {
 
 Hurricane::Hurricane() :root(NULL){}
 

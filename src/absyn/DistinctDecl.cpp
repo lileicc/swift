@@ -10,7 +10,7 @@
 namespace swift {
 
 DistinctDecl::DistinctDecl(int l, int c, Symbol typ)
-	:Decl(l, c, AbsynDeclConstant::DISTINCT), typ(typ) {
+	:Decl(l, c), typ(typ) {
 }
 
 DistinctDecl::~DistinctDecl() {

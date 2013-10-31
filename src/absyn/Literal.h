@@ -15,9 +15,8 @@ namespace swift {
 class Literal :
 	public swift::Expr
 {
-	AbsynLiteralConstant typ;
 public:
-	Literal(int l, int c, AbsynLiteralConstant typ);
+	Literal(int l, int c);
 	virtual ~Literal();
 };
 

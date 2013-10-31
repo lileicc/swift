@@ -10,7 +10,7 @@
 namespace swift{
 
 IntLiteral::IntLiteral(int l, int c, int value)
-	:Literal(l, c, AbsynLiteralConstant::INT), value(value) {
+	:Literal(l, c), value(value) {
 }
 
 IntLiteral::~IntLiteral() {
