@@ -23,7 +23,7 @@ enum class AbsynConstant {
 
 class Absyn {
 public:
-  Absyn(int l, int c) : line(l), col(c) {}
+  Absyn(int l, int c);
   virtual ~Absyn();
   int line; // line number in original file
   int col; // column number in original file
