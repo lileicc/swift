@@ -13,19 +13,21 @@
 
 #include "Expr.h"
 #include "Symbol.h"
+#include "Ty.h"
 
 namespace swift{
 
 class VarDecl
   :public swift::Expr
 {
-  Symbol typ, var;
+  Ty typ;
+  Symbol var;
 public:
-  VarDecl(int l, int c, Symbol typ = Symbol(), Symbol var = Symbol());
+  VarDecl(int l, int c, Ty typ, Symbol var = Symbol());
   virtual ~VarDecl();
 
+  Ty& getTyp();
   Symbol& getVar();
-  Symbol& getTyp();
 
   //For Debugging Use
   void print(FILE *file, int indent);

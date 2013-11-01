@@ -9,7 +9,7 @@
 
 namespace swift {
 
-FuncDecl::FuncDecl(int l, int c, bool random, Symbol typ, Symbol func, Expr* expr)
+FuncDecl::FuncDecl(int l, int c, bool random, Ty typ, Symbol func, Expr* expr)
   :Decl(l, c), random(random), typ(typ), func(func), expr(expr) {
 }
 
@@ -17,7 +17,7 @@ FuncDecl::~FuncDecl() {
   if (expr != NULL) delete expr;
 }
 
-Symbol& FuncDecl::getRetTyp() {
+Ty& FuncDecl::getRetTyp() {
   return typ;
 }
 
@@ -50,7 +50,7 @@ void FuncDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s(FuncDecl:\n", indent, "");
   fprintf(file, "%*s:kind %s\n", indent + 2, "", 
                               (random ? "random" : "fixed"));
-  fprintf(file, "%*s:type %s\n", indent + 2, "", typ.getValue().c_str());
+  fprintf(file, "%*s:type %s\n", indent + 2, "", typ.toString().c_str());
   fprintf(file, "%*s:func %s\n", indent + 2, "", func.getValue().c_str());
   if (args.size() > 0) {
     fprintf(file, "%*s(args:\n", indent + 2, "");

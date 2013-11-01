@@ -12,6 +12,7 @@
 #include "Decl.h"
 #include "Expr.h"
 #include "Symbol.h"
+#include "Ty.h"
 #include "VarDecl.h"
 
 namespace swift {
@@ -20,17 +21,17 @@ class FuncDecl :
   public swift::Decl
 {
   bool random;
-  Symbol typ;
+  Ty typ;
   Symbol func;
   Expr* expr;
   std::vector<VarDecl> args;
 
 public:
-  FuncDecl(int l, int c, bool random, Symbol typ, Symbol func, Expr* expr);
+  FuncDecl(int l, int c, bool random, Ty typ, Symbol func, Expr* expr);
   virtual ~FuncDecl();
 
+  Ty& getRetTyp();
   Symbol& getFuncName();
-  Symbol& getRetTyp();
   Expr* getExpr();
   bool isRandom();
   size_t argSize();

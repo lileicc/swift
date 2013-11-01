@@ -36,6 +36,7 @@
 #include "StringLiteral.h"
 #include "Symbol.h"
 #include "TimeStampLiteral.h"
+#include "Ty.h"
 #include "TypDecl.h"
 #include "VarDecl.h"
 #include "VarRef.h"
