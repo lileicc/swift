@@ -1,4 +1,4 @@
-#include "hurricane.h"
+#include "Hurricane.h"
 
 namespace test_absyn {
 
