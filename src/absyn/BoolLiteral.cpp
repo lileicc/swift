@@ -8,6 +8,7 @@
 #include "BoolLiteral.h"
 
 namespace swift{
+  namespace absyn {
 
 BoolLiteral::BoolLiteral(int l, int c, bool value)
   :Literal(l, c), value(value) {
@@ -26,4 +27,4 @@ void BoolLiteral::print(FILE* file, int indent) {
                 (value ? "true" : "false"));
 }
 
-}
+}}

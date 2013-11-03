@@ -10,10 +10,10 @@
 #include "Expr.h"
 #include "Symbol.h"
 
-namespace swift{
+namespace swift{ namespace absyn {
 
 class DistrExpr :
-  public swift::Expr
+  public Expr
 {
   Symbol distr;
 public:
@@ -26,4 +26,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

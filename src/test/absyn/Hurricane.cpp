@@ -1,8 +1,8 @@
 #include "Hurricane.h"
 
-namespace test_absyn {
+namespace test_absyn { 
 
-using namespace swift;
+using namespace swift::absyn;
 
 Hurricane::Hurricane() :root(NULL){}
 

@@ -10,6 +10,7 @@
 #include <cstdio>
 
 namespace swift {
+namespace absyn {
 
 enum class AbsynConstant {
   // For OpExpr
@@ -32,4 +33,5 @@ public:
   virtual void print(FILE* file, int indent = 0) = 0;
 };
 
-} /* namespace swift */
+}
+}

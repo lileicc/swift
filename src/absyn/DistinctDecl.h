@@ -13,9 +13,10 @@
 #include "Symbol.h"
 
 namespace swift {
+  namespace absyn {
 
 class DistinctDecl :
-  public swift::Decl
+  public Decl
 {
   Symbol typ;
   std::vector<Symbol> var;
@@ -34,4 +35,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

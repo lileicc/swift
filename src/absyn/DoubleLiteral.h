@@ -10,9 +10,10 @@
 #include "Literal.h"
 
 namespace swift {
+  namespace absyn {
 
 class DoubleLiteral :
-  public swift::Literal
+  public Literal
 {
   double value;
 public:
@@ -25,4 +26,4 @@ public:
   void print(FILE* file, int indent);
 };
 
-}
+}}

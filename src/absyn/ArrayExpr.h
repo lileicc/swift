@@ -10,9 +10,9 @@
 #include "Expr.h"
 
 namespace swift {
+namespace absyn {
 
-class ArrayExpr :
-  public swift::Expr
+class ArrayExpr :public Expr
 {
   int dim;
 public:
@@ -25,4 +25,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

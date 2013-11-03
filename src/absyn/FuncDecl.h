@@ -16,9 +16,10 @@
 #include "VarDecl.h"
 
 namespace swift {
+  namespace absyn {
 
 class FuncDecl :
-  public swift::Decl
+  public Decl
 {
   bool random;
   Ty typ;
@@ -42,4 +43,4 @@ public:
   void print(FILE* file, int indent);
 };
 
-}
+}}

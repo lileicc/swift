@@ -42,9 +42,9 @@
 #include "VarRef.h"
 
 namespace swift {
+namespace absyn {
 
-class BlogProgram :
-  public swift::Absyn
+class BlogProgram :public Absyn
 {
   std::vector<Stmt*> args;
 public:
@@ -59,4 +59,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

@@ -11,18 +11,19 @@
 #include "Absyn.h"
 
 namespace swift {
+  namespace absyn {
 
-class Expr: public swift::Absyn {
-public:
-  Expr(int l, int c);
-  virtual ~Expr();
+  class Expr : public Absyn {
+  public:
+    Expr(int l, int c);
+    virtual ~Expr();
 
-  void add(Expr* e);
-  Expr* get(int id);
-  size_t size();
+    void add(Expr* e);
+    Expr* get(int id);
+    size_t size();
 
-protected:
-  std::vector<Expr*> args;
-};
+  protected:
+    std::vector<Expr*> args;
+  };
 
-} /* namespace swift */
+}}

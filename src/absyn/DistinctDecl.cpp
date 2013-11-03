@@ -8,7 +8,7 @@
 #include "DistinctDecl.h"
 
 namespace swift {
-
+  namespace absyn {
 DistinctDecl::DistinctDecl(int l, int c, Symbol typ)
   :Decl(l, c), typ(typ) {
 }
@@ -49,4 +49,4 @@ void DistinctDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
-}
+}}

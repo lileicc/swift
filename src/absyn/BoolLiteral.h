@@ -10,9 +10,10 @@
 #include "Literal.h"
 
 namespace swift {
+namespace absyn {
 
 class BoolLiteral :
-  public swift::Literal
+  public Literal
 {
   bool value;
 public:
@@ -25,4 +26,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

@@ -11,9 +11,9 @@
 #include "VarDecl.h"
 
 namespace swift {
-
+  namespace absyn {
 class CondSet :
-  public swift::SetExpr
+  public SetExpr
 {
   VarDecl var;
   Expr* cond;
@@ -28,4 +28,5 @@ public:
   void print(FILE *file, int indent);
 };
 
+}
 }

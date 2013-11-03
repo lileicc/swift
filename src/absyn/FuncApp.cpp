@@ -8,6 +8,7 @@
 #include "FuncApp.h"
 
 namespace swift{
+  namespace absyn {
 
 FuncApp::FuncApp(int l, int c, Symbol func)
   :Expr(l,c), func(func) {
@@ -32,4 +33,4 @@ void FuncApp::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
-}
+}}

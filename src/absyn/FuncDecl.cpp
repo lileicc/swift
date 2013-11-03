@@ -8,6 +8,7 @@
 #include "FuncDecl.h"
 
 namespace swift {
+  namespace absyn {
 
 FuncDecl::FuncDecl(int l, int c, bool random, Ty typ, Symbol func, Expr* expr)
   :Decl(l, c), random(random), typ(typ), func(func), expr(expr) {
@@ -65,4 +66,4 @@ void FuncDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
-}
+}}

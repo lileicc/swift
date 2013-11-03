@@ -11,9 +11,10 @@
 #include "Stmt.h"
 
 namespace swift {
+  namespace absyn {
 
 class Evidence :
-  public swift::Stmt
+  public Stmt
 {
   Expr* left;
   Expr* right;
@@ -28,4 +29,4 @@ public:
   void print(FILE* file, int indent);
 };
 
-}
+}}

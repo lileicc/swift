@@ -8,7 +8,7 @@
 #include "CondSet.h"
 
 namespace swift {
-
+  namespace absyn {
 CondSet::CondSet(int l, int c, VarDecl var, Expr* cond)
   :SetExpr(l, c), var(var), cond(cond) {
 }
@@ -37,4 +37,4 @@ void CondSet::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
-}
+}}

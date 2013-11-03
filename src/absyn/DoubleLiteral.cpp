@@ -8,6 +8,7 @@
 #include "DoubleLiteral.h"
 
 namespace swift{
+  namespace absyn {
 
 DoubleLiteral::DoubleLiteral(int l, int c, double value)
   :Literal(l, c), value(value) {
@@ -25,4 +26,4 @@ void DoubleLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(DoubleLiteral: %f )\n", indent, "", value);
 }
 
-}
+}}

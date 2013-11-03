@@ -8,6 +8,7 @@
 #include "Evidence.h"
 
 namespace swift {
+  namespace absyn {
 
 Evidence::Evidence(int l, int c, Expr* left, Expr* right)
   :Stmt(l, c), left(left), right(right) {
@@ -42,4 +43,4 @@ void Evidence::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
-}
+} }

@@ -8,6 +8,7 @@
 #include "ArrayExpr.h"
 
 namespace swift {
+  namespace absyn {
 
 ArrayExpr::ArrayExpr(int l, int c, int dim)
   :Expr(l, c), dim(dim) {
@@ -28,4 +29,4 @@ void ArrayExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
-}
+}}

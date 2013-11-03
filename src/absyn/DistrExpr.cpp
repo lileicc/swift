@@ -8,6 +8,7 @@
 #include "DistrExpr.h"
 
 namespace swift{
+  namespace absyn {
 
 DistrExpr::DistrExpr(int l,int r,Symbol distr)
   :Expr(l,r), distr(distr) {
@@ -33,4 +34,4 @@ void DistrExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
-}
+}}

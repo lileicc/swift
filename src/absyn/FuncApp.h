@@ -11,9 +11,10 @@
 #include "Symbol.h"
 
 namespace swift{
+  namespace absyn {
 
 class FuncApp :
-  public swift::Expr
+  public Expr
 {
   Symbol func;
 public:
@@ -26,4 +27,4 @@ public:
   void print(FILE* file, int indent);
 };
 
-}
+}}

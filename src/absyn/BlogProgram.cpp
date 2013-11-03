@@ -8,6 +8,7 @@
 #include "BlogProgram.h"
 
 namespace swift {
+  namespace absyn {
 
 BlogProgram::BlogProgram(int l, int c)
   :Absyn(l, c) {
@@ -42,4 +43,4 @@ void BlogProgram::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
-}
+}}

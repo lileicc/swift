@@ -11,13 +11,14 @@
 #include "Stmt.h"
 
 namespace swift {
-
+  namespace absyn {
 class Decl :
-  public swift::Stmt
+  public Stmt
 {
 public:
   Decl(int l, int c);
   virtual ~Decl();
 };
 
+}
 }
