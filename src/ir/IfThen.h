@@ -14,6 +14,9 @@ public:
   IfThen();
   ~IfThen();
 private:
+  Expr* cond;
+  Clause* thcl;
+  Clause* elcl;
 };
 
 }

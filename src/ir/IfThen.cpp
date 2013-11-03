@@ -7,7 +7,12 @@
 
 namespace swift{
 namespace ir{
+IfThen::IfThen() {
+
+}
+IfThen::~IfThen() {
   
+}
 }
 }
 
