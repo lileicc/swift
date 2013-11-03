@@ -18,6 +18,7 @@ public:
   void process(absyn::BlogProgram *prog);
 private:
   void transExpr(absyn::Expr* expr);
+  void transExpr(absyn::OpExpr* expr);
 };
 
 }

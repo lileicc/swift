@@ -18,6 +18,15 @@ Semant::Semant() {
 Semant::~Semant() {
   // TODO Auto-generated destructor stub
 }
+  
+void Semant::transExpr(absyn::Expr *expr){
+  //TODO
+    
+}
+
+  void Semant::transExpr(absyn::OpExpr* expr){
+    //TODO
+  }
 
 }
 } /* namespace swift */
