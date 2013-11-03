@@ -6,9 +6,10 @@
  */
 
 #pragma once
+#include "Type.h"
 
-namespace swift{
-namespace ir{
+namespace swift {
+namespace ir {
 
 class Clause {
 public:

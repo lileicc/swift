@@ -4,9 +4,9 @@
  *  Created on: Nov 2, 2013
  *      Author: leili
  */
-
-namespace swift{
-namespace ir{
+#include "PrimTy.h"
+namespace swift {
+namespace ir {
 PrimTy::PrimTy() {
 
 }

@@ -7,13 +7,14 @@
 
 #pragma once
 #include <string>
-namespace swift{
-namespace ir{
-class PrimTy : public Ty {
+#include "Type.h"
+namespace swift {
+namespace ir {
+class PrimTy: public Type {
 public:
   PrimTy();
   ~PrimTy();
-  string name;
+  std::string name;
 };
 }
 }

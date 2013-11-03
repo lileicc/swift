@@ -5,17 +5,19 @@
  *      Author: leili
  */
 
+#pragma once
 #include <vector>
-namespace swift{
-namespace ir{
-class Expr : public Clause {
+#include "Clause.h"
+namespace swift {
+namespace ir {
+class Expr: public Clause {
 public:
   Expr();
   virtual ~Expr();
   void addArg(Expr * expr);
-  vector<Expr*> getArgs();
+  std::vector<Expr*> getArgs();
 private:
-  vector<Expr*> args;
+  std::vector<Expr*> args;
 };
 }
 }

@@ -1,18 +1,15 @@
 /*
- * IfThen.cpp
+ * Type.cpp
  *
  *  Created on: Nov 2, 2013
  *      Author: leili
  */
-#include "IfThen.h"
+#include "Type.h"
 namespace swift {
 namespace ir {
-IfThen::IfThen() {
+Type::Type() {
 
 }
-IfThen::~IfThen() {
 
 }
 }
-}
-

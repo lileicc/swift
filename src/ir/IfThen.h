@@ -5,9 +5,10 @@
  *      Author: leili
  */
 #pragma once
-
-namespace swift{
-namespace ir{
+#include "Expr.h"
+#include "Clause.h"
+namespace swift {
+namespace ir {
 
 class IfThen: public Clause {
 public:

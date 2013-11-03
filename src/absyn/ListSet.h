@@ -12,7 +12,7 @@
 namespace swift {
 namespace absyn {
 
-class ListSet: public swift::SetExpr {
+class ListSet: public SetExpr {
 public:
   ListSet(int l, int c);
   virtual ~ListSet();

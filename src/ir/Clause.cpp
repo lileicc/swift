@@ -4,11 +4,15 @@
  *  Created on: Nov 2, 2013
  *      Author: leili
  */
+#include "Clause.h"
 
-namespace swift{
-namespace ir{
+namespace swift {
+namespace ir {
+Clause::Clause() {
 
-Clause::setType(Type* ty) {
+}
+
+void Clause::setType(Type* ty) {
   this->ty = ty;
 }
 

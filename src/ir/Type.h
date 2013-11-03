@@ -1,17 +1,17 @@
 /*
- * Ty.h
+ * Type.h
  *
  *  Created on: Nov 2, 2013
  *      Author: leili
  */
 
 #pragma once
-namespace swift{
-namespace ir{
-class Ty {
+namespace swift {
+namespace ir {
+class Type {
 public:
-  Ty();
-  virtual ~Ty();
+  Type();
+  virtual ~Type();
 };
 }
 }
