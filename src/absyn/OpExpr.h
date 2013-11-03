@@ -14,8 +14,9 @@
 #include "Expr.h"
 
 namespace swift {
+namespace absyn {
 
-class OpExpr: public swift::Expr {
+class OpExpr: public Expr {
   AbsynConstant op;
 public:
   OpExpr(int l, int c, AbsynConstant op, Expr* left, Expr* right);
@@ -29,4 +30,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 } /* namespace swift */

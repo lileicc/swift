@@ -1,13 +1,13 @@
 /*
-* VarDecl.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*
-*  Note :
-*    This is not a DECL but an EXPR
-*
-*/
+ * VarDecl.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ *
+ *  Note :
+ *    This is not a DECL but an EXPR
+ *
+ */
 
 #pragma once
 
@@ -15,11 +15,10 @@
 #include "Symbol.h"
 #include "Ty.h"
 
-namespace swift{
+namespace swift {
+namespace absyn {
 
-class VarDecl
-  :public swift::Expr
-{
+class VarDecl: public Expr {
   Ty typ;
   Symbol var;
 public:
@@ -33,4 +32,5 @@ public:
   void print(FILE *file, int indent);
 };
 
+}
 }

@@ -1,18 +1,18 @@
 /*
-* Symbol.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * Symbol.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
 #include<string>
 
 namespace swift {
+namespace absyn {
 
-class Symbol
-{
+class Symbol {
   std::string value;
 public:
   Symbol(std::string v = "");
@@ -21,4 +21,5 @@ public:
   const std::string& getValue();
 };
 
+}
 }

@@ -1,9 +1,9 @@
 /*
-* FuncDecl.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * FuncDecl.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -16,11 +16,9 @@
 #include "VarDecl.h"
 
 namespace swift {
-  namespace absyn {
+namespace absyn {
 
-class FuncDecl :
-  public Decl
-{
+class FuncDecl: public Decl {
   bool random;
   Ty typ;
   Symbol func;
@@ -43,4 +41,5 @@ public:
   void print(FILE* file, int indent);
 };
 
-}}
+}
+}

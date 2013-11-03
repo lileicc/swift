@@ -1,9 +1,9 @@
 /*
-* Evidence.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * Evidence.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -11,17 +11,15 @@
 #include "Stmt.h"
 
 namespace swift {
-  namespace absyn {
+namespace absyn {
 
-class Evidence :
-  public Stmt
-{
+class Evidence: public Stmt {
   Expr* left;
   Expr* right;
 public:
   Evidence(int l, int c, Expr* left, Expr* right);
   virtual ~Evidence();
-  
+
   Expr* getLeft();
   Expr* getRight();
 
@@ -29,4 +27,5 @@ public:
   void print(FILE* file, int indent);
 };
 
-}}
+}
+}

@@ -1,16 +1,17 @@
 /*
-* VarRef.cpp
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * VarRef.cpp
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #include "VarRef.h"
 
-namespace swift{
+namespace swift {
+namespace absyn {
 
-VarRef::VarRef(int l, int c, Symbol var)
-  :Expr(l,c), var(var) {
+VarRef::VarRef(int l, int c, Symbol var) :
+    Expr(l, c), var(var) {
 }
 
 VarRef::~VarRef() {
@@ -25,4 +26,5 @@ void VarRef::print(FILE* file, int indent) {
   fprintf(file, "%*s(VarRef: %s )\n", indent, "", var.getValue().c_str());
 }
 
+}
 }

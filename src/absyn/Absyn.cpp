@@ -8,14 +8,15 @@
 #include "Absyn.h"
 
 namespace swift {
-  namespace absyn {
+namespace absyn {
 
-Absyn::Absyn(int l, int c)
-  :line(l), col(c) {
+Absyn::Absyn(int l, int c) :
+    line(l), col(c) {
 }
 
 Absyn::~Absyn() {
   // TODO Auto-generated destructor stub
 }
 
-}}
+}
+}

@@ -1,9 +1,9 @@
 /*
-* QuantExpr.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * QuantExpr.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -12,15 +12,13 @@
 #include "VarDecl.h"
 
 namespace swift {
+namespace absyn {
 
-class QuantExpr :
-  public swift::Expr
-{
+class QuantExpr: public Expr {
   AbsynConstant typ;
   VarDecl var;
 public:
-  QuantExpr(int l, int c, 
-      AbsynConstant typ, VarDecl var, Expr* cond);
+  QuantExpr(int l, int c, AbsynConstant typ, VarDecl var, Expr* cond);
   virtual ~QuantExpr();
 
   AbsynConstant getTyp();
@@ -31,4 +29,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

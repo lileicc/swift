@@ -1,9 +1,9 @@
 /*
-* ArrayExpr.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * ArrayExpr.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -12,8 +12,7 @@
 namespace swift {
 namespace absyn {
 
-class ArrayExpr :public Expr
-{
+class ArrayExpr: public Expr {
   int dim;
 public:
   ArrayExpr(int l, int c, int dim = 1);

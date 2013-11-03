@@ -1,9 +1,9 @@
 /*
-* BoolLiteral.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * BoolLiteral.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -12,9 +12,7 @@
 namespace swift {
 namespace absyn {
 
-class BoolLiteral :
-  public Literal
-{
+class BoolLiteral: public Literal {
   bool value;
 public:
   BoolLiteral(int l, int c, bool value);

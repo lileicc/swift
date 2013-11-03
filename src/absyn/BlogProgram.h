@@ -1,13 +1,13 @@
 /*
-* BlogProgram.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*
-*  Note :
-*    This node appears only ONCE in the syntax tree
-*
-*/
+ * BlogProgram.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ *
+ *  Note :
+ *    This node appears only ONCE in the syntax tree
+ *
+ */
 
 #pragma once
 
@@ -44,8 +44,7 @@
 namespace swift {
 namespace absyn {
 
-class BlogProgram :public Absyn
-{
+class BlogProgram: public Absyn {
   std::vector<Stmt*> args;
 public:
   BlogProgram(int l, int r);

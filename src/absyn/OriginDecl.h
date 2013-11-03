@@ -1,9 +1,9 @@
 /*
-* OriginDecl.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * OriginDecl.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -11,10 +11,9 @@
 #include "Symbol.h"
 
 namespace swift {
+namespace absyn {
 
-class OriginDecl :
-  public swift::Decl
-{
+class OriginDecl: public Decl {
   Symbol func;
   Symbol arg;
   Symbol typ;
@@ -30,4 +29,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

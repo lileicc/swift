@@ -8,9 +8,10 @@
 #include "OpExpr.h"
 
 namespace swift {
+namespace absyn {
 
-OpExpr::OpExpr(int l, int c, AbsynConstant op, Expr* left, Expr* right)
-  :Expr(l,c),op(op) {
+OpExpr::OpExpr(int l, int c, AbsynConstant op, Expr* left, Expr* right) :
+    Expr(l, c), op(op) {
   args.push_back(left);
   args.push_back(right);
 }
@@ -34,17 +35,16 @@ Expr* OpExpr::getRight() {
 void OpExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s(OpExpr:\n", indent, "");
   fprintf(file, "%*s:op %d\n", indent + 2, "", op);
-  if (args[0] != NULL)
-  {
+  if (args[0] != NULL) {
     fprintf(file, "%*s:left\n", indent + 2, "");
     args[0]->print(file, indent + 4);
   }
-  if (args[1] != NULL)
-  {
+  if (args[1] != NULL) {
     fprintf(file, "%*s:right\n", indent + 2, "");
     args[1]->print(file, indent + 4);
   }
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 } /* namespace swift */

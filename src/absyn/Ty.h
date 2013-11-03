@@ -1,9 +1,9 @@
 /*
-* Ty.h
-*
-*  Created on: Oct 31, 2013
-*      Author: yiwu
-*/
+ * Ty.h
+ *
+ *  Created on: Oct 31, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -12,9 +12,8 @@
 #include "Symbol.h"
 
 namespace swift {
-
-class Ty
-{
+namespace absyn {
+class Ty {
   Symbol typ;
   int dim;
 public:
@@ -28,4 +27,5 @@ public:
   std::string toString();
 };
 
+}
 }

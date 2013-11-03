@@ -1,16 +1,17 @@
 /*
-* NumStRef.cpp
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * NumStRef.cpp
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #include "NumStRef.h"
 
 namespace swift {
+namespace absyn {
 
-NumStRef::NumStRef(int l, int c, Expr* e)
-  :Expr(l, c) {
+NumStRef::NumStRef(int l, int c, Expr* e) :
+    Expr(l, c) {
   args.push_back(e);
 }
 
@@ -25,4 +26,5 @@ void NumStRef::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 }

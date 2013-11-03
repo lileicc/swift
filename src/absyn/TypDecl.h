@@ -1,9 +1,9 @@
 /*
-* TypDecl.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * TypDecl.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -13,10 +13,9 @@
 #include "Symbol.h"
 
 namespace swift {
+namespace absyn {
 
-class TypDecl :
-  public swift::Decl
-{
+class TypDecl: public Decl {
   Symbol arg;
 public:
   TypDecl(int l, int c, Symbol arg);
@@ -28,4 +27,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

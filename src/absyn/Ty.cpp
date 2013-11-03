@@ -1,16 +1,17 @@
 /*
-* Ty.cpp
-*
-*  Created on: Oct 31, 2013
-*      Author: yiwu
-*/
+ * Ty.cpp
+ *
+ *  Created on: Oct 31, 2013
+ *      Author: yiwu
+ */
 
 #include "Ty.h"
 
 namespace swift {
+namespace absyn {
 
-Ty::Ty(Symbol typ, int dim)
-  :typ(typ), dim(dim) {
+Ty::Ty(Symbol typ, int dim) :
+    typ(typ), dim(dim) {
 }
 
 Ty::~Ty() {
@@ -31,4 +32,5 @@ std::string Ty::toString() {
   return ret;
 }
 
+}
 }

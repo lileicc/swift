@@ -1,9 +1,9 @@
 /*
-* NumStDecl.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * NumStDecl.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -14,10 +14,9 @@
 #include "Symbol.h"
 
 namespace swift {
+namespace absyn {
 
-class NumStDecl :
-  public swift::Decl
-{
+class NumStDecl: public Decl {
   Symbol typ;
   std::vector<Symbol> origin;
   std::vector<Symbol> var;
@@ -37,4 +36,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

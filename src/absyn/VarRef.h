@@ -1,20 +1,19 @@
 /*
-* VarRef.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * VarRef.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
 #include "Expr.h"
 #include "Symbol.h"
 
-namespace swift{
+namespace swift {
+namespace absyn {
 
-class VarRef :
-  public swift::Expr
-{
+class VarRef: public Expr {
   Symbol var;
 public:
   VarRef(int l, int c, Symbol var);
@@ -26,4 +25,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

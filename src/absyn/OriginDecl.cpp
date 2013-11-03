@@ -1,16 +1,17 @@
 /*
-* OriginDecl.cpp
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * OriginDecl.cpp
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #include "OriginDecl.h"
 
 namespace swift {
+namespace absyn {
 
-OriginDecl::OriginDecl(int l, int c, Symbol typ, Symbol func, Symbol arg)
-  :Decl(l, c), typ(typ), func(func), arg(arg) {
+OriginDecl::OriginDecl(int l, int c, Symbol typ, Symbol func, Symbol arg) :
+    Decl(l, c), typ(typ), func(func), arg(arg) {
 }
 
 OriginDecl::~OriginDecl() {
@@ -37,4 +38,5 @@ void OriginDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 }

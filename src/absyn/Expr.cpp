@@ -8,10 +8,10 @@
 #include "Expr.h"
 
 namespace swift {
-  namespace absyn {
+namespace absyn {
 
-Expr::Expr(int l, int c)
-  :Absyn(l, c) {
+Expr::Expr(int l, int c) :
+    Absyn(l, c) {
 }
 
 Expr::~Expr() {
@@ -32,4 +32,5 @@ size_t Expr::size() {
   return args.size();
 }
 
-}}
+}
+}

@@ -5,17 +5,20 @@
  *      Author: leili
  */
 
-#ifndef SEMANT_H_
-#define SEMANT_H_
+#pragma once
+#include "../absyn/BlogProgram.h"
 
 namespace swift {
+namespace semant {
 
 class Semant {
 public:
   Semant();
   ~Semant();
+  void process(absyn::BlogProgram *prog);
+private:
+  void transExpr(absyn::Expr* expr);
 };
 
+}
 } /* namespace swift */
-
-#endif /* SEMANT_H_ */

@@ -1,20 +1,19 @@
 /*
-* DistrExpr.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * DistrExpr.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
 #include "Expr.h"
 #include "Symbol.h"
 
-namespace swift{ namespace absyn {
+namespace swift {
+namespace absyn {
 
-class DistrExpr :
-  public Expr
-{
+class DistrExpr: public Expr {
   Symbol distr;
 public:
   DistrExpr(int l, int c, Symbol distr);

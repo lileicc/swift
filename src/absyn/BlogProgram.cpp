@@ -1,17 +1,17 @@
 /*
-* BlogProgram.cpp
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * BlogProgram.cpp
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #include "BlogProgram.h"
 
 namespace swift {
-  namespace absyn {
+namespace absyn {
 
-BlogProgram::BlogProgram(int l, int c)
-  :Absyn(l, c) {
+BlogProgram::BlogProgram(int l, int c) :
+    Absyn(l, c) {
 }
 
 BlogProgram::~BlogProgram() {
@@ -43,4 +43,5 @@ void BlogProgram::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
-}}
+}
+}
