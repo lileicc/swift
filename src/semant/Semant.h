@@ -28,7 +28,7 @@ private:
   void transTyDecl(absyn::TypDecl* td);
   void error(int line, int col, std::string info);
   TypeFactory tyFactory;
-  msg::ErrorMsg errorMsg(stdout);
+  msg::ErrorMsg errorMsg;
 };
 
 }
