@@ -12,6 +12,7 @@ class NumberStmt;
 class OriginAttr;
 class Ty;
 class TypeDomain;
+class VarDecl;
 
 }
 }

@@ -8,7 +8,6 @@
 
 #include "IRForwardDecl.h"
 
-#include "Expr.h"
 #include "Clause.h"
 namespace swift {
 namespace ir {

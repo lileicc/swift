@@ -1,4 +1,6 @@
 #include "NumberStmt.h"
+#include "OriginAttr.h"
+#include "VarDecl.h"
 
 namespace swift { namespace ir {
 NumberStmt::NumberStmt(TypeDomain* refer)
@@ -16,7 +18,7 @@ OriginAttr* NumberStmt::getOrigin(int k)  {
   return origin[k];
 }
 
-const std::string& NumberStmt::getVar(int k) {
+VarDecl* NumberStmt::getVar(int k) {
   return var[k];
 }
 
@@ -26,7 +28,7 @@ TypeDomain* NumberStmt::getRefer() {
 
 void NumberStmt::addArg(OriginAttr* o, std::string v) {
   origin.push_back(o);
-  var.push_back(v);
+  var.push_back(new VarDecl(o->getTyp(), v));
 }
 
 }

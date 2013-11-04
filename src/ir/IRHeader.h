@@ -10,3 +10,4 @@
 #include "OriginAttr.h"
 #include "Ty.h"
 #include "TypeDomain.h"
+#include "VarDecl.h"
