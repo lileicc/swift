@@ -3,7 +3,6 @@
 #include<vector>
 
 #include "IRForwardDecl.h"
-
 #include "Ty.h"
 
 namespace swift {

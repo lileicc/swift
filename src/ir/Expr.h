@@ -8,9 +8,8 @@
 #pragma once
 #include <vector>
 
-#include "IRForwardDecl.h"
-
 #include "Clause.h"
+#include "IRForwardDecl.h"
 
 namespace swift {
 namespace ir {
