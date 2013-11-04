@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Ty.h"
+#include "TypeDomain.h"
+
 namespace swift {
 namespace ir {
 
