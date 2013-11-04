@@ -9,4 +9,10 @@
 
 namespace swift {
 
+
 } /* namespace swift */
+
+int main() {
+
+
+}
