@@ -8,7 +8,9 @@
 #pragma once
 #include <string>
 #include <map>
-#include "../ir/IRHeader.h"
+#include "../ir/Ty.h"
+#include "../ir/TypeDomain.h"
+#include "../ir/NameTy.h"
 
 namespace swift {
 namespace semant{
