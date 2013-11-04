@@ -2,13 +2,13 @@
 
 #include <vector>
 
+#include "IRForwardDecl.h"
+
 #include "Clause.h"
 #include "OriginAttr.h"
 #include "Ty.h"
-//#include "TypeDomain.h"
 
 namespace swift { namespace ir {
-class TypeDomain;
 
 class NumberStmt {
   TypeDomain* refer;

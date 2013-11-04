@@ -1,20 +1,12 @@
 #pragma once
 
-//#include "Ty.h"
-//#include "TypeDomain.h"
-
-namespace swift {
-namespace ir {
-
-enum class IRConstant {
-  // Not Available
-  NA,
-  // Type: for class Ty
-  BOOL, INT, DOUBLE, STRING,
-  NAMETY, ARRAY, MAP,
-  // Function Category: for FunctionDefn
-  FIXED, RANDOM, ORIGIN
-};
-
-}
-}
+#include "ArrayTy.h"
+#include "Clause.h"
+#include "Expr.h"
+#include "IfThen.h"
+#include "MapTy.h"
+#include "NameTy.h"
+#include "NumberStmt.h"
+#include "OriginAttr.h"
+#include "Ty.h"
+#include "TypeDomain.h"

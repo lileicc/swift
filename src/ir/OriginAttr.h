@@ -2,11 +2,11 @@
 
 #include <string>
 
+#include "IRForwardDecl.h"
+
 #include "Ty.h"
-//#include "TypeDomain.h"
 
 namespace swift { namespace ir {
-class TypeDomain;
 
 class OriginAttr {
   std::string name;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "IRForwardDecl.h"
+
 #include "Ty.h"
 
 namespace swift {

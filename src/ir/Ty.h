@@ -7,7 +7,9 @@
 
 #pragma once
 
-#include "IRHeader.h"
+#include "IRForwardDecl.h"
+
+#include "IRConst.h"
 
 namespace swift {
 namespace ir {

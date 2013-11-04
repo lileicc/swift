@@ -7,6 +7,9 @@
 
 #pragma once
 #include <vector>
+
+#include "IRForwardDecl.h"
+
 #include "Clause.h"
 namespace swift {
 namespace ir {

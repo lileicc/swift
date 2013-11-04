@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include "IRForwardDecl.h"
+
 #include "OriginAttr.h"
 #include "Ty.h"
 #include "NameTy.h"
