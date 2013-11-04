@@ -10,7 +10,7 @@
 namespace swift {
 namespace semant {
 
-Semant::Semant() {
+Semant::Semant():errorMsg(stdout) {
   // TODO Auto-generated constructor stub
 
 }
