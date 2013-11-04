@@ -14,11 +14,12 @@ namespace ir {
 
 class Clause {
 public:
-  Clause();
+  Clause(Ty* typ = NULL);
   virtual ~Clause();
-  void setType(Ty* ty);
+  void setTyp(Ty* typ);
+  Ty* getTyp();
 private:
-  Ty* ty;
+  Ty* typ;
 };
 
 }

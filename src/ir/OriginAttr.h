@@ -4,8 +4,6 @@
 
 #include "IRForwardDecl.h"
 
-#include "Ty.h"
-
 namespace swift { namespace ir {
 
 class OriginAttr {

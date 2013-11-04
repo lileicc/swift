@@ -6,17 +6,23 @@
  */
 #include "Clause.h"
 
+#include "Ty.h"
+
 namespace swift {
 namespace ir {
-Clause::Clause() {
-
+Clause::Clause(Ty* typ)
+  :typ(typ) {
 }
 
 Clause::~Clause() {
 }
 
-void Clause::setType(Ty* ty) {
-  this->ty = ty;
+void Clause::setTyp(Ty* ty) {
+  typ = ty;
+}
+
+Ty* Clause::getTyp()  {
+  return typ;
 }
 
 }

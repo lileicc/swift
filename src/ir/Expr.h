@@ -11,6 +11,7 @@
 #include "IRForwardDecl.h"
 
 #include "Clause.h"
+
 namespace swift {
 namespace ir {
 class Expr: public Clause {

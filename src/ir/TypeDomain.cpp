@@ -5,6 +5,12 @@
  *      Author: yiwu
  */
 #include "TypeDomain.h"
+
+#include "OriginAttr.h"
+#include "Ty.h"
+#include "NameTy.h"
+#include "NumberStmt.h"
+
 namespace swift {
 namespace ir {
 

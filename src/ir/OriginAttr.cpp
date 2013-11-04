@@ -1,5 +1,7 @@
 #include "OriginAttr.h"
 
+#include "Ty.h"
+
 namespace swift { namespace ir {
 
 OriginAttr::OriginAttr(const std::string& name, Ty* ty, TypeDomain* src)

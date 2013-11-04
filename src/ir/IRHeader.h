@@ -1,8 +1,12 @@
 #pragma once
 
+// For NULL
+#include <cstdio>
+
 #include "ArrayTy.h"
 #include "Clause.h"
 #include "Expr.h"
+#include "Evidence.h"
 #include "IfThen.h"
 #include "MapTy.h"
 #include "NameTy.h"
