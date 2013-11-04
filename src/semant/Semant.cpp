@@ -18,6 +18,26 @@ Semant::Semant() {
 Semant::~Semant() {
   // TODO Auto-generated destructor stub
 }
+
+void Semant::process(absyn::BlogProgram *prog) {
+
+}
+
+void Semant::processTypes(absyn::BlogProgram* prog) {
+  absyn::TypDecl* td;
+  for (auto st : prog->getAll()) {
+    td = dynamic_cast<absyn::TypDecl*>(st);
+    if (td != NULL) {
+      transTyDecl(td);
+    }
+  }
+}
+
+void Semant::transTyDecl(absyn::TypDecl* td) {
+  if (! tyFactory.addNameTy(td->get().getValue())) {
+
+  }
+}
   
 void Semant::transExpr(absyn::Expr *expr){
   //TODO

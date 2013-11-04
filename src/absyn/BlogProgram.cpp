@@ -32,6 +32,10 @@ Stmt* BlogProgram::get(int k) {
   return args[k];
 }
 
+const std::vector<Stmt*>& BlogProgram::getAll() {
+  return args;
+}
+
 // For Debugging Use
 void BlogProgram::print(FILE* file, int indent) {
   fprintf(file, "%*s(BlogProgram:\n", indent, "");
