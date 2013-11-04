@@ -9,6 +9,10 @@ namespace swift {
 namespace ir {
 Expr::Expr() {
 }
+
+Expr::~Expr() {
+}
+
 void Expr::addArg(Expr * expr) {
   args.push_back(expr);
 }

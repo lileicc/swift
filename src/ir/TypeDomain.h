@@ -4,19 +4,19 @@
  *  Created on: Nov 2, 2013
  *      Author: yiwu
  */
-
 #pragma once
 #include <map>
 #include <string>
 #include <vector>
 
-#include "NumberStmt.h"
 #include "OriginAttr.h"
 #include "Ty.h"
 #include "NameTy.h"
+#include "NumberStmt.h"
 
 namespace swift {
 namespace ir {
+
 class TypeDomain {
 public:
   TypeDomain(std::string name="");
@@ -47,5 +47,6 @@ private:
 
   std::map<std::string,int> originID;
 };
+
 }
 }

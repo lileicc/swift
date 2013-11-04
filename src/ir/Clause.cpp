@@ -12,6 +12,9 @@ Clause::Clause() {
 
 }
 
+Clause::~Clause() {
+}
+
 void Clause::setType(Ty* ty) {
   this->ty = ty;
 }

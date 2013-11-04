@@ -1,5 +1,7 @@
 #include "NameTy.h"
 
+#include "TypeDomain.h"
+
 namespace swift { namespace ir {
 NameTy::NameTy(TypeDomain* refer)
   :Ty(IRConstant::NAMETY), refer(refer) {

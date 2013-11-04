@@ -11,6 +11,9 @@ Ty::Ty(IRConstant typ)
   :typ(typ) {
 }
 
+Ty::~Ty() {
+}
+
 IRConstant Ty::getTyp() {
   return typ;
 }

@@ -3,9 +3,10 @@
 #include <string>
 
 #include "Ty.h"
-#include "TypeDomain.h"
+//#include "TypeDomain.h"
 
 namespace swift { namespace ir {
+class TypeDomain;
 
 class OriginAttr {
   std::string name;
