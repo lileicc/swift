@@ -8,12 +8,16 @@ namespace swift { namespace ir {
 class ArrayTy;
 class Branch;
 class BoolLiteral;
+class CardExpr;
 class Clause;
 class ConstSymbol;
+class DistrDefn;
+class Distribution;
 class DoubleLiteral;
 class Expr;
 class Evidence;
 class FuncDefn;
+class FunctionCall;
 class IfThen;
 class InstSymbol;
 class IntLiteral;
@@ -22,12 +26,16 @@ class MapTy;
 class NameTy;
 class NullSymbol;
 class NumberStmt;
+class OprExpr;
 class OriginAttr;
+class OriginRefer;
+class QuantForm;
 class StringLiteral;
 class Ty;
 class TypeDomain;
 class VarDecl;
 class VarRefer;
+class VoidFuncCall;
 
 }
 }

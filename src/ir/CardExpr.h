@@ -1,21 +1,20 @@
 #pragma once
-
 #include "Expr.h"
-#include "IRConst.h"
 #include "IRForwardDecl.h"
 
 namespace swift { namespace ir {
 
-class ConstSymbol :
+class CardExpr :
   public swift::ir::Expr {
 public:
-  ConstSymbol(IRConstant typ);
-  virtual ~ConstSymbol();
+  CardExpr();
+  virtual ~CardExpr();
 
-  IRConstant getKind();
+  void setRefer(Ty* t);
+  Ty* getRefer();
 
 private:
-  IRConstant kind;
+  Ty* refer;
 };
 
 }
