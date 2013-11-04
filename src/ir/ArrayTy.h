@@ -10,16 +10,19 @@ namespace swift {
 namespace ir {
 
 class ArrayTy :public swift::ir::Ty {
-  std::vector<int> size;
-  Ty* base;
 public:
-  ArrayTy(IRConstant typ, Ty* base, std::vector<int> size = std::vector<int>());
+  ArrayTy(IRConstant typ, Ty* base, const std::vector<int>& size = std::vector<int>());
   virtual ~ArrayTy();
 
   Ty* getBase();
-  int getSize();
+  size_t getSize();
   int getDim(int k);
-  std::vector<int>& getAllDim();
+  void addDim(int d);
+  const std::vector<int>& getAllDim();
+
+private:
+  std::vector<int> size;
+  Ty* base;
 };
 
 }

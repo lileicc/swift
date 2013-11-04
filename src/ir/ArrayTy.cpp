@@ -1,7 +1,7 @@
 #include "ArrayTy.h"
 
 namespace swift { namespace ir {
-ArrayTy::ArrayTy(IRConstant typ, Ty* base, std::vector<int>size)
+ArrayTy::ArrayTy(IRConstant typ, Ty* base, const std::vector<int>& size)
   :Ty(typ), base(base), size(size) {
 }
 
@@ -12,16 +12,20 @@ Ty* ArrayTy::getBase() {
   return base;
 }
 
-std::vector<int>& ArrayTy::getAllDim() {
+const std::vector<int>& ArrayTy::getAllDim() {
   return size;
 }
 
-int ArrayTy::getSize() {
+size_t ArrayTy::getSize() {
   return size.size();
 }
 
 int ArrayTy::getDim(int k) {
   return size[k];
+}
+
+void ArrayTy::addDim(int d)  {
+  size.push_back(d);
 }
 
 }

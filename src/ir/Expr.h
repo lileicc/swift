@@ -18,7 +18,9 @@ public:
   Expr();
   virtual ~Expr();
   void addArg(Expr * expr);
-  std::vector<Expr*> getArgs();
+  const std::vector<Expr*>& getArgs();
+  Expr* get(int k);
+  size_t argSize();
 private:
   std::vector<Expr*> args;
 };

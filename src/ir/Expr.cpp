@@ -16,8 +16,18 @@ Expr::~Expr() {
 void Expr::addArg(Expr * expr) {
   args.push_back(expr);
 }
-std::vector<Expr*> Expr::getArgs() {
+
+const std::vector<Expr*>& Expr::getArgs() {
   return args;
 }
+
+size_t Expr::argSize() {
+  return args.size();
+}
+
+Expr* Expr::get(int k)  {
+  return args[k];
+}
+
 }
 }

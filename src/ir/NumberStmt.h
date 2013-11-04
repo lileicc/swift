@@ -11,9 +11,6 @@
 namespace swift { namespace ir {
 
 class NumberStmt {
-  TypeDomain* refer;
-  std::vector<OriginAttr*> origin;
-  std::vector<std::string> var;
 public:
   NumberStmt(TypeDomain* refer);
   virtual ~NumberStmt();
@@ -24,6 +21,11 @@ public:
   TypeDomain* getRefer();
 
   void addArg(OriginAttr* o, std::string v);
+
+private:
+  TypeDomain* refer;
+  std::vector<OriginAttr*> origin;
+  std::vector<std::string> var;
 };
 
 }

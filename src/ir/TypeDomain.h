@@ -21,7 +21,7 @@ namespace ir {
 
 class TypeDomain {
 public:
-  TypeDomain(std::string name="");
+  TypeDomain(const std::string& name = std::string());
   ~TypeDomain();
 
   const std::string& getName();
@@ -30,11 +30,11 @@ public:
   void setPreLen(int l);
   int getPreLen();
   void addNumberStmt(NumberStmt* num);
-  std::vector<NumberStmt*>& getAllNumberStmt();
+  const std::vector<NumberStmt*>& getAllNumberStmt();
   NumberStmt* getNumberStmt(int k);
   size_t getNumberStmtSize();
   void addOrigin(OriginAttr* o);
-  std::vector<OriginAttr*>& getAllOrigin();
+  const std::vector<OriginAttr*>& getAllOrigin();
   OriginAttr* getOrigin(int k);
   size_t getOriginSize();
 

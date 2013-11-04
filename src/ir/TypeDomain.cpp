@@ -8,7 +8,7 @@
 namespace swift {
 namespace ir {
 
-TypeDomain::TypeDomain(std::string name)
+TypeDomain::TypeDomain(const std::string& name)
   :name(name) {
 }
 
@@ -39,7 +39,7 @@ void TypeDomain::addNumberStmt(NumberStmt* num) {
   gen.push_back(num);
 }
 
-std::vector<NumberStmt*>& TypeDomain::getAllNumberStmt() {
+const std::vector<NumberStmt*>& TypeDomain::getAllNumberStmt() {
   return gen;
 }
 
@@ -57,7 +57,7 @@ void TypeDomain::addOrigin(OriginAttr* o) {
   origin.push_back(o);
 }
 
-std::vector<OriginAttr*>& TypeDomain::getAllOrigin() {
+const std::vector<OriginAttr*>& TypeDomain::getAllOrigin() {
   return origin;
 }
 
