@@ -6,7 +6,6 @@
  */
 
 #pragma once
-#include <cstdlib>
 #include <cstdio>
 #include "../absyn/BlogProgram.h"
 #include "../msg/ErrorMsg.h"

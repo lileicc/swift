@@ -10,7 +10,8 @@
 namespace swift {
 namespace semant {
 
-Semant::Semant():errorMsg(stdout) {
+Semant::Semant() :
+    errorMsg(stderr) {
   // TODO Auto-generated constructor stub
 
 }
@@ -35,7 +36,8 @@ void Semant::processTypes(absyn::BlogProgram* prog) {
 
 void Semant::transTyDecl(absyn::TypDecl* td) {
   if (!tyFactory.addNameTy(td->get().getValue())) {
-
+    error(td->line, td->col,
+        "type name " + td->get().getValue() + " is defined multiple times");
   }
 }
 
