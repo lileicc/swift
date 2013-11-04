@@ -18,13 +18,29 @@ class Semant {
 public:
   Semant();
   ~Semant();
-  void process(absyn::BlogProgram *prog);
+  void process(absyn::BlogProgram* prog);
 private:
-  void processTypes(absyn::BlogProgram *prog);
+  /**
+   * process all declarations, including
+   *   - type declaration
+   *   - distinct symbols
+   *   - function signature (but not the function body)
+   */
+  void processDeclarations(absyn::BlogProgram* prog);
+
   void transExpr(absyn::Expr* expr);
   void transExpr(absyn::OpExpr* expr);
   void transExpr(absyn::FuncApp* expr);
+  /**
+   * create a declared type, shout error message if duplicate
+   */
   void transTyDecl(absyn::TypDecl* td);
+  /**
+   * process distinct/guaranteed symbols
+   * e.g.
+   *   distinct Blip b[100];
+   */
+  void transDistinctDecl(absyn::DistinctDecl* dd);
   void error(int line, int col, const std::string & info);
   TypeFactory tyFactory;
   msg::ErrorMsg errorMsg;
