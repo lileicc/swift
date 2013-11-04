@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg height="1193" version="1.1" width="2138" xmlns="http://www.w3.org/2000/svg">
+<svg height="1242" version="1.1" width="2138" xmlns="http://www.w3.org/2000/svg">
 <rect fill="#ffffff" height="138" stroke="#ffffff" stroke-width="1" width="222" x="454" y="254"/>
 <rect fill="none" height="138" stroke="#000000" stroke-width="1" width="222" x="454" y="254"/>
-<text font-family="Dialog" font-size="12" x="529" y="267">
+<text font-family="Dialog" font-size="12" x="524" y="267">
 BlogFunction</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="222" x="454" y="277"/>
 <text font-family="Dialog" font-size="12" x="458" y="291">
@@ -12,30 +12,34 @@ name : string</text>
 args : vector&lt;VarDecl*&gt;</text>
 <text font-family="Dialog" font-size="12" x="458" y="323">
 body : Clause*</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="222" x="454" y="351"/>
+<text font-family="Dialog" font-size="12" x="458" y="339">
+retTy : Ty*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="222" x="454" y="358"/>
+<text font-family="Dialog" font-size="12" x="458" y="372">
+getRetTy() : Ty*</text>
 <rect fill="#ffffff" height="75" stroke="#ffffff" stroke-width="1" width="154" x="670" y="534"/>
 <rect fill="none" height="75" stroke="#000000" stroke-width="1" width="154" x="670" y="534"/>
-<text font-family="Dialog" font-size="12" x="728" y="547">
+<text font-family="Dialog" font-size="12" x="726" y="547">
 Clause</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="154" x="670" y="557"/>
 <text font-family="Dialog" font-size="12" x="674" y="571">
 typ : Ty*</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="154" x="670" y="584"/>
-<rect fill="#ffffff" height="101" stroke="#ffffff" stroke-width="1" width="93" x="270" y="678"/>
-<rect fill="none" height="101" stroke="#000000" stroke-width="1" width="93" x="270" y="678"/>
-<text font-family="Dialog" font-size="12" x="298" y="691">
+<rect fill="#ffffff" height="101" stroke="#ffffff" stroke-width="1" width="97" x="270" y="678"/>
+<rect fill="none" height="101" stroke="#000000" stroke-width="1" width="97" x="270" y="678"/>
+<text font-family="Dialog" font-size="12" x="299" y="691">
 IfThen</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="93" x="270" y="701"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="97" x="270" y="701"/>
 <text font-family="Dialog" font-size="12" x="274" y="715">
 cond : Expr*</text>
 <text font-family="Dialog" font-size="12" x="274" y="731">
 then : Clause*</text>
 <text font-family="Dialog" font-size="12" x="274" y="747">
 else : Clause*</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="93" x="270" y="757"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="97" x="270" y="757"/>
 <rect fill="#ffffff" height="113" stroke="#ffffff" stroke-width="1" width="196" x="451" y="674"/>
 <rect fill="none" height="113" stroke="#000000" stroke-width="1" width="196" x="451" y="674"/>
-<text font-family="Dialog" font-size="12" x="531" y="687">
+<text font-family="Dialog" font-size="12" x="529" y="687">
 Switch</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="196" x="451" y="697"/>
 <text font-family="Dialog" font-size="12" x="455" y="711">
@@ -55,13 +59,15 @@ args : vector&lt;Expr*&gt;</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="168" x="1005" y="724"/>
 <rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="206" x="78" y="870"/>
 <rect fill="none" height="69" stroke="#000000" stroke-width="1" width="206" x="78" y="870"/>
-<text font-family="Dialog" font-size="12" x="144" y="883">
+<text font-family="Dialog" font-size="12" x="141" y="883">
 ConstSymbol</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="206" x="78" y="893"/>
+<text font-family="Dialog" font-size="12" x="82" y="907">
+newAttr : Integer</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="206" x="78" y="917"/>
 <rect fill="#ffffff" height="117" stroke="#ffffff" stroke-width="1" width="152" x="14" y="1062"/>
 <rect fill="none" height="117" stroke="#000000" stroke-width="1" width="152" x="14" y="1062"/>
-<text font-family="Dialog" font-size="12" x="59" y="1075">
+<text font-family="Dialog" font-size="12" x="56" y="1075">
 InstSymbol</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="152" x="14" y="1085"/>
 <text font-family="Dialog" font-size="12" x="18" y="1099">
@@ -70,38 +76,40 @@ name : string</text>
 refer : BlogClass*</text>
 <text font-family="Dialog" font-size="12" x="18" y="1131">
 id : int</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="152" x="14" y="1157"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="152" x="14" y="1149"/>
 <rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="192" x="254" y="1062"/>
 <rect fill="none" height="69" stroke="#000000" stroke-width="1" width="192" x="254" y="1062"/>
-<text font-family="Dialog" font-size="12" x="332" y="1075">
+<text font-family="Dialog" font-size="12" x="331" y="1075">
 Literal</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="192" x="254" y="1085"/>
 <text font-family="Dialog" font-size="12" x="258" y="1099">
 value : Integer/double/bool</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="192" x="254" y="1109"/>
-<rect fill="#ffffff" height="109" stroke="#ffffff" stroke-width="1" width="102" x="326" y="870"/>
-<rect fill="none" height="109" stroke="#000000" stroke-width="1" width="102" x="326" y="870"/>
-<text font-family="Dialog" font-size="12" x="351" y="883">
+<rect fill="#ffffff" height="109" stroke="#ffffff" stroke-width="1" width="113" x="326" y="870"/>
+<rect fill="none" height="109" stroke="#000000" stroke-width="1" width="113" x="326" y="870"/>
+<text font-family="Dialog" font-size="12" x="355" y="883">
 VarRefer</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="102" x="326" y="893"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="326" y="893"/>
 <text font-family="Dialog" font-size="12" x="330" y="907">
 typ : Ty*</text>
 <text font-family="Dialog" font-size="12" x="330" y="923">
 name : string</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="102" x="326" y="945"/>
-<rect fill="#ffffff" height="94" stroke="#ffffff" stroke-width="1" width="177" x="454" y="878"/>
-<rect fill="none" height="94" stroke="#000000" stroke-width="1" width="177" x="454" y="878"/>
-<text font-family="Dialog" font-size="12" x="518" y="891">
-Variable</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="177" x="454" y="901"/>
-<text font-family="Dialog" font-size="12" x="458" y="915">
+<text font-family="Dialog" font-size="12" x="330" y="939">
+refer : VarDecl*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="326" y="953"/>
+<rect fill="#ffffff" height="94" stroke="#ffffff" stroke-width="1" width="177" x="910" y="1134"/>
+<rect fill="none" height="94" stroke="#000000" stroke-width="1" width="177" x="910" y="1134"/>
+<text font-family="Dialog" font-size="12" x="959" y="1147">
+VoidFuncCall</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="177" x="910" y="1157"/>
+<text font-family="Dialog" font-size="12" x="914" y="1171">
 name : string</text>
-<text font-family="Dialog" font-size="12" x="458" y="931">
+<text font-family="Dialog" font-size="12" x="914" y="1187">
 refer : BlogFunction*</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="177" x="454" y="945"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="177" x="910" y="1201"/>
 <rect fill="#ffffff" height="117" stroke="#ffffff" stroke-width="1" width="229" x="878" y="867"/>
 <rect fill="none" height="117" stroke="#000000" stroke-width="1" width="229" x="878" y="867"/>
-<text font-family="Dialog" font-size="12" x="960" y="880">
+<text font-family="Dialog" font-size="12" x="957" y="880">
 FuncionCall</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="229" x="878" y="890"/>
 <text font-family="Dialog" font-size="12" x="882" y="904">
@@ -131,15 +139,12 @@ isRand : bool</text>
 <polyline fill="none" points="86,1062 86,1030 150,1030 150,938" stroke="#333399" stroke-width="1"/>
 <polygon fill="#ffffff" points="150,938 157,950 143,950" stroke="#ffffff" stroke-width="1"/>
 <polygon fill="none" points="150,938 157,950 143,950" stroke="#333399" stroke-width="1"/>
-<polyline fill="none" points="483,878 483,839 1073,839 1073,748" stroke="#333399" stroke-width="1"/>
-<polygon fill="#ffffff" points="1073,748 1080,760 1066,760" stroke="#ffffff" stroke-width="1"/>
-<polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
 <polyline fill="none" points="958,867 958,839 1073,839 1073,748" stroke="#333399" stroke-width="1"/>
 <polygon fill="#ffffff" points="1073,748 1080,760 1066,760" stroke="#ffffff" stroke-width="1"/>
 <polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
 <rect fill="#ffffff" height="85" stroke="#ffffff" stroke-width="1" width="195" x="1122" y="867"/>
 <rect fill="none" height="85" stroke="#000000" stroke-width="1" width="195" x="1122" y="867"/>
-<text font-family="Dialog" font-size="12" x="1188" y="880">
+<text font-family="Dialog" font-size="12" x="1185" y="880">
 Distrbution</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="195" x="1122" y="890"/>
 <text font-family="Dialog" font-size="12" x="1126" y="904">
@@ -176,7 +181,7 @@ refer : Ty*</text>
 <polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
 <rect fill="#ffffff" height="70" stroke="#ffffff" stroke-width="1" width="147" x="1693" y="867"/>
 <rect fill="none" height="70" stroke="#000000" stroke-width="1" width="147" x="1693" y="867"/>
-<text font-family="Dialog" font-size="12" x="1758" y="880">
+<text font-family="Dialog" font-size="12" x="1756" y="880">
 Set</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="147" x="1693" y="890"/>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="147" x="1693" y="913"/>
@@ -185,7 +190,7 @@ Set</text>
 <polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
 <rect fill="#ffffff" height="85" stroke="#ffffff" stroke-width="1" width="270" x="1854" y="870"/>
 <rect fill="none" height="85" stroke="#000000" stroke-width="1" width="270" x="1854" y="870"/>
-<text font-family="Dialog" font-size="12" x="1957" y="883">
+<text font-family="Dialog" font-size="12" x="1955" y="883">
 QuanfForm</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="270" x="1854" y="893"/>
 <text font-family="Dialog" font-size="12" x="1858" y="907">
@@ -195,7 +200,7 @@ var : VarRefer*</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="270" x="1854" y="933"/>
 <rect fill="#ffffff" height="151" stroke="#ffffff" stroke-width="1" width="364" x="62" y="230"/>
 <rect fill="none" height="151" stroke="#000000" stroke-width="1" width="364" x="62" y="230"/>
-<text font-family="Dialog" font-size="12" x="217" y="243">
+<text font-family="Dialog" font-size="12" x="214" y="243">
 BlogClass</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="364" x="62" y="253"/>
 <text font-family="Dialog" font-size="12" x="66" y="267">
@@ -205,11 +210,11 @@ generator : vector&lt;NumStmt*&gt;</text>
 <text font-family="Dialog" font-size="12" x="66" y="299">
 prelen : int</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="364" x="62" y="334"/>
-<rect fill="#ffffff" height="132" stroke="#ffffff" stroke-width="1" width="154" x="318" y="454"/>
-<rect fill="none" height="132" stroke="#000000" stroke-width="1" width="154" x="318" y="454"/>
-<text font-family="Dialog" font-size="12" x="346" y="467">
+<rect fill="#ffffff" height="132" stroke="#ffffff" stroke-width="1" width="161" x="318" y="454"/>
+<rect fill="none" height="132" stroke="#000000" stroke-width="1" width="161" x="318" y="454"/>
+<text font-family="Dialog" font-size="12" x="344" y="467">
 NumberStmtFunc</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="154" x="318" y="477"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="161" x="318" y="477"/>
 <text font-family="Dialog" font-size="12" x="322" y="491">
 name : string</text>
 <text font-family="Dialog" font-size="12" x="322" y="507">
@@ -218,10 +223,12 @@ refer : BlogClass*</text>
 args : vector&lt;VarDecl*&gt;</text>
 <text font-family="Dialog" font-size="12" x="322" y="539">
 body : Clause*</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="154" x="318" y="556"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="161" x="318" y="555"/>
+<text font-family="Dialog" font-size="12" x="322" y="569">
+getRetTy() : Ty*</text>
 <rect fill="#ffffff" height="173" stroke="#ffffff" stroke-width="1" width="278" x="848" y="54"/>
 <rect fill="none" height="173" stroke="#000000" stroke-width="1" width="278" x="848" y="54"/>
-<text font-family="Dialog" font-size="12" x="957" y="67">
+<text font-family="Dialog" font-size="12" x="955" y="67">
 BlogModel</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="278" x="848" y="77"/>
 <text font-family="Dialog" font-size="12" x="852" y="91">
@@ -241,7 +248,7 @@ symbols : map</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="278" x="848" y="201"/>
 <rect fill="#ffffff" height="94" stroke="#ffffff" stroke-width="1" width="95" x="758" y="406"/>
 <rect fill="none" height="94" stroke="#000000" stroke-width="1" width="95" x="758" y="406"/>
-<text font-family="Dialog" font-size="12" x="783" y="419">
+<text font-family="Dialog" font-size="12" x="781" y="419">
 VarDecl</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="95" x="758" y="429"/>
 <text font-family="Dialog" font-size="12" x="762" y="443">
@@ -267,12 +274,12 @@ var : string</text>
 <polyline fill="none" points="675,391 758,406" stroke="#000000" stroke-width="1"/>
 <polygon fill="#ffffff" points="675,391 685,387 694,394 683,397" stroke="#ffffff" stroke-width="1"/>
 <polygon fill="none" points="675,391 685,387 694,394 683,397" stroke="#000000" stroke-width="1"/>
-<polyline fill="none" points="471,499 758,499" stroke="#000000" stroke-width="1"/>
-<polygon fill="#ffffff" points="471,499 481,494 491,499 481,504" stroke="#ffffff" stroke-width="1"/>
-<polygon fill="none" points="471,499 481,494 491,499 481,504" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="478,499 758,499" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="478,499 488,494 498,499 488,504" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="478,499 488,494 498,499 488,504" stroke="#000000" stroke-width="1"/>
 <rect fill="#ffffff" height="85" stroke="#ffffff" stroke-width="1" width="113" x="1406" y="414"/>
 <rect fill="none" height="85" stroke="#000000" stroke-width="1" width="113" x="1406" y="414"/>
-<text font-family="Dialog" font-size="12" x="1437" y="427">
+<text font-family="Dialog" font-size="12" x="1434" y="427">
 Evidence</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="1406" y="437"/>
 <text font-family="Dialog" font-size="12" x="1410" y="451">
@@ -285,7 +292,7 @@ right : Expr*</text>
 <polygon fill="none" points="1125,226 1136,227 1141,237 1130,235" stroke="#000000" stroke-width="1"/>
 <rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="113" x="1422" y="286"/>
 <rect fill="none" height="69" stroke="#000000" stroke-width="1" width="113" x="1422" y="286"/>
-<text font-family="Dialog" font-size="12" x="1461" y="299">
+<text font-family="Dialog" font-size="12" x="1460" y="299">
 Query</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="1422" y="309"/>
 <text font-family="Dialog" font-size="12" x="1426" y="323">
@@ -296,24 +303,24 @@ var : VarRefer*</text>
 <polygon fill="none" points="1125,226 1135,223 1144,229 1133,232" stroke="#000000" stroke-width="1"/>
 <rect fill="#ffffff" height="85" stroke="#ffffff" stroke-width="1" width="104" x="390" y="14"/>
 <rect fill="none" height="85" stroke="#000000" stroke-width="1" width="104" x="390" y="14"/>
-<text font-family="Dialog" font-size="12" x="410" y="27">
+<text font-family="Dialog" font-size="12" x="409" y="27">
 PrimitiveTy</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="104" x="390" y="37"/>
 <text font-family="Dialog" font-size="12" x="394" y="51">
 name : string</text>
 <rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="104" x="390" y="69"/>
-<rect fill="#ffffff" height="101" stroke="#ffffff" stroke-width="1" width="112" x="238" y="94"/>
-<rect fill="none" height="101" stroke="#000000" stroke-width="1" width="112" x="238" y="94"/>
-<text font-family="Dialog" font-size="12" x="271" y="107">
+<rect fill="#ffffff" height="101" stroke="#ffffff" stroke-width="1" width="118" x="238" y="94"/>
+<rect fill="none" height="101" stroke="#000000" stroke-width="1" width="118" x="238" y="94"/>
+<text font-family="Dialog" font-size="12" x="274" y="107">
 ArrayTy</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="112" x="238" y="117"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="118" x="238" y="117"/>
 <text font-family="Dialog" font-size="12" x="242" y="131">
 ty : PrimitiveTy</text>
 <text font-family="Dialog" font-size="12" x="242" y="147">
 dim : int</text>
 <text font-family="Dialog" font-size="12" x="242" y="163">
 size : vector&lt;int&gt;</text>
-<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="112" x="238" y="173"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="118" x="238" y="173"/>
 <rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="104" x="62" y="30"/>
 <rect fill="none" height="69" stroke="#000000" stroke-width="1" width="104" x="62" y="30"/>
 <text font-family="Dialog" font-size="12" x="107" y="43">
@@ -332,4 +339,7 @@ Ty</text>
 <polyline fill="none" points="326,380 326,454" stroke="#000000" stroke-width="1"/>
 <polygon fill="#ffffff" points="326,380 331,390 326,400 321,390" stroke="#ffffff" stroke-width="1"/>
 <polygon fill="none" points="326,380 331,390 326,400 321,390" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="998,1134 998,983" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="998,983 1005,995 991,995" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="998,983 1005,995 991,995" stroke="#000000" stroke-width="1"/>
 </svg>
