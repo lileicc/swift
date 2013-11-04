@@ -34,19 +34,23 @@ void Semant::processTypes(absyn::BlogProgram* prog) {
 }
 
 void Semant::transTyDecl(absyn::TypDecl* td) {
-  if (! tyFactory.addNameTy(td->get().getValue())) {
+  if (!tyFactory.addNameTy(td->get().getValue())) {
 
   }
 }
-  
-void Semant::transExpr(absyn::Expr *expr){
+
+void Semant::transExpr(absyn::Expr *expr) {
   //TODO
-    
+
 }
 
-  void Semant::transExpr(absyn::OpExpr* expr){
-    //TODO
-  }
+void Semant::transExpr(absyn::OpExpr* expr) {
+  //TODO
+}
+
+void Semant::error(int line, int col, std::string info) {
+  errorMsg.error(line, col, info);
+}
 
 }
 } /* namespace swift */
