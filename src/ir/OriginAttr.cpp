@@ -9,12 +9,24 @@ OriginAttr::OriginAttr(std::string name, Ty* ty, TypeDomain* src, int id)
 OriginAttr::~OriginAttr() {
 }
 
-std::string& OriginAttr::getName() {
+const std::string& OriginAttr::getName() {
   return name;
 }
 
 Ty* OriginAttr::getTyp() {
   return typ;
+}
+
+TypeDomain* OriginAttr::getSrc()  {
+  return src;
+}
+
+void OriginAttr::setID(int k) {
+  id = k;
+}
+
+int OriginAttr::getID() {
+  return id;
 }
 
 }

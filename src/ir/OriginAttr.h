@@ -13,11 +13,12 @@ class OriginAttr {
   Ty* typ;
   TypeDomain* src;
 public:
-  OriginAttr(std::string name, Ty* ty, TypeDomain* src, int id);
+  OriginAttr(std::string name, Ty* ty, TypeDomain* src);
   virtual ~OriginAttr();
 
-  std::string& getName();
+  const std::string& getName();
   Ty* getTyp();
+  void setID(int k);
   int getID();
   TypeDomain* getSrc();
 };

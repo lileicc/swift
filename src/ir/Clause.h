@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include "Type.h"
+#include "Ty.h"
 
 namespace swift {
 namespace ir {
@@ -15,9 +15,9 @@ class Clause {
 public:
   Clause();
   virtual ~Clause();
-  void setType(Type* ty);
+  void setType(Ty* ty);
 private:
-  Type* ty;
+  Ty* ty;
 };
 
 }

@@ -8,7 +8,7 @@ namespace swift { namespace ir {
 class NameTy :public swift::ir::Ty {
   TypeDomain* refer;
 public:
-  NameTy(IRConstant typ, TypeDomain* refer);
+  NameTy(TypeDomain* refer);
   virtual ~NameTy();
 
   TypeDomain* getRefer();

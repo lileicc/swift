@@ -12,7 +12,7 @@ Clause::Clause() {
 
 }
 
-void Clause::setType(Type* ty) {
+void Clause::setType(Ty* ty) {
   this->ty = ty;
 }
 
