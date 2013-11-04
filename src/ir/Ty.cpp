@@ -4,11 +4,15 @@
  *  Created on: Nov 2, 2013
  *      Author: leili
  */
-#include "Type.h"
+#include "Ty.h"
 namespace swift {
 namespace ir {
-Type::Type() {
+Ty::Ty(IRConstant typ)
+  :typ(typ) {
+}
 
+IRConstant Ty::getTyp() {
+  return typ;
 }
 
 }

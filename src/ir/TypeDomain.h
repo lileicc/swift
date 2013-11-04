@@ -1,19 +1,19 @@
 /*
- * PrimTy.h
+ * TypeDomain.h
  *
  *  Created on: Nov 2, 2013
- *      Author: leili
+ *      Author: yiwu
  */
 
 #pragma once
 #include <string>
-#include "Type.h"
+#include <vector>
+
+#include "Ty.h"
 namespace swift {
 namespace ir {
-class PrimTy: public Type {
+class TypeDomain{
 public:
-  PrimTy();
-  ~PrimTy();
   std::string name;
 };
 }
