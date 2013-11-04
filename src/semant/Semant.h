@@ -26,7 +26,7 @@ private:
   void transExpr(absyn::OpExpr* expr);
   void transExpr(absyn::FuncApp* expr);
   void transTyDecl(absyn::TypDecl* td);
-  void error(int line, int col, std::string info);
+  void error(int line, int col, const std::string & info);
   TypeFactory tyFactory;
   msg::ErrorMsg errorMsg(stdout);
 };

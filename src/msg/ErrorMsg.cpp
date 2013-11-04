@@ -19,7 +19,7 @@ ErrorMsg::~ErrorMsg() {
   // TODO Auto-generated destructor stub
 }
 
-void ErrorMsg::error(int line, int col, std::string info) {
+void ErrorMsg::error(int line, int col, const std::string & info) {
   fprintf(file, "Error: line=%d, col=%d: %s\n", line, col, info.c_str());
   numError++;
 }

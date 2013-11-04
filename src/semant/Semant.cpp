@@ -48,7 +48,7 @@ void Semant::transExpr(absyn::OpExpr* expr) {
   //TODO
 }
 
-void Semant::error(int line, int col, std::string info) {
+void Semant::error(int line, int col, const std::string& info) {
   errorMsg.error(line, col, info);
 }
 

@@ -16,7 +16,7 @@ class ErrorMsg {
 public:
   ErrorMsg(FILE* file);
   ~ErrorMsg();
-  void error(int line, int col, std::string info);
+  void error(int line, int col, const std::string & info);
 private:
   FILE* file;
   int numError;
