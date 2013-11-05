@@ -37,6 +37,7 @@ void Semant::processDeclarations(absyn::BlogProgram* prog) {
     dd = dynamic_cast<absyn::DistinctDecl*>(st);
     if (dd != NULL) { // it is distinct declaration
       transDistinctDecl(dd);
+      continue;
     }
   }
 }
@@ -50,7 +51,10 @@ void Semant::transTyDecl(absyn::TypDecl* td) {
 
 void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
   // TODO
+
 }
+
+
 
 
 void Semant::transExpr(absyn::Expr *expr) {
