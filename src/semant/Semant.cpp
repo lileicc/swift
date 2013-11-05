@@ -108,7 +108,7 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
 }
 
 void Semant::transFuncDecl(absyn::FuncDecl* fd) {
-
+  fd->getRetTyp();
 }
 
 void Semant::transOriginDecl(absyn::OriginDecl* od) {

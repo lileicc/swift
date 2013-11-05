@@ -90,6 +90,7 @@ private:
 
   void error(int line, int col, const std::string & info);
   fabrica::TypeFactory tyFactory;
+  fabrica::Functory functory;
   msg::ErrorMsg errorMsg;
 };
 
