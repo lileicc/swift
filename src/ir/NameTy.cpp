@@ -15,5 +15,9 @@ TypeDomain* NameTy::getRefer() {
   return refer;
 }
 
+std::string NameTy::toString() {
+  return refer->getName();
+}
+
 }
 }

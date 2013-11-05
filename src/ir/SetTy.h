@@ -12,6 +12,8 @@ public:
 
   Ty* getRefer();
 
+  virtual std::string toString();
+
 private:
   Ty* refer;
 };

@@ -17,10 +17,13 @@ public:
   Clause* getBody();
   void setBody(Clause* b);
   size_t argSize();
+  void addArg(VarDecl* v);
   VarDecl* getArg(int k);
   const std::vector<VarDecl*>& getArgs();
   bool isRand();
   bool isFixed();
+
+  std::string toSignature();
 
 private:
   std::string name;

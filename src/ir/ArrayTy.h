@@ -19,6 +19,8 @@ public:
   void addDim(int d);
   const std::vector<int>& getAllDim();
 
+  virtual std::string toString();
+
 private:
   std::vector<int> size;
   Ty* base;
