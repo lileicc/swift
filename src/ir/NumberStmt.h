@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-
+#include <string>
 #include "IRForwardDecl.h"
 
 namespace swift { namespace ir {

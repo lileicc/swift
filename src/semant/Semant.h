@@ -7,9 +7,11 @@
 
 #pragma once
 #include <cstdio>
+#include <string>
 #include "../absyn/BlogProgram.h"
 #include "../msg/ErrorMsg.h"
 #include "../fabrica/TypeFactory.h"
+#include "../fabrica/Functory.h"
 
 namespace swift {
 namespace semant {
