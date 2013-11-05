@@ -44,7 +44,7 @@ void Semant::processDeclarations(absyn::BlogProgram* prog) {
     }
 
     fd = dynamic_cast<absyn::FuncDecl*>(st);
-    if (fd != NULL) {// it is function declaration
+    if (fd != NULL) { // it is function declaration
       transFuncDecl(fd);
       continue;
     }
@@ -62,7 +62,7 @@ void Semant::processBodies(absyn::BlogProgram* prog) {
   absyn::NumStDecl* nd;
   for (auto st : prog->getAll()) {
     fd = dynamic_cast<absyn::FuncDecl*>(st);
-    if (fd != NULL) {// it is function declaration
+    if (fd != NULL) { // it is function declaration
       transFuncBody(fd);
       continue;
     }
@@ -78,7 +78,6 @@ void Semant::processBodies(absyn::BlogProgram* prog) {
   }
 }
 
-
 void Semant::transTyDecl(absyn::TypDecl* td) {
   if (!tyFactory.addNameTy(td->get().getValue())) {
     error(td->line, td->col,
@@ -87,15 +86,32 @@ void Semant::transTyDecl(absyn::TypDecl* td) {
 }
 
 void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
-  // TODO
+  ir::NameTy* nt = lookupNameTy(dd->getTyp().getValue());
+  if (nt != NULL) {
+    for (size_t i = 0; i < dd->size(); i++) {
+      const std::string& name = dd->getVar(i);
+      int k = dd->getLen(i);
+      if (k == 1) {
+        if (!tyFactory.addInstSymbol(nt, name)) {
+          error(dd->line, dd->col, "Symbol " + name + " already defined");
+        }
+      } else {
+        for (int j = 0; j < k; j++) {
+          if (!tyFactory.addInstSymbol(nt, arrayRefToString(name, j))) {
+            error(dd->line, dd->col,
+                "Symbol " + name + "[" + j + "] already defined");
+          }
+        }
+      }
+    }
+  }
+}
+
+void Semant::transFuncDecl(absyn::FuncDecl* fd) {
 
 }
 
-void Semant::transFuncDecl(absyn::FuncDecl* fd){
-  //TODO
-}
-
-void Semant::transOriginDecl(absyn::OriginDecl* od){
+void Semant::transOriginDecl(absyn::OriginDecl* od) {
   //TODO
 }
 
@@ -116,9 +132,12 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
   //TODO
 }
 
-
 void Semant::error(int line, int col, const std::string& info) {
   errorMsg.error(line, col, info);
+}
+
+static std::string Semant::arrayRefToString(const std::string & name, int idx) {
+  return name + "[" + idx + "]";
 }
 
 }
