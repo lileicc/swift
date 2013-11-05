@@ -8,7 +8,7 @@ enum class IRConstant {
   NA,
   // Type: for class Ty
   BOOL, INT, DOUBLE, STRING,
-  NAMETY, ARRAY, MAP,
+  NAMETY, ARRAY, MAP, SET,
   // Function Category: for FunctionDefn
   FIXED, RANDOM, ORIGIN,
   // Constant Symbol Category: for ConstSymbol
@@ -19,7 +19,9 @@ enum class IRConstant {
   AND, OR, NOT, IMPLY,
   SUB,
   // Quantified Formula: For QuantForm
-  FORALL, EXISTS
+  FORALL, EXISTS,
+  // Set Type: for SetExpr
+  LISTSET, CONDSET
 };
 
 }
