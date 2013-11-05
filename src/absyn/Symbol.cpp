@@ -17,7 +17,7 @@ Symbol::Symbol(std::string v) :
 Symbol::~Symbol() {
 }
 
-const std::string& Symbol::getValue() {
+const std::string& Symbol::getValue() const {
   return value;
 }
 

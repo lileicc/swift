@@ -17,7 +17,7 @@ TypDecl::TypDecl(int l, int c, Symbol arg) :
 TypDecl::~TypDecl() {
 }
 
-Symbol& TypDecl::get() {
+const Symbol& TypDecl::get() {
   return arg;
 }
 

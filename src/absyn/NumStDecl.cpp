@@ -19,7 +19,7 @@ NumStDecl::~NumStDecl() {
     delete expr;
 }
 
-Symbol& NumStDecl::getTyp() {
+const Symbol& NumStDecl::getTyp() {
   return typ;
 }
 
@@ -31,11 +31,11 @@ size_t NumStDecl::argSize() {
   return origin.size();
 }
 
-Symbol& NumStDecl::getArgOrigin(int k) {
+const Symbol& NumStDecl::getArgOrigin(int k) {
   return origin[k];
 }
 
-Symbol& NumStDecl::getArgVar(int k) {
+const Symbol& NumStDecl::getArgVar(int k) {
   return var[k];
 }
 

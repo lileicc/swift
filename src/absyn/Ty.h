@@ -20,7 +20,7 @@ public:
   Ty(Symbol typ, int dim = 0);
   virtual ~Ty();
 
-  Symbol& getTyp();
+  const Symbol& getTyp() const;
   int getDim();
 
   // For Debugging Use

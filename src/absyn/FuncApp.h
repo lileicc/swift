@@ -19,7 +19,7 @@ public:
   FuncApp(int l, int c, Symbol func);
   virtual ~FuncApp();
 
-  Symbol& getFuncName();
+  const Symbol& getFuncName();
 
   // For Debugging Use
   void print(FILE* file, int indent);

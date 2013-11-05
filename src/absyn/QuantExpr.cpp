@@ -22,7 +22,7 @@ AbsynConstant QuantExpr::getTyp() {
   return typ;
 }
 
-VarDecl& QuantExpr::getVar() {
+const VarDecl& QuantExpr::getVar() {
   return var;
 }
 

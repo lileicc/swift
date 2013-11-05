@@ -22,7 +22,7 @@ public:
   virtual ~QuantExpr();
 
   AbsynConstant getTyp();
-  VarDecl& getVar();
+  const VarDecl& getVar();
   Expr* getCond();
 
   // For Debugging Use

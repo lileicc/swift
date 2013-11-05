@@ -18,7 +18,7 @@ public:
   Symbol(std::string v = "");
   ~Symbol();
 
-  const std::string& getValue();
+  const std::string& getValue() const;
 };
 
 }

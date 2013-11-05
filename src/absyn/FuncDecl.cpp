@@ -19,11 +19,11 @@ FuncDecl::~FuncDecl() {
     delete expr;
 }
 
-Ty& FuncDecl::getRetTyp() {
+const Ty& FuncDecl::getRetTyp() {
   return typ;
 }
 
-Symbol& FuncDecl::getFuncName() {
+const Symbol& FuncDecl::getFuncName() {
   return func;
 }
 
@@ -39,7 +39,7 @@ size_t FuncDecl::argSize() {
   return args.size();
 }
 
-VarDecl& FuncDecl::getArg(int k) {
+const VarDecl& FuncDecl::getArg(int k) {
   return args[k];
 }
 
