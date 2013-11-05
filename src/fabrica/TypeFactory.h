@@ -39,8 +39,15 @@ public:
    *   true if succeed
    */
   bool addInstSymbol(ir::NameTy* typ, const std::string& name);
+
+  /**
+   * get the instance symbol for a given name
+   * return NULL if not found
+   */
+  ir::InstSymbol* getInstSymbol(const std::string& name);
 private:
   std::map<std::string, ir::Ty*> tyTable;
+  std::map<std::string, ir::InstSymbol*> instanceTable;
 };
 
 }

@@ -32,10 +32,20 @@ ir::NameTy* TypeFactory::getNameTy(const std::string& name) {
 }
 
 bool TypeFactory::addInstSymbol(ir::NameTy* typ, const std::string& name) {
-  //TODO
-  return false;
+  if (instanceTable.find(name) != instanceTable.end()) return false;
+  ir::TypeDomain* tydo = typ->getRefer();
+  int sz = tydo->getPreLen();
+  instanceTable[name] = new ir::InstSymbol(tydo, sz);
+  tydo->setPreLen(++sz);
+  return true;
 }
 
+ir::InstSymbol* TypeFactory::getInstSymbol(const std::string& name) {
+  auto element = instanceTable.find(name);
+  if (element == instanceTable.end())
+    return NULL;
+  return element->second;
+}
 
 }
 } /* namespace swift */
