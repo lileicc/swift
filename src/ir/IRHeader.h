@@ -4,6 +4,7 @@
 #include <cstdio>
 
 #include "ArrayTy.h"
+#include "BlogModel.h"
 #include "BoolLiteral.h"
 #include "Branch.h"
 #include "CardExpr.h"
@@ -30,6 +31,7 @@
 #include "OriginAttr.h"
 #include "OriginRefer.h"
 #include "QuantForm.h"
+#include "Query.h"
 #include "SetExpr.h"
 #include "SetTy.h"
 #include "StringLiteral.h"

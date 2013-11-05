@@ -32,6 +32,7 @@ class OprExpr;
 class OriginAttr;
 class OriginRefer;
 class QuantForm;
+class Query;
 class SetTy;
 class SetExpr;
 class StringLiteral;
