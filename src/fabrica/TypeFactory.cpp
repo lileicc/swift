@@ -8,7 +8,7 @@
 #include "TypeFactory.h"
 
 namespace swift {
-namespace semant {
+namespace fabrica {
 TypeFactory::TypeFactory() {
   // TODO Auto-generated constructor stub
 

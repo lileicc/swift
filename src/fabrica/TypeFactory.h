@@ -13,9 +13,9 @@
 #include "../ir/NameTy.h"
 
 namespace swift {
-namespace semant{
+namespace fabrica{
 
-class TypeFactory {
+class TypeFactory{
 public:
   TypeFactory();
   ~TypeFactory();
