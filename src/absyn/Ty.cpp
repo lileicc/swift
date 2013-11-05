@@ -17,7 +17,7 @@ Ty::Ty(Symbol typ, int dim) :
 Ty::~Ty() {
 }
 
-Symbol& Ty::getTyp() {
+const Symbol& Ty::getTyp() const {
   return typ;
 }
 

@@ -21,7 +21,7 @@ public:
   TypDecl(int l, int c, Symbol arg);
   virtual ~TypDecl();
 
-  Symbol& get();
+  const Symbol& get();
 
   // For Debugging Use
   void print(FILE* file, int indent);

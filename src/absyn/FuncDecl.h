@@ -29,13 +29,13 @@ public:
   FuncDecl(int l, int c, bool random, Ty typ, Symbol func, Expr* expr);
   virtual ~FuncDecl();
 
-  Ty& getRetTyp();
-  Symbol& getFuncName();
+  const Ty& getRetTyp();
+  const Symbol& getFuncName();
   Expr* getExpr();
   bool isRandom();
   size_t argSize();
   void addArg(VarDecl var);
-  VarDecl& getArg(int k);
+  const VarDecl& getArg(int k);
 
   // For Debugging Use
   void print(FILE* file, int indent);

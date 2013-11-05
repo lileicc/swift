@@ -89,7 +89,7 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
   ir::NameTy* nt = lookupNameTy(dd->getTyp().getValue());
   if (nt != NULL) {
     for (size_t i = 0; i < dd->size(); i++) {
-      const std::string& name = dd->getVar(i);
+      const std::string& name = dd->getVar(i).getValue();
       int k = dd->getLen(i);
       if (k == 1) {
         if (!tyFactory.addInstSymbol(nt, name)) {
@@ -99,7 +99,7 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
         for (int j = 0; j < k; j++) {
           if (!tyFactory.addInstSymbol(nt, arrayRefToString(name, j))) {
             error(dd->line, dd->col,
-                "Symbol " + name + "[" + j + "] already defined");
+                "Symbol " + name + "[" + std::to_string(j) + "] already defined");
           }
         }
       }
@@ -136,8 +136,12 @@ void Semant::error(int line, int col, const std::string& info) {
   errorMsg.error(line, col, info);
 }
 
-static std::string Semant::arrayRefToString(const std::string & name, int idx) {
-  return name + "[" + idx + "]";
+ir::NameTy* Semant::lookupNameTy(const std::string & name) {
+  return tyFactory.getNameTy(name);
+}
+
+std::string Semant::arrayRefToString(const std::string & name, int idx) {
+  return name + "[" + std::to_string(idx) + "]";
 }
 
 }

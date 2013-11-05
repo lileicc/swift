@@ -14,5 +14,9 @@ Ty* SetTy::getRefer() {
   return refer;
 }
 
+std::string SetTy::toString() {
+  return std::string("set<") + (refer == NULL ? "NULL" : refer->toString()) + ">";
+}
+
 }
 }

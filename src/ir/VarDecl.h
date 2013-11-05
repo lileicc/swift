@@ -14,6 +14,8 @@ public:
   Ty* getTyp();
   const std::string& getVar();
 
+  virtual std::string toString();
+
 private:
   std::string var;
   Ty* typ;

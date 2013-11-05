@@ -7,18 +7,24 @@
 
 #pragma once
 
+#include <string>
+
 #include "IRConst.h"
 #include "IRForwardDecl.h"
 
 namespace swift {
 namespace ir {
 class Ty {
-  IRConstant typ;
 public:
   Ty(IRConstant typ = IRConstant::NA);
   virtual ~Ty();
 
   IRConstant getTyp();
+
+  virtual std::string toString();
+
+private:
+  IRConstant typ;
 };
 }
 }

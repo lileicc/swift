@@ -19,7 +19,7 @@ public:
   VarRef(int l, int c, Symbol var);
   virtual ~VarRef();
 
-  Symbol& getVar();
+  const Symbol& getVar();
 
   // For Debugging Use
   void print(FILE* file, int indent);

@@ -12,6 +12,8 @@ public:
 
   TypeDomain* getRefer();
 
+  virtual std::string toString();
+
 private:
   TypeDomain* refer;
 };

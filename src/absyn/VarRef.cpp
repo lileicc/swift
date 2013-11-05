@@ -17,7 +17,7 @@ VarRef::VarRef(int l, int c, Symbol var) :
 VarRef::~VarRef() {
 }
 
-Symbol& VarRef::getVar() {
+const Symbol& VarRef::getVar() {
   return var;
 }
 

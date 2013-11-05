@@ -25,8 +25,8 @@ public:
   VarDecl(int l, int c, Ty typ, Symbol var = Symbol());
   virtual ~VarDecl();
 
-  Ty& getTyp();
-  Symbol& getVar();
+  const Ty& getTyp() const;
+  const Symbol& getVar() const;
 
   //For Debugging Use
   void print(FILE *file, int indent);

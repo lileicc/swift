@@ -19,7 +19,7 @@ public:
   DistrExpr(int l, int c, Symbol distr);
   virtual ~DistrExpr();
 
-  Symbol& getDistrName();
+  const Symbol& getDistrName();
 
   // For Debugging Use
   void print(FILE* file, int indent);

@@ -1,5 +1,8 @@
 #include "FuncDefn.h"
 
+#include "Ty.h"
+#include "VarDecl.h"
+
 namespace swift { namespace ir {
  
 FuncDefn::FuncDefn(bool isrand, const std::string& name, Ty* retTyp)
@@ -29,6 +32,10 @@ size_t FuncDefn::argSize() {
   return args.size();
 }
 
+void FuncDefn::addArg(VarDecl* v) {
+  args.push_back(v);
+}
+
 VarDecl* FuncDefn::getArg(int k) {
   return args[k];
 }
@@ -43,6 +50,20 @@ bool FuncDefn::isRand() {
 
 bool FuncDefn::isFixed() {
   return !isrand;
+}
+
+std::string FuncDefn::toSignature() {
+  std::string ret;
+  ret.append(retTyp == NULL ? "NULL" : retTyp->toString());
+  ret.push_back(' ');
+  ret.append(name);
+  ret.push_back('(');
+  for (size_t i = 0; i < args.size(); i++)  {
+    if (i > 0) ret.push_back(',');
+    ret.append(args[i]->toString());
+  }
+  ret.push_back(')');
+  return ret;
 }
 
 }

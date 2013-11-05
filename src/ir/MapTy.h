@@ -14,6 +14,8 @@ public:
   Ty* getFrom();
   Ty* getTo();
 
+  virtual std::string toString();
+
 private:
   Ty* from;
   Ty* to;
