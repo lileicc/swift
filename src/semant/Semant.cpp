@@ -136,6 +136,10 @@ void Semant::error(int line, int col, const std::string& info) {
   errorMsg.error(line, col, info);
 }
 
+ir::NameTy* Semant::lookupNameTy(const std::string & name) {
+  return tyFactory.getNameTy(name);
+}
+
 std::string Semant::arrayRefToString(const std::string & name, int idx) {
   return name + "[" + std::to_string(idx) + "]";
 }
