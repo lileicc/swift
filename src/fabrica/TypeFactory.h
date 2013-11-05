@@ -10,6 +10,7 @@
 #include <map>
 #include "../ir/Ty.h"
 #include "../ir/TypeDomain.h"
+#include "../ir/InstSymbol.h"
 #include "../ir/NameTy.h"
 
 namespace swift {
@@ -46,8 +47,8 @@ public:
    */
   ir::InstSymbol* getInstSymbol(const std::string& name);
 private:
-  std::map<std::string, ir::Ty*> tyTable;
-  std::map<std::string, ir::InstSymbol*> instanceTable;
+  std::map<std::string, ir::Ty*> tyTable;//mapping from name to a declared type
+  std::map<std::string, ir::InstSymbol*> instanceTable; //mapping from name to distinct instance symbol
 };
 
 }
