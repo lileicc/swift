@@ -166,8 +166,8 @@ const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
 }
 
 const ir::VarDecl* Semant::transVarDecl(const absyn::VarDecl & vd) {
-  // TODO
-  return NULL;
+  const ir::Ty* ty = transTy(vd.getTyp());
+  return new ir::VarDecl(ty, vd.getVar().getValue());
 }
 
 void Semant::error(int line, int col, const std::string& info) {
