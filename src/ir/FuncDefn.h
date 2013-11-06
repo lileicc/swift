@@ -9,26 +9,26 @@ namespace swift { namespace ir {
 
 class FuncDefn {
 public:
-  FuncDefn(bool isrand, const std::string& name, Ty* retTyp);
+  FuncDefn(bool isrand, const std::string& name, const Ty* retTyp);
   virtual ~FuncDefn();
 
-  Ty* getRetTyp();
-  const std::string& getName();
-  Clause* getBody();
+  const Ty* getRetTyp() const;
+  const std::string& getName() const;
+  Clause* getBody() const;
   void setBody(Clause* b);
-  size_t argSize();
+  size_t argSize() const;
   void addArg(VarDecl* v);
-  VarDecl* getArg(int k);
-  const std::vector<VarDecl*>& getArgs();
-  bool isRand();
-  bool isFixed();
+  const VarDecl* getArg(int k) const;
+  const std::vector<VarDecl*>& getArgs() const;
+  bool isRand() const;
+  bool isFixed() const;
 
-  std::string toSignature();
+  std::string toSignature() const;
 
 private:
   std::string name;
   std::vector<VarDecl*> args;
-  Ty* retTyp;
+  const Ty* retTyp;
   bool isrand;
   Clause* body;
 };

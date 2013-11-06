@@ -21,7 +21,7 @@ IRConstant Ty::getTyp() {
   return typ;
 }
 
-std::string Ty::toString() {
+std::string Ty::toString() const {
   // Type: for class Ty
   switch (typ) {
   case IRConstant::BOOL: return std::string("Bool");

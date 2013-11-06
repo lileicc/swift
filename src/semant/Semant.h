@@ -79,16 +79,26 @@ private:
   void transNumSt(absyn::NumStDecl* nd);
 
   /**
+   * translate the type in abstract syntax to intermediate representation
+   */
+  const ir::Ty* transTy(const absyn::Ty & typ);
+
+  /**
+   * translate the variable declaration, which can be defined in
+   * function header or quantified formula
+   */
+  const ir::VarDecl* transVarDecl(const absyn::VarDecl & vd);
+
+  /**
    * lookup the nametype in tyFactory, if not exist, produce an error
    * return the found NameTy or NULL
    */
-  ir::NameTy* lookupNameTy(const std::string & name);
+  const ir::NameTy* lookupNameTy(const std::string & name);
 
   /**
    * translate the array reference to string representation
    */
-  static std::string arrayRefToString(const std::string & name,
-      int idx);
+  static std::string arrayRefToString(const std::string & name, int idx);
 
   void error(int line, int col, const std::string & info);
   fabrica::TypeFactory tyFactory;

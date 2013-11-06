@@ -21,7 +21,7 @@ public:
 
   IRConstant getTyp();
 
-  virtual std::string toString();
+  virtual std::string toString() const;
 
 private:
   IRConstant typ;

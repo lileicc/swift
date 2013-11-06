@@ -86,7 +86,7 @@ void Semant::transTyDecl(absyn::TypDecl* td) {
 }
 
 void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
-  ir::NameTy* nt = lookupNameTy(dd->getTyp().getValue());
+  ir::NameTy const* nt = lookupNameTy(dd->getTyp().getValue());
   if (nt != NULL) {
     for (size_t i = 0; i < dd->size(); i++) {
       const std::string& name = dd->getVar(i).getValue();
@@ -99,7 +99,8 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
         for (int j = 0; j < k; j++) {
           if (!tyFactory.addInstSymbol(nt, arrayRefToString(name, j))) {
             error(dd->line, dd->col,
-                "Symbol " + name + "[" + std::to_string(j) + "] already defined");
+                "Symbol " + name + "[" + std::to_string(j)
+                    + "] already defined");
           }
         }
       }
@@ -108,7 +109,16 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
 }
 
 void Semant::transFuncDecl(absyn::FuncDecl* fd) {
-  fd->getRetTyp();
+  const ir::Ty* rettyp = transTy(fd->getRetTyp());
+  const std::string& name = fd->getFuncName().getValue();
+  std::vector<const ir::VarDecl*> vds;
+  for (size_t i = 0; i < fd->argSize(); i++) {
+    vds.push_back(transVarDecl(fd->getArg(i)));
+  }
+  if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom())) {
+    error(fd->line, fd->col,
+        "function " + name + " with the same argument type already defined");
+  }
 }
 
 void Semant::transOriginDecl(absyn::OriginDecl* od) {
@@ -132,11 +142,31 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
   //TODO
 }
 
+const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
+  int dim = typ.getDim();
+  const ir::Ty* ty = tyFactory.getTy(typ.getTyp().getValue());
+  if (ty == NULL) {
+    //TODO fix this need line and col in absyn::Ty
+//    error(typ.line, typ.col, "Type " + typ.getTyp().getValue() + " not found");
+  }
+  if (dim == 0) {
+    return ty;
+  } else {
+    //TODO array type
+    return NULL;
+  }
+}
+
+const ir::VarDecl* Semant::transVarDecl(const absyn::VarDecl & vd) {
+  // TODO
+  return NULL;
+}
+
 void Semant::error(int line, int col, const std::string& info) {
   errorMsg.error(line, col, info);
 }
 
-ir::NameTy* Semant::lookupNameTy(const std::string & name) {
+const ir::NameTy* Semant::lookupNameTy(const std::string & name) {
   return tyFactory.getNameTy(name);
 }
 

@@ -12,11 +12,12 @@
 #include "../ir/TypeDomain.h"
 #include "../ir/InstSymbol.h"
 #include "../ir/NameTy.h"
+#include "../ir/IRConst.h"
 
 namespace swift {
-namespace fabrica{
+namespace fabrica {
 
-class TypeFactory{
+class TypeFactory {
 public:
   TypeFactory();
   ~TypeFactory();
@@ -29,9 +30,14 @@ public:
   bool addNameTy(const std::string& name);
 
   /**
-   * get the NameTy associated with the name <str>
+   * get the NameTy associated with the name
    */
-  ir::NameTy* getNameTy(const std::string& name);
+  const ir::NameTy* getNameTy(const std::string& name);
+
+  /**
+   * get the Ty associated with the name
+   */
+  const ir::Ty* getTy(const std::string& name);
 
   /**
    * add the string symbol for the instance of the type
@@ -39,16 +45,20 @@ public:
    *   false if the symbol is already defined.
    *   true if succeed
    */
-  bool addInstSymbol(ir::NameTy* typ, const std::string& name);
+  bool addInstSymbol(const ir::NameTy * typ, const std::string& name);
 
   /**
    * get the instance symbol for a given name
    * return NULL if not found
    */
-  ir::InstSymbol* getInstSymbol(const std::string& name);
+  const ir::InstSymbol * getInstSymbol(const std::string& name);
 private:
-  std::map<std::string, ir::Ty*> tyTable;//mapping from name to a declared type
-  std::map<std::string, ir::InstSymbol*> instanceTable; //mapping from name to distinct instance symbol
+  std::map<std::string, const ir::Ty*> tyTable; //mapping from name to a declared type
+  std::map<std::string, const ir::InstSymbol*> instanceTable; //mapping from name to distinct instance symbol
+  static const ir::Ty INT_TY;
+  static const ir::Ty BOOL_TY;
+  static const ir::Ty DOUBLE_TY;
+  static const ir::Ty STRING_TY;
 };
 
 }

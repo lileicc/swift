@@ -11,11 +11,11 @@ NameTy::NameTy(TypeDomain* refer)
 NameTy::~NameTy() {
 }
 
-TypeDomain* NameTy::getRefer() {
+TypeDomain* NameTy::getRefer() const {
   return refer;
 }
 
-std::string NameTy::toString() {
+std::string NameTy::toString() const {
   return refer->getName();
 }
 

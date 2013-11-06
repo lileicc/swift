@@ -5,22 +5,22 @@
 
 namespace swift { namespace ir {
  
-FuncDefn::FuncDefn(bool isrand, const std::string& name, Ty* retTyp)
+FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp)
   :name(name), retTyp(retTyp), isrand(isrand), body(NULL) {
 }
 
 FuncDefn::~FuncDefn() {
 }
 
-Ty* FuncDefn::getRetTyp() {
+const Ty* FuncDefn::getRetTyp() const {
   return retTyp;
 }
 
-const std::string& FuncDefn::getName() {
+const std::string& FuncDefn::getName() const {
   return name;
 }
 
-Clause* FuncDefn::getBody() {
+Clause* FuncDefn::getBody() const {
   return body;
 }
 
@@ -28,7 +28,7 @@ void FuncDefn::setBody(Clause* b) {
   body = b;
 }
 
-size_t FuncDefn::argSize() {
+size_t FuncDefn::argSize() const {
   return args.size();
 }
 
@@ -36,23 +36,23 @@ void FuncDefn::addArg(VarDecl* v) {
   args.push_back(v);
 }
 
-VarDecl* FuncDefn::getArg(int k) {
+const VarDecl* FuncDefn::getArg(int k) const {
   return args[k];
 }
 
-const std::vector<VarDecl*>& FuncDefn::getArgs() {
+const std::vector<VarDecl*>& FuncDefn::getArgs() const {
   return args;
 }
 
-bool FuncDefn::isRand() {
+bool FuncDefn::isRand() const {
   return isrand;
 }
 
-bool FuncDefn::isFixed() {
+bool FuncDefn::isFixed() const {
   return !isrand;
 }
 
-std::string FuncDefn::toSignature() {
+std::string FuncDefn::toSignature() const {
   std::string ret;
   ret.append(retTyp == NULL ? "NULL" : retTyp->toString());
   ret.push_back(' ');

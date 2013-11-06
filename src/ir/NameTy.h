@@ -10,9 +10,9 @@ public:
   NameTy(TypeDomain* refer);
   virtual ~NameTy();
 
-  TypeDomain* getRefer();
+  TypeDomain* getRefer() const;
 
-  virtual std::string toString();
+  virtual std::string toString() const;
 
 private:
   TypeDomain* refer;

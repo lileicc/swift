@@ -19,11 +19,23 @@ Functory::~Functory() {
   // TODO Auto-generated destructor stub
 }
 
-bool addFuncDefn(const std::string& name, ir::Ty* retTy, const std::vector<ir::VarDecl*> args){
-  //TODO
-  return false;
+bool Functory::addFuncDefn(const std::string& name, const ir::Ty* retTy,
+    std::vector<const ir::VarDecl*> args, bool isRand) {
+  if (getFunc(name, args) != NULL) return false;
+  ir::FuncDefn* fd = new ir::FuncDefn(isRand, std::string(name), retTy);
+  funTable[fd->toSignature()] = fd;
+  return true;
 }
 
+ir::FuncDefn* Functory::getFunc(const std::string& name,
+    const std::vector<const ir::VarDecl*> args) {
+  ir::FuncDefn fd = ir::FuncDefn(true, name, NULL);
+  auto element = funTable.find(fd.toSignature());
+  if (element == funTable.end()) {
+    return NULL;
+  }
+  return element->second;
+}
 
 } /* namespace fabrica */
 } /* namespace swift */

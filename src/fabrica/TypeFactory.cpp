@@ -9,8 +9,16 @@
 
 namespace swift {
 namespace fabrica {
+
+const ir::Ty TypeFactory::INT_TY = ir::Ty(ir::IRConstant::INT);
+const ir::Ty TypeFactory::BOOL_TY = ir::Ty(ir::IRConstant::BOOL);
+const ir::Ty TypeFactory::DOUBLE_TY = ir::Ty(ir::IRConstant::DOUBLE);
+const ir::Ty TypeFactory::STRING_TY = ir::Ty(ir::IRConstant::STRING);
+
 TypeFactory::TypeFactory() {
   // TODO Auto-generated constructor stub
+  tyTable[INT_TY.toString()] = &INT_TY;
+
 
 }
 
@@ -24,14 +32,14 @@ bool TypeFactory::addNameTy(const std::string& name) {
   return true;
 }
 
-ir::NameTy* TypeFactory::getNameTy(const std::string& name) {
+const ir::NameTy * TypeFactory::getNameTy(const std::string& name) {
   auto element = tyTable.find(name);
   if (element == tyTable.end())
     return NULL;
-  return dynamic_cast<ir::NameTy*>(element->second);
+  return dynamic_cast<ir::NameTy const*>(element->second);
 }
 
-bool TypeFactory::addInstSymbol(ir::NameTy* typ, const std::string& name) {
+bool TypeFactory::addInstSymbol(const ir::NameTy* typ, const std::string& name) {
   if (instanceTable.find(name) != instanceTable.end()) return false;
   ir::TypeDomain* tydo = typ->getRefer();
   int sz = tydo->getPreLen();
@@ -40,12 +48,20 @@ bool TypeFactory::addInstSymbol(ir::NameTy* typ, const std::string& name) {
   return true;
 }
 
-ir::InstSymbol* TypeFactory::getInstSymbol(const std::string& name) {
+const ir::InstSymbol * TypeFactory::getInstSymbol(const std::string& name) {
   auto element = instanceTable.find(name);
   if (element == instanceTable.end())
     return NULL;
   return element->second;
 }
+
+ir::Ty const* TypeFactory::getTy(const std::string& name) {
+  auto element = tyTable.find(name);
+  if (element == tyTable.end())
+    return NULL;
+  return element->second;
+}
+
 
 }
 } /* namespace swift */

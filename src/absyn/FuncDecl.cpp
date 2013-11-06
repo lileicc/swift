@@ -19,15 +19,15 @@ FuncDecl::~FuncDecl() {
     delete expr;
 }
 
-const Ty& FuncDecl::getRetTyp() {
+const Ty& FuncDecl::getRetTyp() const {
   return typ;
 }
 
-const Symbol& FuncDecl::getFuncName() {
+const Symbol& FuncDecl::getFuncName() const {
   return func;
 }
 
-bool FuncDecl::isRandom() {
+bool FuncDecl::isRandom() const {
   return random;
 }
 
@@ -35,11 +35,11 @@ Expr* FuncDecl::getExpr() {
   return expr;
 }
 
-size_t FuncDecl::argSize() {
+size_t FuncDecl::argSize() const {
   return args.size();
 }
 
-const VarDecl& FuncDecl::getArg(int k) {
+const VarDecl& FuncDecl::getArg(int k) const {
   return args[k];
 }
 

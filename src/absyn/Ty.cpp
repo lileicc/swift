@@ -21,7 +21,7 @@ const Symbol& Ty::getTyp() const {
   return typ;
 }
 
-int Ty::getDim() {
+int Ty::getDim() const {
   return dim;
 }
 

@@ -21,7 +21,7 @@ public:
   virtual ~Ty();
 
   const Symbol& getTyp() const;
-  int getDim();
+  int getDim() const;
 
   // For Debugging Use
   std::string toString();
