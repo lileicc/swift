@@ -26,7 +26,7 @@ public:
   /**
    * add a function with name, return type, and a list of arguments
    */
-  bool addFuncDefn(const std::string& name, ir::Ty* retTy, const std::vector<ir::VarDecl*> args);
+  bool addFuncDefn(const std::string& name, ir::Ty* retTy, const std::vector<ir::VarDecl*>& args);
 private:
   std::map<std::string, ir::FuncDefn*> funTable;
 };

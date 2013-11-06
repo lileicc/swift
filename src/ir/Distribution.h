@@ -4,23 +4,22 @@
 
 #include "Expr.h"
 #include "IRForwardDecl.h"
+#include "../predecl/PreDeclDistr.h"
 
 namespace swift { namespace ir {
 
 class Distribution :
   public swift::ir::Expr {
 public:
-  Distribution(DistrDefn* refer, const std::string& distr = std::string(""));
+  Distribution(const std::string& distr = std::string(""), predecl::PreDeclDistr* refer = NULL);
   virtual ~Distribution();
 
-  DistrDefn* getRefer();
+  predecl::PreDeclDistr* getRefer();
   
-  // For Debugging Use
   const std::string& getDistrName();
 
 private:
-  DistrDefn* refer;
-  // For Debugging Use
+  predecl::PreDeclDistr* refer;
   std::string distr;
 };
 

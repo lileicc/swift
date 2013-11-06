@@ -17,8 +17,8 @@ public:
   virtual std::string toString();
 
 private:
-  std::string var;
   Ty* typ;
+  std::string var;
 };
 
 }

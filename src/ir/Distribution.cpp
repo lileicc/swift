@@ -1,9 +1,8 @@
 #include "Distribution.h"
 
-#include "DistrDefn.h"
-
 namespace swift { namespace ir {
-Distribution::Distribution(DistrDefn* refer, const std::string& distr)
+
+Distribution::Distribution(const std::string& distr, predecl::PreDeclDistr* refer)
   :refer(refer), distr(distr) {
 }
 
@@ -14,7 +13,7 @@ const std::string& Distribution::getDistrName() {
   return distr;
 }
 
-DistrDefn* Distribution::getRefer() {
+predecl::PreDeclDistr* Distribution::getRefer() {
   return refer;
 }
 
