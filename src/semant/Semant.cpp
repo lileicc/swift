@@ -118,11 +118,19 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
   if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom())) {
     error(fd->line, fd->col,
         "function " + name + " with the same argument type already defined");
+    // if the creation fail, should delete the variable declaration
+    for (auto vd:vds) {
+      delete vd;
+    }
   }
 }
 
 void Semant::transOriginDecl(absyn::OriginDecl* od) {
-  //TODO
+  const ir::NameTy* retTyp = lookupNameTy(od->getTyp().getValue());
+  const ir::NameTy* srcTy = lookupNameTy(od->getArg().getValue());
+  if ((retTyp != NULL) && (srcTy != NULL) && (! tyFactory.addOriginAttr(srcTy, retTyp, od->getFunc().getValue()))) {
+    error(od->line, od->col, "origin attribute already exist!");
+  }
 }
 
 void Semant::transExpr(absyn::Expr *expr) {

@@ -32,7 +32,7 @@ bool TypeFactory::addNameTy(const std::string& name) {
   return true;
 }
 
-const ir::NameTy * TypeFactory::getNameTy(const std::string& name) {
+const ir::NameTy * TypeFactory::getNameTy(const std::string& name) const{
   auto element = tyTable.find(name);
   if (element == tyTable.end())
     return NULL;
@@ -48,18 +48,28 @@ bool TypeFactory::addInstSymbol(const ir::NameTy* typ, const std::string& name) 
   return true;
 }
 
-const ir::InstSymbol * TypeFactory::getInstSymbol(const std::string& name) {
+const ir::InstSymbol * TypeFactory::getInstSymbol(const std::string& name) const{
   auto element = instanceTable.find(name);
   if (element == instanceTable.end())
     return NULL;
   return element->second;
 }
 
-ir::Ty const* TypeFactory::getTy(const std::string& name) {
+const ir::Ty * TypeFactory::getTy(const std::string& name) const{
   auto element = tyTable.find(name);
   if (element == tyTable.end())
     return NULL;
   return element->second;
+}
+
+const ir::OriginAttr * TypeFactory::getOriginAttr(const std::string& name) const {
+  //auto element = 
+  //TODO
+}
+
+bool TypeFactory::addOriginAttr(const ir::NameTy * srcty, const ir::NameTy* retTy, const std::string& name) {
+  // TODO
+  return true;
 }
 
 

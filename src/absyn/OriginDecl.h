@@ -18,9 +18,9 @@ public:
   OriginDecl(int l, int c, Symbol typ, Symbol func, Symbol arg);
   virtual ~OriginDecl();
 
-  const Symbol& getFunc();
-  const Symbol& getArg();
-  const Symbol& getTyp();
+  const Symbol& getFunc() const;
+  const Symbol& getArg() const;
+  const Symbol& getTyp() const;
 
   // For Debugging Use
   void print(FILE* file, int indent);
