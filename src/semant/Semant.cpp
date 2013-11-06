@@ -159,8 +159,7 @@ const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
   int dim = typ.getDim();
   const ir::Ty* ty = tyFactory.getTy(typ.getTyp().getValue());
   if (ty == NULL) {
-    //TODO fix this need line and col in absyn::Ty
-//    error(typ.line, typ.col, "Type " + typ.getTyp().getValue() + " not found");
+    error(typ.line, typ.col, "Type " + typ.getTyp().getValue() + " not found");
   }
   if (dim == 0) {
     return ty;
