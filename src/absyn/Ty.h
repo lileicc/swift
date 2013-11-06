@@ -14,10 +14,12 @@
 namespace swift {
 namespace absyn {
 class Ty {
-  Symbol typ;
-  int dim;
 public:
+  int line; // line number in original file
+  int col; // column number in original file
+
   Ty(Symbol typ, int dim = 0);
+  Ty(int l, int c, Symbol typ, int dim = 0);
   virtual ~Ty();
 
   const Symbol& getTyp() const;
@@ -25,6 +27,10 @@ public:
 
   // For Debugging Use
   std::string toString();
+
+private:
+  Symbol typ;
+  int dim;
 };
 
 }
