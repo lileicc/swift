@@ -8,7 +8,7 @@ namespace swift { namespace ir {
 
 class OriginAttr {
 public:
-  OriginAttr(const std::string& name, Ty* ty, TypeDomain* src);
+  OriginAttr(const std::string& name, Ty* ty, TypeDomain* src, int id);
   virtual ~OriginAttr();
 
   const std::string& getName();
@@ -19,9 +19,9 @@ public:
 
 private:
   std::string name;
-  int id;
   Ty* typ;
   TypeDomain* src;
+  int id;
 };
 
 }

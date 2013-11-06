@@ -14,8 +14,8 @@ public:
   Expr* getVar();
 
 private:
-  Expr* var;
   OriginAttr* refer;
+  Expr* var;
 };
 
 }

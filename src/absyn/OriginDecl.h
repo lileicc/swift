@@ -14,9 +14,6 @@ namespace swift {
 namespace absyn {
 
 class OriginDecl: public Decl {
-  Symbol func;
-  Symbol arg;
-  Symbol typ;
 public:
   OriginDecl(int l, int c, Symbol typ, Symbol func, Symbol arg);
   virtual ~OriginDecl();
@@ -27,6 +24,10 @@ public:
 
   // For Debugging Use
   void print(FILE* file, int indent);
+private:
+  Symbol typ;
+  Symbol func;
+  Symbol arg;
 };
 
 }

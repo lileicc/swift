@@ -22,8 +22,8 @@ public:
   virtual std::string toString();
 
 private:
-  std::vector<int> size;
   Ty* base;
+  std::vector<int> size;
 };
 
 }
