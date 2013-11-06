@@ -11,25 +11,25 @@ public:
   BlogModel();
   virtual ~BlogModel();
 
-  void addFunction(FuncDefn* func);
-  void addQuery(Query* q);
-  void addEvidence(Evidence* e);
-  void addTypeDomain(TypeDomain* t);
+  void addFunction(std::shared_ptr<FuncDefn> func);
+  void addQuery(std::shared_ptr<Query> q);
+  void addEvidence(std::shared_ptr<Evidence> e);
+  void addTypeDomain(std::shared_ptr<TypeDomain> t);
 
-  const std::vector<FuncDefn*>& getFixFuncs();
-  const std::vector<FuncDefn*>& getVoidFuncs();
-  const std::vector<FuncDefn*>& getRandFuncs();
-  const std::vector<Query*>& getQueries();
-  const std::vector<Evidence*>& getEvidences();
-  const std::vector<TypeDomain*>& getTypes();
+  const std::vector<std::shared_ptr<FuncDefn>>& getFixFuncs();
+  const std::vector<std::shared_ptr<FuncDefn>>& getVoidFuncs();
+  const std::vector<std::shared_ptr<FuncDefn>>& getRandFuncs();
+  const std::vector<std::shared_ptr<Query>>& getQueries();
+  const std::vector<std::shared_ptr<Evidence>>& getEvidences();
+  const std::vector<std::shared_ptr<TypeDomain>>& getTypes();
 
 private:
-  std::vector<FuncDefn*> fixFunc;
-  std::vector<FuncDefn*> voidFunc;
-  std::vector<FuncDefn*> randFunc;
-  std::vector<Query*> query;
-  std::vector<Evidence*> evidence;
-  std::vector<TypeDomain*> types;
+  std::vector<std::shared_ptr<FuncDefn>> fixFunc;
+  std::vector<std::shared_ptr<FuncDefn>> voidFunc;
+  std::vector<std::shared_ptr<FuncDefn>> randFunc;
+  std::vector<std::shared_ptr<Query>> query;
+  std::vector<std::shared_ptr<Evidence>> evidence;
+  std::vector<std::shared_ptr<TypeDomain>> types;
 };
 
 }

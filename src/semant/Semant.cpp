@@ -13,11 +13,16 @@ namespace semant {
 Semant::Semant() :
     errorMsg(stderr) {
   // TODO Auto-generated constructor stub
-
+  model = new ir::BlogModel();
 }
 
 Semant::~Semant() {
   // TODO Auto-generated destructor stub
+  delete model;
+}
+
+ir::BlogModel* Semant::getModel() {
+  return model;
 }
 
 void Semant::process(absyn::BlogProgram* prog) {

@@ -2,6 +2,8 @@
 
 //For NULL
 #include <cstdio>
+//For shared_ptr
+#include <memory>
 
 namespace swift { namespace ir {
 

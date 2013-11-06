@@ -14,20 +14,22 @@ namespace ir {
 
 class IfThen: public Clause {
 public:
-  IfThen(Expr* cond=NULL, Clause* thcl=NULL, Clause* elcl=NULL);
+  IfThen(std::shared_ptr<Expr> cond = nullptr,
+        std::shared_ptr<Clause> thcl = nullptr,
+        std::shared_ptr<Clause> elcl = nullptr);
   ~IfThen();
 
-  void setCond(Expr* e);
-  void setThen(Clause *c);
-  void setElse(Clause *c);
-  Expr* getCond();
-  Clause* getThen();
-  Clause* getElse();
+  void setCond(std::shared_ptr<Expr> e);
+  void setThen(std::shared_ptr<Clause> c);
+  void setElse(std::shared_ptr<Clause> c);
+  std::shared_ptr<Expr> getCond();
+  std::shared_ptr<Clause> getThen();
+  std::shared_ptr<Clause> getElse();
 
 private:
-  Expr* cond;
-  Clause* thcl;
-  Clause* elcl;
+  std::shared_ptr<Expr> cond;
+  std::shared_ptr<Clause> thcl;
+  std::shared_ptr<Clause> elcl;
 };
 
 }

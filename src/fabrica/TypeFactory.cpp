@@ -65,6 +65,7 @@ const ir::Ty * TypeFactory::getTy(const std::string& name) const{
 const ir::OriginAttr * TypeFactory::getOriginAttr(const std::string& name) const {
   //auto element = 
   //TODO
+  return NULL;
 }
 
 bool TypeFactory::addOriginAttr(const ir::NameTy * srcty, const ir::NameTy* retTy, const std::string& name) {

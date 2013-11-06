@@ -10,11 +10,10 @@ namespace swift { namespace ir {
 BlogModel::BlogModel() {
 }
 
-
 BlogModel::~BlogModel() {
 }
 
-void BlogModel::addFunction(FuncDefn* func) {
+void BlogModel::addFunction(std::shared_ptr<FuncDefn> func) {
   if (func->isFixed()) fixFunc.push_back(func);
   else
   if (func->argSize() == 0)
@@ -23,39 +22,39 @@ void BlogModel::addFunction(FuncDefn* func) {
     randFunc.push_back(func);
 }
 
-void BlogModel::addQuery(Query* q) {
+void BlogModel::addQuery(std::shared_ptr<Query> q) {
   query.push_back(q);
 }
 
-void BlogModel::addEvidence(Evidence* e) {
+void BlogModel::addEvidence(std::shared_ptr<Evidence> e) {
   evidence.push_back(e);
 }
 
-void BlogModel::addTypeDomain(TypeDomain* t) {
+void BlogModel::addTypeDomain(std::shared_ptr<TypeDomain> t) {
   types.push_back(t);
 }
 
-const std::vector<FuncDefn*>& BlogModel::getFixFuncs() {
+const std::vector<std::shared_ptr<FuncDefn>>& BlogModel::getFixFuncs() {
   return fixFunc;
 }
 
-const std::vector<FuncDefn*>& BlogModel::getVoidFuncs() {
+const std::vector<std::shared_ptr<FuncDefn>>& BlogModel::getVoidFuncs() {
   return voidFunc;
 }
 
-const std::vector<FuncDefn*>& BlogModel::getRandFuncs() {
+const std::vector<std::shared_ptr<FuncDefn>>& BlogModel::getRandFuncs() {
   return randFunc;
 }
 
-const std::vector<Query*>& BlogModel::getQueries() {
+const std::vector<std::shared_ptr<Query>>& BlogModel::getQueries() {
   return query;
 }
 
-const std::vector<Evidence*>& BlogModel::getEvidences() {
+const std::vector<std::shared_ptr<Evidence>>& BlogModel::getEvidences() {
   return evidence;
 }
 
-const std::vector<TypeDomain*>& BlogModel::getTypes() {
+const std::vector<std::shared_ptr<TypeDomain>>& BlogModel::getTypes() {
   return types;
 }
 

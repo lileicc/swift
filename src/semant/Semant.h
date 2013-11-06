@@ -10,6 +10,7 @@
 #include <string>
 #include "../absyn/BlogProgram.h"
 #include "../msg/ErrorMsg.h"
+#include "../ir/BlogModel.h"
 #include "../fabrica/TypeFactory.h"
 #include "../fabrica/Functory.h"
 
@@ -21,6 +22,7 @@ public:
   Semant();
   ~Semant();
   void process(absyn::BlogProgram* prog);
+  ir::BlogModel* getModel();
 private:
   /**
    * process all declarations, including
@@ -104,6 +106,7 @@ private:
   fabrica::TypeFactory tyFactory;
   fabrica::Functory functory;
   msg::ErrorMsg errorMsg;
+  ir::BlogModel* model;
 };
 
 }
