@@ -8,7 +8,9 @@
 #pragma once
 #include <map>
 #include <string>
+#include <vector>
 #include "../ir/Ty.h"
+#include "../ir/VarDecl.h"
 
 namespace swift {
 namespace fabrica {
