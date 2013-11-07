@@ -11,15 +11,15 @@ OriginAttr::OriginAttr(const std::string& name, const Ty* ty, TypeDomain* src, i
 OriginAttr::~OriginAttr() {
 }
 
-const std::string& OriginAttr::getName() {
+const std::string& OriginAttr::getName() const {
   return name;
 }
 
-const Ty* OriginAttr::getTyp() {
+const Ty* OriginAttr::getTyp() const {
   return typ;
 }
 
-TypeDomain* OriginAttr::getSrc()  {
+TypeDomain* OriginAttr::getSrc() const {
   return src;
 }
 
@@ -27,7 +27,7 @@ void OriginAttr::setID(int k) {
   id = k;
 }
 
-int OriginAttr::getID() {
+int OriginAttr::getID() const {
   return id;
 }
 

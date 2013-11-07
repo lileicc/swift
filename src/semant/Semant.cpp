@@ -126,7 +126,7 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
     error(fd->line, fd->col,
         "function " + name + " with the same argument type already defined");
     // if the creation fail, should delete the variable declaration
-    for (auto vd:vds) {
+    for (auto vd : vds) {
       delete vd;
     }
   }
@@ -135,7 +135,8 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
 void Semant::transOriginDecl(absyn::OriginDecl* od) {
   const ir::NameTy* retTyp = lookupNameTy(od->getTyp().getValue());
   const ir::NameTy* srcTy = lookupNameTy(od->getArg().getValue());
-  if ((retTyp != NULL) && (srcTy != NULL) && (! tyFactory.addOriginAttr(srcTy, retTyp, od->getFunc().getValue()))) {
+  if ((retTyp != NULL) && (srcTy != NULL)
+      && (!tyFactory.addOriginAttr(srcTy, retTyp, od->getFunc().getValue()))) {
     error(od->line, od->col, "origin attribute already exist!");
   }
 }
@@ -281,8 +282,7 @@ const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
   int dim = typ.getDim();
   const ir::Ty* ty = tyFactory.getTy(typ.getTyp().getValue());
   if (ty == NULL) {
-    //TODO fix this need line and col in absyn::Ty
-//    error(typ.line, typ.col, "Type " + typ.getTyp().getValue() + " not found");
+    error(typ.line, typ.col, "Type " + typ.getTyp().getValue() + " not found");
   }
   if (dim == 0) {
     return ty;

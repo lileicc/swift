@@ -13,6 +13,7 @@
 #include "../ir/InstSymbol.h"
 #include "../ir/NameTy.h"
 #include "../ir/IRConst.h"
+#include "../ir/OriginAttr.h"
 
 namespace swift {
 namespace fabrica {
@@ -50,7 +51,8 @@ public:
   /**
    * add the attribute for the NameTy (type in blog)
    */
-  bool addOriginAttr(const ir::NameTy * srcty, const ir::NameTy* retTy, const std::string& name);
+  bool addOriginAttr(const ir::NameTy * srcty, const ir::NameTy* retTy,
+      const std::string& name);
 
   /**
    * get the instance symbol for a given name
@@ -62,8 +64,10 @@ public:
    * get the origin attribute
    * return NULL if not found
    */
-  const ir::OriginAttr * getOriginAttr(const std::string& name) const;
+  const ir::OriginAttr * getOriginAttr(const ir::NameTy* srcty,
+      const std::string& name) const;
 private:
+  static std::string constructAttrSign(const ir::NameTy* srcty, const std::string & name);
   std::map<std::string, const ir::Ty*> tyTable; //mapping from name to a declared type
   std::map<std::string, const ir::InstSymbol*> instanceTable; //mapping from name to distinct instance symbol
   std::map<std::string, const ir::OriginAttr*> attrTable; // mapping from origin name(signature) to attribute of type

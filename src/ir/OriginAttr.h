@@ -11,11 +11,11 @@ public:
   OriginAttr(const std::string& name, const Ty* ty, TypeDomain* src, int id);
   virtual ~OriginAttr();
 
-  const std::string& getName();
-  const Ty* getTyp();
+  const std::string& getName() const;
+  const Ty* getTyp() const;
   void setID(int k);
-  int getID();
-  TypeDomain* getSrc();
+  int getID() const;
+  TypeDomain* getSrc() const;
 
 private:
   std::string name;
