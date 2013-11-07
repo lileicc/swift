@@ -14,11 +14,11 @@ Expr::Expr() {
 Expr::~Expr() {
 }
 
-void Expr::addArg(Expr * expr) {
+void Expr::addArg(std::shared_ptr<Expr> expr) {
   args.push_back(expr);
 }
 
-const std::vector<Expr*>& Expr::getArgs() {
+const std::vector<std::shared_ptr<Expr>>& Expr::getArgs() {
   return args;
 }
 
@@ -26,7 +26,7 @@ size_t Expr::argSize() {
   return args.size();
 }
 
-Expr* Expr::get(int k)  {
+std::shared_ptr<Expr> Expr::get(int k) {
   return args[k];
 }
 

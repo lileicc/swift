@@ -3,22 +3,22 @@
 namespace swift {
 namespace ir {
 
-MapTy::MapTy(IRConstant typ, Ty* from, Ty* to)
+MapTy::MapTy(IRConstant typ, const Ty* from, const Ty* to)
   :Ty(typ), from(from), to(to) {
 }
 
 MapTy::~MapTy() {
 }
 
-Ty* MapTy::getFrom() {
+const Ty* MapTy::getFrom() {
   return from;
 }
 
-Ty* MapTy::getTo() {
+const Ty* MapTy::getTo() {
   return to;
 }
 
-std::string MapTy::toString() {
+std::string MapTy::toString() const {
   return std::string("map<") + (from == NULL ? "NULL" : from->toString()) + "," 
     + (to == NULL ? "NULL" : to->toString());
 }

@@ -10,17 +10,17 @@ public:
   virtual ~MapExpr();
 
   size_t mapSize();
-  void addMap(Expr* a, Expr* b);
-  Expr* getFrom(int k);
-  Expr* getTo(int k);
-  Ty* getFromTyp();
-  Ty* getToTyp();
-  void setFromTyp(Ty* t);
-  void setToTyp(Ty* t);
+  void addMap(std::shared_ptr<Expr> a, std::shared_ptr<Expr> b);
+  std::shared_ptr<Expr> getFrom(int k);
+  std::shared_ptr<Expr> getTo(int k);
+  const Ty* getFromTyp();
+  const Ty* getToTyp();
+  void setFromTyp(const Ty* t);
+  void setToTyp(const Ty* t);
 
 private:
-  Ty* fromTyp;
-  Ty* toTyp;
+  const Ty* fromTyp;
+  const Ty* toTyp;
 };
 
 }

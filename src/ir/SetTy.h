@@ -7,15 +7,15 @@ namespace swift { namespace ir {
 class SetTy :
   public swift::ir::Ty {
 public:
-  SetTy(Ty* refer);
+  SetTy(const Ty* refer);
   virtual ~SetTy();
 
-  Ty* getRefer();
+  const Ty* getRefer();
 
-  virtual std::string toString();
+  virtual std::string toString() const ;
 
 private:
-  Ty* refer;
+  const Ty* refer;
 };
 
 }

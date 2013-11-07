@@ -7,6 +7,8 @@
 
 #include "Semant.h"
 
+#include "../ir/IRHeader.h"
+
 namespace swift {
 namespace semant {
 
@@ -138,13 +140,133 @@ void Semant::transOriginDecl(absyn::OriginDecl* od) {
   }
 }
 
-void Semant::transExpr(absyn::Expr *expr) {
-  //TODO
-
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
+  std::shared_ptr<ir::Expr> ret;
+  if (dynamic_cast<absyn::OpExpr*>(expr) != NULL) return (ret=transExpr((absyn::OpExpr*) expr));
+  return ret;
 }
 
-void Semant::transExpr(absyn::OpExpr* expr) {
-  //TODO
+ir::IRConstant OprExpr_convertOpConst(absyn::AbsynConstant op) {
+  using absyn::AbsynConstant;
+  using ir::IRConstant;
+  switch (op) {
+  case AbsynConstant::PLUS: return IRConstant::PLUS;
+  case AbsynConstant::MINUS: return IRConstant::MINUS;
+  case AbsynConstant::MUL: return IRConstant::MUL;
+  case AbsynConstant::DIV: return IRConstant::DIV;
+  case AbsynConstant::MOD: return IRConstant::MOD;
+  case AbsynConstant::POWER: return IRConstant::POWER;
+  case AbsynConstant::EQ: return IRConstant::EQ;
+  case AbsynConstant::NEQ: return IRConstant::NEQ;
+  case AbsynConstant::LT: return IRConstant::LT;
+  case AbsynConstant::GT: return IRConstant::GT;
+  case AbsynConstant::LE: return IRConstant::GE;
+  case AbsynConstant::AND: return IRConstant::AND;
+  case AbsynConstant::OR: return IRConstant::OR;
+  case AbsynConstant::NOT: return IRConstant::NOT;
+  case AbsynConstant::IMPLY: return IRConstant::IMPLY;
+  case AbsynConstant::SUB: return IRConstant::SUB;
+  default: return IRConstant::NA;
+  }
+}
+
+bool OprExpr_isPrimitive(const ir::Ty* t) {
+  return t->getTyp() == ir::IRConstant::INT
+         || t->getTyp() == ir::IRConstant::DOUBLE
+         || t->getTyp() == ir::IRConstant::BOOL
+         || t->getTyp() == ir::IRConstant::STRING;
+}
+
+bool OprExpr_isNumerical(const ir::Ty* t) {
+  return t->getTyp() == ir::IRConstant::INT
+    || t->getTyp() == ir::IRConstant::DOUBLE;
+}
+
+const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op, const std::vector<std::shared_ptr<ir::Expr>>& arg) {
+  using ir::IRConstant;
+  using ir::IRConstString;
+  switch (op) {
+  // Bool
+  // Unary Operator
+  case IRConstant::NOT:
+    if (arg[0]->getTyp() != lookupTy(IRConstString::BOOL)) return NULL;
+    return arg[0]->getTyp();
+  // Logical Operator
+  case IRConstant::AND:
+  case IRConstant::OR:
+  case IRConstant::IMPLY:
+    if (arg[0]->getTyp() != lookupTy(IRConstString::BOOL)
+      || arg[1]->getTyp() != lookupTy(IRConstString::BOOL)) return NULL;
+    return arg[0]->getTyp();
+  case IRConstant::LT:
+  case IRConstant::GT:
+  case IRConstant::LE:
+  case IRConstant::GE:
+    if (!OprExpr_isPrimitive(arg[0]->getTyp()) || !OprExpr_isPrimitive(arg[1]->getTyp()))
+      return NULL;
+    return lookupTy(IRConstString::BOOL);
+  case IRConstant::NEQ:
+  case IRConstant::EQ:
+    if (arg[0]->getTyp() != arg[1]->getTyp()) return NULL;
+    return lookupTy(IRConstString::BOOL);
+  // Numerical Operator
+  case IRConstant::MOD:
+    if (arg[0]->getTyp() != arg[1]->getTyp() || arg[0]->getTyp() != lookupTy(IRConstString::INT))
+      return NULL;
+    return arg[0]->getTyp();
+  case IRConstant::PLUS:
+    if (arg[0]->getTyp() == arg[1]->getTyp() && arg[0]->getTyp() == lookupTy(IRConstString::STRING))
+      return arg[0]->getTyp();
+  case IRConstant::MINUS:
+  case IRConstant::MUL:
+  case IRConstant::DIV:
+  case IRConstant::POWER:
+    if (arg[0]->getTyp() != arg[1]->getTyp() || !OprExpr_isNumerical(arg[0]->getTyp()))
+      return NULL;
+    if (op == IRConstant::POWER)
+      return lookupTy(IRConstString::DOUBLE);
+    return arg[0]->getTyp();
+
+  // Address Operator
+  // TODO:
+  case IRConstant::SUB:
+    return NULL;
+    break;
+  default: return NULL;
+  }
+}
+
+std::shared_ptr<ir::OprExpr> Semant::transExpr(absyn::OpExpr* expr) {
+  std::shared_ptr<ir::OprExpr> ret(new ir::OprExpr(OprExpr_convertOpConst(expr->getOp())));
+  if (ret->getOp() == ir::IRConstant::NA) {
+    error(expr->line, expr->col, "Invalid Operator!");
+    return nullptr;
+  }
+  // Unary Operator
+  if (ret->getOp() == ir::IRConstant::NOT)  {
+    if (expr->getLeft() != NULL || expr->getRight() == NULL) {
+      error(expr->line, expr->col, "Invalid Unaray Operator Expression!");
+      return nullptr;
+    }
+    ret->addArg(transExpr(expr->getRight()));
+    if (ret->get(0) == nullptr) return nullptr;
+  } 
+  else {
+    if (expr->getLeft() == NULL || expr->getRight() == NULL) {
+      error(expr->line, expr->col, "Invalid Binary Operator Expression!");
+      return nullptr;
+    }
+    ret->addArg(transExpr(expr->getLeft()));
+    ret->addArg(transExpr(expr->getRight()));
+    if (ret->get(0) == nullptr || ret->get(1) == nullptr) return nullptr;
+  }
+  // Type Check
+  ret->setTyp(OprExpr_checkType(ret->getOp(), ret->getArgs()));
+  if (ret->getTyp() == NULL) {
+    error(expr->line, expr->col, "Error Type Matching for OprExpr!");
+    return nullptr;
+  }
+  return ret;
 }
 
 void Semant::transFuncBody(absyn::FuncDecl* fd) {
@@ -181,6 +303,10 @@ void Semant::error(int line, int col, const std::string& info) {
 
 const ir::NameTy* Semant::lookupNameTy(const std::string & name) {
   return tyFactory.getNameTy(name);
+}
+
+const ir::Ty* Semant::lookupTy(const std::string & name) {
+  return tyFactory.getTy(name);
 }
 
 std::string Semant::arrayRefToString(const std::string & name, int idx) {

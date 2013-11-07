@@ -8,17 +8,17 @@ namespace ir {
 
 class MapTy :public swift::ir::Ty {
 public:
-  MapTy(IRConstant typ, Ty* from, Ty* to);
+  MapTy(IRConstant typ, const Ty* from, const Ty* to);
   virtual ~MapTy();
 
-  Ty* getFrom();
-  Ty* getTo();
+  const Ty* getFrom();
+  const Ty* getTo();
 
-  virtual std::string toString();
+  virtual std::string toString() const ;
 
 private:
-  Ty* from;
-  Ty* to;
+  const Ty* from;
+  const Ty* to;
 };
 
 }

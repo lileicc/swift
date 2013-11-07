@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace swift {
 namespace ir {
 
@@ -22,6 +24,15 @@ enum class IRConstant {
   FORALL, EXISTS,
   // Set Type: for SetExpr
   LISTSET, CONDSET
+};
+
+class IRConstString {
+public:
+  static const std::string BOOL;
+  static const std::string INT;
+  static const std::string DOUBLE;
+  static const std::string STRING;
+  static const std::string NA;
 };
 
 }

@@ -19,7 +19,7 @@ public:
   Ty(IRConstant typ = IRConstant::NA);
   virtual ~Ty();
 
-  IRConstant getTyp();
+  IRConstant getTyp() const;
 
   virtual std::string toString() const;
 

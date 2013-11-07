@@ -7,6 +7,7 @@
 
 #pragma once
 #include <cstdio>
+#include <memory>
 #include <string>
 #include "../absyn/BlogProgram.h"
 #include "../msg/ErrorMsg.h"
@@ -41,9 +42,14 @@ private:
    */
   void processBodies(absyn::BlogProgram* prog);
 
-  void transExpr(absyn::Expr* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::Expr* expr);
 
-  void transExpr(absyn::OpExpr* expr);
+  /*
+   * Special Type Checking Function for OprExpr
+   */
+  const ir::Ty* OprExpr_checkType(ir::IRConstant op, const std::vector<std::shared_ptr<ir::Expr>>& arg);
+
+  std::shared_ptr<ir::OprExpr> transExpr(absyn::OpExpr* expr);
 
   void transExpr(absyn::FuncApp* expr);
 
@@ -96,6 +102,13 @@ private:
    * return the found NameTy or NULL
    */
   const ir::NameTy* lookupNameTy(const std::string & name);
+
+  /**
+  * lookup a general type in tyFactory, if not exist, produce an error
+  * return the found Ty or NULL
+  */
+
+  const ir::Ty* lookupTy(const std::string & name);
 
   /**
    * translate the array reference to string representation

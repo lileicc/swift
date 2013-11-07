@@ -8,16 +8,16 @@ namespace swift { namespace ir {
 
 class VarDecl {
 public:
-  VarDecl(Ty* typ, const std::string& var);
+  VarDecl(const Ty* typ, const std::string& var);
   virtual ~VarDecl();
 
-  Ty* getTyp();
-  const std::string& getVar();
+  const Ty* getTyp() const;
+  const std::string& getVar() const;
 
-  virtual std::string toString();
+  virtual std::string toString() const;
 
 private:
-  Ty* typ;
+  const Ty* typ;
   std::string var;
 };
 

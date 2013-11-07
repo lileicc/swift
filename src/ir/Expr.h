@@ -17,12 +17,12 @@ class Expr: public Clause {
 public:
   Expr();
   virtual ~Expr();
-  void addArg(Expr * expr);
-  const std::vector<Expr*>& getArgs();
-  Expr* get(int k);
+  void addArg(std::shared_ptr<Expr> expr);
+  const std::vector<std::shared_ptr<Expr>>& getArgs();
+  std::shared_ptr<Expr> get(int k);
   size_t argSize();
 private:
-  std::vector<Expr*> args;
+  std::vector<std::shared_ptr<Expr>> args;
 };
 }
 }

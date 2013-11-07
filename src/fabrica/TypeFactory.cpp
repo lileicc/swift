@@ -18,8 +18,9 @@ const ir::Ty TypeFactory::STRING_TY = ir::Ty(ir::IRConstant::STRING);
 TypeFactory::TypeFactory() {
   // TODO Auto-generated constructor stub
   tyTable[INT_TY.toString()] = &INT_TY;
-
-
+  tyTable[BOOL_TY.toString()] = &BOOL_TY;
+  tyTable[DOUBLE_TY.toString()] = &DOUBLE_TY;
+  tyTable[STRING_TY.toString()] = &STRING_TY;
 }
 
 TypeFactory::~TypeFactory() {

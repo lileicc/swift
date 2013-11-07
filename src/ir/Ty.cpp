@@ -17,18 +17,18 @@ Ty::Ty(IRConstant typ)
 Ty::~Ty() {
 }
 
-IRConstant Ty::getTyp() {
+IRConstant Ty::getTyp() const {
   return typ;
 }
 
 std::string Ty::toString() const {
   // Type: for class Ty
   switch (typ) {
-  case IRConstant::BOOL: return std::string("Bool");
-  case IRConstant::INT: return std::string("Int");
-  case IRConstant::DOUBLE: return std::string("Double");
-  case IRConstant::STRING: return std::string("std::string");
-  default: return std::string("NA");
+  case IRConstant::BOOL: return IRConstString::BOOL;
+  case IRConstant::INT: return IRConstString::INT;
+  case IRConstant::DOUBLE: return IRConstString::DOUBLE;
+  case IRConstant::STRING: return IRConstString::STRING;
+  default: return IRConstString::NA;
   }
 }
 

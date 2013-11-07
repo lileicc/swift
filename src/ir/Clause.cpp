@@ -10,18 +10,18 @@
 
 namespace swift {
 namespace ir {
-Clause::Clause(Ty* typ)
+Clause::Clause(const Ty* typ)
   :typ(typ) {
 }
 
 Clause::~Clause() {
 }
 
-void Clause::setTyp(Ty* ty) {
+void Clause::setTyp(const Ty* ty) {
   typ = ty;
 }
 
-Ty* Clause::getTyp()  {
+const Ty* Clause::getTyp()  {
   return typ;
 }
 
