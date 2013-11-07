@@ -2,10 +2,13 @@
 
 #include <string>
 
+#include "../predecl/PreDeclDistrList.h"
+
 namespace swift { namespace ir {
 
 CategoricalDistr::CategoricalDistr()
-  :Distribution(std::string("Categorical")) {
+  :Distribution(std::string("Categorical"),
+  &(predecl::PreDeclDistrList::categoricalDistr)) {
 }
 
 CategoricalDistr::~CategoricalDistr() {

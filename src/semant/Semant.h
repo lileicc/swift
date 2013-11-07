@@ -14,6 +14,7 @@
 #include "../ir/BlogModel.h"
 #include "../fabrica/TypeFactory.h"
 #include "../fabrica/Functory.h"
+#include "../fabrica/PreDeclFactory.h"
 
 namespace swift {
 namespace semant {
@@ -118,6 +119,7 @@ private:
   void error(int line, int col, const std::string & info);
   fabrica::TypeFactory tyFactory;
   fabrica::Functory functory;
+  fabrica::PreDeclFactory predeclFactory;
   msg::ErrorMsg errorMsg;
   ir::BlogModel* model;
 };

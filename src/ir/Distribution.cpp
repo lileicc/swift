@@ -2,7 +2,7 @@
 
 namespace swift { namespace ir {
 
-Distribution::Distribution(const std::string& distr, predecl::PreDeclDistr* refer)
+Distribution::Distribution(const std::string& distr, const predecl::PreDeclDistr* refer)
   :refer(refer), distr(distr) {
 }
 
@@ -13,7 +13,7 @@ const std::string& Distribution::getDistrName() {
   return distr;
 }
 
-predecl::PreDeclDistr* Distribution::getRefer() {
+const predecl::PreDeclDistr* Distribution::getRefer() {
   return refer;
 }
 

@@ -11,15 +11,15 @@ namespace swift { namespace ir {
 class Distribution :
   public swift::ir::Expr {
 public:
-  Distribution(const std::string& distr = std::string(""), predecl::PreDeclDistr* refer = NULL);
+  Distribution(const std::string& distr = std::string(""), const predecl::PreDeclDistr* refer = NULL);
   virtual ~Distribution();
 
-  predecl::PreDeclDistr* getRefer();
+  const predecl::PreDeclDistr* getRefer();
   
   const std::string& getDistrName();
 
 private:
-  predecl::PreDeclDistr* refer;
+  const predecl::PreDeclDistr* refer;
   std::string distr;
 };
 
