@@ -52,7 +52,7 @@ private:
 
   std::shared_ptr<ir::OprExpr> transExpr(absyn::OpExpr* expr);
 
-  void transExpr(absyn::FuncApp* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::FuncApp* expr);
 
   /**
    * create a declared type, shout error message if duplicate

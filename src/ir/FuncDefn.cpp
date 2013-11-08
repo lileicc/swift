@@ -12,7 +12,7 @@ FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp)
 FuncDefn::~FuncDefn() {
 }
 
-const std::shared_ptr<Ty> FuncDefn::getRetTyp() const {
+const Ty* FuncDefn::getRetTyp() const {
   return retTyp;
 }
 
@@ -24,7 +24,7 @@ const std::shared_ptr<Clause> FuncDefn::getBody() const {
   return body;
 }
 
-void FuncDefn::setBody(Clause* b) {
+void FuncDefn::setBody(std::shared_ptr<Clause> b) {
   body = b;
 }
 
