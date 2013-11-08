@@ -20,7 +20,7 @@ Functory::~Functory() {
 }
 
 bool Functory::addFuncDefn(const std::string& name, const ir::Ty* retTy,
-    std::vector<const ir::VarDecl*> args, bool isRand) {
+    std::vector<const std::shared_ptr<ir::VarDecl> > args, bool isRand) {
   if (getFunc(name, args) != NULL) return false;
   ir::FuncDefn* fd = new ir::FuncDefn(isRand, std::string(name), retTy);
   funTable[fd->toSignature()] = fd;
@@ -28,7 +28,7 @@ bool Functory::addFuncDefn(const std::string& name, const ir::Ty* retTy,
 }
 
 ir::FuncDefn* Functory::getFunc(const std::string& name,
-    const std::vector<const ir::VarDecl*> args) {
+    const std::vector<const std::shared_ptr<ir::VarDecl> > args) {
   ir::FuncDefn fd = ir::FuncDefn(true, name, NULL);
   auto element = funTable.find(fd.toSignature());
   if (element == funTable.end()) {
