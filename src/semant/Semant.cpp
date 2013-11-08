@@ -118,7 +118,7 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
 void Semant::transFuncDecl(absyn::FuncDecl* fd) {
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
   const std::string& name = fd->getFuncName().getValue();
-  std::vector<const std::shared_ptr<ir::VarDecl> > vds;
+  std::vector<std::shared_ptr<ir::VarDecl> > vds;
   for (size_t i = 0; i < fd->argSize(); i++) {
     vds.push_back(transVarDecl(fd->getArg(i)));
   }
@@ -139,7 +139,8 @@ void Semant::transOriginDecl(absyn::OriginDecl* od) {
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
   std::shared_ptr<ir::Expr> ret;
-  if (dynamic_cast<absyn::OpExpr*>(expr) != NULL) return (ret=transExpr((absyn::OpExpr*) expr));
+  if (dynamic_cast<absyn::OpExpr*>(expr) != NULL)
+    return (ret=transExpr((absyn::OpExpr*) expr));
   return ret;
 }
 
@@ -266,15 +267,22 @@ std::shared_ptr<ir::OprExpr> Semant::transExpr(absyn::OpExpr* expr) {
   return ret;
 }
 
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
+  //TODO
+  return NULL;
+}
+
 void Semant::transFuncBody(absyn::FuncDecl* fd) {
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
   const std::string& name = fd->getFuncName().getValue();
-  std::vector<const std::shared_ptr<ir::VarDecl> > vds;
+  std::vector<std::shared_ptr<ir::VarDecl> > vds;
   for (size_t i = 0; i < fd->argSize(); i++) {
     vds.push_back(transVarDecl(fd->getArg(i)));
   }
   ir::FuncDefn * fun = functory.getFunc(name, vds);
-
+  if (fun != NULL) {
+    fun->setBody( transExpr(fd->getExpr()) );
+  }
 }
 
 void Semant::transNumSt(absyn::NumStDecl* nd) {
@@ -297,7 +305,7 @@ const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
 
 const std::shared_ptr<ir::VarDecl> Semant::transVarDecl(const absyn::VarDecl & vd) {
   const ir::Ty* ty = transTy(vd.getTyp());
-  return std::shared_ptr<ir::VarDecl>(ty, vd.getVar().getValue());
+  return std::make_shared<ir::VarDecl>(ty, vd.getVar().getValue());
 }
 
 void Semant::error(int line, int col, const std::string& info) {
