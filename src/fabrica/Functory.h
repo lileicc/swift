@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 #include "../ir/Ty.h"
 #include "../ir/VarDecl.h"
 #include "../ir/FuncDefn.h"
@@ -28,14 +29,14 @@ public:
    * add a function with name, return type, and a list of arguments
    */
   bool addFuncDefn(const std::string& name, const ir::Ty* retTy,
-      std::vector<const ir::VarDecl*> args, bool isRand);
+      std::vector<const std::shared_ptr<ir::VarDecl> > args, bool isRand);
 
   /**
    * look up the table to find the function with the same signature
    * return NULL if not found
    */
   ir::FuncDefn* getFunc(const std::string& name,
-      const std::vector<const ir::VarDecl*> args);
+      const std::vector<const std::shared_ptr<ir::VarDecl> > args);
 private:
   std::map<std::string, ir::FuncDefn*> funTable;
 };

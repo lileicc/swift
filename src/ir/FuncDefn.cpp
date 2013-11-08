@@ -12,7 +12,7 @@ FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp)
 FuncDefn::~FuncDefn() {
 }
 
-const Ty* FuncDefn::getRetTyp() const {
+const std::shared_ptr<Ty> FuncDefn::getRetTyp() const {
   return retTyp;
 }
 
@@ -20,7 +20,7 @@ const std::string& FuncDefn::getName() const {
   return name;
 }
 
-Clause* FuncDefn::getBody() const {
+const std::shared_ptr<Clause> FuncDefn::getBody() const {
   return body;
 }
 
@@ -32,15 +32,15 @@ size_t FuncDefn::argSize() const {
   return args.size();
 }
 
-void FuncDefn::addArg(VarDecl* v) {
+void FuncDefn::addArg(const std::shared_ptr<VarDecl> v) {
   args.push_back(v);
 }
 
-const VarDecl* FuncDefn::getArg(int k) const {
+const std::shared_ptr<VarDecl> FuncDefn::getArg(int k) const {
   return args[k];
 }
 
-const std::vector<VarDecl*>& FuncDefn::getArgs() const {
+const std::vector<std::shared_ptr<VarDecl> >& FuncDefn::getArgs() const {
   return args;
 }
 
