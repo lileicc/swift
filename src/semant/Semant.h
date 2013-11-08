@@ -52,7 +52,7 @@ private:
 
   std::shared_ptr<ir::OprExpr> transExpr(absyn::OpExpr* expr);
 
-  void transExpr(absyn::FuncApp* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::FuncApp* expr);
 
   /**
    * create a declared type, shout error message if duplicate
@@ -96,7 +96,7 @@ private:
    * translate the variable declaration, which can be defined in
    * function header or quantified formula
    */
-  const ir::VarDecl* transVarDecl(const absyn::VarDecl & vd);
+  const std::shared_ptr<ir::VarDecl> transVarDecl(const absyn::VarDecl & vd);
 
   /**
    * lookup the nametype in tyFactory, if not exist, produce an error
