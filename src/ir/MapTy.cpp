@@ -3,8 +3,8 @@
 namespace swift {
 namespace ir {
 
-MapTy::MapTy(IRConstant typ, const Ty* from, const Ty* to)
-  :Ty(typ), from(from), to(to) {
+MapTy::MapTy(const Ty* from, const Ty* to)
+  :Ty(IRConstant::MAP), from(from), to(to) {
 }
 
 MapTy::~MapTy() {

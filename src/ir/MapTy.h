@@ -8,7 +8,7 @@ namespace ir {
 
 class MapTy :public swift::ir::Ty {
 public:
-  MapTy(IRConstant typ, const Ty* from, const Ty* to);
+  MapTy(const Ty* from, const Ty* to);
   virtual ~MapTy();
 
   const Ty* getFrom();

@@ -67,6 +67,16 @@ const ir::Ty * TypeFactory::getTy(const std::string& name) const {
   return element->second;
 }
 
+const ir::Ty * TypeFactory::getUpdateTy(ir::Ty* ty) {
+  auto element = tyTable.find(ty->toString());
+  if (element == tyTable.end()) {
+    tyTable[ty->toString()] = ty;
+    return ty;
+  }
+  delete ty;
+  return element->second;
+}
+
 const ir::OriginAttr * TypeFactory::getOriginAttr(const ir::NameTy* srcty,
     const std::string& name) const {
   auto element = attrTable.find(constructAttrSign(srcty, name));

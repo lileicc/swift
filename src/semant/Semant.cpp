@@ -7,6 +7,9 @@
 
 #include "Semant.h"
 
+#include <memory>
+#include <utility>
+
 #include "../ir/IRHeader.h"
 
 namespace swift {
@@ -140,8 +143,147 @@ void Semant::transOriginDecl(absyn::OriginDecl* od) {
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
   std::shared_ptr<ir::Expr> ret;
   if (dynamic_cast<absyn::OpExpr*>(expr) != NULL)
-    return (ret=transExpr((absyn::OpExpr*) expr));
+    return (ret = transExpr((absyn::OpExpr*) expr));
+  if (dynamic_cast<absyn::FuncApp*>(expr) != NULL)
+    return (ret = transExpr((absyn::FuncApp*) expr));
   return ret;
+}
+
+std::shared_ptr<ir::IfThen> Semant::transIfThen(absyn::IfExpr* expr) {
+  if (expr->getCond() == NULL || expr->getThen() == NULL) {
+    error(expr->line, expr->col, "Error! Condition and Then cannot be empty for IF!");
+    return nullptr;
+  }
+  std::shared_ptr<ir::IfThen> ptr(new ir::IfThen(transExpr(expr->getCond()), transClause(expr->getThen())));
+  if (ptr->getThen()->getTyp() == NULL) {
+    error(expr->line, expr->col, "Error! Then Clause cannot be NULL!");
+    return ptr;
+  }
+
+  // Type Check
+  ptr->setTyp(ptr->getThen()->getTyp());
+  if (expr->getElse() != NULL)
+    ptr->setElse(transExpr(expr->getElse()));
+  else
+    ptr->setElse(std::shared_ptr<ir::NullSymbol>(new ir::NullSymbol()));
+  if (ptr->getElse()->getTyp() == NULL)
+    ptr->getElse()->setTyp(ptr->getTyp());
+
+  return ptr;
+}
+
+std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
+  if (expr->size() != 2 || dynamic_cast<absyn::MapExpr*>(expr->get(0)) == NULL) {
+    error(expr->line, expr->col, "Wrong Arguments Format for <TabularCPD>!");
+    return nullptr;
+  }
+  std::shared_ptr<ir::Branch> ptr(new ir::Branch());
+  /*
+   * Note that We cannot directly apply trans MapExpr here!
+   *   since arguments of MapExpr are all Expr
+   *   while for Branch, arguments could be clauses
+   */
+  absyn::MapExpr* mp = (absyn::MapExpr*)(expr->get(0));
+  // Similar Type Checking Process to transExpr(MapExpr)
+  const ir::Ty* fromTy = NULL;
+  const ir::Ty* toTy = NULL;
+  for (size_t i = 0; i < mp->mapSize(); i++) {
+    std::shared_ptr<ir::Expr> symbol = transExpr(mp->getFrom(i));
+    std::shared_ptr<ir::Clause> clause = transClause(mp->getTo(i));
+    if (dynamic_cast<ir::ConstSymbol*>(symbol.get()) == NULL) {
+      error(expr->line, expr->col, "From Terms of the MapExpr in < TabularCPD > must be constant symbols!");
+      return ptr;
+    }
+    if (symbol->getTyp() != NULL) {
+      if (fromTy == NULL) fromTy = symbol->getTyp();
+      else {
+        if (fromTy != symbol->getTyp()) {
+          error(mp->line, mp->col, "From Terms of MapExpr must have the same type!");
+          return ptr;
+        }
+      }
+    }
+    if (clause->getTyp() != NULL) {
+      if (toTy == NULL) toTy = clause->getTyp();
+      else {
+        if (toTy != clause->getTyp()) {
+          error(mp->line, mp->col, "To Terms of MapExpr must have the same type!");
+          return ptr;
+        }
+      }
+    }
+    // Add a new Branch
+    ptr->addBranch(std::dynamic_pointer_cast<ir::ConstSymbol>(symbol), clause);
+  }
+  if (fromTy == NULL || toTy == NULL) {
+    error(expr->line, expr->col, "From terms or To terms of MapExpr cannot be all NULL!");
+    return ptr;
+  }
+  // Fill the type field of NullExpr
+  for (auto c : ptr->getConds())
+    if (c->getTyp() == NULL) c->setTyp(fromTy);
+  for (auto b : ptr->getBranches())
+    if (b->getTyp() == NULL) b->setTyp(toTy);
+  ptr->setTyp(toTy);
+  ptr->setVar(transExpr(expr->get(1)));
+  if (ptr->getVar()->getTyp() != toTy) {
+    error(expr->line, expr->col, "Argument type does not match!");
+    return ptr;
+  }
+  return ptr;
+}
+
+std::shared_ptr<ir::Clause> Semant::transClause(absyn::Expr* expr) {
+  std::shared_ptr<ir::Clause> ret;
+  if (dynamic_cast<absyn::IfExpr*>(expr) != NULL)
+    return transIfThen((absyn::IfExpr*) expr);
+}
+
+std::shared_ptr<ir::MapExpr> Semant::transExpr(absyn::MapExpr* expr) {
+  // Type Checking
+  std::shared_ptr<ir::MapExpr> ptr(new ir::MapExpr());
+  const ir::Ty* fromTy = NULL;
+  const ir::Ty* toTy = NULL;
+  for (size_t i = 0; i < expr->mapSize(); i++) {
+    ptr->addMap(transExpr(expr->getFrom(i)), transExpr(expr->getTo(i)));
+    // Check and Update From Type
+    if (ptr->getFrom(i)->getTyp() != NULL) {
+      if (fromTy != NULL) fromTy = ptr->getFrom(i)->getTyp();
+      else {
+        if (fromTy != ptr->getFrom(i)->getTyp()) {
+          error(expr->line, expr->col, "From Terms of MapExpr must have the same type!");
+          return ptr;
+        }
+      }
+    }
+    // Check and Update To Type
+    if (ptr->getTo(i)->getTyp() != NULL) {
+      if (toTy != NULL) toTy = ptr->getTo(i)->getTyp();
+      else {
+        if (toTy != ptr->getTo(i)->getTyp()) {
+          error(expr->line, expr->col, "To Terms of MapExpr must have the same type!");
+          return ptr;
+        }
+      }
+    }
+  }
+  if (fromTy == NULL || toTy == NULL) {
+    error(expr->line, expr->col, "There must be at least one non-null term in From Terms or To Terms!");
+    return ptr;
+  }
+  // Fill type for NullExpr
+  for (size_t i = 0; i < expr->mapSize(); i++) {
+    if (ptr->getFrom(i)->getTyp() == NULL)
+      ptr->getFrom(i)->setTyp(fromTy);
+    if (ptr->getTo(i)->getTyp() == NULL)
+      ptr->getTo(i)->setTyp(toTy);
+  }
+  // Set Type
+  ptr->setFromTyp(fromTy);
+  ptr->setToTyp(toTy);
+  ptr->setTyp(tyFactory.getUpdateTy(new ir::MapTy(fromTy, toTy)));
+
+  return ptr;
 }
 
 ir::IRConstant OprExpr_convertOpConst(absyn::AbsynConstant op) {
@@ -258,7 +400,7 @@ std::shared_ptr<ir::OprExpr> Semant::transExpr(absyn::OpExpr* expr) {
     ret->addArg(transExpr(expr->getRight()));
     if (ret->get(0) == nullptr || ret->get(1) == nullptr) return nullptr;
   }
-  // Type Check
+  // Type Checking
   ret->setTyp(OprExpr_checkType(ret->getOp(), ret->getArgs()));
   if (ret->getTyp() == NULL) {
     error(expr->line, expr->col, "Error Type Matching for OprExpr!");
@@ -267,9 +409,30 @@ std::shared_ptr<ir::OprExpr> Semant::transExpr(absyn::OpExpr* expr) {
   return ret;
 }
 
-std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
-  //TODO
-  return NULL;
+std::shared_ptr<ir::FunctionCall> Semant::transExpr(absyn::FuncApp* expr) {
+  //TODO: Function Call of Origin Function
+  // Parse Arguments
+  std::vector<std::shared_ptr<ir::Expr>> args;
+  std::vector<std::shared_ptr<ir::VarDecl>> decl;
+  for (size_t i = 0; i < expr->size(); i++) {
+    args.push_back(transExpr(expr->get(i)));
+    if (args.back() != nullptr)
+      decl.push_back(
+        std::shared_ptr<ir::VarDecl>
+          (new ir::VarDecl(args.back()->getTyp(), "")));
+  }
+
+  std::shared_ptr<ir::FunctionCall> ptr(
+    new ir::FunctionCall(functory.getFunc(expr->getFuncName().getValue(), decl)));
+  
+  if (ptr->getRefer() == NULL) {
+    error(expr->line, expr->col, "Error on Function Call! No Such Function.");
+    return ptr;
+  }
+
+  // Type Checking
+  ptr->setTyp(ptr->getRefer()->getRetTyp());
+  return ptr;
 }
 
 void Semant::transFuncBody(absyn::FuncDecl* fd) {
@@ -281,7 +444,7 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
   }
   ir::FuncDefn * fun = functory.getFunc(name, vds);
   if (fun != NULL) {
-    fun->setBody( transExpr(fd->getExpr()) );
+    fun->setBody( transClause(fd->getExpr()) );
   }
 }
 

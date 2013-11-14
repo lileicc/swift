@@ -29,7 +29,7 @@ int Ty::getDim() const {
   return dim;
 }
 
-std::string Ty::toString() {
+std::string Ty::toString() const {
   std::string ret(typ.getValue());
   for (int i = 0; i < dim; i++)
     ret.append("[]");

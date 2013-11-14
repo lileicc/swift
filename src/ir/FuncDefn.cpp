@@ -32,6 +32,10 @@ size_t FuncDefn::argSize() const {
   return args.size();
 }
 
+void FuncDefn::addArgs(const std::vector<std::shared_ptr<VarDecl>>& a) {
+  args = a;
+}
+
 void FuncDefn::addArg(const std::shared_ptr<VarDecl> v) {
   args.push_back(v);
 }
