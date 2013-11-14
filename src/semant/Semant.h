@@ -45,6 +45,12 @@ private:
 
   std::shared_ptr<ir::Expr> transExpr(absyn::Expr* expr);
 
+  std::shared_ptr<ir::IfThen> transIfThen(absyn::IfExpr* expr);
+
+  std::shared_ptr<ir::Branch> transBranch(absyn::DistrExpr* expr);
+
+  std::shared_ptr<ir::Clause> transClause(absyn::Expr* expr);
+
   /*
    * Special Type Checking Function for OprExpr
    */
@@ -52,7 +58,9 @@ private:
 
   std::shared_ptr<ir::OprExpr> transExpr(absyn::OpExpr* expr);
 
-  std::shared_ptr<ir::Expr> transExpr(absyn::FuncApp* expr);
+  std::shared_ptr<ir::FunctionCall> transExpr(absyn::FuncApp* expr);
+
+  std::shared_ptr<ir::MapExpr> transExpr(absyn::MapExpr* expr);
 
   /**
    * create a declared type, shout error message if duplicate

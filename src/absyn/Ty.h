@@ -26,7 +26,7 @@ public:
   int getDim() const;
 
   // For Debugging Use
-  std::string toString();
+  std::string toString() const;
 
 private:
   Symbol typ;

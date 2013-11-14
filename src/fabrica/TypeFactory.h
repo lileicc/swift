@@ -41,6 +41,13 @@ public:
   const ir::Ty* getTy(const std::string& name) const;
 
   /**
+  * get the Ty associated with the name
+  *   if not exists, update it
+  */
+
+  const ir::Ty* getUpdateTy(ir::Ty* ty);
+
+  /**
    * add the string symbol for the instance of the type
    * return
    *   false if the symbol is already defined.

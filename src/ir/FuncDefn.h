@@ -18,6 +18,7 @@ public:
   void setBody(std::shared_ptr<Clause> b);
   size_t argSize() const;
   void addArg(std::shared_ptr<VarDecl> v);
+  void addArgs(const std::vector<std::shared_ptr<VarDecl>>& a);
   const std::shared_ptr<VarDecl> getArg(int k) const;
   const std::vector<std::shared_ptr<VarDecl> >& getArgs() const;
   bool isRand() const;

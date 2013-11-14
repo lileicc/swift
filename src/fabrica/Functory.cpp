@@ -30,6 +30,7 @@ bool Functory::addFuncDefn(const std::string& name, const ir::Ty * retTy,
 ir::FuncDefn* Functory::getFunc(const std::string& name,
     const std::vector<std::shared_ptr<ir::VarDecl> > args) {
   ir::FuncDefn fd = ir::FuncDefn(true, name, NULL);
+  fd.addArgs(args);
   auto element = funTable.find(fd.toSignature());
   if (element == funTable.end()) {
     return NULL;
