@@ -237,6 +237,10 @@ std::shared_ptr<ir::Clause> Semant::transClause(absyn::Expr* expr) {
   std::shared_ptr<ir::Clause> ret;
   if (dynamic_cast<absyn::IfExpr*>(expr) != NULL)
     return transIfThen((absyn::IfExpr*) expr);
+  if (dynamic_cast<absyn::DistrExpr*>(expr) != NULL &&
+    ((absyn::DistrExpr*)expr)->getDistrName().getValue() == "TabularCPD")
+    return transBranch((absyn::DistrExpr*) expr);
+  return transExpr(expr);
 }
 
 std::shared_ptr<ir::MapExpr> Semant::transExpr(absyn::MapExpr* expr) {
