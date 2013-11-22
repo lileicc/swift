@@ -50,7 +50,7 @@ vector<int> mark_truecolor;
 vector<int> ret_truecolor;
 int get_truecolor(int b) {
   // get address
-  if (b >= mark_truecolor.size()) {
+  if (b >= mark_truecolor.size()) { // comment by leili, not sure if this is needed or maybe not here, rather it should appear in number statement of ball
     mark_truecolor.resize(b+1);
     ret_truecolor.resize(b+1);
   }
@@ -72,7 +72,7 @@ int get_balldrawn(int d) {
   int&ret = ret_balldrawn[d];
   int n = get_ball_n();
   if (n == 0) ret = -1; // NULL
-  else ret = rand() % get_ball_n();
+  else ret = rand() % n;
   return ret;
 }
 
