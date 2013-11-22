@@ -124,9 +124,9 @@ std::map<int, double> LWSamplerUrnBall::getResult() {
 
 void LWSamplerUrnBall::sample() {
   // check evidence
-  double w = 0;
+  double w = 1;
   for (size_t i = 0; i < observed_obscolor.size(); ++i)
-    w += observe_obscolor(i, observed_obscolor[i]);
+    w *= observe_obscolor(i, observed_obscolor[i]);
 
   // get query
   /*
@@ -151,7 +151,7 @@ LWSamplerUrnBall::~LWSamplerUrnBall() {
 
 double LWSamplerUrnBall::likeli_obscolor(int d) {
   int& val = value_obscolor[d];
-  double w;
+  double w = 1;
   int b = get_balldrawn(d);
   if (b != -1) {
     switch (get_truecolor(b)) {
@@ -162,7 +162,7 @@ double LWSamplerUrnBall::likeli_obscolor(int d) {
       w = cate3_prob[val];
       break;
     }
-  } else w = 1;
+  } else w = 0;
   return w;
 }
 
