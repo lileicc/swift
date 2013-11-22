@@ -184,7 +184,7 @@ void run() {
   OutputInt(ans, "#{Ball b}");
 
   t = clock() - t;
-  printf("Time Elapsed = %d.%03ds\n", t/1000, t%1000);
+  printf("Time Elapsed = %d.%03ds\n", t/1000000, t%1000000);
 }
 
 }

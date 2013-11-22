@@ -6,6 +6,7 @@
  */
 
 #include "rejsampler_urnball.h"
+#include "LWSamplerUrnBall.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -14,6 +15,14 @@
 using namespace std;
 int main() {
   URNBALL_REJ::run();
-  std::system("pause");
+
+  int t = clock();
+
+  lwsampler::LWSamplerUrnBall lwsampler;
+  lwsampler.sample(1000000);
+  t = clock() - t;
+  printf("sampling using LWSampler\n");
+  lwsampler.printResult();
+  printf("Time Elapsed = %d.%03ds\n", t/1000000, t%1000000);
   return 0;
 }
