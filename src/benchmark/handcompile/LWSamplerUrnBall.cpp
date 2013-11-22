@@ -102,7 +102,7 @@ void LWSamplerUrnBall::printResult() {
     printf("please sample first!\n");
     return;
   }
-  printf("Samples = %d\n", loops);
+  printf("Samples = %d\n", loops - 1);
   printf("++++++++++++++++++++++++++++++++++\n");
   printf("Result for #{Ball b}:\n");
   std::map<int, double> result = getResult();
@@ -113,8 +113,8 @@ void LWSamplerUrnBall::printResult() {
 
 std::map<int, double> LWSamplerUrnBall::getResult() {
   std::map<int, double> acc;
-  for (int i = 0; i < loops; ++i)
-    if (weights[i] > 1e-9)
+  for (int i = 1; i < loops; ++i)
+//    if (weights[i] > 1e-9)
       acc[ans[i]] += weights[i];
   for (auto it = acc.begin(); it != acc.end(); it++) {
     it->second = (it->second) / total_weight;
@@ -167,14 +167,16 @@ double LWSamplerUrnBall::likeli_obscolor(int d) {
 }
 
 void LWSamplerUrnBall::sample(int n) {
-  loops = n;
+  loops = n + 1;
   ans = new int[loops];
   cur_loop = -1;
   weights = new double[loops];
   memset(weights, 0, sizeof(weights));
   memset(ans, 0, sizeof(ans));
   total_weight = 0;
-  for (cur_loop = 0; cur_loop < loops; ++ cur_loop)
+  mark_num_ball = 0;
+  num_ball = -1;
+  for (cur_loop = 1; cur_loop < loops; ++ cur_loop)
     sample();
 }
 
