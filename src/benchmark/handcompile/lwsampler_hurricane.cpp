@@ -29,9 +29,11 @@ using namespace std;
 
 namespace LWSAMPLER {
 std::random_device rd;
-std::mt19937 gen(rd());
+//std::mt19937 gen(rd());
+std::default_random_engine gen(rd());
+
 const double eps = 1e-9;
-const int Loops = 2000000;
+const int Loops = 1000000;
 
 inline int RND() {
   return ((rand() & 32767) << 15) + (rand() & 32767);

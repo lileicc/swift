@@ -12,8 +12,9 @@
 
 namespace lwsampler {
 
-std::default_random_engine gen;
-//std::mt19937_64 gen;
+std::random_device rd;
+std::default_random_engine gen(rd());
+//std::mt19937_64 gen(rd());
 std::poisson_distribution<int> poisson6(6.0);
 
 /*

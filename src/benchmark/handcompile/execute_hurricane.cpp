@@ -16,6 +16,6 @@ using namespace std;
 int main() {
   LWSAMPLER::run();
   REJECTSAMPLER::run();
-  std::system("pause");
+//  std::system("pause");
   return 0;
 }
