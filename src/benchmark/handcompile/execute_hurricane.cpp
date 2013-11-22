@@ -14,19 +14,8 @@
 
 using namespace std;
 int main() {
-
   LWSAMPLER::run();
-
   REJECTSAMPLER::run();
-
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<> dis(0, 1);
-  double a = dis(gen);
-  std::cout<<a<<std::endl;
-
-  printf("%.2lf\n", a);
-
   std::system("pause");
   return 0;
 }
