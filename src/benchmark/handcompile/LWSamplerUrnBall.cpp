@@ -13,6 +13,7 @@
 namespace lwsampler {
 
 std::default_random_engine gen;
+//std::mt19937_64 gen;
 std::poisson_distribution<int> poisson6(6.0);
 
 /*
@@ -141,6 +142,8 @@ void LWSamplerUrnBall::sample() {
 LWSamplerUrnBall::LWSamplerUrnBall() : num_ball(0) {
   cur_loop = -1;
   total_weight = 0;
+  ans = NULL;
+  weights = NULL;
   init_observation();
 }
 
@@ -167,6 +170,8 @@ double LWSamplerUrnBall::likeli_obscolor(int d) {
 }
 
 void LWSamplerUrnBall::sample(int n) {
+  delete [] ans;
+  delete [] weights;
   loops = n + 1;
   ans = new int[loops];
   cur_loop = -1;

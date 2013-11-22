@@ -105,11 +105,11 @@ int get_obscolor(int d) {
   return ret;
 }
 
-const int Loops = 10000000;
+int Loops = 10000000;
 
 double total_weight;
-double Wei[Loops + 1];
-int ans[Loops + 1];
+double* Wei;
+int* ans;
 int valid;
 
 void single_sample() {
@@ -163,10 +163,11 @@ void OutputInt(int* ans, const char * buf) {
   }
 }
 
-void run() {
-
+void run(int N) {
+  Loops = N;
   int t = clock();
-
+  ans = new int[Loops+1];
+  Wei = new double[Loops+1];
   // Init
   memset(Wei, 0, sizeof(Wei));
   total_weight = 0;
@@ -185,6 +186,8 @@ void run() {
 
   t = clock() - t;
   printf("Time Elapsed = %d.%03ds\n", t/1000000, t%1000000);
+  delete [] ans;
+  delete [] Wei;
 }
 
 }

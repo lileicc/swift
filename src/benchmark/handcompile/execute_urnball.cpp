@@ -13,13 +13,19 @@
 #include <random>
 #include <cstdio>
 using namespace std;
-int main() {
-  URNBALL_REJ::run();
+int main(int argc, char* argv[]) {
+
+  int N = 1000000; // number of samples
+  if (argc > 2) {
+    N = atoi(argv[1]);
+  }
+
+  URNBALL_REJ::run(N);
 
   int t = clock();
 
   lwsampler::LWSamplerUrnBall lwsampler;
-  lwsampler.sample(1000000);
+  lwsampler.sample(N);
   printf("sampling using LWSampler\n");
   lwsampler.printResult();
   t = clock() - t;

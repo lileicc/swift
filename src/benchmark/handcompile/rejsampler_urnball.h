@@ -8,7 +8,7 @@
 #pragma once
 
 namespace URNBALL_REJ {
-  void run();
+  void run(int N);
 }
 
 
