@@ -10,12 +10,14 @@
 namespace swift {
 namespace random {
 
-SwiftDistribution::SwiftDistribution() {
+template <typename T>
+SwiftDistribution<T>::SwiftDistribution() {
   // TODO Auto-generated constructor stub
 
 }
 
-SwiftDistribution::~SwiftDistribution() {
+template <typename T>
+SwiftDistribution<T>::~SwiftDistribution() {
   // TODO Auto-generated destructor stub
 }
 
