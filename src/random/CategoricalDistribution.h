@@ -18,7 +18,7 @@ public:
   CategoricalDistribution(std::initializer_list<double> il);
   ~CategoricalDistribution();
 private:
-  std::discrete_distribution dist;
+  std::discrete_distribution<int> dist;
 };
 
 } /* namespace random */
