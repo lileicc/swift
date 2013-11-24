@@ -10,18 +10,32 @@
 namespace swift {
 namespace code {
 
-FunctionDecl::FunctionDecl() {
-  // TODO Auto-generated constructor stub
+FunctionDecl* FunctionDecl::createFunctionDecl(DeclContext* context,
+    std::string name, QualType ty, bool inlineTag) {
+  FunctionDecl* fd = new FunctionDecl(context, name, ty, inlineTag);
+  context->addDecl(fd);
+  return fd;
+}
 
+FunctionDecl::FunctionDecl(DeclContext * context, std::string name, QualType ty,
+    bool inlineTag) :
+    parent(context), name(name), retTy(ty), inlineTag(inlineTag) {
 }
 
 FunctionDecl::~FunctionDecl() {
-  // TODO Auto-generated destructor stub
 }
-
-} /* namespace code */
-} /* namespace swift */
 
 void swift::code::FunctionDecl::addStmt(Stmt* st) {
   body.addStmt(st);
 }
+
+void FunctionDecl::setParams(std::vector<ParamVarDecl*> params) {
+  this->params = params;
+}
+
+bool swift::code::FunctionDecl::isInline() {
+  return inlineTag;
+}
+
+} /* namespace code */
+} /* namespace swift */

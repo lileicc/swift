@@ -8,14 +8,17 @@
 #pragma once
 
 #include "Stmt.h"
+#include "Expr.h"
 
 namespace swift {
 namespace code {
 
 class ReturnStmt: public swift::code::Stmt {
 public:
-  ReturnStmt();
+  ReturnStmt(Expr* expr);
   ~ReturnStmt();
+private:
+  Expr* expr;
 };
 
 } /* namespace code */
