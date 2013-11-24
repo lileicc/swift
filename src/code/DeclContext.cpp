@@ -20,7 +20,7 @@ DeclContext::~DeclContext() {
 }
 
 
-void DeclContext::addDecl(std::shared_ptr<Decl> decl) {
+void DeclContext::addDecl(Decl* decl) {
   members.push_back(decl);
 }
 

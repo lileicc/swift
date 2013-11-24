@@ -11,18 +11,17 @@
 namespace swift {
 namespace code {
 
-FieldDecl::FieldDecl(std::shared_ptr<ClassDecl> cd, std::string name,
-    std::shared_ptr<QualType> ty) {
+FieldDecl::FieldDecl(ClassDecl* cd, std::string name,
+    std::shared_ptr<QualType> ty) : parent(cd), id(name), ty(ty) {
 }
 
 FieldDecl::~FieldDecl() {
-  // TODO Auto-generated destructor stub
+  ty = NULL;
 }
 
-std::shared_ptr<FieldDecl> FieldDecl::createFieldDecl(
-    std::shared_ptr<ClassDecl> cd, std::string name,
+FieldDecl* FieldDecl::createFieldDecl(ClassDecl* cd, std::string name,
     std::shared_ptr<QualType> ty) {
-  std::shared_ptr<FieldDecl> fd(new FieldDecl(cd, name, ty));
+  FieldDecl* fd = new FieldDecl(cd, name, ty);
   cd->addDecl(fd);
   return fd;
 }

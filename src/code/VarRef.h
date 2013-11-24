@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <string>
 #include "Expr.h"
 
 namespace swift {
@@ -14,8 +15,10 @@ namespace code {
 
 class VarRef: public swift::code::Expr {
 public:
-  VarRef();
+  VarRef(std::string id);
   ~VarRef();
+private:
+  std::string id;
 };
 
 } /* namespace code */

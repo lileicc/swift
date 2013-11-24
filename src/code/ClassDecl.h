@@ -6,10 +6,9 @@
  */
 
 #pragma once
-#include <memory>
 #include <string>
 #include "Decl.h"
-#include "NamespaceDecl.h"
+#include "DeclContext.h"
 
 
 namespace swift {
@@ -17,9 +16,12 @@ namespace code {
 
 class ClassDecl: public Decl, public DeclContext {
 public:
-  ClassDecl(std::shared_ptr<NamespaceDecl> ns, std::string name);
+  ClassDecl(DeclContext* ns, std::string name);
   ~ClassDecl();
-  static std::shared_ptr<ClassDecl> createClassDecl(std::shared_ptr<NamespaceDecl> ns, const std::string & name);
+  static ClassDecl* createClassDecl(DeclContext* ns, const std::string & name);
+private:
+  DeclContext* parent; // usually it is a namespace
+  std::string name;
 };
 
 } /* namespace code */

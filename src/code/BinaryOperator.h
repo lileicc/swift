@@ -12,10 +12,18 @@
 namespace swift {
 namespace code {
 
+enum class OpKind {
+  BO_ASSIGN         // Assignment
+};
+
 class BinaryOperator: public swift::code::Expr {
 public:
-  BinaryOperator();
+  BinaryOperator(Expr* lhs, Expr* rhs, OpKind op);
   ~BinaryOperator();
+private:
+  Expr* lhs; // left hand side
+  Expr* rhs; // right hand side
+  OpKind op;
 };
 
 } /* namespace code */

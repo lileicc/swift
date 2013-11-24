@@ -12,6 +12,11 @@
 #include "ClassDecl.h"
 #include "MethodDecl.h"
 #include "FieldDecl.h"
+#include "QualType.h"
+#include "NamespaceDecl.h"
+#include "BinaryOperator.h"
+#include "VarRef.h"
+#include "IntegerLiteral.h"
 
 namespace swift {
 namespace code {

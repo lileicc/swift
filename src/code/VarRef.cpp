@@ -10,13 +10,10 @@
 namespace swift {
 namespace code {
 
-VarRef::VarRef() {
-  // TODO Auto-generated constructor stub
-
+VarRef::VarRef(std::string id) : id(id) {
 }
 
 VarRef::~VarRef() {
-  // TODO Auto-generated destructor stub
 }
 
 } /* namespace code */

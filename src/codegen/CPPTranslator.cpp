@@ -11,14 +11,16 @@
 namespace swift {
 namespace codegen {
 
+std::shared_ptr<code::QualType> CPPTranslator::INT_TYPE(new code::QualType("int"));
+std::shared_ptr<code::QualType> CPPTranslator::DOUBLE_TYPE(new code::QualType("double"));
+std::shared_ptr<code::QualType> CPPTranslator::STRING_TYPE(new code::QualType("std::string"));
+std::string CPPTranslator::DISTINCT_FIELDNAME = "__name_";
+
 namespace {
 std::string getVarOfNumType(std::string name) {
   return "__num_" + name;
 }
 }
-
-static std::shared_ptr<code::QualType> INT_TYPE(new code::QualType("int"));
-static std::shared_ptr<code::QualType> DOUBLE_TYPE(new code::QualType("double"));
 
 CPPTranslator::CPPTranslator() {
   // TODO Auto-generated constructor stub
@@ -32,24 +34,30 @@ CPPTranslator::~CPPTranslator() {
 void CPPTranslator::translate(swift::ir::BlogModel* model) {
   for (auto ty : model->getTypes())
     transTypeDomain(ty);
+  for (auto fun : model->getRandFuncs())
+    transFun(fun);
 }
 
-std::shared_ptr<code::Code> CPPTranslator::getResult() const {
+code::Code* CPPTranslator::getResult() const {
   return prog;
 }
 
 void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   const std::string& name = td->getName();
-  std::shared_ptr<code::ClassDecl> cd = code::ClassDecl::createClassDecl(coreNs, name);
+  code::ClassDecl* cd = code::ClassDecl::createClassDecl(coreNs, name);
+  code::FieldDecl::createFieldDecl(cd, DISTINCT_FIELDNAME, STRING_TYPE);
   int len = td->getPreLen();
   if (len > 0) {
     std::string numvar = getVarOfNumType(name);
-    code::FieldDecl::createFieldDecl(coreCls, numvar, INT_TYPE);
-
+    code::FieldDecl* fd = code::FieldDecl::createFieldDecl(coreCls, numvar, INT_TYPE);
+    coreClsInit->addStmt(new code::BinaryOperator(new code::VarRef(numvar), new code::IntegerLiteral(len), code::OpKind::BO_ASSIGN) );
+    // TODO please add the corresponding distinct name
   }
 }
 
-
+void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> td) {
+  // TODO add sampleing function and likelihood calculation function
+}
 
 } /* namespace codegen */
 } /* namespace swift */

@@ -7,7 +7,6 @@
 
 #pragma once
 #include <vector>
-#include <memory>
 #include "Decl.h"
 
 
@@ -18,9 +17,9 @@ class DeclContext {
 public:
   DeclContext();
   virtual ~DeclContext();
-  virtual void addDecl(std::shared_ptr<Decl> decl);
+  virtual void addDecl(Decl* decl);
 private:
-  std::vector<std::shared_ptr<Decl> > members; // member declaration
+  std::vector<Decl* > members; // member declaration
 };
 
 } /* namespace code */

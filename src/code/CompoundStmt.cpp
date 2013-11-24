@@ -19,5 +19,9 @@ CompoundStmt::~CompoundStmt() {
   // TODO Auto-generated destructor stub
 }
 
+void CompoundStmt::addStmt(Stmt* st) {
+  body.push_back(st);
+}
+
 } /* namespace code */
 } /* namespace swift */

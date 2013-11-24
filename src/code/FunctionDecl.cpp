@@ -21,3 +21,7 @@ FunctionDecl::~FunctionDecl() {
 
 } /* namespace code */
 } /* namespace swift */
+
+void swift::code::FunctionDecl::addStmt(Stmt* st) {
+  body.addStmt(st);
+}

@@ -10,13 +10,12 @@
 namespace swift {
 namespace code {
 
-BinaryOperator::BinaryOperator() {
-  // TODO Auto-generated constructor stub
-
+BinaryOperator::BinaryOperator(Expr* lhs, Expr* rhs, OpKind op) : lhs(lhs), rhs(rhs), op(op) {
 }
 
 BinaryOperator::~BinaryOperator() {
-  // TODO Auto-generated destructor stub
+  delete lhs;
+  delete rhs;
 }
 
 } /* namespace code */
