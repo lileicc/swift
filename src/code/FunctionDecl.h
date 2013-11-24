@@ -8,11 +8,12 @@
 #pragma once
 
 #include "Decl.h"
+#include "DeclContext.h"
 
 namespace swift {
 namespace code {
 
-class FunctionDecl: public swift::code::Decl {
+class FunctionDecl: public Decl, public DeclContext {
 public:
   FunctionDecl();
   ~FunctionDecl();

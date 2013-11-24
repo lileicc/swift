@@ -23,7 +23,7 @@ public:
   void addRefer(NameTy* ref);
   NameTy* getRefer();
   void setPreLen(int l);
-  int getPreLen();
+  int getPreLen(); // number of predefined symbols in distinct statement
   void addNumberStmt(NumberStmt* num);
   const std::vector<NumberStmt*>& getAllNumberStmt() const;
   NumberStmt* getNumberStmt(int k);

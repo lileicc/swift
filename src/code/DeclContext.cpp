@@ -1,31 +1,28 @@
 /*
- * Code.cpp
+ * DeclContext.cpp
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
  */
 
-#include "Code.h"
+#include "DeclContext.h"
 
 namespace swift {
 namespace code {
 
-Code::Code() {
+DeclContext::DeclContext() {
   // TODO Auto-generated constructor stub
 
 }
 
-Code::~Code() {
+DeclContext::~DeclContext() {
   // TODO Auto-generated destructor stub
 }
 
-void Code::addDecl(Decl d) {
-}
 
-void Code::addStmt(Stmt st) {
+void DeclContext::addDecl(std::shared_ptr<Decl> decl) {
+  members.push_back(decl);
 }
-
 
 } /* namespace code */
 } /* namespace swift */
-

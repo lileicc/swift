@@ -1,22 +1,23 @@
 /*
- * NamespaceDecl.h
+ * QualType.h
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
  */
 
 #pragma once
-
-#include "Decl.h"
-#include "DeclContext.h"
+#include <string>
 
 namespace swift {
 namespace code {
 
-class NamespaceDecl: public Decl, public DeclContext {
+class QualType {
 public:
-  NamespaceDecl();
-  ~NamespaceDecl();
+  QualType(std::string name);
+  ~QualType();
+
+private:
+  std::string name;
 };
 
 } /* namespace code */
