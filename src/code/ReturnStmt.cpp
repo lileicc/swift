@@ -10,13 +10,11 @@
 namespace swift {
 namespace code {
 
-ReturnStmt::ReturnStmt() {
-  // TODO Auto-generated constructor stub
-
+ReturnStmt::ReturnStmt(Expr* expr) : expr(expr) {
 }
 
 ReturnStmt::~ReturnStmt() {
-  // TODO Auto-generated destructor stub
+  delete expr;
 }
 
 } /* namespace code */

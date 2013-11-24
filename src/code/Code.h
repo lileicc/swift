@@ -10,13 +10,14 @@
 #include "Stmt.h"
 #include "Decl.h"
 #include "ClassDecl.h"
-#include "MethodDecl.h"
+#include "FunctionDecl.h"
 #include "FieldDecl.h"
 #include "QualType.h"
 #include "NamespaceDecl.h"
 #include "BinaryOperator.h"
 #include "VarRef.h"
 #include "IntegerLiteral.h"
+#include "ReturnStmt.h"
 
 namespace swift {
 namespace code {

@@ -25,14 +25,14 @@ private:
   code::Code* prog; // holder for result target code
   code::ClassDecl* coreCls; // main Class for the sampler;
   code::NamespaceDecl* coreNs; // main namespace
-  code::MethodDecl* coreClsInit; // init function for main class
+  code::FunctionDecl* coreClsInit; // init function for main class
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   void transFun(std::shared_ptr<ir::FuncDefn> td);
 
-  static std::shared_ptr<code::QualType> INT_TYPE;
-  static std::shared_ptr<code::QualType> DOUBLE_TYPE;
-  static std::shared_ptr<code::QualType> STRING_TYPE;
-  static std::string DISTINCT_FIELDNAME;
+  static const code::QualType INT_TYPE;
+  static const code::QualType DOUBLE_TYPE;
+  static const code::QualType STRING_TYPE;
+  static const std::string DISTINCT_FIELDNAME;
 
 };
 
