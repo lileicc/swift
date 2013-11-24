@@ -6,16 +6,20 @@
  */
 
 #pragma once
-
+#include <memory>
+#include <string>
 #include "Decl.h"
+#include "NamespaceDecl.h"
+
 
 namespace swift {
 namespace code {
 
-class ClassDecl: public swift::code::Decl {
+class ClassDecl: public Decl, public DeclContext {
 public:
-  ClassDecl();
+  ClassDecl(std::shared_ptr<NamespaceDecl> ns, std::string name);
   ~ClassDecl();
+  static std::shared_ptr<ClassDecl> createClassDecl(std::shared_ptr<NamespaceDecl> ns, const std::string & name);
 };
 
 } /* namespace code */
