@@ -11,19 +11,16 @@
 namespace swift {
 namespace code {
 
-ClassDecl::ClassDecl(std::shared_ptr<NamespaceDecl> ns, std::string name) {
-  // TODO Auto-generated constructor stub
-
+ClassDecl::ClassDecl(DeclContext* ns, std::string name) : parent(ns), name(name) {
 }
 
 ClassDecl::~ClassDecl() {
-  // TODO Auto-generated destructor stub
 }
 
 
 
-std::shared_ptr<ClassDecl> ClassDecl::createClassDecl(std::shared_ptr<NamespaceDecl> ns, const std::string& name) {
-  std::shared_ptr<ClassDecl> cd(new ClassDecl(ns, name));
+ClassDecl* ClassDecl::createClassDecl(DeclContext* ns, const std::string& name) {
+  ClassDecl* cd = new ClassDecl(ns, name);
   ns->addDecl(cd);
   return cd;
 }

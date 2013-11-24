@@ -10,14 +10,10 @@
 namespace swift {
 namespace code {
 
-IntegerLiteral::IntegerLiteral() {
-  // TODO Auto-generated constructor stub
-
+IntegerLiteral::IntegerLiteral(int v) : val(v) {
 }
 
-IntegerLiteral::~IntegerLiteral() {
-  // TODO Auto-generated destructor stub
-}
+IntegerLiteral::~IntegerLiteral() {}
 
 } /* namespace code */
 } /* namespace swift */

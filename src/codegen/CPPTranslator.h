@@ -19,17 +19,20 @@ public:
   CPPTranslator();
   virtual ~CPPTranslator();
   void translate(swift::ir::BlogModel* model);
-  std::shared_ptr<code::Code> getResult() const;
+  code::Code* getResult() const;
 
 private:
-  std::shared_ptr<code::Code> prog; // holder for result target code
-  std::shared_ptr<code::ClassDecl> coreCls; // main Class for the sampler;
-  std::shared_ptr<code::NamespaceDecl> coreNs; // main namespace
-  std::shared_ptr<code::MethodDecl> coreClsInit; // init function for main class
+  code::Code* prog; // holder for result target code
+  code::ClassDecl* coreCls; // main Class for the sampler;
+  code::NamespaceDecl* coreNs; // main namespace
+  code::MethodDecl* coreClsInit; // init function for main class
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
+  void transFun(std::shared_ptr<ir::FuncDefn> td);
 
   static std::shared_ptr<code::QualType> INT_TYPE;
   static std::shared_ptr<code::QualType> DOUBLE_TYPE;
+  static std::shared_ptr<code::QualType> STRING_TYPE;
+  static std::string DISTINCT_FIELDNAME;
 
 };
 

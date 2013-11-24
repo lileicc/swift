@@ -14,8 +14,10 @@ namespace code {
 
 class IntegerLiteral: public swift::code::Expr {
 public:
-  IntegerLiteral();
+  IntegerLiteral(int v);
   ~IntegerLiteral();
+private:
+  int val;
 };
 
 } /* namespace code */
