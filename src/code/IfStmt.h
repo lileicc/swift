@@ -6,11 +6,12 @@
  */
 
 #pragma once
+#include "Stmt.h"
 
 namespace swift {
 namespace code {
 
-class IfStmt: public swift::absyn::Stmt {
+class IfStmt: public swift::code::Stmt {
 public:
   IfStmt();
   ~IfStmt();
