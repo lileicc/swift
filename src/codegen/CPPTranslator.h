@@ -27,12 +27,17 @@ private:
   code::NamespaceDecl* coreNs; // main namespace
   code::FunctionDecl* coreClsInit; // init function for main class
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
-  void transFun(std::shared_ptr<ir::FuncDefn> td);
+  void transFun(std::shared_ptr<ir::FuncDefn> fd);
+  code::Stmt* transClause(std::shared_ptr<ir::Clause> clause);
+
+  static code::QualType mapIRTypeToCodeType(const ir::Ty * ty); // map ir type to code type
+
 
   static const code::QualType INT_TYPE;
   static const code::QualType DOUBLE_TYPE;
   static const code::QualType STRING_TYPE;
-  static const std::string DISTINCT_FIELDNAME;
+  static const code::QualType BOOL_TYPE;
+  static const std::string DISTINCT_FIELDNAME; // field name inside class for declared type
 
 };
 

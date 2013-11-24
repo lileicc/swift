@@ -13,6 +13,7 @@ namespace codegen {
 const code::QualType CPPTranslator::INT_TYPE("int");
 const code::QualType CPPTranslator::DOUBLE_TYPE("double");
 const code::QualType CPPTranslator::STRING_TYPE("std::string");
+const code::QualType CPPTranslator::BOOL_TYPE("bool");
 const std::string CPPTranslator::DISTINCT_FIELDNAME = "__name_";
 
 namespace {
@@ -78,11 +79,36 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   int numstlen = td->getNumberStmtSize();
   if (numstlen > 0) {
     // TODO create functions for number statement and their likelihood
+
   }
 }
 
-void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> td) {
-  // TODO add sampleing function and likelihood calculation function
+void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
+  const std::string & name = fd->getName();
+  std::string getterfunname = getGetterFunName(name);
+  code::QualType retty = mapIRTypeToCodeType(fd->getRetTyp());
+  // translate random function
+  // create gettfunname function
+  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls, getterfunname, retty);
+  fun->addStmt(transClause(fd->getBody()));
+  if (fd->isRand()) {
+    // TODO add likelihood function
+
+  }
+}
+
+code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause) {
+ // TODO translate clause
+}
+
+code::QualType CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
+  switch (ty->getTyp()) {
+  case ir::IRConstant::BOOL: return BOOL_TYPE;
+  case ir::IRConstant::INT: return INT_TYPE;
+  case ir::IRConstant::DOUBLE: return DOUBLE_TYPE;
+  case ir::IRConstant::STRING: return STRING_TYPE;
+  default: return INT_TYPE; // all declared type return int type
+  }
 }
 
 } /* namespace codegen */
