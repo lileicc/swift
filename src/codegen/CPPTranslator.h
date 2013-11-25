@@ -31,9 +31,10 @@ private:
       std::string valuevarname, std::string markvarname);
   code::Stmt* transClause(std::shared_ptr<ir::Clause> clause,
       std::string retvar);
-  code::Expr* transExpr(std::shared_ptr<ir::Expr> expr);
   code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar);
   code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> ith, std::string retvar);
+  code::Expr* transExpr(std::shared_ptr<ir::Expr> expr);
+  code::Expr* transDistribution(std::shared_ptr<ir::Distribution> dist);
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
       const std::shared_ptr<ir::VarDecl> var);
   std::vector<code::ParamVarDecl*> transParamVarDecls(
