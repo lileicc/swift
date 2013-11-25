@@ -245,7 +245,16 @@ code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
 }
 
 code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
+  std::shared_ptr<ir::Distribution> dist = std::dynamic_pointer_cast<ir::Distribution>(expr);
+  if (dist) {
+    return transDistribution(dist);
+  }
   // TODO translate expression
+}
+
+code::Expr* CPPTranslator::transDistribution(
+    std::shared_ptr<ir::Distribution> dist) {
+  // TODO translate distribution
 }
 
 code::QualType CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
