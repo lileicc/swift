@@ -23,6 +23,7 @@ public:
 
   virtual void addStmt(Stmt* st);
   virtual void setParams(std::vector<ParamVarDecl* > params);
+  virtual std::vector<ParamVarDecl*> getParams();
   bool isInline();
 
   static FunctionDecl* createFunctionDecl(DeclContext * context, std::string name, QualType ty, bool inlineTag=false);

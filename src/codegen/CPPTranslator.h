@@ -10,7 +10,6 @@
 #include "../ir/IRHeader.h"
 #include "../code/Code.h"
 
-
 namespace swift {
 namespace codegen {
 
@@ -28,22 +27,31 @@ private:
   code::FunctionDecl* coreClsInit; // init function for main class
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   void transFun(std::shared_ptr<ir::FuncDefn> fd);
-  code::Stmt* transClause(std::shared_ptr<ir::Clause> clause, std::string retvar);
+  void transFunBody(code::FunctionDecl* fun, std::shared_ptr<ir::Clause> clause,
+      std::string valuevarname, std::string markvarname);
+  code::Stmt* transClause(std::shared_ptr<ir::Clause> clause,
+      std::string retvar);
   code::Expr* transExpr(std::shared_ptr<ir::Expr> expr);
   code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar);
   code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> ith, std::string retvar);
-  code::ParamVarDecl* transParamVarDecl(code::DeclContext* context, const std::shared_ptr<ir::VarDecl> var);
-  std::vector<code::ParamVarDecl*> transParamVarDecls(code::DeclContext* context, const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
+  code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
+      const std::shared_ptr<ir::VarDecl> var);
+  std::vector<code::ParamVarDecl*> transParamVarDecls(
+      code::DeclContext* context,
+      const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
   static code::QualType mapIRTypeToCodeType(const ir::Ty * ty); // map ir type to code type
 
   static const code::QualType INT_TYPE;
+  static const code::QualType INT_REF_TYPE;
   static const code::QualType DOUBLE_TYPE;
   static const code::QualType STRING_TYPE;
   static const code::QualType BOOL_TYPE;
   static const std::string DISTINCT_FIELDNAME; // field name inside class for declared type
-  static const int INIT_SAMPLE_NUM;
-
+  static const int INIT_SAMPLE_NUM; // initial value set to mark_var (default -1)
+  static const std::string CURRENT_SAMPLE_NUM_VARNAME; // name of variable for current_loop or current sample num
+  static const std::string RETURN_VAR_NAME; // name for the return variable;
+  static const std::string MARK_VAR_REF_NAME; // name for the mark variable, which is refering the mark var associated with this one;
 };
 
 } /* namespace codegen */

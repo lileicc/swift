@@ -7,17 +7,36 @@
 
 #pragma once
 #include <string>
-#include "Stmt.h"
-#include "Decl.h"
-#include "ClassDecl.h"
-#include "FunctionDecl.h"
-#include "FieldDecl.h"
-#include "QualType.h"
-#include "NamespaceDecl.h"
+#include "ArraySubscriptExpr.h"
 #include "BinaryOperator.h"
-#include "VarRef.h"
+#include "BreakStmt.h"
+#include "CaseStmt.h"
+#include "ClassDecl.h"
+#include "CompoundStmt.h"
+#include "Decl.h"
+#include "DeclStmt.h"
+#include "Expr.h"
+#include "FieldDecl.h"
+#include "ForStmt.h"
+#include "FunctionDecl.h"
+#include "FloatingLiteral.h"
+#include "IfStmt.h"
 #include "IntegerLiteral.h"
+#include "NamespaceDecl.h"
+#include "ParamVarDecl.h"
+#include "QualType.h"
 #include "ReturnStmt.h"
+#include "SwitchStmt.h"
+#include "Stmt.h"
+#include "VarDecl.h"
+#include "VarRef.h"
+
+namespace swift {
+namespace code {
+class Decl;
+class Stmt;
+} /* namespace code */
+} /* namespace swift */
 
 namespace swift {
 namespace code {

@@ -13,11 +13,15 @@ namespace code {
 
 class QualType {
 public:
-  QualType(std::string name);
+  QualType(std::string name, bool refTag=false);
   ~QualType();
+
+  std::string getName();
+  bool isRef();
 
 private:
   std::string name;
+  bool refTag;
 };
 
 } /* namespace code */

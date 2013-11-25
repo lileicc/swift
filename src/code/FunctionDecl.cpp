@@ -17,12 +17,19 @@ FunctionDecl* FunctionDecl::createFunctionDecl(DeclContext* context,
   return fd;
 }
 
+std::vector<ParamVarDecl*> FunctionDecl::getParams() {
+  return params;
+}
+
 FunctionDecl::FunctionDecl(DeclContext * context, std::string name, QualType ty,
     bool inlineTag) :
     parent(context), name(name), retTy(ty), inlineTag(inlineTag) {
 }
 
 FunctionDecl::~FunctionDecl() {
+  for (auto prm : params) {
+    delete prm;
+  }
 }
 
 void swift::code::FunctionDecl::addStmt(Stmt* st) {

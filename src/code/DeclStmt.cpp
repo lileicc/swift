@@ -10,13 +10,11 @@
 namespace swift {
 namespace code {
 
-DeclStmt::DeclStmt() {
-  // TODO Auto-generated constructor stub
-
+DeclStmt::DeclStmt(Decl* dec) : dec(dec) {
 }
 
 DeclStmt::~DeclStmt() {
-  // TODO Auto-generated destructor stub
+  delete dec;
 }
 
 } /* namespace code */
