@@ -77,7 +77,7 @@ then ~ TabularCPD({Blue -> ~ Categorical({Blue -> 0.8, Green -> 0.2}),
 };
 */
 int LWSamplerUrnBall::get_obscolor(int d) {
-  if (mark_obscolor[d] == cur_loop) return value_obscolor[10];
+  if (mark_obscolor[d] == cur_loop) return value_obscolor[d];
   mark_obscolor[d]=cur_loop;
   int&ret = value_obscolor[d];
   if (get_balldrawn(d) != -1) {
