@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <random>
+
 namespace swift {
 namespace random {
 
@@ -16,9 +18,12 @@ public:
   SwiftDistribution();
   virtual ~SwiftDistribution();
 
-  virtual T gen(); // generate a sample from this distribution
-  virtual double likeli(T x); // calculate the likelihood
-  virtual double loglikeli(T x); // calculate the log-likelihood
+  virtual T gen() = 0; // generate a sample from this distribution
+  virtual double likeli(T x) = 0; // calculate the likelihood
+  virtual double loglikeli(T x) = 0; // calculate the log-likelihood
+
+protected:
+  std::default_random_engine engine;
 };
 
 } /* namespace random */
