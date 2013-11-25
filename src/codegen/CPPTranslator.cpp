@@ -83,20 +83,20 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
       INT_TYPE);
   // create a field in the main class:::    int mark_numvar;
   std::string marknumvar = getMarkVarName(numvar);
-  fd = code::FieldDecl::createFieldDecl(coreCls, marknumvar,
-      INT_TYPE);
+  fd = code::FieldDecl::createFieldDecl(coreCls, marknumvar, INT_TYPE);
   // add in the init function:::            numvar = len;
   coreClsInit->addStmt(
       new code::BinaryOperator(new code::VarRef(numvar),
           new code::IntegerLiteral(len), code::OpKind::BO_ASSIGN));
   // add in the init function:::            mark_numvar = -1;
   coreClsInit->addStmt(
-    new code::BinaryOperator(new code::VarRef(marknumvar),
-          new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN));  
+      new code::BinaryOperator(new code::VarRef(marknumvar),
+          new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN));
   if (len > 0) {
     // create the function for getting number of objects in this instance, i.e. numvar
-    code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls, getGetterFunName(numvar), INT_TYPE, true);
-    fun->addStmt(new code::ReturnStmt( new code::VarRef(numvar) ) );
+    code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
+        getGetterFunName(numvar), INT_TYPE, true);
+    fun->addStmt(new code::ReturnStmt(new code::VarRef(numvar)));
     // TODO please add the corresponding distinct name
 
   }
@@ -114,13 +114,18 @@ void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
   code::QualType retty = mapIRTypeToCodeType(fd->getRetTyp());
   // translate random function
   // create gettfunname function
-  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls, getterfunname, retty);
+  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
+      getterfunname, retty);
   fun->setParams(transParamVarDecls(fun, fd->getArgs()));
-  fun->addStmt(transClause(fd->getBody()));
   if (fd->isRand()) {
+    //
+    // TODO translate body
+    // fun->addStmt(transClause(fd->getBody()));
+
     // TODO add likelihood function
     std::string likelifunname = getLikeliFunName(name);
-    code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(coreCls, likelifunname, DOUBLE_TYPE);
+    code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
+        coreCls, likelifunname, DOUBLE_TYPE);
     fun->setParams(transParamVarDecls(fun, fd->getArgs()));
     // add the likelihood calculation
 //    fun->addStmt(transClause(fd->getBody()));
@@ -128,46 +133,79 @@ void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
   }
 }
 
-code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause) {
-  std::shared_ptr<ir::Branch> br = std::dynamic_pointer_cast<ir::Branch>(clause);
+code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
+    std::string retvar) {
+  std::shared_ptr<ir::Branch> br = std::dynamic_pointer_cast<ir::Branch>(
+      clause);
   if (br) {
-    return transBranch(br);
+    return transBranch(br, retvar);
   }
-  std::shared_ptr<ir::IfThen> ith = std::dynamic_pointer_cast<ir::IfThen>(clause);
+  std::shared_ptr<ir::IfThen> ith = std::dynamic_pointer_cast<ir::IfThen>(
+      clause);
   if (ith) {
-    return transIfThen(ith);
+    return transIfThen(ith, retvar);
+  }
+  std::shared_ptr<ir::Expr> expr = std::dynamic_pointer_cast<ir::Expr>(clause);
+  if (expr) {
+    code::CompoundStmt* cst = new code::CompoundStmt();
+    cst->addStmt(
+        new code::BinaryOperator(new code::VarRef(retvar), transExpr(expr),
+            code::OpKind::BO_ASSIGN));
+    // TODO no 100% correct here
+    return cst;
   }
 }
 
 code::ParamVarDecl* CPPTranslator::transParamVarDecl(code::DeclContext* context,
     const std::shared_ptr<ir::VarDecl> var) {
-  return new code::ParamVarDecl(context, var->getVar(), mapIRTypeToCodeType(var->getTyp()));
+  return new code::ParamVarDecl(context, var->getVar(),
+      mapIRTypeToCodeType(var->getTyp()));
 }
 
-std::vector<code::ParamVarDecl* > CPPTranslator::transParamVarDecls(code::DeclContext* context,
+std::vector<code::ParamVarDecl*> CPPTranslator::transParamVarDecls(
+    code::DeclContext* context,
     const std::vector<std::shared_ptr<ir::VarDecl> > & vars) {
-  std::vector<code::ParamVarDecl* > vds;
+  std::vector<code::ParamVarDecl*> vds;
   for (auto v : vars) {
     vds.push_back(transParamVarDecl(context, v));
   }
   return vds;
 }
 
-code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br) {
-  // TODO translate branch expression
+code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
+    std::string retvar) {
+  code::SwitchStmt* sst = new code::SwitchStmt(transExpr(br->getVar()));
+  code::CaseStmt* cst;
+  for (int i = 0; i < br->size(); i++) {
+    cst = new code::CaseStmt(transExpr(br->getCond(i)),
+        transClause(br->getBranch(i), retvar));
+    sst->addStmt(cst);
+    sst->addStmt(new code::BreakStmt());
+  }
+  return sst;
 }
 
-code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> br) {
+code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
+    std::string retvar) {
   // TODO translate ifthenelse
+}
+
+code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
+  // TODO translate expression
 }
 
 code::QualType CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
   switch (ty->getTyp()) {
-  case ir::IRConstant::BOOL: return BOOL_TYPE;
-  case ir::IRConstant::INT: return INT_TYPE;
-  case ir::IRConstant::DOUBLE: return DOUBLE_TYPE;
-  case ir::IRConstant::STRING: return STRING_TYPE;
-  default: return INT_TYPE; // all declared type return int type
+  case ir::IRConstant::BOOL:
+    return BOOL_TYPE;
+  case ir::IRConstant::INT:
+    return INT_TYPE;
+  case ir::IRConstant::DOUBLE:
+    return DOUBLE_TYPE;
+  case ir::IRConstant::STRING:
+    return STRING_TYPE;
+  default:
+    return INT_TYPE; // all declared type return int type
   }
 }
 

@@ -28,9 +28,10 @@ private:
   code::FunctionDecl* coreClsInit; // init function for main class
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   void transFun(std::shared_ptr<ir::FuncDefn> fd);
-  code::Stmt* transClause(std::shared_ptr<ir::Clause> clause);
-  code::Stmt* transBranch(std::shared_ptr<ir::Branch> br);
-  code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> br);
+  code::Stmt* transClause(std::shared_ptr<ir::Clause> clause, std::string retvar);
+  code::Expr* transExpr(std::shared_ptr<ir::Expr> expr);
+  code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar);
+  code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> ith, std::string retvar);
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context, const std::shared_ptr<ir::VarDecl> var);
   std::vector<code::ParamVarDecl*> transParamVarDecls(code::DeclContext* context, const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
