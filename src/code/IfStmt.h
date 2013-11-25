@@ -7,14 +7,19 @@
 
 #pragma once
 #include "Stmt.h"
+#include "Expr.h"
 
 namespace swift {
 namespace code {
 
 class IfStmt: public swift::code::Stmt {
 public:
-  IfStmt();
+  IfStmt(Expr* cond, Stmt* th, Stmt* el);
   ~IfStmt();
+private:
+  Expr* cond;
+  Stmt* th;
+  Stmt* el;
 };
 
 } /* namespace code */

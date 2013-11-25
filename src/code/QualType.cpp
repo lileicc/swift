@@ -10,11 +10,18 @@
 namespace swift {
 namespace code {
 
-QualType::QualType(std::string name) : name(name) {
+QualType::QualType(std::string name, bool refTag) : name(name), refTag(refTag) {
 }
 
 QualType::~QualType() {
-  // TODO Auto-generated destructor stub
+}
+
+std::string QualType::getName() {
+  return name;
+}
+
+bool QualType::isRef() {
+  return refTag;
 }
 
 } /* namespace code */

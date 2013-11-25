@@ -13,7 +13,8 @@ namespace swift {
 namespace code {
 
 enum class OpKind {
-  BO_ASSIGN         // Assignment
+  BO_ASSIGN,         // Assignment
+  BO_EQUAL
 };
 
 class BinaryOperator: public swift::code::Expr {

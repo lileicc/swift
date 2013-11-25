@@ -11,10 +11,14 @@ namespace swift {
 namespace codegen {
 
 const code::QualType CPPTranslator::INT_TYPE("int");
+const code::QualType CPPTranslator::INT_REF_TYPE("int", true);
 const code::QualType CPPTranslator::DOUBLE_TYPE("double");
 const code::QualType CPPTranslator::STRING_TYPE("std::string");
 const code::QualType CPPTranslator::BOOL_TYPE("bool");
 const std::string CPPTranslator::DISTINCT_FIELDNAME = "__name_";
+const std::string CPPTranslator::CURRENT_SAMPLE_NUM_VARNAME = "__cur_loop";
+const std::string CPPTranslator::RETURN_VAR_NAME = "__ret_value";
+const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
 const int CPPTranslator::INIT_SAMPLE_NUM = -1;
 
 namespace {
@@ -50,6 +54,14 @@ std::string getMarkVarName(std::string name) {
   return "__mark_" + name;
 }
 
+/**
+ * given the name of a variable (can be number var, or random function)
+ * return the variable name to get the value of that var/fun
+ */
+std::string getValueVarName(std::string name) {
+  return "__value_" + name;
+}
+
 }
 
 CPPTranslator::CPPTranslator() {
@@ -62,6 +74,8 @@ CPPTranslator::~CPPTranslator() {
 }
 
 void CPPTranslator::translate(swift::ir::BlogModel* model) {
+  code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
+      INT_TYPE);
   for (auto ty : model->getTypes())
     transTypeDomain(ty);
   for (auto fun : model->getRandFuncs())
@@ -118,9 +132,9 @@ void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
       getterfunname, retty);
   fun->setParams(transParamVarDecls(fun, fd->getArgs()));
   if (fd->isRand()) {
-    //
-    // TODO translate body
-    // fun->addStmt(transClause(fd->getBody()));
+    std::string valuevarname = getValueVarName(name);
+    std::string markvarname = getMarkVarName(name);
+    transFunBody(fun, fd->getBody(), valuevarname, markvarname);
 
     // TODO add likelihood function
     std::string likelifunname = getLikeliFunName(name);
@@ -131,6 +145,45 @@ void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
 //    fun->addStmt(transClause(fd->getBody()));
 
   }
+}
+
+void CPPTranslator::transFunBody(code::FunctionDecl* fun,
+    std::shared_ptr<ir::Clause> clause, std::string valuevarname,
+    std::string markvarname) {
+  // for value_var
+  code::Expr* exp = new code::VarRef(valuevarname);
+  for (auto prm : fun->getParams()) {
+    exp = new code::ArraySubscriptExpr(exp, new code::VarRef(prm->getId()));
+  }
+
+  code::VarDecl* retvar = new code::VarDecl(fun, RETURN_VAR_NAME, INT_REF_TYPE,
+      exp); // todo support for other return type
+  code::DeclStmt* dst = new code::DeclStmt(retvar);
+  fun->addStmt(dst);
+  // for mark_var
+  exp = new code::VarRef(markvarname);
+  for (auto prm : fun->getParams()) {
+    exp = new code::ArraySubscriptExpr(exp, new code::VarRef(prm->getId()));
+  }
+  code::VarDecl* markvar = new code::VarDecl(fun, MARK_VAR_REF_NAME,
+      INT_REF_TYPE, exp);
+  dst = new code::DeclStmt(markvar);
+  fun->addStmt(dst);
+  // now translating::: if (markvar == current sample num) then return value;
+  code::Stmt* st = new code::IfStmt(
+      new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
+          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQUAL),
+      new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)), NULL);
+  fun->addStmt(st);
+  // now should sample
+  // mark the variable first
+  st = new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
+      new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
+  fun->addStmt(st);
+  //now translate actual sampling part
+  fun->addStmt(transClause(clause, RETURN_VAR_NAME));
+  // now return the value
+  fun->addStmt(new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)));
 }
 
 code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
@@ -154,6 +207,7 @@ code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
     // TODO no 100% correct here
     return cst;
   }
+  return NULL;
 }
 
 code::ParamVarDecl* CPPTranslator::transParamVarDecl(code::DeclContext* context,
@@ -176,7 +230,7 @@ code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
     std::string retvar) {
   code::SwitchStmt* sst = new code::SwitchStmt(transExpr(br->getVar()));
   code::CaseStmt* cst;
-  for (int i = 0; i < br->size(); i++) {
+  for (size_t i = 0; i < br->size(); i++) {
     cst = new code::CaseStmt(transExpr(br->getCond(i)),
         transClause(br->getBranch(i), retvar));
     sst->addStmt(cst);

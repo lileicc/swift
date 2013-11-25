@@ -8,14 +8,17 @@
 #pragma once
 
 #include "Stmt.h"
+#include "Decl.h"
 
 namespace swift {
 namespace code {
 
 class DeclStmt: public swift::code::Stmt {
 public:
-  DeclStmt();
+  DeclStmt(Decl* dec);
   ~DeclStmt();
+private:
+  Decl* dec;
 };
 
 } /* namespace code */

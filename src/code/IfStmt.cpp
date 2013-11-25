@@ -10,13 +10,13 @@
 namespace swift {
 namespace code {
 
-IfStmt::IfStmt() {
-  // TODO Auto-generated constructor stub
-
+IfStmt::IfStmt(Expr* cond, Stmt* th, Stmt* el) : cond(cond), th(th), el(el) {
 }
 
 IfStmt::~IfStmt() {
-  // TODO Auto-generated destructor stub
+  delete cond;
+  delete th;
+  delete el;
 }
 
 } /* namespace code */
