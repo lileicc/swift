@@ -10,13 +10,11 @@
 namespace swift {
 namespace code {
 
-ParamVarDecl::ParamVarDecl() {
-  // TODO Auto-generated constructor stub
-
+ParamVarDecl::ParamVarDecl(DeclContext * context, std::string id, QualType ty) :
+    VarDecl(context, id, ty) {
 }
 
 ParamVarDecl::~ParamVarDecl() {
-  // TODO Auto-generated destructor stub
 }
 
 } /* namespace code */

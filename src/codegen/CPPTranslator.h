@@ -29,15 +29,19 @@ private:
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   void transFun(std::shared_ptr<ir::FuncDefn> fd);
   code::Stmt* transClause(std::shared_ptr<ir::Clause> clause);
+  code::Stmt* transBranch(std::shared_ptr<ir::Branch> br);
+  code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> br);
+  code::ParamVarDecl* transParamVarDecl(code::DeclContext* context, const std::shared_ptr<ir::VarDecl> var);
+  std::vector<code::ParamVarDecl*> transParamVarDecls(code::DeclContext* context, const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
   static code::QualType mapIRTypeToCodeType(const ir::Ty * ty); // map ir type to code type
-
 
   static const code::QualType INT_TYPE;
   static const code::QualType DOUBLE_TYPE;
   static const code::QualType STRING_TYPE;
   static const code::QualType BOOL_TYPE;
   static const std::string DISTINCT_FIELDNAME; // field name inside class for declared type
+  static const int INIT_SAMPLE_NUM;
 
 };
 
