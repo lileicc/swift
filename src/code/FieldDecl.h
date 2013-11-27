@@ -16,15 +16,15 @@ namespace code {
 
 class FieldDecl: public swift::code::Decl {
 public:
-  FieldDecl(ClassDecl* cd, std::string name, QualType ty);
+  FieldDecl(ClassDecl* cd, std::string name, Type ty);
   ~FieldDecl();
 
-  static FieldDecl* createFieldDecl(ClassDecl* cd, std::string name, QualType ty);
+  static FieldDecl* createFieldDecl(ClassDecl* cd, std::string name, Type ty);
 
 private:
   ClassDecl* parent;
   std::string id;
-  QualType ty;
+  Type ty;
 };
 
 } /* namespace code */

@@ -14,7 +14,7 @@ namespace code {
 
 class ParamVarDecl: public swift::code::VarDecl {
 public:
-  ParamVarDecl(DeclContext * context, std::string id, QualType ty);
+  ParamVarDecl(DeclContext * context, std::string id, Type ty);
   ~ParamVarDecl();
 };
 

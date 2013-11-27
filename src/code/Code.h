@@ -24,7 +24,7 @@
 #include "IntegerLiteral.h"
 #include "NamespaceDecl.h"
 #include "ParamVarDecl.h"
-#include "QualType.h"
+#include "Type.h"
 #include "ReturnStmt.h"
 #include "SwitchStmt.h"
 #include "Stmt.h"

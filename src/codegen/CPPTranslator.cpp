@@ -10,11 +10,11 @@
 namespace swift {
 namespace codegen {
 
-const code::QualType CPPTranslator::INT_TYPE("int");
-const code::QualType CPPTranslator::INT_REF_TYPE("int", true);
-const code::QualType CPPTranslator::DOUBLE_TYPE("double");
-const code::QualType CPPTranslator::STRING_TYPE("std::string");
-const code::QualType CPPTranslator::BOOL_TYPE("bool");
+const code::Type CPPTranslator::INT_TYPE("int");
+const code::Type CPPTranslator::INT_REF_TYPE("int", true);
+const code::Type CPPTranslator::DOUBLE_TYPE("double");
+const code::Type CPPTranslator::STRING_TYPE("std::string");
+const code::Type CPPTranslator::BOOL_TYPE("bool");
 const std::string CPPTranslator::DISTINCT_FIELDNAME = "__name_";
 const std::string CPPTranslator::CURRENT_SAMPLE_NUM_VARNAME = "__cur_loop";
 const std::string CPPTranslator::RETURN_VAR_NAME = "__ret_value";
@@ -125,7 +125,7 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
 void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
   const std::string & name = fd->getName();
   std::string getterfunname = getGetterFunName(name);
-  code::QualType retty = mapIRTypeToCodeType(fd->getRetTyp());
+  code::Type retty = mapIRTypeToCodeType(fd->getRetTyp());
   // translate random function
   // create gettfunname function
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
@@ -259,11 +259,12 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
 code::Expr* CPPTranslator::transDistribution(
     std::shared_ptr<ir::Distribution> dist, std::vector<code::Expr*> args) {
   std::string name = dist->getDistrName();
-
+  // define a field in the main class corresponding to the distribution
+  code::FieldDecl::createFieldDecl(coreCls, name, code::Type(name) );
   // TODO translate distribution
 }
 
-code::QualType CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
+code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
   switch (ty->getTyp()) {
   case ir::IRConstant::BOOL:
     return BOOL_TYPE;

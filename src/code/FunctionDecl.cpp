@@ -11,7 +11,7 @@ namespace swift {
 namespace code {
 
 FunctionDecl* FunctionDecl::createFunctionDecl(DeclContext* context,
-    std::string name, QualType ty, bool inlineTag) {
+    std::string name, Type ty, bool inlineTag) {
   FunctionDecl* fd = new FunctionDecl(context, name, ty, inlineTag);
   context->addDecl(fd);
   return fd;
@@ -21,7 +21,7 @@ std::vector<ParamVarDecl*> FunctionDecl::getParams() {
   return params;
 }
 
-FunctionDecl::FunctionDecl(DeclContext * context, std::string name, QualType ty,
+FunctionDecl::FunctionDecl(DeclContext * context, std::string name, Type ty,
     bool inlineTag) :
     parent(context), name(name), retTy(ty), inlineTag(inlineTag) {
 }

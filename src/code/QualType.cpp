@@ -10,17 +10,17 @@
 namespace swift {
 namespace code {
 
-QualType::QualType(std::string name, bool refTag) : name(name), refTag(refTag) {
+Type::Type(std::string name, bool refTag) : name(name), refTag(refTag) {
 }
 
-QualType::~QualType() {
+Type::~Type() {
 }
 
-std::string QualType::getName() {
+std::string Type::getName() {
   return name;
 }
 
-bool QualType::isRef() {
+bool Type::isRef() {
   return refTag;
 }
 

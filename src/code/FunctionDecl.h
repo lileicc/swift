@@ -26,14 +26,14 @@ public:
   virtual std::vector<ParamVarDecl*> getParams();
   bool isInline();
 
-  static FunctionDecl* createFunctionDecl(DeclContext * context, std::string name, QualType ty, bool inlineTag=false);
+  static FunctionDecl* createFunctionDecl(DeclContext * context, std::string name, Type ty, bool inlineTag=false);
 protected:
-  FunctionDecl(DeclContext * context, std::string name, QualType ty, bool inlineTag);
+  FunctionDecl(DeclContext * context, std::string name, Type ty, bool inlineTag);
 
 private:
   DeclContext* parent;
   std::string name;
-  QualType retTy;
+  Type retTy;
   CompoundStmt body;
   bool inlineTag;
   std::vector<ParamVarDecl*> params;
