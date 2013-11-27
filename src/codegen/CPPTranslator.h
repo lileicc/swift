@@ -46,13 +46,13 @@ private:
       code::DeclContext* context,
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
-  static code::QualType mapIRTypeToCodeType(const ir::Ty * ty); // map ir type to code type
+  static code::Type mapIRTypeToCodeType(const ir::Ty * ty); // map ir type to code type
 
-  static const code::QualType INT_TYPE;
-  static const code::QualType INT_REF_TYPE;
-  static const code::QualType DOUBLE_TYPE;
-  static const code::QualType STRING_TYPE;
-  static const code::QualType BOOL_TYPE;
+  static const code::Type INT_TYPE;
+  static const code::Type INT_REF_TYPE;
+  static const code::Type DOUBLE_TYPE;
+  static const code::Type STRING_TYPE;
+  static const code::Type BOOL_TYPE;
   static const std::string DISTINCT_FIELDNAME; // field name inside class for declared type
   static const int INIT_SAMPLE_NUM; // initial value set to mark_var (default -1)
   static const std::string CURRENT_SAMPLE_NUM_VARNAME; // name of variable for current_loop or current sample num

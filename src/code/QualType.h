@@ -11,10 +11,10 @@
 namespace swift {
 namespace code {
 
-class QualType {
+class Type {
 public:
-  QualType(std::string name, bool refTag=false);
-  ~QualType();
+  Type(std::string name, bool refTag=false);
+  ~Type();
 
   std::string getName();
   bool isRef();

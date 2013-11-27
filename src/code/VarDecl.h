@@ -18,7 +18,7 @@ namespace code {
 
 class VarDecl: public swift::code::Decl {
 public:
-  VarDecl(DeclContext * context, std::string id, QualType ty, Expr* value=NULL);
+  VarDecl(DeclContext * context, std::string id, Type ty, Expr* value=NULL);
   ~VarDecl();
 
   const std::string& getId() const {
@@ -28,7 +28,7 @@ public:
 protected:
   DeclContext* parent;
   std::string id;
-  QualType ty;
+  Type ty;
   Expr* value; // initial value
 };
 

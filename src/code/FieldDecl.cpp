@@ -12,14 +12,14 @@ namespace swift {
 namespace code {
 
 FieldDecl::FieldDecl(ClassDecl* cd, std::string name,
-   QualType ty) : parent(cd), id(name), ty(ty) {
+   Type ty) : parent(cd), id(name), ty(ty) {
 }
 
 FieldDecl::~FieldDecl() {
 }
 
 FieldDecl* FieldDecl::createFieldDecl(ClassDecl* cd, std::string name,
-    QualType ty) {
+    Type ty) {
   FieldDecl* fd = new FieldDecl(cd, name, ty);
   cd->addDecl(fd);
   return fd;

@@ -10,7 +10,7 @@
 namespace swift {
 namespace code {
 
-VarDecl::VarDecl(DeclContext * context, std::string id, QualType ty, Expr* value) :
+VarDecl::VarDecl(DeclContext * context, std::string id, Type ty, Expr* value) :
     parent(context), id(id), ty(ty), value(value) {
 }
 
