@@ -18,9 +18,9 @@ public:
   Expr();
   virtual ~Expr();
   void addArg(std::shared_ptr<Expr> expr);
-  const std::vector<std::shared_ptr<Expr>>& getArgs();
-  std::shared_ptr<Expr> get(int k);
-  size_t argSize();
+  const std::vector<std::shared_ptr<Expr> >& getArgs();
+  std::shared_ptr<Expr> get(int k); // get the k-th argument
+  size_t argSize(); // the number arguments
 private:
   std::vector<std::shared_ptr<Expr>> args;
 };

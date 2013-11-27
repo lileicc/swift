@@ -34,7 +34,12 @@ private:
   code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar);
   code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> ith, std::string retvar);
   code::Expr* transExpr(std::shared_ptr<ir::Expr> expr);
-  code::Expr* transDistribution(std::shared_ptr<ir::Distribution> dist);
+  /**
+   * translate the distribution expression
+   * given the arguments
+   */
+  code::Expr* transDistribution(std::shared_ptr<ir::Distribution> dist,
+      std::vector<code::Expr*> args);
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
       const std::shared_ptr<ir::VarDecl> var);
   std::vector<code::ParamVarDecl*> transParamVarDecls(

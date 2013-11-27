@@ -245,15 +245,21 @@ code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
 }
 
 code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
+  std::vector<code::Expr*> args;
+  for (size_t k = 0; k < expr->argSize(); k++) {
+    args.push_back( transExpr(expr->get(k) ) );
+  }
   std::shared_ptr<ir::Distribution> dist = std::dynamic_pointer_cast<ir::Distribution>(expr);
   if (dist) {
-    return transDistribution(dist);
+    return transDistribution(dist, args);
   }
-  // TODO translate expression
+  // TODO translate other expression
 }
 
 code::Expr* CPPTranslator::transDistribution(
-    std::shared_ptr<ir::Distribution> dist) {
+    std::shared_ptr<ir::Distribution> dist, std::vector<code::Expr*> args) {
+  std::string name = dist->getDistrName();
+
   // TODO translate distribution
 }
 
