@@ -10,9 +10,7 @@
 namespace swift {
 namespace random {
 
-CategoricalDistribution::CategoricalDistribution(std::initializer_list<double> il) {
-  // TODO Auto-generated constructor stub
-
+CategoricalDistribution::CategoricalDistribution(std::initializer_list<double> il) : dist(il) {
 }
 
 CategoricalDistribution::~CategoricalDistribution() {
