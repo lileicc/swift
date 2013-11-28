@@ -1,5 +1,5 @@
 /*
- * NumStRef.h
+ * CardinalityExpr.h
  *
  *  Created on: Oct 30, 2013
  *      Author: yiwu
@@ -12,10 +12,10 @@
 namespace swift {
 namespace absyn {
 
-class NumStRef: public Expr {
+class CardinalityExpr: public Expr {
 public:
-  NumStRef(int l, int c, Expr* e);
-  virtual ~NumStRef();
+  CardinalityExpr(int l, int c, Expr* e);
+  virtual ~CardinalityExpr();
 
   // For Debugging Use
   void print(FILE* file, int indent);

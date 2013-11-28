@@ -5,22 +5,22 @@
  *      Author: yiwu
  */
 
-#include "NumStRef.h"
+#include "CardinalityExpr.h"
 
 namespace swift {
 namespace absyn {
 
-NumStRef::NumStRef(int l, int c, Expr* e) :
+CardinalityExpr::CardinalityExpr(int l, int c, Expr* e) :
     Expr(l, c) {
   args.push_back(e);
 }
 
-NumStRef::~NumStRef() {
+CardinalityExpr::~CardinalityExpr() {
 }
 
 // For Debugging Use
-void NumStRef::print(FILE* file, int indent) {
-  fprintf(file, "%*s(NumStRef:\n", indent, "");
+void CardinalityExpr::print(FILE* file, int indent) {
+  fprintf(file, "%*s(CardinalityExpr:\n", indent, "");
   if (args[0] != NULL)
     args[0]->print(file, indent + 2);
   fprintf(file, "%*s)\n", indent, "");
