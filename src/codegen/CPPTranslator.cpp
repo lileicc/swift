@@ -140,11 +140,13 @@ void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
     std::string markvarname = getMarkVarName(name);
     transFunBody(fun, fd->getBody(), valuevarname, markvarname);
 
-    // TODO add likelihood function
     std::string likelifunname = getLikeliFunName(name);
     code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
         coreCls, likelifunname, DOUBLE_TYPE);
     fun->setParams(transParamVarDecls(fun, fd->getArgs()));
+
+//    transLikelihoodFunBody();
+    // TODO add likelihood function
     // add the likelihood calculation
 //    fun->addStmt(transClause(fd->getBody()));
 
