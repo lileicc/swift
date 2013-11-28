@@ -15,6 +15,7 @@ namespace code {
 class CallExpr: public swift::code::Expr {
 public:
   CallExpr(Expr* fn, std::vector<Expr*> args);
+  CallExpr(Expr* fn);
   ~CallExpr();
 private:
   Expr* fn;

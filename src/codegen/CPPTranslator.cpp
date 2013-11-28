@@ -16,6 +16,10 @@ const code::Type CPPTranslator::DOUBLE_TYPE("double");
 const code::Type CPPTranslator::STRING_TYPE("std::string");
 const code::Type CPPTranslator::BOOL_TYPE("bool");
 const std::string CPPTranslator::DISTINCT_FIELDNAME = "__name_";
+const std::string CPPTranslator::DISTRIBUTION_INIT_FUN_NAME = "init";
+const std::string CPPTranslator::DISTRIBUTION_GEN_FUN_NAME = "gen";
+const std::string CPPTranslator::DISTRIBUTION_LIKELI_FUN_NAME = "likeli";
+const std::string CPPTranslator::DISTRIBUTION_LOGLIKELI_FUN_NAME = "loglikeli";
 const std::string CPPTranslator::CURRENT_SAMPLE_NUM_VARNAME = "__cur_loop";
 const std::string CPPTranslator::RETURN_VAR_NAME = "__ret_value";
 const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
@@ -181,7 +185,9 @@ void CPPTranslator::transFunBody(code::FunctionDecl* fun,
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
   fun->addStmt(st);
   //now translate actual sampling part
-  fun->addStmt(transClause(clause, RETURN_VAR_NAME));
+  fun->addStmt(
+      new code::BinaryOperator(new code::VarRef(RETURN_VAR_NAME),
+          transClause(clause, RETURN_VAR_NAME), code::OpKind::BO_ASSIGN));
   // now return the value
   fun->addStmt(new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)));
 }
@@ -247,9 +253,10 @@ code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
 code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
   std::vector<code::Expr*> args;
   for (size_t k = 0; k < expr->argSize(); k++) {
-    args.push_back( transExpr(expr->get(k) ) );
+    args.push_back(transExpr(expr->get(k)));
   }
-  std::shared_ptr<ir::Distribution> dist = std::dynamic_pointer_cast<ir::Distribution>(expr);
+  std::shared_ptr<ir::Distribution> dist = std::dynamic_pointer_cast<
+      ir::Distribution>(expr);
   if (dist) {
     return transDistribution(dist, args);
   }
@@ -259,9 +266,19 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
 code::Expr* CPPTranslator::transDistribution(
     std::shared_ptr<ir::Distribution> dist, std::vector<code::Expr*> args) {
   std::string name = dist->getDistrName();
+  std::string distname = name + std::to_string((int) dist);
   // define a field in the main class corresponding to the distribution
-  code::FieldDecl::createFieldDecl(coreCls, name, code::Type(name) );
-  // TODO translate distribution
+  code::FieldDecl::createFieldDecl(coreCls, distname, code::Type(name));
+  //put initialization in coreClasInit
+  coreClsInit->addStmt(
+      new code::CallExpr(
+          new code::BinaryOperator(new code::VarRef(distname),
+              new code::VarRef(DISTRIBUTION_INIT_FUN_NAME),
+              code::OpKind::BO_FIELD), args));
+  // now actual sampling a value from the distribution
+  return new code::CallExpr(
+      new code::BinaryOperator(new code::VarRef(distname),
+          new code::VarRef(DISTRIBUTION_GEN_FUN_NAME), code::OpKind::BO_FIELD));
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {

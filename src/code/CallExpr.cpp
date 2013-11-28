@@ -14,6 +14,9 @@ CallExpr::CallExpr(Expr* fn, std::vector<Expr*> args) :
     fn(fn), args(args) {
 }
 
+CallExpr::CallExpr(Expr* fn): fn(fn) {
+}
+
 CallExpr::~CallExpr() {
   delete fn;
   for (auto a : args)

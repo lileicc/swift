@@ -6,8 +6,10 @@
  */
 
 #pragma once
-#include <initializer_list>
+#include <vector>
 #include <random>
+#include <map>
+#include <cmath>
 #include "SwiftDistribution.h"
 
 namespace swift {
@@ -15,10 +17,17 @@ namespace random {
 
 class CategoricalDistribution: public swift::random::SwiftDistribution<int> {
 public:
-  CategoricalDistribution(std::initializer_list<double> il);
+  CategoricalDistribution();
   ~CategoricalDistribution();
+  void init(std::map<int, double>& weights);
+  int gen();
+  double likeli(int x);
+  double loglikeli(int x);
+
 private:
   std::discrete_distribution<int> dist;
+  std::vector<int> keys; // keys for the value
+  std::vector<double> ws; // weights for categorical distribution
 };
 
 } /* namespace random */
