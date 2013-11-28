@@ -23,6 +23,11 @@ const std::string CPPTranslator::DISTRIBUTION_LOGLIKELI_FUN_NAME = "loglikeli";
 const std::string CPPTranslator::CURRENT_SAMPLE_NUM_VARNAME = "__cur_loop";
 const std::string CPPTranslator::RETURN_VAR_NAME = "__ret_value";
 const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
+
+// randomness
+const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
+const code::Type CPPTranslator::RANDOM_ENGINE_TYPE("std::default_random_engine");
+const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
 const int CPPTranslator::INIT_SAMPLE_NUM = -1;
 
 namespace {
@@ -78,6 +83,7 @@ CPPTranslator::~CPPTranslator() {
 }
 
 void CPPTranslator::translate(swift::ir::BlogModel* model) {
+
   code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
       INT_TYPE);
   for (auto ty : model->getTypes())
@@ -85,6 +91,9 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
   for (auto fun : model->getRandFuncs())
     transFun(fun);
 }
+
+
+
 
 code::Code* CPPTranslator::getResult() const {
   return prog;
@@ -143,38 +152,18 @@ void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
     std::string likelifunname = getLikeliFunName(name);
     code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
         coreCls, likelifunname, DOUBLE_TYPE);
-    fun->setParams(transParamVarDecls(fun, fd->getArgs()));
-
-//    transLikelihoodFunBody();
-    // TODO add likelihood function
-    // add the likelihood calculation
-//    fun->addStmt(transClause(fd->getBody()));
-
+    likelifun->setParams(transParamVarDecls(fun, fd->getArgs()));
+    transFunBodyLikeli(likelifun, fd->getBody(), valuevarname, markvarname);
   }
 }
 
 void CPPTranslator::transFunBody(code::FunctionDecl* fun,
     std::shared_ptr<ir::Clause> clause, std::string valuevarname,
     std::string markvarname) {
-  // for value_var
-  code::Expr* exp = new code::VarRef(valuevarname);
-  for (auto prm : fun->getParams()) {
-    exp = new code::ArraySubscriptExpr(exp, new code::VarRef(prm->getId()));
-  }
+  addFunValueRefStmt(fun, valuevarname, RETURN_VAR_NAME);
 
-  code::VarDecl* retvar = new code::VarDecl(fun, RETURN_VAR_NAME, INT_REF_TYPE,
-      exp); // todo support for other return type
-  code::DeclStmt* dst = new code::DeclStmt(retvar);
-  fun->addStmt(dst);
-  // for mark_var
-  exp = new code::VarRef(markvarname);
-  for (auto prm : fun->getParams()) {
-    exp = new code::ArraySubscriptExpr(exp, new code::VarRef(prm->getId()));
-  }
-  code::VarDecl* markvar = new code::VarDecl(fun, MARK_VAR_REF_NAME,
-      INT_REF_TYPE, exp);
-  dst = new code::DeclStmt(markvar);
-  fun->addStmt(dst);
+  addFunValueRefStmt(fun, markvarname, MARK_VAR_REF_NAME);
+
   // now translating::: if (markvar == current sample num) then return value;
   code::Stmt* st = new code::IfStmt(
       new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
@@ -276,9 +265,56 @@ code::Expr* CPPTranslator::transDistribution(
               new code::VarRef(DISTRIBUTION_INIT_FUN_NAME),
               code::OpKind::BO_FIELD), args));
   // now actual sampling a value from the distribution
+  std::vector<code::Expr *> rd;
+  rd.push_back(new code::VarRef(RANDOM_ENGINE_VAR_NAME));
   return new code::CallExpr(
       new code::BinaryOperator(new code::VarRef(distname),
-          new code::VarRef(DISTRIBUTION_GEN_FUN_NAME), code::OpKind::BO_FIELD));
+          new code::VarRef(DISTRIBUTION_GEN_FUN_NAME), code::OpKind::BO_FIELD),
+      rd);
+}
+
+void CPPTranslator::createInit() {
+  code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME, RANDOM_ENGINE_TYPE);
+}
+
+
+
+void CPPTranslator::transFunBodyLikeli(code::FunctionDecl* fun,
+    std::shared_ptr<ir::Clause> clause, std::string valuevarname,
+    std::string markvarname) {
+
+  addFunValueRefStmt(fun, valuevarname, RETURN_VAR_NAME);
+
+  // TODO add likelihood calculation
+  // now translating::: if (markvar == current sample num) then return value;
+  code::Stmt* st = new code::IfStmt(
+      new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
+          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQUAL),
+      new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)), NULL);
+  fun->addStmt(st);
+  // now should sample
+  // mark the variable first
+  st = new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
+      new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
+  fun->addStmt(st);
+  //now translate actual sampling part
+  transClause(clause, RETURN_VAR_NAME);
+  // now return the value
+  fun->addStmt(new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)));
+}
+
+void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
+    std::string valuevarname, std::string valuerefname) {
+  // for value_var
+  code::Expr* exp = new code::VarRef(valuevarname);
+  for (auto prm : fun->getParams()) {
+    exp = new code::ArraySubscriptExpr(exp, new code::VarRef(prm->getId()));
+  }
+
+  code::VarDecl* retvar = new code::VarDecl(fun, valuerefname, INT_REF_TYPE,
+      exp); // todo support for other return type
+  code::DeclStmt* dst = new code::DeclStmt(retvar);
+  fun->addStmt(dst);
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
