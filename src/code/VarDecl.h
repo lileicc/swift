@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <string>
 #include "Decl.h"
-#include "QualType.h"
+#include "Type.h"
 #include "DeclContext.h"
 #include "Expr.h"
 

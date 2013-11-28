@@ -6,7 +6,7 @@
  */
 
 #include "FieldDecl.h"
-#include "QualType.h"
+#include "Type.h"
 
 namespace swift {
 namespace code {

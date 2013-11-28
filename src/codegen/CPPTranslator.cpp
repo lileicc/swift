@@ -185,9 +185,7 @@ void CPPTranslator::transFunBody(code::FunctionDecl* fun,
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
   fun->addStmt(st);
   //now translate actual sampling part
-  fun->addStmt(
-      new code::BinaryOperator(new code::VarRef(RETURN_VAR_NAME),
-          transClause(clause, RETURN_VAR_NAME), code::OpKind::BO_ASSIGN));
+  transClause(clause, RETURN_VAR_NAME);
   // now return the value
   fun->addStmt(new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)));
 }
@@ -266,7 +264,7 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
 code::Expr* CPPTranslator::transDistribution(
     std::shared_ptr<ir::Distribution> dist, std::vector<code::Expr*> args) {
   std::string name = dist->getDistrName();
-  std::string distname = name + std::to_string((int) dist);
+  std::string distname = name + std::to_string((size_t) dist.get());
   // define a field in the main class corresponding to the distribution
   code::FieldDecl::createFieldDecl(coreCls, distname, code::Type(name));
   //put initialization in coreClasInit
