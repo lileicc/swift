@@ -10,11 +10,30 @@
 namespace swift {
 namespace random {
 
-CategoricalDistribution::CategoricalDistribution(std::initializer_list<double> il) : dist(il) {
+CategoricalDistribution::CategoricalDistribution() {
 }
 
 CategoricalDistribution::~CategoricalDistribution() {
-  // TODO Auto-generated destructor stub
+}
+
+void CategoricalDistribution::init(std::map<int, double>& weights) {
+  for (auto it : weights) {
+    keys.push_back( it.first);
+    ws.push_back(it.second);
+  }
+  dist = std::discrete_distribution<int>(ws.begin(), ws.end());
+}
+
+int CategoricalDistribution::gen() {
+  return dist();
+}
+
+double CategoricalDistribution::likeli(int x) {
+  return (x>=0)? ws[x]: 0;
+}
+
+double CategoricalDistribution::loglikeli(int x) {
+  return log(likeli(x));
 }
 
 } /* namespace random */

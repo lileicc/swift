@@ -49,15 +49,62 @@ private:
   static code::Type mapIRTypeToCodeType(const ir::Ty * ty); // map ir type to code type
 
   static const code::Type INT_TYPE;
+
   static const code::Type INT_REF_TYPE;
+
   static const code::Type DOUBLE_TYPE;
+
   static const code::Type STRING_TYPE;
+
   static const code::Type BOOL_TYPE;
-  static const std::string DISTINCT_FIELDNAME; // field name inside class for declared type
-  static const int INIT_SAMPLE_NUM; // initial value set to mark_var (default -1)
-  static const std::string CURRENT_SAMPLE_NUM_VARNAME; // name of variable for current_loop or current sample num
-  static const std::string RETURN_VAR_NAME; // name for the return variable;
-  static const std::string MARK_VAR_REF_NAME; // name for the mark variable, which is refering the mark var associated with this one;
+
+  /**
+   * field name inside class for declared type
+   */
+  static const std::string DISTINCT_FIELDNAME;
+
+  /**
+   * function name for the distribution init
+   */
+  static const std::string DISTRIBUTION_INIT_FUN_NAME;
+
+  /**
+   * function name for the distribution gennerating a sample
+   */
+  static const std::string DISTRIBUTION_GEN_FUN_NAME;
+
+  /**
+   * function name for the distribution calculating the likelihood of a sample
+   */
+  static const std::string DISTRIBUTION_LIKELI_FUN_NAME;
+
+  /**
+   * function name for the distribution calculating the log-likelihood of a sample
+   */
+  static const std::string DISTRIBUTION_LOGLIKELI_FUN_NAME;
+
+
+  /**
+   * initial value set to mark_var (default -1)
+   */
+  static const int INIT_SAMPLE_NUM;
+
+  /**
+   * name of variable for current_loop or current sample num
+   */
+  static const std::string CURRENT_SAMPLE_NUM_VARNAME;
+
+  /**
+   * name for the return variable;
+   */
+  static const std::string RETURN_VAR_NAME;
+
+  /**
+   * name for the mark variable, which is refering the mark var
+   * associated with this one;
+   */
+  static const std::string MARK_VAR_REF_NAME;
+
 };
 
 } /* namespace codegen */

@@ -14,7 +14,8 @@ namespace code {
 
 enum class OpKind {
   BO_ASSIGN,         // Assignment
-  BO_EQUAL
+  BO_EQUAL,
+  BO_FIELD           // reference to a field
 };
 
 class BinaryOperator: public swift::code::Expr {
