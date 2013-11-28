@@ -27,6 +27,11 @@ private:
   code::FunctionDecl* coreClsInit; // init function for main class
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   void transFun(std::shared_ptr<ir::FuncDefn> fd);
+  /**
+   * translate the function body,
+   * given the returnvalue-variable name
+   * and the mark variable name
+   */
   void transFunBody(code::FunctionDecl* fun, std::shared_ptr<ir::Clause> clause,
       std::string valuevarname, std::string markvarname);
   code::Stmt* transClause(std::shared_ptr<ir::Clause> clause,
