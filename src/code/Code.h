@@ -10,6 +10,7 @@
 #include "ArraySubscriptExpr.h"
 #include "BinaryOperator.h"
 #include "BreakStmt.h"
+#include "CallExpr.h"
 #include "CaseStmt.h"
 #include "ClassDecl.h"
 #include "CompoundStmt.h"

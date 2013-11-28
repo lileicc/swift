@@ -24,10 +24,6 @@ void CategoricalDistribution::init(std::map<int, double>& weights) {
   dist = std::discrete_distribution<int>(ws.begin(), ws.end());
 }
 
-int CategoricalDistribution::gen() {
-  return dist();
-}
-
 double CategoricalDistribution::likeli(int x) {
   return (x>=0)? ws[x]: 0;
 }

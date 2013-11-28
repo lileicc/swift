@@ -12,7 +12,7 @@
 #include "Stmt.h"
 #include "CompoundStmt.h"
 #include "ParamVarDecl.h"
-#include "QualType.h"
+#include "Type.h"
 
 namespace swift {
 namespace code {

@@ -1,11 +1,11 @@
 /*
- * QualType.cpp
+ * Type.cpp
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
  */
 
-#include "QualType.h"
+#include "Type.h"
 
 namespace swift {
 namespace code {
