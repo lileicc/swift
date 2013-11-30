@@ -1,17 +1,15 @@
 #include "Query.h"
 
-#include "VoidFuncCall.h"
-
 namespace swift { namespace ir {
 
-Query::Query(VoidFuncCall* var)
+  Query::Query(std::shared_ptr<FunctionCall> var)
   :var(var) {
 }
 
 Query::~Query() {
 }
 
-VoidFuncCall* Query::getVar() {
+std::shared_ptr<FunctionCall> Query::getVar() {
   return var;
 }
 

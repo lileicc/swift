@@ -96,6 +96,16 @@ private:
   void transNumSt(absyn::NumStDecl* nd);
 
   /**
+  * process evidence
+  */
+  void transEvidence(absyn::Evidence* ed);
+
+  /**
+  * process query
+  */
+  void transQuery(absyn::Query* eq);
+
+  /**
    * translate the type in abstract syntax to intermediate representation
    */
   const ir::Ty* transTy(const absyn::Ty & typ);
