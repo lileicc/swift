@@ -97,7 +97,7 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 [Tt][Yy][Pp][Ee] { return TYPE; }
 [Rr][Aa][Nn][Dd][Oo][Mm] { return RANDOM; }
 [Nn][Oo][Nn][Rr][Aa][Nn][Dd][Oo][Mm] { return FIXED; }
-[Ff][Ii][Xx][Ee][Dd] { return FIXED; }                           
+[Ff][Ii][Xx][Ee][Dd] { return FIXED; }			   
 [Gg][Ee][Nn][Ee][Rr][Aa][Tt][Ii][Nn][Gg] { return ORIGIN; }
 [Oo][Rr][Ii][Gg][Ii][Nn] { return ORIGIN; }
 [Gg][Uu][Aa][Rr][Aa][Nn][Tt][Ee][Ee][Dd] { return DISTINCT; }
@@ -105,11 +105,11 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 [Ff][Aa][Cc][Tt][Oo][Rr] { return FACTOR; }
 [Pp][Aa][Rr][Ff][Aa][Cc][Tt][Oo][Rr] { return PARFACTOR; }
 [Tt][Hh][Ee][Nn]     { return THEN; }
-[Ee][Ll][Ss][Ee]          { return ELSE; }
+[Ee][Ll][Ss][Ee]  	{ return ELSE; }
 [Ff][Oo][Rr]         { return FOR; }
 [Ee][Ll][Ss][Ee][Ii][Ff]  { return ELSEIF; }
-[Ii][Ff]                  { return IF; }
-[Qq][Uu][Ee][Rr][Yy]        { return QUERY;}
+[Ii][Ff]  		{ return IF; }
+[Qq][Uu][Ee][Rr][Yy]	{ return QUERY;}
 [Oo][Bb][Ss]         { return OBS;}
 [Pp][Aa][Rr][Aa][Mm] { return PARAM;}
 [Ee][Xx][Ii][Ss][Tt][Ss] { return EXISTS_; }
@@ -119,7 +119,7 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 [Dd][Ii][Tt][Rr][Ii][Bb][Uu][Tt][Ii][Oo][Nn] { return DISTRIBUTION; }
 
 
-"true"        { 
+"true"	{ 
             yylval.boolval = new BLOGSymbol<bool>(curr_line, curr_col, true);
             return BOOLEAN_LITERAL; 
         }
@@ -143,25 +143,25 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 ">="    { return GEQ_; }
 "=="    { return EQEQ_; }
 "!="    { return NEQ_; }
-"&"            { return AND_; }
+"&"	    { return AND_; }
 "|"     { return OR_; }
-"!"            { return NOT_; }
+"!"	    { return NOT_; }
 "@"     { return AT_; }
-"->"        { return RIGHTARROW; }
+"->"	{ return RIGHTARROW; }
 "=>"    { return DOUBLERIGHTARROW; }
 
-"("                { return LPAREN; }
-")"                { return RPAREN; }
-"}"                { return RBRACE; }
-"{"                { return LBRACE; }
-"["                { return LBRACKET; }
-"]"                { return RBRACKET; }
-";"                { return SEMI; }
-":"                { return COLON;}
+"("		{ return LPAREN; }
+")"		{ return RPAREN; }
+"}"		{ return RBRACE; }
+"{"		{ return LBRACE; }
+"["		{ return LBRACKET; }
+"]"		{ return RBRACKET; }
+";"		{ return SEMI; }
+":"		{ return COLON;}
 "."     { return DOT; }
-","                { return COMMA;}
-"="                { return EQ_; }
-"~"                { return DISTRIB; }
+","		{ return COMMA;}
+"="		{ return EQ_; }
+"~"		{ return DISTRIB; }
 "#"     { return NUMSIGN; }
 
 {Comment} { /* ignore */ }
