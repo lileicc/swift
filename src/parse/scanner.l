@@ -6,11 +6,15 @@
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include <string>
+#include <vector>
+#include <tuple>
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #include "BLOGSymbol.h"
-
+#include "VarDecl.h"
 #include "y.tab.h"  // to get the token types that we return
+
 char string_buf[100000];
 int buf_len;
 char *string_buf_ptr;
@@ -20,10 +24,10 @@ int curr_col = 1;
 int first_column;
 int last_column;
 
-int symbol(int token){
-  yylval.keyword.symbol(curr_line, curr_col-yyleng);
-  return token;
-}
+//int symbol(int token){
+//  yylval.keyword.symbol(curr_line, curr_col-yyleng);
+//  return token;
+//}
 
 static void update_column(){
   first_column = curr_col;
@@ -52,13 +56,13 @@ Digit            [0-9]
 
 Identifier       {Alpha}({Alpha}|{Digit}|_)*
 
-IntegerLiteral   [+-]?{Digit}+
+IntegerLiteral   {Digit}+
 
 FLit1            {Digit}+\.{Digit}* 
 FLit2            \.{Digit}+ 
 FLit3            {Digit}+ 
-Exponent         [+-]?{Digit}+
-DoubleLiteral    [+-]?({FLit1}|{FLit2}|{FLit3}){Exponent}?
+Exponent         [eE][+-]?{Digit}+
+DoubleLiteral    ({FLit1}|{FLit2}|{FLit3}){Exponent}?
 
 LineTerminator   [\n\r\r\n]
 
@@ -91,7 +95,7 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
     BEGIN(CHAR_LIT); 
    }
 
-[Tt][Yy][Pp][Ee] { return symbol(TYPE); }
+[Tt][Yy][Pp][Ee] { return TYPE; }
 [Rr][Aa][Nn][Dd][Oo][Mm] { return RANDOM; }
 [Nn][Oo][Nn][Rr][Aa][Nn][Dd][Oo][Mm] { return FIXED; }
 [Ff][Ii][Xx][Ee][Dd] { return FIXED; }			   
@@ -117,16 +121,16 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 
 
 "true"	{ 
-            yylval.boolval.symbol(curr_line, curr_col, 1);
+            yylval.boolval = new BLOGSymbol<bool>(curr_line, curr_col, true);
             return BOOLEAN_LITERAL; 
         }
 "false" { 
-            yylval.boolval.symbol(curr_line, curr_col, 0);
+            yylval.boolval = new BLOGSymbol<bool>(curr_line, curr_col, false);
             return BOOLEAN_LITERAL;
         }
 "null" {return NULLITY; }
-{IntegerLiteral}  {yylval.ival.symbol(curr_line, curr_col, atoi( yytext )); return INT_LITERAL;}
-{DoubleLiteral}   {yylval.dblval.symbol(curr_line, curr_col, atof( yytext )); return DOUBLE_LITERAL;}
+{IntegerLiteral}  {yylval.ival = new BLOGSymbol<int>(curr_line, curr_col, atoi( yytext )); return INT_LITERAL;}
+{DoubleLiteral}   {yylval.dblval = new BLOGSymbol<double>(curr_line, curr_col, atof( yytext )); return DOUBLE_LITERAL;}
 
 "+"     { return PLUS; }
 "-"     { return MINUS; }
@@ -165,20 +169,25 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 
 {Whitespace} { /* Do nothing */}
      
-{Identifier} { yylval.sval.symbol(curr_line, curr_col, strdup(yytext)); return ID; } 
+{Identifier} { 
+  string s(yytext);
+  yylval.sval = new BLOGSymbol<string>(curr_line, curr_col, s);
+  return ID;
+} 
 
 <STR_LIT>\" {
             *string_buf_ptr = '\0';
-            char * s = (char *) malloc (buf_len + 1);
-            strcpy(s, string_buf);
-            yylval.sval.symbol(curr_line, curr_col, s);
+            //char * s = (char *) malloc (buf_len + 1);
+            //strcpy(s, string_buf);
+            string s(string_buf);
+            yylval.sval = new BLOGSymbol<string>(curr_line, curr_col, s);
             BEGIN(INITIAL);
             return STRING_LITERAL;
             } 
 <CHAR_LIT>\' {
             *string_buf_ptr = '\0';
             if (buf_len == 1){
-                yylval.chrval.symbol(curr_line, curr_col, *string_buf);
+                yylval.chrval = new BLOGSymbol<char>(curr_line, curr_col, *string_buf);
             }
             else{
                 cout << "A character must be of length 1" << endl;
