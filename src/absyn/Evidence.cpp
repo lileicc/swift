@@ -38,7 +38,7 @@ void Evidence::print(FILE* file, int indent) {
   }
   if (right != NULL) {
     fprintf(file, "%*s:right\n", indent + 2, "");
-    left->print(file, indent + 4);
+    right->print(file, indent + 4);
   }
   fprintf(file, "%*s)\n", indent, "");
 }

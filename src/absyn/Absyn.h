@@ -14,26 +14,27 @@ namespace absyn {
 
 enum class AbsynConstant {
   // For OpExpr
-  PLUS,
-  MINUS,
-  MUL,
-  DIV,
-  POWER,
-  MOD,
-  EQ,
-  NEQ,
-  LT,
-  GT,
-  LE,
-  GE,
-  AND,
-  OR,
-  NOT,
-  IMPLY,
-  SUB,
+  PLUS_,
+  MINUS_,
+  MUL_,
+  DIV_,
+  POWER_,
+  MOD_,
+  EQ_,
+  NEQ_,
+  LT_,
+  GT_,
+  LE_,
+  GE_,
+  AND_,
+  OR_,
+  NOT_,
+  IMPLY_,
+  SUB_,
+  AT_,
   // For QuantExpr
-  FORALL,
-  EXISTS
+  FORALL_,
+  EXISTS_
 };
 
 class Absyn {
