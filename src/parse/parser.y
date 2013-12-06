@@ -52,15 +52,17 @@ extern "C" int curr_line;
 extern "C" int curr_col;
  
 void yyerror(const char *s);
-BlogProgram *blog = new BlogProgram(0,0);
+BlogProgram *blog;
 
-int main() {
+BlogProgram* parse(const char* inp) {
+  blog = new BlogProgram(0, 0);
   // open a file handle to a particular file:
-  FILE *myfile = fopen("input.in", "r");
+  FILE *myfile = fopen(inp, "r");
   // make sure it is valid:
   if (!myfile) {
     cout << "I can't open input.in" << endl;
-    return -1;
+    exit(0);
+    //return -1;
   }
   // set flex to read from it instead of defaulting to STDIN:
   yyin = myfile;
@@ -68,20 +70,7 @@ int main() {
   do {
     yyparse();
   } while (!feof(yyin));
-  FILE *output = fopen("output.out", "w");
-  //cout << blog->size() << endl;
-  //NumStDecl* st = (NumStDecl*)(blog->get(0));
-  //Symbol o = st->getArgOrigin(0);
-  //cout << "current val: " << o.getValue() << endl;
-  //Evidence* t = (Evidence*)(blog->get(0));
-  //cout << "assigned" << endl;
-  //NumStRef* left = (NumStRef*)(t->getLeft());
-  //cout << "expression extracted" << endl;
-  
-  blog->print(output, 0);
-  return 0;
-  
-  
+  return blog;  
 }
 %}
 
@@ -137,7 +126,7 @@ int main() {
 // by convention), and associate each with a field of the union:
 %token ELSE IF THEN
 %token TYPE RANDOM FIXED ORIGIN DISTINCT QUERY OBS PARAM LIST MAP DISTRIBUTION
-%token EXISTS FORALL
+%token EXISTS_ FORALL_
 %token FOR
 %token NULLITY
 %token <ival> INT_LITERAL 
@@ -148,13 +137,13 @@ int main() {
 %token <sval> ID
 %token PARFACTOR FACTOR
 %token ERROR ELSEIF
-%token AT
-%token PLUS MULT DIV MOD POWER MINUS
-%token LST LT GT LEQ GEQ
-%token EQEQ NEQ
-%token EQ
+%token AT_
+%token PLUS_ MULT_ DIV_ MOD_ POWER_ MINUS_
+%token LST LT_ GT_ LEQ_ GEQ_
+%token EQEQ_ NEQ_
+%token EQ_
 %token DISTRIB
-%token NOT AND OR DOUBLERIGHTARROW
+%token NOT_ AND_ OR_ DOUBLERIGHTARROW
 %token COMMA SEMI COLON DOT NUMSIGN RIGHTARROW
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
 
@@ -192,14 +181,14 @@ int main() {
 %type <i> dims;
 
 %left ELSE
-%nonassoc EQ DISTRIB
+%nonassoc EQ_ DISTRIB
 %right RIGHTARROW
 %left DOUBLERIGHTARROW
-%left AND OR
-%left NOT
-%nonassoc LT GT LEQ GEQ EQEQ NEQ
-%left PLUS MINUS
-%left MULT DIV MOD POWER
+%left AND_ OR_
+%left NOT_
+%nonassoc LT_ GT_ LEQ_ GEQ_ EQEQ_ NEQ_
+%left PLUS_ MINUS_
+%left MULT_ DIV_ MOD_ POWER_
 %left LBRACKET
 
 %%
@@ -258,7 +247,7 @@ name_type:
 
 //TODO: Not sure what type this should be
 list_type:
-  LIST LT ID GT{ $$ = new Ty(curr_line, curr_col, Symbol($3->getValue())); }
+  LIST LT_ ID GT_{ $$ = new Ty(curr_line, curr_col, Symbol($3->getValue())); }
   ;
 
 //TODO: Not sure what type this should be
@@ -273,7 +262,7 @@ dims:
   
 //TODO: Not sure what type this should be
 map_type:
-  MAP LT type COMMA type GT { $$ = $3; }
+  MAP LT_ type COMMA type GT_ { $$ = $3; }
   ;
 
 opt_parenthesized_type_var_lst:
@@ -305,7 +294,7 @@ type_var_lst:
   ;
 
 fixed_func_decl:
-    FIXED type ID opt_parenthesized_type_var_lst EQ expression SEMI
+    FIXED type ID opt_parenthesized_type_var_lst EQ_ expression SEMI
     { 
       $$ = new FuncDecl(curr_line, curr_col, false, $2->getTyp(), Symbol($3->getValue()), $6);
       if($4 != NULL){
@@ -353,12 +342,12 @@ opt_parenthesized_origin_var_list:
 
 //TODO: memory management 
 origin_var_list:
-  origin_var_list COMMA ID EQ ID
+  origin_var_list COMMA ID EQ_ ID
   {
     $$ = $1;
     $$->push_back(make_tuple(Symbol($3->getValue()), Symbol($5->getValue())));
   }
-  | ID EQ ID
+  | ID EQ_ ID
   { 
     $$ = new vector<tuple<Symbol, Symbol>>();
     $$->push_back(make_tuple(Symbol($1->getValue()), Symbol($3->getValue())));
@@ -367,7 +356,7 @@ origin_var_list:
 
 //TODO: DistributionDec/ClassName
 distribution_decl:
-    DISTRIBUTION ID EQ class_name LPAREN opt_expression_list RPAREN SEMI
+    DISTRIBUTION ID EQ_ class_name LPAREN opt_expression_list RPAREN SEMI
     { }
     ;
     
@@ -412,17 +401,13 @@ id_or_subid_list:
     
 id_or_subid:
     ID { 
-        cout << "creating first tuple" << endl;
         auto idint = make_tuple($1->getValue(), 1);
         $$ = &(idint); 
-        cout << "created first tuple" << endl;
        }
   | ID LBRACKET INT_LITERAL RBRACKET
     { 
-      cout << "creating tuple" << endl;
       auto idint = make_tuple($1->getValue(), $3->getValue());
       $$ = &(idint); 
-      cout << "created tuple" << endl;
     }
   ;      
   
@@ -436,7 +421,7 @@ class_name:
   ;
   
 dependency_statement_body:
-    EQ expression { $$ = $2; }
+    EQ_ expression { $$ = $2; }
   | distribution_expr { $$ = $1; }
   | IF expression THEN dependency_statement_body elseif_list
   { $$ = new IfExpr(curr_line, curr_col, $2, $4, $5); }
@@ -484,58 +469,58 @@ literal:
   ;
   
 operation_expr:
-    expression PLUS expression
+    expression PLUS_ expression
     { 
-      $$ = new OpExpr(curr_line, curr_col, AbsynConstant::PLUS_, $1, $3);   
+      $$ = new OpExpr(curr_line, curr_col, AbsynConstant::PLUS, $1, $3);   
     }
-  | expression MINUS expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS_, $1, $3); }
-  | expression MULT expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::MUL_, $1, $3); }
-  | expression DIV expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::DIV_, $1, $3); }
-  | expression MOD expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::MOD_, $1, $3); }
-  | expression POWER expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::POWER_, $1, $3); }
-  | expression LT expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::LT_, $1, $3); }
-  | expression GT expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::GT_, $1, $3); }
-  | expression LEQ expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::LE_, $1, $3); }
-  | expression GEQ expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::GE_, $1, $3); }
-  | expression EQEQ expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::EQ_, $1, $3); }
-  | expression NEQ expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::NEQ_, $1, $3); }
-  | expression AND expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::AND_, $1, $3); }
-  | expression OR expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::OR_, $1, $3); }
+  | expression MINUS_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, $1, $3); }
+  | expression MULT_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::MUL, $1, $3); }
+  | expression DIV_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::DIV, $1, $3); }
+  | expression MOD_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::MOD, $1, $3); }
+  | expression POWER_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::POWER, $1, $3); }
+  | expression LT_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::LT, $1, $3); }
+  | expression GT_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::GT, $1, $3); }
+  | expression LEQ_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::LE, $1, $3); }
+  | expression GEQ_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::GE, $1, $3); }
+  | expression EQEQ_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::EQ, $1, $3); }
+  | expression NEQ_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::NEQ, $1, $3); }
+  | expression AND_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::AND, $1, $3); }
+  | expression OR_ expression
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::OR, $1, $3); }
   | expression DOUBLERIGHTARROW expression
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::IMPLY_, $1, $3); }
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::IMPLY, $1, $3); }
   | expression LBRACKET expression RBRACKET
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::SUB_, $1, $3); }
+    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, $1, $3); }
   | unary_operation_expr { $$ = $1; }
   ;
   
 unary_operation_expr:
-    MINUS expression
-    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::NOT_, new IntLiteral(curr_line, curr_col, 0), $2); }
-  | NOT expression
-    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::NOT_, NULL, $2); } 
-  | AT expression
-    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::AT_, NULL, $2); } 
+    MINUS_ expression
+    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, new IntLiteral(curr_line, curr_col, 0), $2); }
+  | NOT_ expression
+    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::NOT, NULL, $2); } 
+  | AT_ expression
+    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::AT, NULL, $2); } 
   | LPAREN expression RPAREN {$$ = $2; }
   ;
   
 quantified_formula:
-    FORALL type ID expression
-    {$$ = new QuantExpr(curr_line, curr_col, AbsynConstant::FORALL_, *(new VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue()))), $4); }
-  | EXISTS type ID expression
-    {$$ = new QuantExpr(curr_line, curr_col, AbsynConstant::EXISTS_, *(new VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue()))), $4); }
+    FORALL_ type ID expression
+    {$$ = new QuantExpr(curr_line, curr_col, AbsynConstant::FORALL, *(new VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue()))), $4); }
+  | EXISTS_ type ID expression
+    {$$ = new QuantExpr(curr_line, curr_col, AbsynConstant::EXISTS, *(new VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue()))), $4); }
   ;
   
 function_call:
@@ -699,7 +684,7 @@ evidence:
   
 //TODO: No ValueEvidence?  
 value_evidence:
-  expression EQ expression
+  expression EQ_ expression
   {
     $$ = new Evidence(curr_line, curr_col, $1, $3); 
   }
@@ -707,7 +692,7 @@ value_evidence:
 
 //TODO: No SymbolEvidence?  
 symbol_evidence:
-  implicit_set EQ explicit_set
+  implicit_set EQ_ explicit_set
   { $$ = new Evidence(curr_line, curr_col, $1, $3); }
   ;
 

@@ -62,15 +62,17 @@ extern "C" int curr_line;
 extern "C" int curr_col;
  
 void yyerror(const char *s);
-BlogProgram *blog = new BlogProgram(0,0);
+BlogProgram *blog;
 
-int main() {
+BlogProgram* parse(const char* inp) {
+  blog = new BlogProgram(0, 0);
   /* open a file handle to a particular file:*/
-  FILE *myfile = fopen("input.in", "r");
+  FILE *myfile = fopen(inp, "r");
   /* make sure it is valid:*/
   if (!myfile) {
     cout << "I can't open input.in" << endl;
-    return -1;
+    exit(0);
+    /*return -1;*/
   }
   /* set flex to read from it instead of defaulting to STDIN:*/
   yyin = myfile;
@@ -78,22 +80,9 @@ int main() {
   do {
     yyparse();
   } while (!feof(yyin));
-  FILE *output = fopen("output.out", "w");
-  /*cout << blog->size() << endl;*/
-  /*NumStDecl* st = (NumStDecl*)(blog->get(0));*/
-  /*Symbol o = st->getArgOrigin(0);*/
-  /*cout << "current val: " << o.getValue() << endl;*/
-  /*Evidence* t = (Evidence*)(blog->get(0));*/
-  /*cout << "assigned" << endl;*/
-  /*NumStRef* left = (NumStRef*)(t->getLeft());*/
-  /*cout << "expression extracted" << endl;*/
-  
-  blog->print(output, 0);
-  return 0;
-  
-  
+  return blog;  
 }
-#line 88 "parser.y"
+#line 77 "parser.y"
 typedef union {
   int i;
   class BLOGSymbol<int>* ival;
@@ -141,7 +130,7 @@ typedef union {
   vector<Expr*>* explst;
   vector<tuple<Symbol, Symbol>>* varlst;
 } YYSTYPE;
-#line 145 "y.tab.c"
+#line 134 "y.tab.c"
 #define ELSE 257
 #define IF 258
 #define THEN 259
@@ -156,8 +145,8 @@ typedef union {
 #define LIST 268
 #define MAP 269
 #define DISTRIBUTION 270
-#define EXISTS 271
-#define FORALL 272
+#define EXISTS_ 271
+#define FORALL_ 272
 #define FOR 273
 #define NULLITY 274
 #define INT_LITERAL 275
@@ -170,25 +159,25 @@ typedef union {
 #define FACTOR 282
 #define ERROR 283
 #define ELSEIF 284
-#define AT 285
-#define PLUS 286
-#define MULT 287
-#define DIV 288
-#define MOD 289
-#define POWER 290
-#define MINUS 291
+#define AT_ 285
+#define PLUS_ 286
+#define MULT_ 287
+#define DIV_ 288
+#define MOD_ 289
+#define POWER_ 290
+#define MINUS_ 291
 #define LST 292
-#define LT 293
-#define GT 294
-#define LEQ 295
-#define GEQ 296
-#define EQEQ 297
-#define NEQ 298
-#define EQ 299
+#define LT_ 293
+#define GT_ 294
+#define LEQ_ 295
+#define GEQ_ 296
+#define EQEQ_ 297
+#define NEQ_ 298
+#define EQ_ 299
 #define DISTRIB 300
-#define NOT 301
-#define AND 302
-#define OR 303
+#define NOT_ 301
+#define AND_ 302
+#define OR_ 303
 #define DOUBLERIGHTARROW 304
 #define COMMA 305
 #define SEMI 306
@@ -591,12 +580,13 @@ char *yyname[] = {
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"ELSE","IF","THEN","TYPE",
 "RANDOM","FIXED","ORIGIN","DISTINCT","QUERY","OBS","PARAM","LIST","MAP",
-"DISTRIBUTION","EXISTS","FORALL","FOR","NULLITY","INT_LITERAL","DOUBLE_LITERAL",
-"BOOLEAN_LITERAL","CHAR_LITERAL","STRING_LITERAL","ID","PARFACTOR","FACTOR",
-"ERROR","ELSEIF","AT","PLUS","MULT","DIV","MOD","POWER","MINUS","LST","LT","GT",
-"LEQ","GEQ","EQEQ","NEQ","EQ","DISTRIB","NOT","AND","OR","DOUBLERIGHTARROW",
-"COMMA","SEMI","COLON","DOT","NUMSIGN","RIGHTARROW","LPAREN","RPAREN","LBRACE",
-"RBRACE","LBRACKET","RBRACKET",
+"DISTRIBUTION","EXISTS_","FORALL_","FOR","NULLITY","INT_LITERAL",
+"DOUBLE_LITERAL","BOOLEAN_LITERAL","CHAR_LITERAL","STRING_LITERAL","ID",
+"PARFACTOR","FACTOR","ERROR","ELSEIF","AT_","PLUS_","MULT_","DIV_","MOD_",
+"POWER_","MINUS_","LST","LT_","GT_","LEQ_","GEQ_","EQEQ_","NEQ_","EQ_",
+"DISTRIB","NOT_","AND_","OR_","DOUBLERIGHTARROW","COMMA","SEMI","COLON","DOT",
+"NUMSIGN","RIGHTARROW","LPAREN","RPAREN","LBRACE","RBRACE","LBRACKET",
+"RBRACKET",
 };
 char *yyrule[] = {
 "$accept : program",
@@ -622,25 +612,25 @@ char *yyrule[] = {
 "type : array_type",
 "type : map_type",
 "name_type : ID",
-"list_type : LIST LT ID GT",
+"list_type : LIST LT_ ID GT_",
 "array_type : ID dims",
 "dims : LBRACKET RBRACKET",
 "dims : LBRACKET RBRACKET dims",
-"map_type : MAP LT type COMMA type GT",
+"map_type : MAP LT_ type COMMA type GT_",
 "opt_parenthesized_type_var_lst :",
 "opt_parenthesized_type_var_lst : LPAREN RPAREN",
 "opt_parenthesized_type_var_lst : LPAREN type_var_lst RPAREN",
 "var_decl : type ID",
 "type_var_lst : type_var_lst COMMA var_decl",
 "type_var_lst : var_decl",
-"fixed_func_decl : FIXED type ID opt_parenthesized_type_var_lst EQ expression SEMI",
+"fixed_func_decl : FIXED type ID opt_parenthesized_type_var_lst EQ_ expression SEMI",
 "rand_func_decl : RANDOM type ID opt_parenthesized_type_var_lst dependency_statement_body SEMI",
 "number_stmt : NUMSIGN name_type opt_parenthesized_origin_var_list dependency_statement_body SEMI",
 "opt_parenthesized_origin_var_list : LPAREN origin_var_list RPAREN",
 "opt_parenthesized_origin_var_list :",
-"origin_var_list : origin_var_list COMMA ID EQ ID",
-"origin_var_list : ID EQ ID",
-"distribution_decl : DISTRIBUTION ID EQ class_name LPAREN opt_expression_list RPAREN SEMI",
+"origin_var_list : origin_var_list COMMA ID EQ_ ID",
+"origin_var_list : ID EQ_ ID",
+"distribution_decl : DISTRIBUTION ID EQ_ class_name LPAREN opt_expression_list RPAREN SEMI",
 "distinct_decl : id_or_subid_list SEMI",
 "id_or_subid_list : DISTINCT name_type ID",
 "id_or_subid_list : DISTINCT name_type ID LBRACKET INT_LITERAL RBRACKET",
@@ -650,7 +640,7 @@ char *yyrule[] = {
 "id_or_subid : ID LBRACKET INT_LITERAL RBRACKET",
 "class_name : ID",
 "class_name : ID DOT class_name",
-"dependency_statement_body : EQ expression",
+"dependency_statement_body : EQ_ expression",
 "dependency_statement_body : distribution_expr",
 "dependency_statement_body : IF expression THEN dependency_statement_body elseif_list",
 "dependency_statement_body : LBRACE dependency_statement_body RBRACE",
@@ -674,29 +664,29 @@ char *yyrule[] = {
 "literal : DOUBLE_LITERAL",
 "literal : BOOLEAN_LITERAL",
 "literal : NULLITY",
-"operation_expr : expression PLUS expression",
-"operation_expr : expression MINUS expression",
-"operation_expr : expression MULT expression",
-"operation_expr : expression DIV expression",
-"operation_expr : expression MOD expression",
-"operation_expr : expression POWER expression",
-"operation_expr : expression LT expression",
-"operation_expr : expression GT expression",
-"operation_expr : expression LEQ expression",
-"operation_expr : expression GEQ expression",
-"operation_expr : expression EQEQ expression",
-"operation_expr : expression NEQ expression",
-"operation_expr : expression AND expression",
-"operation_expr : expression OR expression",
+"operation_expr : expression PLUS_ expression",
+"operation_expr : expression MINUS_ expression",
+"operation_expr : expression MULT_ expression",
+"operation_expr : expression DIV_ expression",
+"operation_expr : expression MOD_ expression",
+"operation_expr : expression POWER_ expression",
+"operation_expr : expression LT_ expression",
+"operation_expr : expression GT_ expression",
+"operation_expr : expression LEQ_ expression",
+"operation_expr : expression GEQ_ expression",
+"operation_expr : expression EQEQ_ expression",
+"operation_expr : expression NEQ_ expression",
+"operation_expr : expression AND_ expression",
+"operation_expr : expression OR_ expression",
 "operation_expr : expression DOUBLERIGHTARROW expression",
 "operation_expr : expression LBRACKET expression RBRACKET",
 "operation_expr : unary_operation_expr",
-"unary_operation_expr : MINUS expression",
-"unary_operation_expr : NOT expression",
-"unary_operation_expr : AT expression",
+"unary_operation_expr : MINUS_ expression",
+"unary_operation_expr : NOT_ expression",
+"unary_operation_expr : AT_ expression",
 "unary_operation_expr : LPAREN expression RPAREN",
-"quantified_formula : FORALL type ID expression",
-"quantified_formula : EXISTS type ID expression",
+"quantified_formula : FORALL_ type ID expression",
+"quantified_formula : EXISTS_ type ID expression",
 "function_call : class_name LPAREN opt_expression_list RPAREN",
 "symbol_expr : ID",
 "distribution_expr : DISTRIB class_name LPAREN opt_expression_list RPAREN",
@@ -724,8 +714,8 @@ char *yyrule[] = {
 "evidence_stmt : OBS evidence SEMI",
 "evidence : symbol_evidence",
 "evidence : value_evidence",
-"value_evidence : expression EQ expression",
-"symbol_evidence : implicit_set EQ explicit_set",
+"value_evidence : expression EQ_ expression",
+"symbol_evidence : implicit_set EQ_ explicit_set",
 "query_stmt : QUERY query SEMI",
 "query : expression",
 };
@@ -752,7 +742,7 @@ YYSTYPE yylval;
 short yyss[YYSTACKSIZE];
 YYSTYPE yyvs[YYSTACKSIZE];
 #define yystacksize YYSTACKSIZE
-#line 723 "parser.y"
+#line 708 "parser.y"
 
 
 
@@ -761,7 +751,7 @@ void yyerror(const char *s) {
   // might as well halt now:
   exit(-1);
 }
-#line 765 "y.tab.c"
+#line 755 "y.tab.c"
 #define YYABORT goto yyabort
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
@@ -903,7 +893,7 @@ yyreduce:
     switch (yyn)
     {
 case 4:
-#line 217 "parser.y"
+#line 206 "parser.y"
 {
     if(yyvsp[0].stmt != NULL){
       blog->add(yyvsp[0].stmt);
@@ -911,117 +901,117 @@ case 4:
   }
 break;
 case 5:
-#line 222 "parser.y"
+#line 211 "parser.y"
 { blog->add(yyvsp[0].stmt); }
 break;
 case 6:
-#line 226 "parser.y"
+#line 215 "parser.y"
 { yyval.stmt = yyvsp[0].stmt; }
 break;
 case 7:
-#line 227 "parser.y"
+#line 216 "parser.y"
 { yyval.stmt = yyvsp[0].stmt; }
 break;
 case 8:
-#line 228 "parser.y"
+#line 217 "parser.y"
 { yyval.stmt = yyvsp[0].stmt; }
 break;
 case 9:
-#line 233 "parser.y"
+#line 222 "parser.y"
 { yyval.stmt = yyvsp[0].stmt; }
 break;
 case 10:
-#line 234 "parser.y"
+#line 223 "parser.y"
 { yyval.stmt = yyvsp[0].funcdec; }
 break;
 case 11:
-#line 235 "parser.y"
+#line 224 "parser.y"
 { yyval.stmt = yyvsp[0].funcdec; }
 break;
 case 12:
-#line 236 "parser.y"
+#line 225 "parser.y"
 { yyval.stmt = yyvsp[0].origdec; }
 break;
 case 13:
-#line 237 "parser.y"
+#line 226 "parser.y"
 {yyval.stmt = yyvsp[0].numstdec; }
 break;
 case 14:
-#line 238 "parser.y"
+#line 227 "parser.y"
 { yyval.stmt = yyvsp[0].distdec; }
 break;
 case 15:
-#line 239 "parser.y"
+#line 228 "parser.y"
 { yyval.stmt = yyvsp[0].stmt; }
 break;
 case 16:
-#line 240 "parser.y"
+#line 229 "parser.y"
 { yyval.stmt = yyvsp[0].stmt; }
 break;
 case 17:
-#line 245 "parser.y"
+#line 234 "parser.y"
 { yyval.stmt = new TypDecl(curr_line, curr_col, Symbol(yyvsp[-1].sval->getValue())); }
 break;
 case 18:
-#line 249 "parser.y"
+#line 238 "parser.y"
 { yyval.typ = yyvsp[0].typ; }
 break;
 case 19:
-#line 250 "parser.y"
+#line 239 "parser.y"
 { yyval.typ = yyvsp[0].typ; }
 break;
 case 20:
-#line 251 "parser.y"
+#line 240 "parser.y"
 { yyval.typ = yyvsp[0].typ; }
 break;
 case 21:
-#line 252 "parser.y"
+#line 241 "parser.y"
 { yyval.typ = yyvsp[0].typ; }
 break;
 case 22:
-#line 256 "parser.y"
+#line 245 "parser.y"
 { yyval.typ = new Ty(curr_line, curr_col, Symbol(yyvsp[0].sval->getValue())); }
 break;
 case 23:
-#line 261 "parser.y"
+#line 250 "parser.y"
 { yyval.typ = new Ty(curr_line, curr_col, Symbol(yyvsp[-1].sval->getValue())); }
 break;
 case 24:
-#line 266 "parser.y"
+#line 255 "parser.y"
 { yyval.typ = new Ty(curr_line, curr_col, Symbol(yyvsp[-1].sval->getValue())); }
 break;
 case 25:
-#line 270 "parser.y"
+#line 259 "parser.y"
 { yyval.i = 1; }
 break;
 case 26:
-#line 271 "parser.y"
+#line 260 "parser.y"
 { yyval.i = yyvsp[0].i + 1; }
 break;
 case 27:
-#line 276 "parser.y"
+#line 265 "parser.y"
 { yyval.typ = yyvsp[-3].typ; }
 break;
 case 28:
-#line 280 "parser.y"
+#line 269 "parser.y"
 { yyval.varlist = NULL; }
 break;
 case 29:
-#line 281 "parser.y"
+#line 270 "parser.y"
 {yyval.varlist = NULL; }
 break;
 case 30:
-#line 282 "parser.y"
+#line 271 "parser.y"
 { yyval.varlist = yyvsp[-1].varlist; }
 break;
 case 31:
-#line 286 "parser.y"
+#line 275 "parser.y"
 { 
     yyval.vardec = new VarDecl(curr_line, curr_col, *yyvsp[-1].typ, Symbol(yyvsp[0].sval->getValue())); 
   }
 break;
 case 32:
-#line 292 "parser.y"
+#line 281 "parser.y"
 { 
       yyval.varlist = yyvsp[-2].varlist; 
       yyval.varlist->push_back(*yyvsp[0].vardec);
@@ -1031,7 +1021,7 @@ case 32:
     }
 break;
 case 33:
-#line 299 "parser.y"
+#line 288 "parser.y"
 { 
       yyval.varlist = new vector<VarDecl>();
       yyval.varlist->push_back(*yyvsp[0].vardec);
@@ -1040,7 +1030,7 @@ case 33:
     }
 break;
 case 34:
-#line 309 "parser.y"
+#line 298 "parser.y"
 { 
       yyval.funcdec = new FuncDecl(curr_line, curr_col, false, yyvsp[-5].typ->getTyp(), Symbol(yyvsp[-4].sval->getValue()), yyvsp[-1].exp);
       if(yyvsp[-3].varlist != NULL){
@@ -1053,7 +1043,7 @@ case 34:
     }
 break;
 case 35:
-#line 323 "parser.y"
+#line 312 "parser.y"
 { 
       yyval.funcdec = new FuncDecl(curr_line, curr_col, true, yyvsp[-4].typ->getTyp(), Symbol(yyvsp[-3].sval->getValue()), yyvsp[-1].exp);
       if(yyvsp[-2].varlist != NULL){
@@ -1066,7 +1056,7 @@ case 35:
     }
 break;
 case 36:
-#line 337 "parser.y"
+#line 326 "parser.y"
 {
       yyval.numstdec = new NumStDecl(curr_line, curr_col, yyvsp[-3].typ->getTyp(), yyvsp[-1].exp);
       if(yyvsp[-2].varlst != NULL){
@@ -1079,33 +1069,33 @@ case 36:
     }
 break;
 case 37:
-#line 350 "parser.y"
+#line 339 "parser.y"
 {yyval.varlst = yyvsp[-1].varlst; }
 break;
 case 38:
-#line 351 "parser.y"
+#line 340 "parser.y"
 {yyval.varlst = NULL; }
 break;
 case 39:
-#line 357 "parser.y"
+#line 346 "parser.y"
 {
     yyval.varlst = yyvsp[-4].varlst;
     yyval.varlst->push_back(make_tuple(Symbol(yyvsp[-2].sval->getValue()), Symbol(yyvsp[0].sval->getValue())));
   }
 break;
 case 40:
-#line 362 "parser.y"
+#line 351 "parser.y"
 { 
     yyval.varlst = new vector<tuple<Symbol, Symbol>>();
     yyval.varlst->push_back(make_tuple(Symbol(yyvsp[-2].sval->getValue()), Symbol(yyvsp[0].sval->getValue())));
   }
 break;
 case 41:
-#line 371 "parser.y"
+#line 360 "parser.y"
 { }
 break;
 case 42:
-#line 376 "parser.y"
+#line 365 "parser.y"
 {
       yyval.distdec = yyvsp[-1].distdec;
       /*cout << " found distinct dec " << endl;*/
@@ -1119,255 +1109,251 @@ case 42:
     }
 break;
 case 43:
-#line 391 "parser.y"
+#line 380 "parser.y"
 {
         yyval.distdec = new DistinctDecl(curr_line, curr_col, yyvsp[-1].typ->getTyp());
         yyval.distdec->add(Symbol(yyvsp[0].sval->getValue()), 1);
       }
 break;
 case 44:
-#line 396 "parser.y"
+#line 385 "parser.y"
 {
         yyval.distdec = new DistinctDecl(curr_line, curr_col, yyvsp[-4].typ->getTyp());
         yyval.distdec->add(Symbol(yyvsp[-3].sval->getValue()), yyvsp[-1].ival->getValue());
       }
 break;
 case 45:
-#line 401 "parser.y"
+#line 390 "parser.y"
 { 
         yyval.distdec = yyvsp[-2].distdec;
         yyval.distdec->add(Symbol(yyvsp[0].sval->getValue()), 1);
       }
 break;
 case 46:
-#line 406 "parser.y"
+#line 395 "parser.y"
 { 
         yyval.distdec = yyvsp[-5].distdec;
         yyval.distdec->add(Symbol(yyvsp[-3].sval->getValue()), yyvsp[-1].ival->getValue());
       }
 break;
 case 47:
-#line 414 "parser.y"
+#line 403 "parser.y"
 { 
-        cout << "creating first tuple" << endl;
         auto idint = make_tuple(yyvsp[0].sval->getValue(), 1);
         yyval.symbintpair = &(idint); 
-        cout << "created first tuple" << endl;
        }
 break;
 case 48:
-#line 421 "parser.y"
+#line 408 "parser.y"
 { 
-      cout << "creating tuple" << endl;
       auto idint = make_tuple(yyvsp[-3].sval->getValue(), yyvsp[-1].ival->getValue());
       yyval.symbintpair = &(idint); 
-      cout << "created tuple" << endl;
     }
 break;
 case 49:
-#line 430 "parser.y"
+#line 415 "parser.y"
 { 
       yyval.sval = new BLOGSymbol<string>(curr_line, curr_col, yyvsp[0].sval->getValue());
     }
 break;
 case 50:
-#line 433 "parser.y"
+#line 418 "parser.y"
 {
       yyval.sval = new BLOGSymbol<string>(curr_line, curr_col, yyvsp[-2].sval->getValue() + "." + yyvsp[0].sval->getValue());
     }
 break;
 case 51:
-#line 439 "parser.y"
+#line 424 "parser.y"
 { yyval.exp = yyvsp[0].exp; }
 break;
 case 52:
-#line 440 "parser.y"
+#line 425 "parser.y"
 { yyval.exp = yyvsp[0].exp; }
 break;
 case 53:
-#line 442 "parser.y"
+#line 427 "parser.y"
 { yyval.exp = new IfExpr(curr_line, curr_col, yyvsp[-3].exp, yyvsp[-1].exp, yyvsp[0].exp); }
 break;
 case 54:
-#line 444 "parser.y"
+#line 429 "parser.y"
 { yyval.exp = yyvsp[-1].exp; }
 break;
 case 55:
-#line 448 "parser.y"
+#line 433 "parser.y"
 {yyval.exp = yyvsp[0].exp; }
 break;
 case 56:
-#line 449 "parser.y"
+#line 434 "parser.y"
 {yyval.exp = NULL; }
 break;
 case 57:
-#line 454 "parser.y"
+#line 439 "parser.y"
 { }
 break;
 case 58:
-#line 455 "parser.y"
+#line 440 "parser.y"
 { }
 break;
 case 59:
-#line 459 "parser.y"
+#line 444 "parser.y"
 {yyval.exp = yyvsp[0].exp;}
 break;
 case 60:
-#line 460 "parser.y"
+#line 445 "parser.y"
 {yyval.exp = yyvsp[0].exp;}
 break;
 case 61:
-#line 461 "parser.y"
+#line 446 "parser.y"
 {yyval.exp = yyvsp[0].exp;}
 break;
 case 62:
-#line 462 "parser.y"
+#line 447 "parser.y"
 {yyval.exp = yyvsp[0].exp;}
 break;
 case 63:
-#line 463 "parser.y"
+#line 448 "parser.y"
 {yyval.exp = yyvsp[0].exp;}
 break;
 case 64:
-#line 464 "parser.y"
+#line 449 "parser.y"
 {yyval.exp = yyvsp[0].mapexp;}
 break;
 case 65:
-#line 465 "parser.y"
+#line 450 "parser.y"
 { yyval.exp = yyvsp[0].exp; }
 break;
 case 66:
-#line 466 "parser.y"
+#line 451 "parser.y"
 { yyval.exp = yyvsp[0].setexp; }
 break;
 case 67:
-#line 467 "parser.y"
+#line 452 "parser.y"
 { yyval.exp = yyvsp[0].numref; }
 break;
 case 68:
-#line 468 "parser.y"
+#line 453 "parser.y"
 { yyval.exp = yyvsp[0].exp; }
 break;
 case 69:
-#line 473 "parser.y"
+#line 458 "parser.y"
 {yyval.exp = new StringLiteral(curr_line, curr_col, yyvsp[0].sval->getValue()); }
 break;
 case 70:
-#line 475 "parser.y"
+#line 460 "parser.y"
 {string charstr(1, yyvsp[0].chrval->getValue()); yyval.exp = new StringLiteral(curr_line, curr_col, charstr); }
 break;
 case 71:
-#line 477 "parser.y"
+#line 462 "parser.y"
 {yyval.exp = new IntLiteral(curr_line, curr_col, yyvsp[0].ival->getValue()); }
 break;
 case 72:
-#line 479 "parser.y"
+#line 464 "parser.y"
 {yyval.exp = new DoubleLiteral(curr_line, curr_col, yyvsp[0].dblval->getValue()); }
 break;
 case 73:
-#line 481 "parser.y"
+#line 466 "parser.y"
 {yyval.exp = new BoolLiteral(curr_line, curr_col, yyvsp[0].boolval->getValue()); }
 break;
 case 74:
-#line 483 "parser.y"
+#line 468 "parser.y"
 {yyval.exp = new NullLiteral(curr_line, curr_col); }
 break;
 case 75:
-#line 488 "parser.y"
+#line 473 "parser.y"
 { 
-      yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::PLUS_, yyvsp[-2].exp, yyvsp[0].exp);   
+      yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::PLUS, yyvsp[-2].exp, yyvsp[0].exp);   
     }
 break;
 case 76:
-#line 492 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 477 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 77:
-#line 494 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MUL_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 479 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MUL, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 78:
-#line 496 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::DIV_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 481 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::DIV, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 79:
-#line 498 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MOD_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 483 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MOD, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 80:
-#line 500 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::POWER_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 485 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::POWER, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 81:
-#line 502 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::LT_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 487 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::LT, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 82:
-#line 504 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::GT_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 489 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::GT, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 83:
-#line 506 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::LE_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 491 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::LE, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 84:
-#line 508 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::GE_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 493 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::GE, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 85:
-#line 510 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::EQ_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 495 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::EQ, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 86:
-#line 512 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::NEQ_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 497 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::NEQ, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 87:
-#line 514 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::AND_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 499 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::AND, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 88:
-#line 516 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::OR_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 501 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::OR, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 89:
-#line 518 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::IMPLY_, yyvsp[-2].exp, yyvsp[0].exp); }
+#line 503 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::IMPLY, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 90:
-#line 520 "parser.y"
-{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::SUB_, yyvsp[-3].exp, yyvsp[-1].exp); }
+#line 505 "parser.y"
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, yyvsp[-3].exp, yyvsp[-1].exp); }
 break;
 case 91:
-#line 521 "parser.y"
+#line 506 "parser.y"
 { yyval.exp = yyvsp[0].exp; }
 break;
 case 92:
-#line 526 "parser.y"
-{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::NOT_, new IntLiteral(curr_line, curr_col, 0), yyvsp[0].exp); }
+#line 511 "parser.y"
+{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, new IntLiteral(curr_line, curr_col, 0), yyvsp[0].exp); }
 break;
 case 93:
-#line 528 "parser.y"
-{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::NOT_, NULL, yyvsp[0].exp); }
+#line 513 "parser.y"
+{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::NOT, NULL, yyvsp[0].exp); }
 break;
 case 94:
-#line 530 "parser.y"
-{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::AT_, NULL, yyvsp[0].exp); }
+#line 515 "parser.y"
+{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::AT, NULL, yyvsp[0].exp); }
 break;
 case 95:
-#line 531 "parser.y"
+#line 516 "parser.y"
 {yyval.exp = yyvsp[-1].exp; }
 break;
 case 96:
-#line 536 "parser.y"
-{yyval.exp = new QuantExpr(curr_line, curr_col, AbsynConstant::FORALL_, *(new VarDecl(curr_line, curr_col, *yyvsp[-2].typ, Symbol(yyvsp[-1].sval->getValue()))), yyvsp[0].exp); }
+#line 521 "parser.y"
+{yyval.exp = new QuantExpr(curr_line, curr_col, AbsynConstant::FORALL, *(new VarDecl(curr_line, curr_col, *yyvsp[-2].typ, Symbol(yyvsp[-1].sval->getValue()))), yyvsp[0].exp); }
 break;
 case 97:
-#line 538 "parser.y"
-{yyval.exp = new QuantExpr(curr_line, curr_col, AbsynConstant::EXISTS_, *(new VarDecl(curr_line, curr_col, *yyvsp[-2].typ, Symbol(yyvsp[-1].sval->getValue()))), yyvsp[0].exp); }
+#line 523 "parser.y"
+{yyval.exp = new QuantExpr(curr_line, curr_col, AbsynConstant::EXISTS, *(new VarDecl(curr_line, curr_col, *yyvsp[-2].typ, Symbol(yyvsp[-1].sval->getValue()))), yyvsp[0].exp); }
 break;
 case 98:
-#line 543 "parser.y"
+#line 528 "parser.y"
 { 
     yyval.exp = new FuncApp(curr_line, curr_col, Symbol(yyvsp[-3].sval->getValue())); 
     if (yyvsp[-1].explst != NULL){
@@ -1379,11 +1365,11 @@ case 98:
   }
 break;
 case 99:
-#line 556 "parser.y"
+#line 541 "parser.y"
 { yyval.exp = new VarRef(curr_line, curr_col, Symbol(yyvsp[0].sval->getValue())); }
 break;
 case 100:
-#line 561 "parser.y"
+#line 546 "parser.y"
 {
       yyval.exp = new DistrExpr(curr_line, curr_col, Symbol(yyvsp[-3].sval->getValue()));
       if(yyvsp[-1].explst != NULL){
@@ -1399,44 +1385,44 @@ case 100:
     }
 break;
 case 101:
-#line 577 "parser.y"
+#line 562 "parser.y"
 {yyval.explst = yyvsp[0].explst;}
 break;
 case 102:
-#line 578 "parser.y"
+#line 563 "parser.y"
 {yyval.explst = NULL; }
 break;
 case 103:
-#line 583 "parser.y"
+#line 568 "parser.y"
 { yyval.explst = yyvsp[-2].explst;
       yyval.explst->push_back(yyvsp[0].exp);
     }
 break;
 case 104:
-#line 587 "parser.y"
+#line 572 "parser.y"
 { 
       yyval.explst = new vector<Expr*>();
       yyval.explst->push_back(yyvsp[0].exp);
     }
 break;
 case 105:
-#line 595 "parser.y"
+#line 580 "parser.y"
 { }
 break;
 case 106:
-#line 596 "parser.y"
+#line 581 "parser.y"
 { }
 break;
 case 107:
-#line 601 "parser.y"
+#line 586 "parser.y"
 { }
 break;
 case 108:
-#line 602 "parser.y"
+#line 587 "parser.y"
 { }
 break;
 case 109:
-#line 606 "parser.y"
+#line 591 "parser.y"
 { 
     /*$$ = $2; */
     yyval.mapexp = new MapExpr(curr_line, curr_col);
@@ -1448,7 +1434,7 @@ case 109:
   }
 break;
 case 110:
-#line 620 "parser.y"
+#line 605 "parser.y"
 { 
       yyval.exptuplst = yyvsp[-4].exptuplst;
       yyval.exptuplst->push_back(make_tuple(yyvsp[-2].exp, yyvsp[0].exp));
@@ -1457,7 +1443,7 @@ case 110:
     }
 break;
 case 111:
-#line 627 "parser.y"
+#line 612 "parser.y"
 { 
       yyval.exptuplst = new vector<tuple<Expr*, Expr*>>();
       yyval.exptuplst->push_back(make_tuple(yyvsp[-2].exp, yyvsp[0].exp));
@@ -1466,30 +1452,30 @@ case 111:
     }
 break;
 case 112:
-#line 637 "parser.y"
+#line 622 "parser.y"
 {yyval.numref = new NumStRef(curr_line, curr_col, (Expr*)yyvsp[0].setexp); }
 break;
 case 113:
-#line 638 "parser.y"
+#line 623 "parser.y"
 { 
       VarDecl* var = new VarDecl(curr_line, curr_col, *yyvsp[0].typ, Symbol("a"));
       yyval.numref = new NumStRef(curr_line, curr_col, new CondSet(curr_line, curr_col, *var, new BoolLiteral(curr_line, curr_col, true)));
   }
 break;
 case 114:
-#line 645 "parser.y"
+#line 630 "parser.y"
 { yyval.origdec = new OriginDecl(curr_line, curr_col, yyvsp[-5].typ->getTyp(), Symbol(yyvsp[-4].sval->getValue()), yyvsp[-2].typ->getTyp());  }
 break;
 case 115:
-#line 649 "parser.y"
+#line 634 "parser.y"
 {yyval.setexp = yyvsp[0].setexp; }
 break;
 case 116:
-#line 650 "parser.y"
+#line 635 "parser.y"
 {yyval.setexp = yyvsp[0].setexp; }
 break;
 case 117:
-#line 656 "parser.y"
+#line 641 "parser.y"
 {
       yyval.setexp = new ListSet(curr_line, curr_col);
       for(size_t i = 0; i < yyvsp[-1].explst->size(); i++){
@@ -1501,7 +1487,7 @@ case 117:
     }
 break;
 case 118:
-#line 670 "parser.y"
+#line 655 "parser.y"
 { 
       yyval.setexp = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *yyvsp[-4].typ, Symbol(yyvsp[-3].sval->getValue())), yyvsp[-1].exp);
       /*$$ = new CondSet(curr_line, curr_col, NULL);*/
@@ -1509,50 +1495,50 @@ case 118:
     }
 break;
 case 119:
-#line 676 "parser.y"
+#line 661 "parser.y"
 { 
       yyval.setexp = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *yyvsp[-2].typ, Symbol(yyvsp[-1].sval->getValue())));
     }
 break;
 case 120:
-#line 685 "parser.y"
+#line 670 "parser.y"
 { }
 break;
 case 121:
-#line 687 "parser.y"
+#line 672 "parser.y"
 { }
 break;
 case 122:
-#line 693 "parser.y"
+#line 678 "parser.y"
 {yyval.stmt = yyvsp[-1].stmt; }
 break;
 case 123:
-#line 696 "parser.y"
+#line 681 "parser.y"
 {yyval.stmt = yyvsp[0].stmt; }
 break;
 case 124:
-#line 697 "parser.y"
+#line 682 "parser.y"
 {yyval.stmt = yyvsp[0].stmt; }
 break;
 case 125:
-#line 703 "parser.y"
+#line 688 "parser.y"
 {
     yyval.stmt = new Evidence(curr_line, curr_col, yyvsp[-2].exp, yyvsp[0].exp); 
   }
 break;
 case 126:
-#line 711 "parser.y"
+#line 696 "parser.y"
 { yyval.stmt = new Evidence(curr_line, curr_col, yyvsp[-2].setexp, yyvsp[0].setexp); }
 break;
 case 127:
-#line 715 "parser.y"
+#line 700 "parser.y"
 {yyval.stmt = yyvsp[-1].stmt; }
 break;
 case 128:
-#line 719 "parser.y"
+#line 704 "parser.y"
 { yyval.stmt = new Query(curr_line, curr_col, yyvsp[0].exp); }
 break;
-#line 1556 "y.tab.c"
+#line 1542 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

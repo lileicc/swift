@@ -23,5 +23,6 @@ main(int argc, char* argv[]) {
     if(strcmp(argv[i], "-o") == 0) out = argv[i+1];
   }
   BlogProgram* test = parse(inp);
+  FILE *output = fopen(out, "w");
   test->print(output, 0);
 }
