@@ -12,7 +12,6 @@
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #include "BLOGSymbol.h"
-#include "VarDecl.h"
 #include "y.tab.h"  // to get the token types that we return
 
 char string_buf[100000];
@@ -77,7 +76,7 @@ ZERO_TO_THREE    [0123]
 HEX_DIGIT        [0123456789abcdefABCDEF]
 
 /* comments */
-TraditionalComment      "/*"[^*]~"*/"|"/*""*"+"/"
+TraditionalComment      "/*"([^*]|\*+[^*/])*\*+"/"
 EndOfLineComment        "//"{InputCharacter}*{LineTerminator}?
 DocumentationComment    "/*""*"+[^/*]~"*/"
 Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationComment}
@@ -113,8 +112,8 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 [Qq][Uu][Ee][Rr][Yy]	{ return QUERY;}
 [Oo][Bb][Ss]         { return OBS;}
 [Pp][Aa][Rr][Aa][Mm] { return PARAM;}
-[Ee][Xx][Ii][Ss][Tt][Ss] { return EXISTS; }
-[Ff][Oo][Rr][Aa][Ll][Ll] { return FORALL; }
+[Ee][Xx][Ii][Ss][Tt][Ss] { return EXISTS_; }
+[Ff][Oo][Rr][Aa][Ll][Ll] { return FORALL_; }
 [Ll][Ii][Ss][Tt] { return LIST; }
 [Mm][Aa][Pp] { return MAP; }
 [Dd][Ii][Tt][Rr][Ii][Bb][Uu][Tt][Ii][Oo][Nn] { return DISTRIBUTION; }
@@ -132,22 +131,22 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 {IntegerLiteral}  {yylval.ival = new BLOGSymbol<int>(curr_line, curr_col, atoi( yytext )); return INT_LITERAL;}
 {DoubleLiteral}   {yylval.dblval = new BLOGSymbol<double>(curr_line, curr_col, atof( yytext )); return DOUBLE_LITERAL;}
 
-"+"     { return PLUS; }
-"-"     { return MINUS; }
-"*"     { return MULT; }
-"/"     { return DIV; }
-"%"     { return MOD; }
-"^"     { return POWER; }
-"<"     { return LT; }
-">"     { return GT; }
-"<="    { return LEQ; }
-">="    { return GEQ; }
-"=="    { return EQEQ; }
-"!="    { return NEQ; }
-"&"	    { return AND; }
-"|"     { return OR; }
-"!"	    { return NOT; }
-"@"     { return AT; }
+"+"     { return PLUS_; }
+"-"     { return MINUS_; }
+"*"     { return MULT_; }
+"/"     { return DIV_; }
+"%"     { return MOD_; }
+"^"     { return POWER_; }
+"<"     { return LT_; }
+">"     { return GT_; }
+"<="    { return LEQ_; }
+">="    { return GEQ_; }
+"=="    { return EQEQ_; }
+"!="    { return NEQ_; }
+"&"	    { return AND_; }
+"|"     { return OR_; }
+"!"	    { return NOT_; }
+"@"     { return AT_; }
 "->"	{ return RIGHTARROW; }
 "=>"    { return DOUBLERIGHTARROW; }
 
@@ -161,7 +160,7 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 ":"		{ return COLON;}
 "."     { return DOT; }
 ","		{ return COMMA;}
-"="		{ return EQ; }
+"="		{ return EQ_; }
 "~"		{ return DISTRIB; }
 "#"     { return NUMSIGN; }
 
