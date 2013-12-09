@@ -27,6 +27,12 @@ private:
   code::FunctionDecl* coreClsInit; // init function for main class
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   void transFun(std::shared_ptr<ir::FuncDefn> fd);
+
+  /**
+   * create declaration of variables/fileds
+   * initializaton statements
+   */
+  void createInit();
   /**
    * translate the function body,
    * given the returnvalue-variable name
@@ -34,11 +40,20 @@ private:
    */
   void transFunBody(code::FunctionDecl* fun, std::shared_ptr<ir::Clause> clause,
       std::string valuevarname, std::string markvarname);
+  /**
+   * translate the function body to likelihood function,
+   * given the returnvalue-variable name
+   * and the mark variable name
+   */
+  void transFunBodyLikeli(code::FunctionDecl* fun, std::shared_ptr<ir::Clause> clause,
+      std::string valuevarname, std::string markvarname);
   code::Stmt* transClause(std::shared_ptr<ir::Clause> clause,
       std::string retvar);
   code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar);
   code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> ith, std::string retvar);
   code::Expr* transExpr(std::shared_ptr<ir::Expr> expr);
+
+  void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname, std::string valuerefname);
   /**
    * translate the distribution expression
    * given the arguments
@@ -110,6 +125,20 @@ private:
    */
   static const std::string MARK_VAR_REF_NAME;
 
+  /**
+   * string name for the random device
+   */
+  static const std::string RANDOM_DEVICE_VAR_NAME;
+
+  /**
+   * string name for the random engine, note a random engine need to use random device as an input source of randomness
+   */
+  static const std::string RANDOM_ENGINE_VAR_NAME;
+
+  /**
+   * type for the random engine
+   */
+  static const code::Type RANDOM_ENGINE_TYPE;
 };
 
 } /* namespace codegen */
