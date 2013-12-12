@@ -11,12 +11,12 @@ namespace swift {
 namespace code {
 
 DeclContext::DeclContext() {
-  // TODO Auto-generated constructor stub
-
 }
 
 DeclContext::~DeclContext() {
-  // TODO Auto-generated destructor stub
+  for (auto d : members) {
+    delete d;
+  }
 }
 
 
