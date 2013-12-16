@@ -21,6 +21,9 @@ public:
 
   static FieldDecl* createFieldDecl(ClassDecl* cd, std::string name, Type ty);
 
+  // For Printer
+  void print(printer::CPPPrinter* prt);
+
 private:
   ClassDecl* parent;
   std::string id;

@@ -17,6 +17,11 @@ class ReturnStmt: public swift::code::Stmt {
 public:
   ReturnStmt(Expr* expr);
   ~ReturnStmt();
+
+  Expr* getExpr();
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
 private:
   Expr* expr;
 };

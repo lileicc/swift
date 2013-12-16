@@ -7,9 +7,10 @@
 
 #pragma once
 
+#include <vector>
 #include "Stmt.h"
 #include "Expr.h"
-#include "CompoundStmt.h"
+#include "CaseStmt.h"
 
 namespace swift {
 namespace code {
@@ -23,11 +24,18 @@ public:
   SwitchStmt(Expr* cond);
   ~SwitchStmt();
 
-  void addStmt(Stmt* st);
+  Expr* getCond() const;
+  void addCase(CaseStmt* st);
+  CaseStmt* get(int k) const;
+  size_t size() const;
+  const std::vector<CaseStmt*>& getAll() const;
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
 
 private:
   Expr* cond;
-  CompoundStmt body;
+  std::vector<CaseStmt*> body;
 };
 
 } /* namespace code */

@@ -18,6 +18,12 @@ public:
   CompoundStmt();
   ~CompoundStmt();
   void addStmt(Stmt* st);
+  size_t size() const;
+  Stmt* get(int k) const;
+  const std::vector<Stmt*>& getAll() const;
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
 
 private:
   std::vector<Stmt* > body;

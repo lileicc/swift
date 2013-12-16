@@ -9,17 +9,27 @@
 #include "Stmt.h"
 #include "Expr.h"
 
+#include "CompoundStmt.h"
+
 namespace swift {
 namespace code {
 
 class IfStmt: public swift::code::Stmt {
 public:
-  IfStmt(Expr* cond, Stmt* th, Stmt* el);
+  IfStmt(Expr* cond);
+  IfStmt(Expr* cond, Stmt* th_st, Stmt* el_st);
   ~IfStmt();
+
+  Expr* getCond();
+  CompoundStmt& getThen();
+  CompoundStmt& getElse();
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
 private:
   Expr* cond;
-  Stmt* th;
-  Stmt* el;
+  CompoundStmt th;
+  CompoundStmt el;
 };
 
 } /* namespace code */

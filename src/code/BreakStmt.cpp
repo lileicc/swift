@@ -16,5 +16,8 @@ BreakStmt::BreakStmt() {
 BreakStmt::~BreakStmt() {
 }
 
+void BreakStmt::print(printer::CPPPrinter* prt) {
+  prt->print(this);
+}
 } /* namespace code */
 } /* namespace swift */

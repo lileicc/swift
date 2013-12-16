@@ -14,8 +14,16 @@ namespace code {
 
 class FloatingLiteral: public swift::code::Expr {
 public:
-  FloatingLiteral();
+  FloatingLiteral(double val);
   ~FloatingLiteral();
+
+  double getVal() const ;
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
+
+private:
+  double val;
 };
 
 } /* namespace code */

@@ -18,5 +18,9 @@ ArraySubscriptExpr::~ArraySubscriptExpr() {
   delete rhs;
 }
 
+void ArraySubscriptExpr::print(printer::CPPPrinter* prt) {
+  prt->print(this);
+}
+
 } /* namespace code */
 } /* namespace swift */

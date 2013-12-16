@@ -17,6 +17,11 @@ class VarRef: public swift::code::Expr {
 public:
   VarRef(std::string id);
   ~VarRef();
+
+  const std::string& getId() const;
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
 private:
   std::string id;
 };

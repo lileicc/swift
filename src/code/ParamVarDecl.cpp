@@ -17,5 +17,10 @@ ParamVarDecl::ParamVarDecl(DeclContext * context, std::string id, Type ty) :
 ParamVarDecl::~ParamVarDecl() {
 }
 
+// For Printer
+void ParamVarDecl::print(printer::CPPPrinter* prt) {
+  prt->print(this);
+}
+
 } /* namespace code */
 } /* namespace swift */

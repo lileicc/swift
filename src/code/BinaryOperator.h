@@ -22,6 +22,13 @@ class BinaryOperator: public swift::code::Expr {
 public:
   BinaryOperator(Expr* lhs, Expr* rhs, OpKind op);
   ~BinaryOperator();
+
+  Expr* getLeft() const ;
+  Expr* getRight() const ;
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
+
 private:
   Expr* lhs; // left hand side
   Expr* rhs; // right hand side
