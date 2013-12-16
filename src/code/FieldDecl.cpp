@@ -25,5 +25,10 @@ FieldDecl* FieldDecl::createFieldDecl(ClassDecl* cd, std::string name,
   return fd;
 }
 
+// For Printer
+void FieldDecl::print(printer::CPPPrinter* prt) {
+  prt->print(this);
+}
+
 } /* namespace code */
 } /* namespace swift */

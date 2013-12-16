@@ -27,6 +27,9 @@ public:
   bool isInline();
 
   static FunctionDecl* createFunctionDecl(DeclContext * context, std::string name, Type ty, bool inlineTag=false);
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
 protected:
   FunctionDecl(DeclContext * context, std::string name, Type ty, bool inlineTag);
 

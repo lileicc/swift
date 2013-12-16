@@ -16,5 +16,14 @@ VarRef::VarRef(std::string id) : id(id) {
 VarRef::~VarRef() {
 }
 
+const std::string& VarRef::getId() const {
+  return id;
+}
+
+// For Printer
+void VarRef::print(printer::CPPPrinter* prt) {
+  prt->print(this);
+}
+
 } /* namespace code */
 } /* namespace swift */

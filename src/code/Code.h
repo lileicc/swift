@@ -7,6 +7,7 @@
 
 #pragma once
 #include <string>
+#include <vector>
 #include "ArraySubscriptExpr.h"
 #include "BinaryOperator.h"
 #include "BreakStmt.h"
@@ -32,6 +33,8 @@
 #include "VarDecl.h"
 #include "VarRef.h"
 
+#include "../printer/CPPPrinter.h"
+
 namespace swift {
 namespace code {
 class Decl;
@@ -46,8 +49,15 @@ class Code {
 public:
   Code();
   ~Code();
-  void addDecl(Decl d);
-  void addStmt(Stmt st);
+  void addDecl(Decl* d);
+  void addStmt(Stmt* st);
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
+
+private:
+  std::vector<Decl*> decls;
+  std::vector<Stmt*> stmts;
 };
 
 } /* namespace code */

@@ -17,5 +17,14 @@ VarDecl::VarDecl(DeclContext * context, std::string id, Type ty, Expr* value) :
 VarDecl::~VarDecl() {
 }
 
+const std::string& VarDecl::getId() const {
+  return id;
+}
+
+// For Printer
+void VarDecl::print(printer::CPPPrinter* prt) {
+  prt->print(this);
+}
+
 } /* namespace code */
 } /* namespace swift */

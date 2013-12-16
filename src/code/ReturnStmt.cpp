@@ -17,5 +17,14 @@ ReturnStmt::~ReturnStmt() {
   delete expr;
 }
 
+Expr* ReturnStmt::getExpr() {
+  return expr;
+}
+
+// For Printer
+void ReturnStmt::print(printer::CPPPrinter* prt) {
+  prt->print(this);
+}
+
 } /* namespace code */
 } /* namespace swift */

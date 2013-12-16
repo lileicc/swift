@@ -16,6 +16,10 @@ class ArraySubscriptExpr: public swift::code::Expr {
 public:
   ArraySubscriptExpr(Expr* lhs, Expr* rhs);
   ~ArraySubscriptExpr();
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
+
 private:
   Expr* lhs;
   Expr* rhs;

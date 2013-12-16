@@ -21,10 +21,10 @@ public:
   VarDecl(DeclContext * context, std::string id, Type ty, Expr* value=NULL);
   ~VarDecl();
 
-  const std::string& getId() const {
-    return id;
-  }
+  const std::string& getId() const;
 
+  // For Printer
+  void print(printer::CPPPrinter* prt);
 protected:
   DeclContext* parent;
   std::string id;

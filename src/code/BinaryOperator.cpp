@@ -18,5 +18,17 @@ BinaryOperator::~BinaryOperator() {
   delete rhs;
 }
 
+Expr* BinaryOperator::getLeft() const {
+  return lhs;
+}
+
+Expr* BinaryOperator::getRight() const {
+  return rhs;
+}
+
+void BinaryOperator::print(printer::CPPPrinter* prt) {
+  prt->print(this);
+}
+
 } /* namespace code */
 } /* namespace swift */

@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "Decl.h"
 #include "DeclContext.h"
 
@@ -15,8 +17,16 @@ namespace code {
 
 class NamespaceDecl: public Decl, public DeclContext {
 public:
-  NamespaceDecl();
+  NamespaceDecl(std::string name = std::string());
   ~NamespaceDecl();
+
+  const std::string& getName();
+
+  // For Printer
+  void print(printer::CPPPrinter* prt);
+
+private:
+  std::string name;
 };
 
 } /* namespace code */

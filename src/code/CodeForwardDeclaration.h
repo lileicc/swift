@@ -9,9 +9,16 @@
 
 namespace swift { namespace code {
 
+class ArraySubscriptExpr;
 class BinaryOperator;
+class BreakStmt;
+class CallExpr;
+class CaseStmt;
 class ClassDecl;
+class Code;
+class CompoundStmt;
 class Decl;
+class DeclContext;
 class DeclStmt;
 class Expr;
 class FieldDecl;
@@ -20,11 +27,12 @@ class ForStmt;
 class FunctionDecl;
 class IfStmt;
 class IntegerLiteral;
-class MethodDecl;
 class NamespaceDecl;
 class ParamVarDecl;
 class ReturnStmt;
 class Stmt;
+class SwitchStmt;
+class Type;
 class VarDecl;
 class VarRef;
 

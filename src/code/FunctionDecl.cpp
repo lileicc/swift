@@ -44,5 +44,10 @@ bool swift::code::FunctionDecl::isInline() {
   return inlineTag;
 }
 
+// For Printer
+void FunctionDecl::print(printer::CPPPrinter* prt) {
+  prt->print(this);
+}
+
 } /* namespace code */
 } /* namespace swift */

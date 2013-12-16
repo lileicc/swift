@@ -21,6 +21,12 @@ CallExpr::~CallExpr() {
   delete fn;
   for (auto a : args)
     delete a;
+  args.clear();
+}
+
+// For Printer
+void CallExpr::print(printer::CPPPrinter* prt) {
+  prt->print(this);
 }
 
 } /* namespace code */
