@@ -26,10 +26,6 @@ void CPPPrinter::print(code::BinaryOperator* term) {
 
 }
 
-void CPPPrinter::print(code::BreakStmt* term) {
-
-}
-
 void CPPPrinter::print(code::CallExpr* term) {
 
 }
@@ -83,6 +79,10 @@ void CPPPrinter::print(code::ParamVarDecl* term) {
 }
 
 void CPPPrinter::print(code::ReturnStmt* term) {
+
+}
+
+void CPPPrinter::print(code::SpecialStmt* term) {
 
 }
 

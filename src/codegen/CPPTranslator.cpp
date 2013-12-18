@@ -228,8 +228,8 @@ code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
   for (size_t i = 0; i < br->size(); i++) {
     cst = new code::CaseStmt(transExpr(br->getCond(i)),
         transClause(br->getBranch(i), retvar));
-    sst->addStmt(cst);
-    sst->addStmt(new code::BreakStmt());
+    cst->addStmt(new code::SpecialStmt(std::string("break")));
+    sst->addCase(cst);
   }
   return sst;
 }

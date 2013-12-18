@@ -18,6 +18,15 @@ ArraySubscriptExpr::~ArraySubscriptExpr() {
   delete rhs;
 }
 
+Expr* ArraySubscriptExpr::getLeft() {
+  return lhs;
+}
+
+Expr* ArraySubscriptExpr::getRight() {
+  return rhs;
+}
+
+// For Printer
 void ArraySubscriptExpr::print(printer::CPPPrinter* prt) {
   prt->print(this);
 }

@@ -25,6 +25,14 @@ FieldDecl* FieldDecl::createFieldDecl(ClassDecl* cd, std::string name,
   return fd;
 }
 
+const std::string& FieldDecl::getId() const {
+  return id;
+}
+
+Type& FieldDecl::getType() {
+  return ty;
+}
+
 // For Printer
 void FieldDecl::print(printer::CPPPrinter* prt) {
   prt->print(this);

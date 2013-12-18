@@ -15,7 +15,7 @@ namespace code {
 class Stmt {
 public:
   Stmt();
-  ~Stmt();
+  virtual ~Stmt();
 
   // For Printer
   virtual void print(printer::CPPPrinter* prt) = 0;

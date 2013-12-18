@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Stmt.h"
+#include "Expr.h"
 #include "CompoundStmt.h"
 
 namespace swift {

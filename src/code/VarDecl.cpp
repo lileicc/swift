@@ -15,10 +15,19 @@ VarDecl::VarDecl(DeclContext * context, std::string id, Type ty, Expr* value) :
 }
 
 VarDecl::~VarDecl() {
+  if (value != NULL) delete value;
 }
 
 const std::string& VarDecl::getId() const {
   return id;
+}
+
+Type& VarDecl::getType() {
+  return ty;
+}
+
+Expr* VarDecl::getValue() {
+  return value;
 }
 
 // For Printer

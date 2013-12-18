@@ -17,8 +17,17 @@ DeclContext::DeclContext() {
 
 DeclContext::~DeclContext() {
   // TODO Auto-generated destructor stub
+  for (auto p: members)
+    if (p != NULL) delete p;
 }
 
+Decl* DeclContext::getMem(int k) {
+  return members[k];
+}
+
+std::vector<Decl*>& DeclContext::getAllMem() {
+  return members;
+}
 
 void DeclContext::addDecl(Decl* decl) {
   members.push_back(decl);

@@ -17,7 +17,7 @@ namespace code {
 class CaseStmt: public swift::code::Stmt {
 public:
   CaseStmt(Expr* val);
-  CaseStmt(Expr* val, Stmt* sub);
+  CaseStmt(Expr* val, Stmt* stmt);
   ~CaseStmt();
 
   void addStmt(Stmt* st);
