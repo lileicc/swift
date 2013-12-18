@@ -1,5 +1,5 @@
 /*
- * ParamVarDecl.h
+ * IntegerLiteral.h
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
@@ -7,18 +7,23 @@
 
 #pragma once
 
-#include "VarDecl.h"
+#include "Expr.h"
+
+#include <string>
 
 namespace swift {
 namespace code {
 
-class ParamVarDecl: public swift::code::VarDecl {
+class StringLiteral: public swift::code::Expr {
 public:
-  ParamVarDecl(DeclContext * context, std::string id, Type ty, Expr* value = NULL);
-  ~ParamVarDecl();
+  StringLiteral(std::string v);
+  ~StringLiteral();
 
+  const std::string& getVal() const ;
   // For Printer
   void print(printer::CPPPrinter* prt);
+private:
+  std::string val;
 };
 
 } /* namespace code */

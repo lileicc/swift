@@ -6,6 +6,7 @@
  */
 
 #include "Code.h"
+#include "../printer/CPPPrinter.h"
 
 namespace swift {
 namespace code {
@@ -17,20 +18,22 @@ Code::Code() {
 
 Code::~Code() {
   // TODO Auto-generated destructor stub
-  for (auto p: decls)
-    delete p;
-  decls.clear();
-  for (auto p: stmts)
-    delete p;
-  stmts.clear();
 }
 
 void Code::addDecl(Decl* d) {
-  decls.push_back(d);
+  decls.addDecl(d);
 }
 
 void Code::addStmt(Stmt* st) {
-  stmts.push_back(st);
+  stmts.addStmt(st);
+}
+
+DeclContext& Code::getDecls() {
+  return decls;
+}
+
+CompoundStmt& Code::getStmts() {
+  return stmts;
 }
 
 void Code::print(printer::CPPPrinter* prt) {

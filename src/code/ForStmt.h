@@ -23,8 +23,10 @@ public:
   Stmt* getInit();
   void setCond(Expr* cd);
   Expr* getCond();
-  void setStep(Stmt* st);
-  Stmt* getStep();
+  void setStep(Expr* st);
+  Expr* getStep();
+  void setRange(bool r);
+  bool isRange() const;
   void addStmt(Stmt* st);
   CompoundStmt& getBody();
 
@@ -35,7 +37,17 @@ private:
   CompoundStmt body;
   Stmt* init;
   Expr* cond;
-  Stmt* step;
+  Expr* step;
+  bool range;
+  /*
+    if range == true
+      then this if statment contains a C++11 range expression
+    e.g.
+    for(auto i : args)
+    init = new BinaryOperator(new VarRef("i"), new VarRef("args"), ':')
+    cond = step = NULL
+    isRange = true
+  */
 };
 
 } /* namespace code */

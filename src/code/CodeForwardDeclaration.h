@@ -11,6 +11,7 @@ namespace swift { namespace code {
 
 class ArraySubscriptExpr;
 class BinaryOperator;
+class BooleanLiteral;
 class CallExpr;
 class CaseStmt;
 class ClassDecl;
@@ -31,6 +32,7 @@ class ParamVarDecl;
 class ReturnStmt;
 class SpecialStmt;
 class Stmt;
+class StringLiteral;
 class SwitchStmt;
 class Type;
 class VarDecl;

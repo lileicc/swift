@@ -12,7 +12,7 @@
 namespace swift {
 namespace code {
 
-ForStmt::ForStmt() {
+ForStmt::ForStmt(): range(false) {
   // TODO Auto-generated constructor stub
   init = NULL;
   cond = NULL;
@@ -42,12 +42,20 @@ void ForStmt::setCond(Expr* cd) {
   cond = cd;
 }
 
-Stmt* ForStmt::getStep() {
+Expr* ForStmt::getStep() {
   return step;
 }
 
-void ForStmt::setStep(Stmt* st) {
+void ForStmt::setStep(Expr* st) {
   step = st;
+}
+
+bool ForStmt::isRange() const {
+  return range;
+}
+
+void ForStmt::setRange(bool r) {
+  range = r;
 }
 
 void ForStmt::addStmt(Stmt* st) {

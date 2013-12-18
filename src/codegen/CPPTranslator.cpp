@@ -167,7 +167,7 @@ void CPPTranslator::transFunBody(code::FunctionDecl* fun,
   // now translating::: if (markvar == current sample num) then return value;
   code::Stmt* st = new code::IfStmt(
       new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
-          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQUAL),
+          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQU),
       new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)), NULL);
   fun->addStmt(st);
   // now should sample
@@ -228,7 +228,7 @@ code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
   for (size_t i = 0; i < br->size(); i++) {
     cst = new code::CaseStmt(transExpr(br->getCond(i)),
         transClause(br->getBranch(i), retvar));
-    cst->addStmt(new code::SpecialStmt(std::string("break")));
+    cst->addStmt(new code::SpecialStmt(std::string("break;"))); // ';' is Necessary!
     sst->addCase(cst);
   }
   return sst;
@@ -291,7 +291,7 @@ void CPPTranslator::transFunBodyLikeli(code::FunctionDecl* fun,
   // now translating::: if (markvar == current sample num) then return value;
   code::Stmt* st = new code::IfStmt(
       new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
-          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQUAL),
+          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQU),
       new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)), NULL);
   fun->addStmt(st);
   // now should sample

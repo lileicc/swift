@@ -26,7 +26,7 @@ public:
   Expr* getValue();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  virtual void print(printer::CPPPrinter* prt);
 protected:
   DeclContext* parent;
   std::string id;
