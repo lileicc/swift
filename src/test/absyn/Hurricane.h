@@ -5,13 +5,13 @@
 namespace test_absyn {
 
 class Hurricane {
-  swift::Absyn* root;
+  swift::absyn::Absyn* root;
 public:
   Hurricane();
   ~Hurricane();
   void test(FILE *file);
   void build();
-  swift::Absyn* getRoot();
+  swift::absyn::Absyn* getRoot();
 };
 
 }

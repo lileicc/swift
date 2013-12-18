@@ -1,20 +1,21 @@
 /*
-* CondSet.cpp
-*
-*  Created on: Oct 31, 2013
-*      Author: yiwu
-*/
+ * CondSet.cpp
+ *
+ *  Created on: Oct 31, 2013
+ *      Author: yiwu
+ */
 
 #include "CondSet.h"
 
 namespace swift {
-
-CondSet::CondSet(int l, int c, VarDecl var, Expr* cond)
-  :SetExpr(l, c), var(var), cond(cond) {
+namespace absyn {
+CondSet::CondSet(int l, int c, VarDecl var, Expr* cond) :
+    SetExpr(l, c), var(var), cond(cond) {
 }
 
 CondSet::~CondSet() {
-  if (cond != NULL) delete cond;
+  if (cond != NULL)
+    delete cond;
 }
 
 VarDecl& CondSet::getVar() {
@@ -37,4 +38,5 @@ void CondSet::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 }

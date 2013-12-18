@@ -1,19 +1,18 @@
 /*
-* MapExpr.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * MapExpr.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
 #include "Expr.h"
 
 namespace swift {
+namespace absyn {
 
-class MapExpr :
-  public swift::Expr
-{
+class MapExpr: public Expr {
 public:
   MapExpr(int l, int c);
   virtual ~MapExpr();
@@ -27,4 +26,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

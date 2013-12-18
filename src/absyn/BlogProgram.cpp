@@ -1,16 +1,17 @@
 /*
-* BlogProgram.cpp
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * BlogProgram.cpp
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #include "BlogProgram.h"
 
 namespace swift {
+namespace absyn {
 
-BlogProgram::BlogProgram(int l, int c)
-  :Absyn(l, c) {
+BlogProgram::BlogProgram(int l, int c) :
+    Absyn(l, c) {
 }
 
 BlogProgram::~BlogProgram() {
@@ -31,6 +32,10 @@ Stmt* BlogProgram::get(int k) {
   return args[k];
 }
 
+const std::vector<Stmt*>& BlogProgram::getAll() {
+  return args;
+}
+
 // For Debugging Use
 void BlogProgram::print(FILE* file, int indent) {
   fprintf(file, "%*s(BlogProgram:\n", indent, "");
@@ -42,4 +47,5 @@ void BlogProgram::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 }

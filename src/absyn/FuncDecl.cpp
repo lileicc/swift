@@ -1,31 +1,33 @@
 /*
-* FuncDecl.cpp
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * FuncDecl.cpp
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #include "FuncDecl.h"
 
 namespace swift {
+namespace absyn {
 
-FuncDecl::FuncDecl(int l, int c, bool random, Ty typ, Symbol func, Expr* expr)
-  :Decl(l, c), random(random), typ(typ), func(func), expr(expr) {
+FuncDecl::FuncDecl(int l, int c, bool random, Ty typ, Symbol func, Expr* expr) :
+    Decl(l, c), random(random), typ(typ), func(func), expr(expr) {
 }
 
 FuncDecl::~FuncDecl() {
-  if (expr != NULL) delete expr;
+  if (expr != NULL)
+    delete expr;
 }
 
-Ty& FuncDecl::getRetTyp() {
+const Ty& FuncDecl::getRetTyp() const {
   return typ;
 }
 
-Symbol& FuncDecl::getFuncName() {
+const Symbol& FuncDecl::getFuncName() const {
   return func;
 }
 
-bool FuncDecl::isRandom() {
+bool FuncDecl::isRandom() const {
   return random;
 }
 
@@ -33,11 +35,11 @@ Expr* FuncDecl::getExpr() {
   return expr;
 }
 
-size_t FuncDecl::argSize() {
+size_t FuncDecl::argSize() const {
   return args.size();
 }
 
-VarDecl& FuncDecl::getArg(int k) {
+const VarDecl& FuncDecl::getArg(int k) const {
   return args[k];
 }
 
@@ -48,8 +50,7 @@ void FuncDecl::addArg(VarDecl var) {
 // For Debugging Use
 void FuncDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s(FuncDecl:\n", indent, "");
-  fprintf(file, "%*s:kind %s\n", indent + 2, "", 
-                              (random ? "random" : "fixed"));
+  fprintf(file, "%*s:kind %s\n", indent + 2, "", (random ? "random" : "fixed"));
   fprintf(file, "%*s:type %s\n", indent + 2, "", typ.toString().c_str());
   fprintf(file, "%*s:func %s\n", indent + 2, "", func.getValue().c_str());
   if (args.size() > 0) {
@@ -65,4 +66,5 @@ void FuncDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 }

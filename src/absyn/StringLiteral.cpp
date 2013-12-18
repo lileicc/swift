@@ -1,16 +1,17 @@
 /*
-* StringLiteral.cpp
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * StringLiteral.cpp
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #include "StringLiteral.h"
 
-namespace swift{
+namespace swift {
+namespace absyn {
 
-StringLiteral::StringLiteral(int l, int c, std::string value)
-  :Literal(l, c), value(value) {
+StringLiteral::StringLiteral(int l, int c, std::string value) :
+    Literal(l, c), value(value) {
 }
 
 StringLiteral::~StringLiteral() {
@@ -25,4 +26,5 @@ void StringLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(StringLiteral: %s )\n", indent, "", value.c_str());
 }
 
+}
 }

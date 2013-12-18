@@ -10,8 +10,9 @@
 #include "Expr.h"
 
 namespace swift {
+namespace absyn {
 
-class IfExpr: public swift::Expr {
+class IfExpr: public Expr {
 public:
   IfExpr(int l, int c, Expr* cond, Expr* then_clause, Expr* else_clause = NULL);
   virtual ~IfExpr();
@@ -24,4 +25,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 } /* namespace swift */

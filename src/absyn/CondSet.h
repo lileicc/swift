@@ -1,9 +1,9 @@
 /*
-* CondSet.h
-*
-*  Created on: Oct 31, 2013
-*      Author: yiwu
-*/
+ * CondSet.h
+ *
+ *  Created on: Oct 31, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -11,10 +11,8 @@
 #include "VarDecl.h"
 
 namespace swift {
-
-class CondSet :
-  public swift::SetExpr
-{
+namespace absyn {
+class CondSet: public SetExpr {
   VarDecl var;
   Expr* cond;
 public:
@@ -28,4 +26,5 @@ public:
   void print(FILE *file, int indent);
 };
 
+}
 }

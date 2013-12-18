@@ -1,23 +1,23 @@
 /*
-* DistrExpr.cpp
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * DistrExpr.cpp
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #include "DistrExpr.h"
 
-namespace swift{
+namespace swift {
+namespace absyn {
 
-DistrExpr::DistrExpr(int l,int r,Symbol distr)
-  :Expr(l,r), distr(distr) {
+DistrExpr::DistrExpr(int l, int r, Symbol distr) :
+    Expr(l, r), distr(distr) {
 }
-
 
 DistrExpr::~DistrExpr() {
 }
 
-Symbol& DistrExpr::getDistrName(){
+const Symbol& DistrExpr::getDistrName() {
   return distr;
 }
 
@@ -27,10 +27,11 @@ void DistrExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s:distr %s\n", indent + 2, "", distr.getValue().c_str());
   fprintf(file, "%*s(args:\n", indent + 2, "");
   for (size_t i = 0; i < args.size(); i++)
-  if (args[i] != NULL)
-    args[i]->print(file, indent + 4);
+    if (args[i] != NULL)
+      args[i]->print(file, indent + 4);
   fprintf(file, "%*s)\n", indent + 2, "");
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 }

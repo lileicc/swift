@@ -8,9 +8,10 @@
 #include "IfExpr.h"
 
 namespace swift {
+namespace absyn {
 
-IfExpr::IfExpr(int l, int r, Expr* cond, Expr* then_clause, Expr* else_clause)
-  :Expr(l, r) {
+IfExpr::IfExpr(int l, int r, Expr* cond, Expr* then_clause, Expr* else_clause) :
+    Expr(l, r) {
   args.push_back(cond);
   args.push_back(then_clause);
   args.push_back(else_clause);
@@ -34,22 +35,20 @@ Expr* IfExpr::getElse() {
 // For Debugging Use
 void IfExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s(IfExpr:\n", indent, "");
-  if (getCond() != NULL)
-  {
+  if (getCond() != NULL) {
     fprintf(file, "%*s:cond\n", indent + 2, "");
     getCond()->print(file, indent + 4);
   }
-  if (getThen() != NULL)
-  {
+  if (getThen() != NULL) {
     fprintf(file, "%*s:then\n", indent + 2, "");
     getThen()->print(file, indent + 4);
   }
-  if (getElse() != NULL)
-  {
+  if (getElse() != NULL) {
     fprintf(file, "%*s:else\n", indent + 2, "");
     getElse()->print(file, indent + 4);
   }
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 } /* namespace swift */

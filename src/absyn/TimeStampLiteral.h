@@ -1,19 +1,18 @@
 /*
-* TimeStampLiteral.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * TimeStampLiteral.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
 #include "Literal.h"
 
 namespace swift {
+namespace absyn {
 
-class TimeStampLiteral :
-  public swift::Literal
-{
+class TimeStampLiteral: public Literal {
   int value;
 public:
   TimeStampLiteral(int l, int c, int value);
@@ -25,4 +24,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

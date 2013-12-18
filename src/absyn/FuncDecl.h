@@ -1,9 +1,9 @@
 /*
-* FuncDecl.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * FuncDecl.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -16,10 +16,9 @@
 #include "VarDecl.h"
 
 namespace swift {
+namespace absyn {
 
-class FuncDecl :
-  public swift::Decl
-{
+class FuncDecl: public Decl {
   bool random;
   Ty typ;
   Symbol func;
@@ -30,16 +29,17 @@ public:
   FuncDecl(int l, int c, bool random, Ty typ, Symbol func, Expr* expr);
   virtual ~FuncDecl();
 
-  Ty& getRetTyp();
-  Symbol& getFuncName();
+  const Ty& getRetTyp() const;
+  const Symbol& getFuncName() const;
   Expr* getExpr();
-  bool isRandom();
-  size_t argSize();
+  bool isRandom() const;
+  size_t argSize() const;
   void addArg(VarDecl var);
-  VarDecl& getArg(int k);
+  const VarDecl& getArg(int k) const;
 
   // For Debugging Use
   void print(FILE* file, int indent);
 };
 
+}
 }

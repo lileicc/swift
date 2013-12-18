@@ -1,17 +1,17 @@
 /*
-* QunatExpr.cpp
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * QunatExpr.cpp
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #include "QuantExpr.h"
 
 namespace swift {
+namespace absyn {
 
-QuantExpr::QuantExpr(int l, int c, 
-  AbsynConstant typ, VarDecl var, Expr* cond)
-  :Expr(l, c), typ(typ), var(var){
+QuantExpr::QuantExpr(int l, int c, AbsynConstant typ, VarDecl var, Expr* cond) :
+    Expr(l, c), typ(typ), var(var) {
   args.push_back(cond);
 }
 
@@ -22,7 +22,7 @@ AbsynConstant QuantExpr::getTyp() {
   return typ;
 }
 
-VarDecl& QuantExpr::getVar() {
+const VarDecl& QuantExpr::getVar() {
   return var;
 }
 
@@ -42,4 +42,5 @@ void QuantExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 }

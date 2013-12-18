@@ -1,9 +1,9 @@
 /*
-* StringLiteral.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * StringLiteral.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -12,10 +12,8 @@
 #include "Literal.h"
 
 namespace swift {
-
-class StringLiteral :
-  public swift::Literal
-{
+namespace absyn {
+class StringLiteral: public Literal {
   std::string value;
 public:
   StringLiteral(int l, int c, std::string value);
@@ -27,4 +25,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }
