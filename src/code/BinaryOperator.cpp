@@ -14,8 +14,8 @@ BinaryOperator::BinaryOperator(Expr* lhs, Expr* rhs, OpKind op) : lhs(lhs), rhs(
 }
 
 BinaryOperator::~BinaryOperator() {
-  delete lhs;
-  delete rhs;
+  if(lhs != NULL) delete lhs;
+  if(rhs != NULL) delete rhs;
 }
 
 Expr* BinaryOperator::getLeft() const {
@@ -24,6 +24,10 @@ Expr* BinaryOperator::getLeft() const {
 
 Expr* BinaryOperator::getRight() const {
   return rhs;
+}
+
+const OpKind& BinaryOperator::getOp() const {
+  return op;
 }
 
 void BinaryOperator::print(printer::CPPPrinter* prt) {

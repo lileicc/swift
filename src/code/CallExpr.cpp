@@ -24,6 +24,14 @@ CallExpr::~CallExpr() {
   args.clear();
 }
 
+Expr* CallExpr::getFunc() const {
+  return fn;
+}
+
+std::vector<Expr*>& CallExpr::getArgs() {
+  return args;
+}
+
 // For Printer
 void CallExpr::print(printer::CPPPrinter* prt) {
   prt->print(this);

@@ -9,10 +9,16 @@
 
 /*
 Special Statement can be any single statement in the source code.
+
+Note that: ';' (if applicable) must be included!
+
 For example:
    break;
    continue;
    std::exit(0);
+   using namespace std;
+   include <iostream>
+   #define LL long long
 etc.
  -- Yi Wu
 */
