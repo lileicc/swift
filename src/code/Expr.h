@@ -18,7 +18,7 @@ public:
   virtual ~Expr();
 
   // For Printer
-  virtual void print(printer::CPPPrinter* prt) = 0;
+  virtual void print(printer::Printer* prt) = 0;
 };
 
 } /* namespace code */

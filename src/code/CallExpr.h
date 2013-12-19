@@ -22,7 +22,7 @@ public:
   std::vector<Expr*>& getArgs();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 private:
   Expr* fn;
   std::vector<Expr*> args;

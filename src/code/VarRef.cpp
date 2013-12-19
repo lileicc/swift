@@ -21,7 +21,7 @@ const std::string& VarRef::getId() const {
 }
 
 // For Printer
-void VarRef::print(printer::CPPPrinter* prt) {
+void VarRef::print(printer::Printer* prt) {
   prt->print(this);
 }
 

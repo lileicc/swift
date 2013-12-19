@@ -20,7 +20,7 @@ int IntegerLiteral::getVal() const {
 }
 
 // For Printer
-void IntegerLiteral::print(printer::CPPPrinter* prt) {
+void IntegerLiteral::print(printer::Printer* prt) {
   prt->print(this);
 }
 

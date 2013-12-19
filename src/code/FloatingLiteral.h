@@ -20,7 +20,7 @@ public:
   double getVal() const ;
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   double val;

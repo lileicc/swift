@@ -25,7 +25,7 @@ public:
   Type& getType();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   ClassDecl* parent;

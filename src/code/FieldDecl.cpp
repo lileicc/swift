@@ -34,7 +34,7 @@ Type& FieldDecl::getType() {
 }
 
 // For Printer
-void FieldDecl::print(printer::CPPPrinter* prt) {
+void FieldDecl::print(printer::Printer* prt) {
   prt->print(this);
 }
 

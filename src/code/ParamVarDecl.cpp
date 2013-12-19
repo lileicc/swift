@@ -18,7 +18,7 @@ ParamVarDecl::~ParamVarDecl() {
 }
 
 // For Printer
-void ParamVarDecl::print(printer::CPPPrinter* prt) {
+void ParamVarDecl::print(printer::Printer* prt) {
   prt->print(this);
 }
 

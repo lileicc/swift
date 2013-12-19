@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "../printer/CPPPrinter.h"
+#include "../printer/Printer.h"
 
 namespace swift {
 namespace code {
@@ -18,7 +18,7 @@ public:
   virtual ~Decl();
 
   // For Printer
-  virtual void print(printer::CPPPrinter* prt) = 0;
+  virtual void print(printer::Printer* prt) = 0;
 };
 
 } /* namespace code */

@@ -38,7 +38,7 @@ const std::vector<Stmt*>& CompoundStmt::getAll() const {
 }
 
 // For Printer
-void CompoundStmt::print(printer::CPPPrinter* prt) {
+void CompoundStmt::print(printer::Printer* prt) {
   prt->print(this);
 }
 

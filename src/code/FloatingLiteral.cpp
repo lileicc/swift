@@ -24,7 +24,7 @@ double FloatingLiteral::getVal() const {
 }
 
 // For Printer
-void FloatingLiteral::print(printer::CPPPrinter* prt) {
+void FloatingLiteral::print(printer::Printer* prt) {
   prt->print(this);
 }
 

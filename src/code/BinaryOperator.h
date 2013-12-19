@@ -13,7 +13,7 @@ namespace swift {
 namespace code {
 
 enum class OpKind {
-  // Unary Operator
+  // Unitary Operator
   BO_COMP, // complement
   BO_NEG, // negate
   BO_INC, // increment
@@ -23,6 +23,7 @@ enum class OpKind {
   // Binary Operator
   BO_ASSIGN,   // Assignment
   BO_FIELD,    // reference to a field
+  BO_RANGE,    // Range Operator : i.e. for(auto p: args) in C++
   BO_LSHGT,    // binary left shift
   BO_RSHGT,    // binary right shift
   BO_BAND,     // binary and
@@ -57,7 +58,7 @@ public:
   const OpKind& getOp() const ;
   
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   Expr* lhs; // left hand side

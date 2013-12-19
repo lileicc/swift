@@ -23,7 +23,7 @@ public:
   const std::string& getName();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   std::string name;

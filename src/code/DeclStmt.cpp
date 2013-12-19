@@ -22,7 +22,7 @@ Decl* DeclStmt::getDecl() {
 }
 
 // For Printer
-void DeclStmt::print(printer::CPPPrinter* prt) {
+void DeclStmt::print(printer::Printer* prt) {
   prt->print(this);
 }
 

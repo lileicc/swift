@@ -23,7 +23,7 @@ public:
   const std::vector<Stmt*>& getAll() const;
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   std::vector<Stmt* > body;

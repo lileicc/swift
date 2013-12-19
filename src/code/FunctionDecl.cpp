@@ -57,7 +57,7 @@ const std::string& FunctionDecl::getName() const {
 }
 
 // For Printer
-void FunctionDecl::print(printer::CPPPrinter* prt) {
+void FunctionDecl::print(printer::Printer* prt) {
   prt->print(this);
 }
 

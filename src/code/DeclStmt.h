@@ -21,7 +21,7 @@ public:
   Decl* getDecl();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   Decl* dec;

@@ -11,10 +11,12 @@
 #include "ArraySubscriptExpr.h"
 #include "BinaryOperator.h"
 #include "BooleanLiteral.h"
+#include "BreakStmt.h"
 #include "CallExpr.h"
 #include "CaseStmt.h"
 #include "ClassDecl.h"
 #include "CompoundStmt.h"
+#include "ContinueStmt.h"
 #include "Decl.h"
 #include "DeclStmt.h"
 #include "Expr.h"
@@ -62,7 +64,7 @@ public:
   CompoundStmt& getStmts();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   DeclContext decls;

@@ -31,7 +31,7 @@ public:
   static FunctionDecl* createFunctionDecl(DeclContext * context, std::string name, Type ty, bool inlineTag=false);
 
   // For Printer
-  virtual void print(printer::CPPPrinter* prt);
+  virtual void print(printer::Printer* prt);
 protected:
   FunctionDecl(DeclContext * context, std::string name, Type ty, bool inlineTag);
 

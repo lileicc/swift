@@ -14,8 +14,8 @@ ArraySubscriptExpr::ArraySubscriptExpr(Expr* lhs, Expr* rhs) : lhs(lhs), rhs(rhs
 }
 
 ArraySubscriptExpr::~ArraySubscriptExpr() {
-  delete lhs;
-  delete rhs;
+  if(lhs != NULL) delete lhs;
+  if(rhs != NULL) delete rhs;
 }
 
 Expr* ArraySubscriptExpr::getLeft() {
@@ -27,7 +27,7 @@ Expr* ArraySubscriptExpr::getRight() {
 }
 
 // For Printer
-void ArraySubscriptExpr::print(printer::CPPPrinter* prt) {
+void ArraySubscriptExpr::print(printer::Printer* prt) {
   prt->print(this);
 }
 

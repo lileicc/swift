@@ -18,7 +18,7 @@ public:
   ~ParamVarDecl();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 };
 
 } /* namespace code */

@@ -1,5 +1,5 @@
 /*
- * BreakStmt.h
+ * SpecialStmt.h
  *
  *  Created on: Nov 24, 2013
  *      Author: leili
@@ -13,11 +13,9 @@ Special Statement can be any single statement in the source code.
 Note that: ';' (if applicable) must be included!
 
 For example:
-   break;
-   continue;
    std::exit(0);
    using namespace std;
-   include <iostream>
+   #include <iostream>
    #define LL long long
 etc.
  -- Yi Wu
@@ -38,7 +36,7 @@ public:
   const std::string& getStmt() const;
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   std::string stmt;

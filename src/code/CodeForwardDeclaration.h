@@ -12,11 +12,13 @@ namespace swift { namespace code {
 class ArraySubscriptExpr;
 class BinaryOperator;
 class BooleanLiteral;
+class BreakStmt;
 class CallExpr;
 class CaseStmt;
 class ClassDecl;
 class Code;
 class CompoundStmt;
+class ContinueStmt;
 class Decl;
 class DeclContext;
 class DeclStmt;

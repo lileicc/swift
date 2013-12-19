@@ -24,7 +24,7 @@ const std::string& NamespaceDecl::getName() {
 }
 
 // For Printer
-void NamespaceDecl::print(printer::CPPPrinter* prt) {
+void NamespaceDecl::print(printer::Printer* prt) {
   prt->print(this);
 }
 
