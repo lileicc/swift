@@ -10,31 +10,24 @@
 namespace swift {
 namespace code {
 
-CaseStmt::CaseStmt(Expr* val) : val(val) {
-}
-
-CaseStmt::CaseStmt(Expr* val, Stmt* stmt) : val(val) {
-  sub.addStmt(stmt);
+CaseStmt::CaseStmt(Expr* val, Stmt* stmt) : val(val), sub(stmt) {
 }
 
 CaseStmt::~CaseStmt() {
   delete val;
+  if (sub != NULL) delete sub;
 }
 
-Expr* CaseStmt::getVal() {
+Expr* CaseStmt::getVal() const {
   return val;
 }
 
-void CaseStmt::addStmt(Stmt* st) {
-  sub.addStmt(st);
-}
-
-CompoundStmt& CaseStmt::getSub() {
+Stmt* CaseStmt::getSub() const {
   return sub;
 }
 
 // For Printer
-void CaseStmt::print(printer::CPPPrinter* prt) {
+void CaseStmt::print(printer::Printer* prt) {
   prt->print(this);
 }
 

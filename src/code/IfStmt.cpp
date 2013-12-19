@@ -35,7 +35,7 @@ CompoundStmt& IfStmt::getElse() {
 }
 
 // For Printer
-void IfStmt::print(printer::CPPPrinter* prt) {
+void IfStmt::print(printer::Printer* prt) {
   prt->print(this);
 }
 

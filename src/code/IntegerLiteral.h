@@ -19,7 +19,7 @@ public:
 
   int getVal() const ;
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 private:
   int val;
 };

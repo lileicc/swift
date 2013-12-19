@@ -21,7 +21,7 @@ public:
   Expr* getRight();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   Expr* lhs;

@@ -8,7 +8,7 @@
 #pragma once
 #include <string>
 
-#include "../printer/CPPPrinter.h"
+#include "../printer/Printer.h"
 
 namespace swift {
 namespace code {
@@ -22,7 +22,7 @@ public:
   bool isRef();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 private:
   std::string name;
   bool refTag;

@@ -25,7 +25,7 @@ public:
   CompoundStmt& getElse();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 private:
   Expr* cond;
   CompoundStmt th;

@@ -20,7 +20,7 @@ bool BooleanLiteral::getVal() const {
 }
 
 // For Printer
-void BooleanLiteral::print(printer::CPPPrinter* prt) {
+void BooleanLiteral::print(printer::Printer* prt) {
   prt->print(this);
 }
 

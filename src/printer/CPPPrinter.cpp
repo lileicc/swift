@@ -1,29 +1,14 @@
 #include "CPPPrinter.h"
 
+#include <cassert>
 #include "../code/Code.h"
 
 namespace swift { namespace printer {
 
-CPPPrinter::CPPPrinter(std::string str) : indent(0), newline(true), isforward(false) {
-  file = fopen(str.c_str(), "w");
-  if (file == NULL) {
-    fprintf(stderr, "Warning: the output file is not modifiable! set defualt to stdout.\n");
-    file = stdout;
-  }
+CPPPrinter::CPPPrinter(std::string str) : Printer(str), isforward(false) {
 }
 
 CPPPrinter::~CPPPrinter() {
-  if (file != stdout) fclose(file);
-}
-
-void CPPPrinter::printIndent() {
-  if (newline)
-    fprintf(file, "%*s", indent, "");
-}
-
-void CPPPrinter::printLine() {
-  if (newline)
-    fprintf(file, "\n");
 }
 
 std::string CPPPrinter::OpConvert(code::OpKind op) {
@@ -33,10 +18,11 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
   case OpKind::BO_NEG: return "!"; // negate
   case OpKind::BO_INC: return "++"; // increment
   case OpKind::BO_DEC: return "--"; // decrement
-  case OpKind::BO_NEW: return "new"; // new or malloc
-  case OpKind::BO_DEL: return "delete"; // delete or dispose
+  case OpKind::BO_NEW: return "new "; // new or malloc
+  case OpKind::BO_DEL: return "delete "; // delete or dispose
   case OpKind::BO_ASSIGN: return "=";   // Assignment
   case OpKind::BO_FIELD: return ".";    // reference to a field
+  case OpKind::BO_RANGE: return ": ";    // range operator
   case OpKind::BO_LSHGT: return "<<";    // binary left shift
   case OpKind::BO_RSHGT: return ">>";    // binary right shift
   case OpKind::BO_BAND: return "&";     // binary and
@@ -58,6 +44,7 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
   case OpKind::BO_SMUL: return "*="; // self multiply
   case OpKind::BO_SDIV: return "/="; // self divide
   case OpKind::BO_SMOD: return "%="; // self module
+  default: assert(false); return "";
   }
 }
 
@@ -65,6 +52,10 @@ void CPPPrinter::printPrefix() {
   for (auto p : prefix) {
     fprintf(file, "%s::", p.c_str());
   }
+}
+
+void CPPPrinter::addHeader(std::string h) {
+  header.push_back(h);
 }
 
 void CPPPrinter::print(code::Code* prog) {
@@ -78,6 +69,7 @@ void CPPPrinter::print(code::Code* prog) {
   indent = 0;
   newline = true;
   prefix.clear();
+  isforward = false;
 
   // output include
   fprintf(file, "#include<iostream>\n");
@@ -96,8 +88,14 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include<numeric>\n");
   fprintf(file, "#include<string>\n");
 
+  // output costumized include
+  for (auto h: header) 
+    fprintf(file, "#include %s\n", h.c_str());
+  printLine();
+
   // print special include/statements
-  prog->getStmts().print(this);
+  for (auto s : prog->getStmts().getAll())
+    s->print(this);
   printLine();
 
   // print forward declaration
@@ -113,23 +111,21 @@ void CPPPrinter::print(code::Code* prog) {
 }
 
 void CPPPrinter::print(code::ArraySubscriptExpr* term) {
-
+  printIndent();
   bool backup = newline;
-  if (backup)
-    printIndent();
-
   newline = false;
 
-  term->getLeft()->print(this);
+  if (term->getLeft() != NULL)
+    term->getLeft()->print(this);
   fprintf(file, "[");
-  term->getRight()->print(this);
+  if (term->getRight() != NULL)
+    term->getRight()->print(this);
   fprintf(file, "]");
 
   newline = backup;
-  if (backup) {
+  if (backup)
     fprintf(file, ";");
-    printLine();
-  }
+  printLine();
 }
 
 void CPPPrinter::print(code::BinaryOperator* term) {
@@ -145,12 +141,16 @@ void CPPPrinter::print(code::BinaryOperator* term) {
     fprintf(file, ")");
   }
   else {
+    if (!newline)
+      fprintf(file, "(");
     std::string op = OpConvert(term->getOp());
     if (term->getLeft() != NULL)
       term->getLeft()->print(this);
     fprintf(file, "%s", op.c_str());
     if (term->getRight() != NULL)
       term->getRight()->print(this);
+    if (!newline)
+      fprintf(file, ")");
   }
 
   newline = backup;
@@ -165,15 +165,20 @@ void CPPPrinter::print(code::BooleanLiteral* term) {
     fprintf(file, "true");
   else
     fprintf(file, "false");
-  if (newline) fprintf(file, ";");
+  if (newline)
+    fprintf(file, ";");
+  printLine();
+}
+
+void CPPPrinter::print(code::BreakStmt* term) {
+  printIndent();
+  fprintf(file, "break;");
   printLine();
 }
 
 void CPPPrinter::print(code::CallExpr* term) {
+  printIndent();
   bool backup = newline;
-  if (backup)
-    printIndent();
-
   newline = false;
 
   term->getFunc()->print(this);
@@ -187,30 +192,25 @@ void CPPPrinter::print(code::CallExpr* term) {
   fprintf(file, ")");
 
   newline = backup;
-  if (backup) {
+  if (backup)
     fprintf(file, ";");
-    printLine();
-  }
+  printLine();
 }
 
 void CPPPrinter::print(code::CaseStmt* term) {
+  indent -= 2;
   printIndent();
-  fprintf(file, "case (");
+  fprintf(file, "case ");
   bool backup = newline;
   newline = false;
   term->getVal()->print(this);
   newline = backup;
-  fprintf(file, "): {");
+  fprintf(file, ":");
   printLine();
+  indent += 2;
 
-  indent += 4;
-  term->getSub().print(this);
-  indent -= 2;
-
-  printIndent();
-  fprintf(file, "}");
-  printLine();
-  indent -= 2;
+  if (term != NULL)
+    term->getSub()->print(this);
 }
 
 void CPPPrinter::print(code::ClassDecl* term) {
@@ -231,12 +231,30 @@ void CPPPrinter::print(code::ClassDecl* term) {
 }
 
 void CPPPrinter::print(code::CompoundStmt* term) {
+  printIndent();
+  fprintf(file, "{");
+  printLine();
+  indent += 2;
+
   for (auto p : term->getAll())
     p->print(this);
+
+  indent -= 2;
+  printIndent();
+  fprintf(file, "}");
+  printLine();
+}
+
+void CPPPrinter::print(code::ContinueStmt* term) {
+  printIndent();
+  fprintf(file, "continue;");
+  printLine();
 }
 
 void CPPPrinter::print(code::DeclStmt* term) {
   // We assume now isforward == false
+  assert(isforward == false);
+
   isforward = true;
   term->getDecl()->print(this);
   isforward = false;
@@ -286,21 +304,15 @@ void CPPPrinter::print(code::ForStmt* term) {
   }
 
   fprintf(file, ")");
-  newline = true;
+  newline = backup;
 
   if (term->getBody().size() == 0) {
     fprintf(file, ";");
     printLine();
   }
   else {
-    fprintf(file, " {");
     printLine();
-    indent += 2;
     term->getBody().print(this);
-    indent -= 2;
-    printIndent();
-    fprintf(file, "}");
-    printLine();
   }
 }
 
@@ -313,8 +325,7 @@ void CPPPrinter::print(code::FunctionDecl* term) {
     if (term->isInline())
       fprintf(file, "inline ");
     term->getType().print(this);
-    fprintf(file, " %s",term->getName().c_str());
-    fprintf(file, "(");
+    fprintf(file, " %s(",term->getName().c_str());
     bool not_first = false;
     for (auto p : term->getParams()) {
       if (not_first) fprintf(file, ",");
@@ -331,6 +342,9 @@ void CPPPrinter::print(code::FunctionDecl* term) {
     newline = false;
     if (term->isInline()) fprintf(file, "inline ");
     term->getType().print(this);
+
+    fprintf(file, " ");
+
     printPrefix();
     fprintf(file, "%s(", term->getName().c_str());
     bool not_first = false;
@@ -339,17 +353,11 @@ void CPPPrinter::print(code::FunctionDecl* term) {
       else not_first = true;
       p->print(this);
     }
-    fprintf(file, ") {");
+    fprintf(file, ")");
     newline = backup;
     printLine();
 
-    indent += 2;
     term->getBody().print(this);
-    indent -= 2;
-
-    printIndent();
-    fprintf(file, "}");
-    printLine();
   }
 }
 
@@ -365,26 +373,25 @@ void CPPPrinter::print(code::IfStmt* term) {
     fprintf(file, ";");
     printLine();
   }
-  else {
-    fprintf(file, "{");
-    printLine();
+  else if (term->getThen().size() == 1) {
     indent += 2;
-    term->getThen().print(this);
+    term->getThen().get(0)->print(this);
     indent -= 2;
-    printIndent();
-    fprintf(file,"}");
+  }
+  else {
     printLine();
+    term->getThen().print(this);
   }
   if (term->getElse().size() != 0) {
     printIndent();
-    fprintf(file, "else {");
+    fprintf(file, "else");
     printLine();
-    indent += 2;
-    term->getElse().print(this);
-    indent -= 2;
-    printIndent();
-    fprintf(file, "}");
-    printLine();
+    if (term->getElse().size() == 1) {
+      indent += 2;
+      term->getElse().get(0)->print(this);
+      indent -= 2;
+    } else
+      term->getElse().print(this);
   }
 }
 
@@ -398,7 +405,7 @@ void CPPPrinter::print(code::IntegerLiteral* term) {
 void CPPPrinter::print(code::NamespaceDecl* term) {
   if (isforward) return ;
 
-  printIndent(); fprintf(file, "%s {", term->getName().c_str()); printLine();
+  printIndent(); fprintf(file, "namespace %s {", term->getName().c_str()); printLine();
   printLine();
 
   // print forward declaration
@@ -413,21 +420,20 @@ void CPPPrinter::print(code::NamespaceDecl* term) {
     p->print(this);
   printLine();
 
-  printLine();
   printIndent(); fprintf(file, "}"); printLine();
 }
 
 void CPPPrinter::print(code::ParamVarDecl* term) {
   // assume newline == false
+  assert(newline == false);
+
   bool backup = newline;
   newline = false;
   if (isforward) {
     term->getType().print(this);
     if (term->getValue() != NULL) {
-      isforward = false;
       fprintf(file,"=");
       term->getValue()->print(this);
-      isforward = true;
     }
   }
   else {
@@ -441,10 +447,12 @@ void CPPPrinter::print(code::ReturnStmt* term) {
   printIndent();
   fprintf(file, "return ");
 
-  bool backup = newline;
-  newline = false;
-  term->getExpr()->print(this);
-  newline = backup;
+  if (term->getExpr() != NULL) {
+    bool backup = newline;
+    newline = false;
+    term->getExpr()->print(this);
+    newline = backup;
+  }
 
   fprintf(file, ";");
   printLine();
@@ -471,35 +479,35 @@ void CPPPrinter::print(code::SwitchStmt* term) {
   newline = false;
   term->getCond()->print(this);
   newline = backup;
-  fprintf(file, ") {");
+  fprintf(file, ")");
   printLine();
 
-  for (auto p : term->getAll())
-    p->print(this);
-
-  fprintf(file, "}");
-  printLine();
+  term->getBody().print(this);
 }
 
 void CPPPrinter::print(code::Type* term) {
   // assume newline == false;
+  assert(newline == false);
+
   fprintf(file, "%s", term->getName().c_str());
 }
 
 void CPPPrinter::print(code::VarDecl* term) {
   if (!isforward) return ;
 
+  bool backup = newline;
+  newline = false;
   printIndent();
+
   term->getType().print(this);
   fprintf(file, " %s", term->getId().c_str());
   if (term->getValue() != NULL) {
-    bool backup = newline;
-    newline = false;
     fprintf(file, " = ");
     term->getValue()->print(this);
-    newline = backup;
   }
-  if (newline)
+
+  newline = backup;
+  if (backup)
     fprintf(file, ";"); // Note: VarDecl can be in a ForStmt
   printLine();
 }

@@ -67,7 +67,7 @@ CompoundStmt& ForStmt::getBody() {
 }
 
 // For Printer
-void ForStmt::print(printer::CPPPrinter* prt) {
+void ForStmt::print(printer::Printer* prt) {
   prt->print(this);
 }
 

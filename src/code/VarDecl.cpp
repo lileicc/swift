@@ -31,7 +31,7 @@ Expr* VarDecl::getValue() {
 }
 
 // For Printer
-void VarDecl::print(printer::CPPPrinter* prt) {
+void VarDecl::print(printer::Printer* prt) {
   prt->print(this);
 }
 

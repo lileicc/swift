@@ -33,7 +33,7 @@ std::vector<Expr*>& CallExpr::getArgs() {
 }
 
 // For Printer
-void CallExpr::print(printer::CPPPrinter* prt) {
+void CallExpr::print(printer::Printer* prt) {
   prt->print(this);
 }
 

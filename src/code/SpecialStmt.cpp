@@ -1,5 +1,5 @@
 /*
- * BreakStmt.cpp
+ * SpecialStmt.cpp
  *
  *  Created on: Nov 24, 2013
  *      Author: leili
@@ -20,7 +20,7 @@ const std::string& SpecialStmt::getStmt() const {
   return stmt;
 }
 
-void SpecialStmt::print(printer::CPPPrinter* prt) {
+void SpecialStmt::print(printer::Printer* prt) {
   prt->print(this);
 }
 } /* namespace code */

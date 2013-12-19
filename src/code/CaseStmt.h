@@ -19,19 +19,17 @@ namespace code {
  */
 class CaseStmt: public swift::code::Stmt {
 public:
-  CaseStmt(Expr* val);
-  CaseStmt(Expr* val, Stmt* stmt);
+  CaseStmt(Expr* val, Stmt* stmt = NULL);
   ~CaseStmt();
 
-  void addStmt(Stmt* st);
-  CompoundStmt& getSub();
-  Expr* getVal();
+  Stmt* getSub() const;
+  Expr* getVal() const;
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 private:
   Expr* val;
-  CompoundStmt sub;
+  Stmt* sub;
 };
 
 } /* namespace code */

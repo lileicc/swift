@@ -36,7 +36,7 @@ CompoundStmt& Code::getStmts() {
   return stmts;
 }
 
-void Code::print(printer::CPPPrinter* prt) {
+void Code::print(printer::Printer* prt) {
   prt->print(this);
 }
 

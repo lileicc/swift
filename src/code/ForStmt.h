@@ -31,7 +31,7 @@ public:
   CompoundStmt& getBody();
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   CompoundStmt body;

@@ -30,7 +30,7 @@ const OpKind& BinaryOperator::getOp() const {
   return op;
 }
 
-void BinaryOperator::print(printer::CPPPrinter* prt) {
+void BinaryOperator::print(printer::Printer* prt) {
   prt->print(this);
 }
 

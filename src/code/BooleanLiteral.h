@@ -19,7 +19,7 @@ public:
 
   bool getVal() const ;
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 private:
   bool val;
 };

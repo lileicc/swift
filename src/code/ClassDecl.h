@@ -22,7 +22,7 @@ public:
   const std::string& getName() const;
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   DeclContext* parent; // usually it is a namespace

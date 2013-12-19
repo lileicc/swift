@@ -20,7 +20,7 @@ const std::string& StringLiteral::getVal() const {
 }
 
 // For Printer
-void StringLiteral::print(printer::CPPPrinter* prt) {
+void StringLiteral::print(printer::Printer* prt) {
   prt->print(this);
 }
 

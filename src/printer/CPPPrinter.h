@@ -1,10 +1,7 @@
 #pragma once
 
-#include <cstdio>
-#include <string>
 #include <vector>
-
-#include "../code/CodeForwardDeclaration.h"
+#include "Printer.h"
 
 namespace swift { namespace code {
 enum class OpKind;
@@ -14,10 +11,13 @@ enum class OpKind;
 namespace swift {
 namespace printer {
 
-class CPPPrinter {
+class CPPPrinter:public Printer {
 public:
   CPPPrinter(std::string);
   virtual ~CPPPrinter();
+
+  // add a single include
+  void addHeader(std::string h);
 
   // main framework of the program
   void print(code::Code* prog);
@@ -26,10 +26,12 @@ public:
   void print(code::ArraySubscriptExpr* term);
   void print(code::BinaryOperator* term);
   void print(code::BooleanLiteral* term);
+  void print(code::BreakStmt* term);
   void print(code::CallExpr* term);
   void print(code::CaseStmt* term);
   void print(code::ClassDecl* term);
   void print(code::CompoundStmt* term);
+  void print(code::ContinueStmt* term);
   void print(code::DeclStmt* term);
   void print(code::FieldDecl* term);
   void print(code::FloatingLiteral* term);
@@ -48,9 +50,9 @@ public:
   void print(code::VarRef* term);
 
 private:
-  FILE* file;
-  int indent;
-  bool newline; // whether need to print a newline after a statement
+
+  std::vector<std::string> header;
+
   bool isforward; // whether the current phase is to print forward declaration
   // Note: when process a print method of a Stmt, we assume isforward == false
   //    for every Decl, it should be processed twice!
@@ -68,9 +70,7 @@ private:
     we print 
     int A::B(){...}
   */
-
-  void printIndent();
-  void printLine();
+  
   void printPrefix();
 
   // convert an OpKind to the corresponding string in C++

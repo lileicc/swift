@@ -25,17 +25,16 @@ public:
   ~SwitchStmt();
 
   Expr* getCond() const;
-  void addCase(CaseStmt* st);
-  CaseStmt* get(int k) const;
-  size_t size() const;
-  const std::vector<CaseStmt*>& getAll() const;
-
+  void addStmt(Stmt* st);
+  void setBody(CompoundStmt b);
+  CompoundStmt& getBody();
+  
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 
 private:
   Expr* cond;
-  std::vector<CaseStmt*> body;
+  CompoundStmt body;
 };
 
 } /* namespace code */

@@ -21,7 +21,7 @@ public:
   const std::string& getId() const;
 
   // For Printer
-  void print(printer::CPPPrinter* prt);
+  void print(printer::Printer* prt);
 private:
   std::string id;
 };

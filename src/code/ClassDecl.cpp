@@ -28,7 +28,7 @@ const std::string& ClassDecl::getName() const {
 }
 
 // For Printer
-void ClassDecl::print(printer::CPPPrinter* prt) {
+void ClassDecl::print(printer::Printer* prt) {
   prt->print(this);
 }
 

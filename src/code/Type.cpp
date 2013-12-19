@@ -25,7 +25,7 @@ bool Type::isRef() {
 }
 
 // For Printer
-void Type::print(printer::CPPPrinter* prt) {
+void Type::print(printer::Printer* prt) {
   prt->print(this);
 }
 
