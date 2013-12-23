@@ -70,6 +70,8 @@ void Semant::processDeclarations(absyn::BlogProgram* prog) {
 void Semant::processBodies(absyn::BlogProgram* prog) {
   absyn::FuncDecl* fd;
   absyn::NumStDecl* nd;
+  absyn::Evidence* ne;
+  absyn::Query* nq;
   for (auto st : prog->getAll()) {
     fd = dynamic_cast<absyn::FuncDecl*>(st);
     if (fd != NULL) { // it is function declaration
@@ -82,9 +84,18 @@ void Semant::processBodies(absyn::BlogProgram* prog) {
       transNumSt(nd);
       continue;
     }
-    //TODO evidence
-    //TODO query
 
+    ne = dynamic_cast<absyn::Evidence*>(st);
+    if (ne != NULL) {
+      transEvidence(ne);
+      continue;
+    }
+
+    nq = dynamic_cast<absyn::Query*>(st);
+    if (nq != NULL) {
+      transQuery(nq);
+      continue;
+    }
   }
 }
 
@@ -372,9 +383,17 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op, const std::vector<std
     return arg[0]->getTyp();
 
   // Address Operator
-  // TODO:
   case IRConstant::SUB:
-    return NULL;
+    {
+      if (arg[1]->getTyp() != tyFactory.getTy(ir::IRConstString::INT)
+          || (dynamic_cast<const ir::ArrayTy*>(arg[0]->getTyp()) == NULL))
+        return NULL;
+      const ir::ArrayTy* arr = (const ir::ArrayTy*)(arg[0]->getTyp());
+      if (arr->getDim() == 1)
+        return arr->getBase();
+      else
+        return new ir::ArrayTy(ir::IRConstant::ARRAY, arr->getBase(), arr->getDim() - 1);
+    }
     break;
   default: return NULL;
   }
@@ -382,7 +401,9 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op, const std::vector<std
 
 std::shared_ptr<ir::OprExpr> Semant::transExpr(absyn::OpExpr* expr) {
   std::shared_ptr<ir::OprExpr> ret(new ir::OprExpr(OprExpr_convertOpConst(expr->getOp())));
-  if (ret->getOp() == ir::IRConstant::NA) {
+  if (ret->getOp() == ir::IRConstant::NA
+      || (ret->getOp() == ir::IRConstant::NOT && ret->getArgs().size() != 1)
+      || (ret->getOp() != ir::IRConstant::NOT && ret->getArgs().size() != 2)) {
     error(expr->line, expr->col, "Invalid Operator!");
     return nullptr;
   }
@@ -413,8 +434,8 @@ std::shared_ptr<ir::OprExpr> Semant::transExpr(absyn::OpExpr* expr) {
   return ret;
 }
 
-std::shared_ptr<ir::FunctionCall> Semant::transExpr(absyn::FuncApp* expr) {
-  //TODO: Function Call of Origin Function
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
+  std::string func = expr->getFuncName().getValue();
   // Parse Arguments
   std::vector<std::shared_ptr<ir::Expr>> args;
   std::vector<std::shared_ptr<ir::VarDecl>> decl;
@@ -426,8 +447,18 @@ std::shared_ptr<ir::FunctionCall> Semant::transExpr(absyn::FuncApp* expr) {
           (new ir::VarDecl(args.back()->getTyp(), "")));
   }
 
+  if (decl.size() == 1 && (dynamic_cast<const ir::NameTy*>(decl[0]->getTyp()) != NULL)) {
+    const ir::OriginAttr* att = tyFactory.getOriginAttr((const ir::NameTy*)decl[0]->getTyp(), func);
+    if (att != NULL) {
+      std::shared_ptr<ir::OriginRefer> ptr(new ir::OriginRefer(att, args[0]));
+      // type checking
+      ptr->setTyp(att->getTyp());
+      return ptr;
+    }
+  }
+
   std::shared_ptr<ir::FunctionCall> ptr(
-    new ir::FunctionCall(functory.getFunc(expr->getFuncName().getValue(), decl)));
+    new ir::FunctionCall(functory.getFunc(func, decl)));
   
   if (ptr->getRefer() == NULL) {
     error(expr->line, expr->col, "Error on Function Call! No Such Function.");
@@ -456,6 +487,25 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
   //TODO
 }
 
+void Semant::transEvidence(absyn::Evidence* ne) {
+  std::shared_ptr<ir::Evidence> e(
+    new ir::Evidence(transExpr(ne->getLeft()), 
+                     transExpr(ne->getRight())));
+  model->addEvidence(e);
+}
+
+void Semant::transQuery(absyn::Query* nq) {
+  std::shared_ptr<ir::FunctionCall> ptr
+    (std::dynamic_pointer_cast<ir::FunctionCall>(transExpr(nq->getExpr())));
+  if (ptr == nullptr) {
+    //TODO: build a internal Void Function representing this expr
+    error(nq->line, nq->col, "Currently we only accept function call in the query statement!");
+    return ;
+  }
+  std::shared_ptr<ir::Query> q(new ir::Query(ptr));
+  model->addQuery(q);
+}
+
 const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
   int dim = typ.getDim();
   const ir::Ty* ty = tyFactory.getTy(typ.getTyp().getValue());
@@ -465,8 +515,7 @@ const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
   if (dim == 0) {
     return ty;
   } else {
-    //TODO array type
-    return NULL;
+    return new ir::ArrayTy(ir::IRConstant::ARRAY, ty, dim);
   }
 }
 

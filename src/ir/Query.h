@@ -1,18 +1,18 @@
 #pragma once
 
-#include "VoidFuncCall.h"
+#include "FunctionCall.h"
 
 namespace swift { namespace ir {
 
 class Query {
 public:
-  Query(VoidFuncCall* var);
+  Query(std::shared_ptr<FunctionCall> var);
   virtual ~Query();
 
-  VoidFuncCall* getVar();
+  const std::shared_ptr<FunctionCall>& getVar() const;
 
 private:
-  VoidFuncCall* var;
+  std::shared_ptr<FunctionCall> var;
 };
 
 }

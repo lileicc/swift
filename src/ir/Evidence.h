@@ -6,15 +6,15 @@ namespace swift { namespace ir {
 
 class Evidence {
 public:
-  Evidence(Expr* left, Expr* right);
+  Evidence(std::shared_ptr<Expr> left, std::shared_ptr<Expr> right);
   virtual ~Evidence();
 
-  Expr* getLeft();
-  Expr* getRight();
+  const std::shared_ptr<Expr>& getLeft() const;
+  const std::shared_ptr<Expr>& getRight() const;
 
 private:
-  Expr* left;
-  Expr* right;
+  std::shared_ptr<Expr> left;
+  std::shared_ptr<Expr> right;
 };
 
 }

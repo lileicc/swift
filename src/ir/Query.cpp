@@ -4,14 +4,14 @@
 
 namespace swift { namespace ir {
 
-Query::Query(VoidFuncCall* var)
+Query::Query(std::shared_ptr<FunctionCall> var)
   :var(var) {
 }
 
 Query::~Query() {
 }
 
-VoidFuncCall* Query::getVar() {
+const std::shared_ptr<FunctionCall>& Query::getVar() const {
   return var;
 }
 

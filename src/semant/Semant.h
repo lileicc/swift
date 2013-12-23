@@ -58,7 +58,7 @@ private:
 
   std::shared_ptr<ir::OprExpr> transExpr(absyn::OpExpr* expr);
 
-  std::shared_ptr<ir::FunctionCall> transExpr(absyn::FuncApp* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::FuncApp* expr);
 
   std::shared_ptr<ir::MapExpr> transExpr(absyn::MapExpr* expr);
 
@@ -94,6 +94,16 @@ private:
    * process number statement body
    */
   void transNumSt(absyn::NumStDecl* nd);
+
+  /*
+   * process evidence
+   */
+  void transEvidence(absyn::Evidence* ne);
+
+  /*
+  * process query
+  */
+  void transQuery(absyn::Query* nq);
 
   /**
    * translate the type in abstract syntax to intermediate representation
