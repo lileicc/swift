@@ -502,7 +502,29 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
 }
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
-  //TODO
+  // 3 cases: local variable, voidfunccall, const symbol
+  std::string var = expr->getVar().getValue();
+  if (local_var.count(var) != 0) {
+    // Local Variable
+    std::shared_ptr<ir::VarRefer> ret(new ir::VarRefer(local_var[var].top()));
+    ret->setTyp(ret->getRefer()->getTyp());
+    return ret;
+  }
+  auto func = functory.getFunc(var, std::vector<std::shared_ptr<ir::VarDecl> >());
+  if (func != NULL) {
+    // Void Function Call
+    std::shared_ptr<ir::VoidFuncCall> ret(new ir::VoidFuncCall(func));
+    ret->setTyp(func->getRetTyp());
+    return ret;
+  }
+  auto sym = tyFactory.getInstSymbol(var);
+  if (sym != NULL) {
+    // Const Symbol
+    std::shared_ptr<ir::InstSymbol>ret(new ir::InstSymbol(*sym)); // Note: We MUST Copy the object here!!!
+    ret->setTyp(tyFactory.getNameTy(sym->getRefer()->getName()));
+    return ret;
+  }
+  error(expr->line, expr->col, "Illegal Symbol Reference!");
   return nullptr;
 }
 
@@ -526,8 +548,38 @@ std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
   return nullptr;
 }
 
-std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Literal* expr) {
-  //TODO
+std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
+  // int, double, string, boolean, null
+  if (dynamic_cast<absyn::NullLiteral*>(expr) != NULL) {
+    // TODO: type of NULL Symbol should be assigned later!
+    //       NULL will appear in MAP, OpExpr, If, Branch, FunctionDefn
+    return std::shared_ptr<ir::NullSymbol>(new ir::NullSymbol());
+  }
+  if (dynamic_cast<absyn::IntLiteral*>(expr) != NULL) {
+    std::shared_ptr<ir::IntLiteral> ret
+      (new ir::IntLiteral(((absyn::IntLiteral*)expr)->getValue()));
+    ret->setTyp(tyFactory.getTy(ir::IRConstString::INT));
+    return ret;
+  }
+  if (dynamic_cast<absyn::DoubleLiteral*>(expr) != NULL) {
+    std::shared_ptr<ir::DoubleLiteral> ret
+      (new ir::DoubleLiteral(((absyn::DoubleLiteral*)expr)->getValue()));
+    ret->setTyp(tyFactory.getTy(ir::IRConstString::DOUBLE));
+    return ret;
+  }
+  if (dynamic_cast<absyn::BoolLiteral*>(expr) != NULL) {
+    std::shared_ptr<ir::BoolLiteral> ret
+      (new ir::BoolLiteral(((absyn::BoolLiteral*)expr)->getValue()));
+    ret->setTyp(tyFactory.getTy(ir::IRConstString::BOOL));
+    return ret;
+  }
+  if (dynamic_cast<absyn::StringLiteral*>(expr) != NULL) {
+    std::shared_ptr<ir::StringLiteral> ret
+      (new ir::StringLiteral(((absyn::StringLiteral*)expr)->getValue()));
+    ret->setTyp(tyFactory.getTy(ir::IRConstString::STRING));
+    return ret;
+  }
+  error(expr->line, expr->col, "Illegal Literal!");
   return nullptr;
 }
 
@@ -540,7 +592,18 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
   }
   ir::FuncDefn * fun = functory.getFunc(name, vds);
   if (fun != NULL) {
+    // Add Local Variables
+    for (auto v : vds)
+      local_var[v->getVar()].push(v.get());
+
     fun->setBody( transClause(fd->getExpr()) );
+
+    for (auto v : vds) {
+      auto it = local_var.find(v->getVar());
+      it->second.pop();
+      if (it->second.empty())
+        local_var.erase(it);
+    }
   }
 }
 
@@ -584,7 +647,16 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
     delete numst;
     return ;
   }
+
+  // Add Local Variable
+  for (auto v : numst->getAllVars())
+    local_var[v->getVar()].push(v.get());
   numst->setExpr(transClause(nd->getExpr()));
+  for (auto v : numst->getAllVars()) {
+    auto it = local_var.find(v->getVar());
+    it->second.pop();
+    if (it->second.empty()) local_var.erase(it);
+  }
   tyFactory.addNumberStmt(numst);
 }
 

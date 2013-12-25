@@ -11,15 +11,15 @@ InstSymbol::InstSymbol(TypeDomain* refer, int id)
 InstSymbol::~InstSymbol() {
 }
 
-TypeDomain* InstSymbol::getRefer() {
+TypeDomain* InstSymbol::getRefer() const {
   return refer;
 }
 
-int InstSymbol::getID() {
+int InstSymbol::getID() const {
   return id;
 }
 
-bool InstSymbol::isNull() {
+bool InstSymbol::isNull() const {
   return refer == NULL;
 }
 

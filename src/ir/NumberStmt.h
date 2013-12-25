@@ -14,6 +14,7 @@ public:
   size_t size();
   const OriginAttr* getOrigin(int k) const;
   const std::shared_ptr<VarDecl>& getVar(int k) const;
+  const std::vector<std::shared_ptr<VarDecl>>& getAllVars() const;
   TypeDomain* getRefer() const;
   const std::shared_ptr<Clause>& getBody() const;
 

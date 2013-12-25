@@ -14,6 +14,10 @@ size_t NumberStmt::size() {
   return origin.size();
 }
 
+const std::vector<std::shared_ptr<VarDecl>>& NumberStmt::getAllVars() const {
+  return var;
+}
+
 const OriginAttr* NumberStmt::getOrigin(int k) const {
   return origin[k];
 }

@@ -9,9 +9,9 @@ public:
   InstSymbol(TypeDomain* refer = NULL, int id = -1);
   virtual ~InstSymbol();
 
-  TypeDomain* getRefer();
-  int getID();
-  bool isNull();
+  TypeDomain* getRefer() const ;
+  int getID() const ;
+  bool isNull() const ;
 
 private:
   TypeDomain* refer;

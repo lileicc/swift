@@ -8,6 +8,7 @@
 #pragma once
 #include <cstdio>
 #include <memory>
+#include <stack>
 #include <string>
 #include "../absyn/BlogProgram.h"
 #include "../msg/ErrorMsg.h"
@@ -76,7 +77,7 @@ private:
 
   std::shared_ptr<ir::Distribution> transExpr(absyn::DistrExpr* expr);
 
-  std::shared_ptr<ir::Expr> transExpr(absyn::Literal* expr);
+  std::shared_ptr<ir::ConstSymbol> transExpr(absyn::Literal* expr);
 
   /**
    * create a declared type, shout error message if duplicate
@@ -156,6 +157,9 @@ private:
   fabrica::PreDeclFactory predeclFactory;
   msg::ErrorMsg errorMsg;
   ir::BlogModel* model;
+
+  //stack used to store local variable
+  std::map<std::string,std::stack<ir::VarDecl*> > local_var;
 };
 
 }
