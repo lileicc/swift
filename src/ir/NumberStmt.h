@@ -12,16 +12,19 @@ public:
   virtual ~NumberStmt();
 
   size_t size();
-  OriginAttr* getOrigin(int k);
-  VarDecl* getVar(int k);
-  TypeDomain* getRefer();
+  const OriginAttr* getOrigin(int k) const;
+  const std::shared_ptr<VarDecl>& getVar(int k) const;
+  TypeDomain* getRefer() const;
+  const std::shared_ptr<Clause>& getBody() const;
 
-  void addArg(OriginAttr* o, std::string v);
+  void addArg(const OriginAttr* o, std::string v);
+  void setExpr(std::shared_ptr<Clause> c);
 
 private:
   TypeDomain* refer;
-  std::vector<OriginAttr*> origin;
-  std::vector<VarDecl*> var;
+  std::vector<const OriginAttr*> origin;
+  std::vector<std::shared_ptr<VarDecl> > var;
+  std::shared_ptr<Clause> body;
 };
 
 }

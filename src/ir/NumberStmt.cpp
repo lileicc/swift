@@ -14,21 +14,29 @@ size_t NumberStmt::size() {
   return origin.size();
 }
 
-OriginAttr* NumberStmt::getOrigin(int k)  {
+const OriginAttr* NumberStmt::getOrigin(int k) const {
   return origin[k];
 }
 
-VarDecl* NumberStmt::getVar(int k) {
+const std::shared_ptr<VarDecl>& NumberStmt::getVar(int k) const {
   return var[k];
 }
 
-TypeDomain* NumberStmt::getRefer() {
+TypeDomain* NumberStmt::getRefer() const {
   return refer;
 }
 
-void NumberStmt::addArg(OriginAttr* o, std::string v) {
+const std::shared_ptr<Clause>& NumberStmt::getBody() const {
+  return body;
+}
+
+void NumberStmt::setExpr(std::shared_ptr<Clause> c) {
+  body = c;
+}
+
+void NumberStmt::addArg(const OriginAttr* o, std::string v) {
   origin.push_back(o);
-  var.push_back(new VarDecl(o->getTyp(), v));
+  var.push_back(std::shared_ptr<VarDecl>(new VarDecl(o->getTyp(), v)));
 }
 
 }

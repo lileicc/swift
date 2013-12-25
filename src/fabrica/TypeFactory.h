@@ -14,6 +14,7 @@
 #include "../ir/NameTy.h"
 #include "../ir/IRConst.h"
 #include "../ir/OriginAttr.h"
+#include "../ir/NumberStmt.h"
 
 namespace swift {
 namespace fabrica {
@@ -62,6 +63,11 @@ public:
       const std::string& name);
 
   /**
+   * add a number statement
+   */
+  bool addNumberStmt(ir::NumberStmt * numst);
+
+  /**
    * get the instance symbol for a given name
    * return NULL if not found
    */
@@ -73,6 +79,11 @@ public:
    */
   const ir::OriginAttr * getOriginAttr(const ir::NameTy* srcty,
       const std::string& name) const;
+
+  /**
+   * get all the Ty*
+   */
+  const std::map<std::string, const ir::Ty*>& getAllTyTable() const;
 private:
   static std::string constructAttrSign(const ir::NameTy* srcty, const std::string & name);
   std::map<std::string, const ir::Ty*> tyTable; //mapping from name to a declared type

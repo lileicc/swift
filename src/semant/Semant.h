@@ -62,6 +62,24 @@ private:
 
   std::shared_ptr<ir::MapExpr> transExpr(absyn::MapExpr* expr);
 
+  std::shared_ptr<ir::CardExpr> transExpr(absyn::CardinalityExpr* expr);
+
+  std::shared_ptr<ir::QuantForm> transExpr(absyn::QuantExpr* expr);
+
+  std::shared_ptr<ir::Expr> transExpr(absyn::VarRef* expr);
+
+  std::shared_ptr<ir::SetExpr> transExpr(absyn::SetExpr* expr);
+
+  std::shared_ptr<ir::ListSet> transExpr(absyn::ListSet* expr);
+
+  std::shared_ptr<ir::CondSet> transExpr(absyn::CondSet* expr);
+
+  std::shared_ptr<ir::MapExpr> transExpr(absyn::MapExpr* expr);
+
+  std::shared_ptr<ir::Distribution> transExpr(absyn::DistrExpr* expr);
+
+  std::shared_ptr<ir::Expr> transExpr(absyn::Literal* expr);
+
   /**
    * create a declared type, shout error message if duplicate
    */
@@ -134,7 +152,7 @@ private:
    */
   static std::string arrayRefToString(const std::string & name, int idx);
 
-  void error(int line, int col, const std::string & info);
+  void error(int line, int col, std::string info);
   fabrica::TypeFactory tyFactory;
   fabrica::Functory functory;
   fabrica::PreDeclFactory predeclFactory;

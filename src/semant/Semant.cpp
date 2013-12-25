@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <utility>
+#include <set>
 
 #include "../ir/IRHeader.h"
 
@@ -27,12 +28,20 @@ Semant::~Semant() {
 }
 
 ir::BlogModel* Semant::getModel() {
+  // TODO:
+  // note that since model uses shared_ptr to store type domains
+  // after deleting model, all type domains will be deleted!
+  // and they should not be deleted again from tyFactory!
   return model;
 }
 
 void Semant::process(absyn::BlogProgram* prog) {
   processDeclarations(prog);
   processBodies(prog);
+  // add TypeDomains to model
+  for (auto p : tyFactory.getAllTyTable()) 
+    if (p.second->getTyp() == ir::IRConstant::NAMETY)
+      model->addTypeDomain(std::shared_ptr<ir::TypeDomain>(((const ir::NameTy*)p.second)->getRefer()));
 }
 
 void Semant::processDeclarations(absyn::BlogProgram* prog) {
@@ -470,6 +479,42 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   return ptr;
 }
 
+std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
+  //TODO
+}
+
+std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
+  //TODO
+}
+
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
+  //TODO
+}
+
+std::shared_ptr<ir::SetExpr> Semant::transExpr(absyn::SetExpr* expr) {
+  //TODO
+}
+
+std::shared_ptr<ir::ListSet> Semant::transExpr(absyn::ListSet* expr) {
+  //TODO
+}
+
+std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
+  //TODO
+}
+
+std::shared_ptr<ir::MapExpr> Semant::transExpr(absyn::MapExpr* expr) {
+  //TODO
+}
+
+std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
+  //TODO
+}
+
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Literal* expr) {
+  //TODO
+}
+
 void Semant::transFuncBody(absyn::FuncDecl* fd) {
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
   const std::string& name = fd->getFuncName().getValue();
@@ -484,7 +529,47 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
 }
 
 void Semant::transNumSt(absyn::NumStDecl* nd) {
-  //TODO
+  std::string name = nd->getTyp().getValue();
+  const ir::NameTy* ty = tyFactory.getNameTy(name);
+  if (ty == NULL) {
+    error(nd->line, nd->col, "Invalid Number Statement! No corresponding type definition!");
+    return ;
+  }
+  ir::NumberStmt* numst = new ir::NumberStmt(ty->getRefer());
+  std::set<std::string> defined_var, defined_att;
+  bool success = true;
+  for (size_t k = 0; k < nd->argSize(); k++) {
+    std::string var = nd->getArgVar(k).getValue();
+    std::string att = nd->getArgOrigin(k).getValue();
+    if (defined_var.count(var) != 0) {
+      error(nd->line, nd->col, std::to_string(k+1) + "th arg var is already defined in this number statement!");
+      success = false;
+    }
+    if (tyFactory.getTy(var) != NULL) {
+      error(nd->line, nd->col, std::to_string(k + 1) + "th arg var cannot be a type!");
+      success = false;
+    }
+    defined_var.insert(var);
+    if (defined_att.count(att) != 0) {
+      error(nd->line, nd->col, std::to_string(k + 1) + "th origin field is already declared in this number statement!");
+      success = false;
+    }
+    const ir::OriginAttr* o = tyFactory.getOriginAttr(ty, att);
+    if (o == NULL) {
+      error(nd->line, nd->col, std::to_string(k + 1) + "th origin field is not declared in the program!");
+      success = false;
+    }
+    defined_att.insert(att);
+    if (!success) break;
+
+    numst->addArg(o, var);
+  }
+  if (!success) {
+    delete numst;
+    return ;
+  }
+  numst->setExpr(transClause(nd->getExpr()));
+  tyFactory.addNumberStmt(numst);
 }
 
 void Semant::transEvidence(absyn::Evidence* ne) {
@@ -524,7 +609,7 @@ const std::shared_ptr<ir::VarDecl> Semant::transVarDecl(const absyn::VarDecl & v
   return std::make_shared<ir::VarDecl>(ty, vd.getVar().getValue());
 }
 
-void Semant::error(int line, int col, const std::string& info) {
+void Semant::error(int line, int col, std::string info) {
   errorMsg.error(line, col, info);
 }
 

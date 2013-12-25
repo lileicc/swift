@@ -98,8 +98,20 @@ bool TypeFactory::addOriginAttr(const ir::NameTy * srcty,
   return true;
 }
 
+bool TypeFactory::addNumberStmt(ir::NumberStmt* numst) {
+  if (numst->getRefer() != NULL) {
+    numst->getRefer()->addNumberStmt(numst);
+    return true;
+  } else
+    return false;
+}
+
 std::string TypeFactory::constructAttrSign(const ir::NameTy* srcty, const std::string & name) {
   return srcty->toString() + "@" + name;
+}
+
+const std::map<std::string, const ir::Ty*>& TypeFactory::getAllTyTable() const {
+  return tyTable;
 }
 
 }
