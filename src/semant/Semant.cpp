@@ -480,39 +480,55 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
 }
 
 std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
-  //TODO
+  if (expr->size() != 1) {
+    error(expr->line, expr->col, "Invalid Cardinality Expression!");
+    return nullptr;
+  }
+  std::shared_ptr<ir::Expr> b = transExpr(expr->get(0));
+  std::shared_ptr<ir::SetExpr> st = std::dynamic_pointer_cast<ir::SetExpr>(b);
+  if (st == nullptr) {
+    error(expr->line, expr->col, "Invalid Cardinality Expression!");
+    return nullptr;
+  }
+  std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
+  cd->setBody(st);
+  cd->setTyp(tyFactory.getTy(ir::IRConstString::INT));
+  return cd;
 }
 
 std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   //TODO
+  return nullptr;
 }
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
   //TODO
+  return nullptr;
 }
 
 std::shared_ptr<ir::SetExpr> Semant::transExpr(absyn::SetExpr* expr) {
   //TODO
+  return nullptr;
 }
 
 std::shared_ptr<ir::ListSet> Semant::transExpr(absyn::ListSet* expr) {
   //TODO
+  return nullptr;
 }
 
 std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
   //TODO
-}
-
-std::shared_ptr<ir::MapExpr> Semant::transExpr(absyn::MapExpr* expr) {
-  //TODO
+  return nullptr;
 }
 
 std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
   //TODO
+  return nullptr;
 }
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Literal* expr) {
   //TODO
+  return nullptr;
 }
 
 void Semant::transFuncBody(absyn::FuncDecl* fd) {

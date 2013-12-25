@@ -10,11 +10,13 @@ public:
   CardExpr();
   virtual ~CardExpr();
 
-  void setRefer(Ty* t);
-  Ty* getRefer();
+  const Ty* getRefer() const;
+  void setBody(std::shared_ptr<SetExpr> b);
+  const std::shared_ptr<SetExpr>& getBody() const;
 
 private:
-  Ty* refer;
+  const Ty* refer;
+  std::shared_ptr<SetExpr> body;
 };
 
 }

@@ -10,7 +10,7 @@ SetTy::SetTy(const Ty* refer)
 SetTy::~SetTy() {
 }
 
-const Ty* SetTy::getRefer() {
+const Ty* SetTy::getRefer() const {
   return refer;
 }
 

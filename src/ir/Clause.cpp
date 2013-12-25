@@ -8,6 +8,7 @@
 
 #include "Ty.h"
 #include "ArrayTy.h"
+#include "SetTy.h"
 
 namespace swift {
 namespace ir {
@@ -17,6 +18,8 @@ Clause::Clause(const Ty* typ)
 
 Clause::~Clause() {
   if (dynamic_cast<const ArrayTy*>(typ) != NULL) delete typ;
+  else
+  if (dynamic_cast<const SetTy*>(typ) != NULL) delete typ;
 }
 
 void Clause::setTyp(const Ty* ty) {
