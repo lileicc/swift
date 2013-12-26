@@ -1,20 +1,22 @@
 #pragma once
 
+#include <memory>
 #include "IRForwardDecl.h"
 
 namespace swift { namespace ir {
 
 class Evidence {
 public:
-  Evidence(Expr* left, Expr* right);
+  Evidence(std::shared_ptr<Expr> left,
+           std::shared_ptr<Expr> right);
   virtual ~Evidence();
 
-  Expr* getLeft();
-  Expr* getRight();
+  std::shared_ptr<Expr> getLeft();
+  std::shared_ptr<Expr> getRight();
 
 private:
-  Expr* left;
-  Expr* right;
+  std::shared_ptr<Expr> left;
+  std::shared_ptr<Expr> right;
 };
 
 }

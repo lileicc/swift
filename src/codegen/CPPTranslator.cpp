@@ -237,6 +237,7 @@ code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
 code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
     std::string retvar) {
   // TODO translate ifthenelse
+  return NULL;
 }
 
 code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
@@ -250,6 +251,7 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
     return transDistribution(dist, args);
   }
   // TODO translate other expression
+  return NULL;
 }
 
 code::Expr* CPPTranslator::transDistribution(

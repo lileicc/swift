@@ -1,0 +1,1 @@
+query #{Aircraft a : a != b};

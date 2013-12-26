@@ -1,0 +1,4 @@
+random PrepLevel Prep(City c) {
+  if (First == c) then ~ Categorical({High -> 0.5, Low -> 0.5})
+  else ~ Categorical({High -> 0.8, Low -> 0.2})
+};
