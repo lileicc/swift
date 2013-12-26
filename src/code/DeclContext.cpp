@@ -16,7 +16,9 @@ DeclContext::DeclContext() {
 }
 
 DeclContext::~DeclContext() {
-  // TODO Auto-generated destructor stub
+  for (auto d : members) {
+    delete d;
+  }
 }
 
 

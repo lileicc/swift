@@ -13,6 +13,11 @@
 namespace swift {
 namespace code {
 
+/**
+ * DeclContext defines a context for declarations. It provides an abstract class
+ * for defining an environment within which other declarations reside.
+ * For example, a C++ class, and a C++ function are DeclContext.
+ */
 class DeclContext {
 public:
   DeclContext();

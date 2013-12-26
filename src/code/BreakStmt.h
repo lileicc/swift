@@ -12,6 +12,9 @@
 namespace swift {
 namespace code {
 
+/**
+ * Representing a statement which can be used in for, while, and switch statements
+ */
 class BreakStmt: public swift::code::Stmt {
 public:
   BreakStmt();

@@ -14,10 +14,15 @@
 namespace swift {
 namespace code {
 
+/**
+ * A switch statement accepts an expression, based whose value it will jump to
+ * the corresponding case statement
+ */
 class SwitchStmt: public swift::code::Stmt {
 public:
   SwitchStmt(Expr* cond);
   ~SwitchStmt();
+
 
   void addStmt(Stmt* st);
 

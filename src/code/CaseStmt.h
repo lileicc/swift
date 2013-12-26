@@ -13,6 +13,9 @@
 namespace swift {
 namespace code {
 
+/**
+ * A statement that can only be used inside switch statement.
+ */
 class CaseStmt: public swift::code::Stmt {
 public:
   CaseStmt(Expr* val, Stmt* sub);
