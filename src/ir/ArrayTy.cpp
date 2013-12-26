@@ -1,8 +1,8 @@
 #include "ArrayTy.h"
 
 namespace swift { namespace ir {
-ArrayTy::ArrayTy(IRConstant typ, const Ty* base, int dim)
-  :Ty(typ), base(base), dim(dim) {
+ArrayTy::ArrayTy(const Ty* base, int dim)
+  :Ty(ir::IRConstant::ARRAY), base(base), dim(dim) {
 }
 
 ArrayTy::~ArrayTy() {

@@ -10,7 +10,7 @@ namespace ir {
 
 class ArrayTy :public swift::ir::Ty {
 public:
-  ArrayTy(IRConstant typ, const Ty* base, int dim);
+  ArrayTy(const Ty* base, int dim);
   virtual ~ArrayTy();
 
   const Ty* getBase() const;

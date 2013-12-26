@@ -23,6 +23,7 @@ class FuncDefn;
 class FunctionCall;
 class IfThen;
 class InstSymbol;
+class InstSymbolRef;
 class IntLiteral;
 class ListSet;
 class MapExpr;

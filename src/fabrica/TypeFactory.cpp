@@ -38,7 +38,7 @@ const ir::NameTy * TypeFactory::getNameTy(const std::string& name) const {
   auto element = tyTable.find(name);
   if (element == tyTable.end())
     return NULL;
-  return dynamic_cast<ir::NameTy const*>(element->second);
+  return dynamic_cast<const ir::NameTy*>(element->second);
 }
 
 bool TypeFactory::addInstSymbol(const ir::NameTy* typ,

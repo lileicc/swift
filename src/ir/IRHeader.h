@@ -20,6 +20,7 @@
 #include "FunctionCall.h"
 #include "IfThen.h"
 #include "InstSymbol.h"
+#include "InstSymbolRef.h"
 #include "IntLiteral.h"
 #include "ListSet.h"
 #include "MapExpr.h"

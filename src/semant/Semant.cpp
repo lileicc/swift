@@ -42,6 +42,7 @@ void Semant::process(absyn::BlogProgram* prog) {
   for (auto p : tyFactory.getAllTyTable()) 
     if (p.second->getTyp() == ir::IRConstant::NAMETY)
       model->addTypeDomain(std::shared_ptr<ir::TypeDomain>(((const ir::NameTy*)p.second)->getRefer()));
+  // TODO: Add Functions
 }
 
 void Semant::processDeclarations(absyn::BlogProgram* prog) {
@@ -55,13 +56,9 @@ void Semant::processDeclarations(absyn::BlogProgram* prog) {
       transTyDecl(td);
       continue;
     }
+  }
 
-    dd = dynamic_cast<absyn::DistinctDecl*>(st);
-    if (dd != NULL) { // it is distinct declaration
-      transDistinctDecl(dd);
-      continue;
-    }
-
+  for (auto st : prog->getAll()) {
     fd = dynamic_cast<absyn::FuncDecl*>(st);
     if (fd != NULL) { // it is function declaration
       transFuncDecl(fd);
@@ -74,6 +71,15 @@ void Semant::processDeclarations(absyn::BlogProgram* prog) {
       continue;
     }
   }
+
+  for (auto st : prog->getAll()) {
+    dd = dynamic_cast<absyn::DistinctDecl*>(st);
+    if (dd != NULL) { // it is distinct declaration
+      transDistinctDecl(dd);
+      continue;
+    }
+  }
+
 }
 
 void Semant::processBodies(absyn::BlogProgram* prog) {
@@ -121,11 +127,28 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
     for (size_t i = 0; i < dd->size(); i++) {
       const std::string& name = dd->getVar(i).getValue();
       int k = dd->getLen(i);
+      if (k < 1) {
+        error(dd->line, dd->col, "Dimension of a distinct symbol must be positive!");
+        continue;
+      }
+      if (lookupNameTy(name) != NULL) {
+        error(dd->line, dd->col, "Distinct Symbol already defined as a Type");
+        continue;
+      }
+      if (functory.getFunc(name, std::vector<std::shared_ptr<ir::VarDecl>>()) != NULL) {
+        error(dd->line, dd->col, "Distinct Symbol already defined as a Function");
+        continue;
+      }
       if (k == 1) {
-        if (!tyFactory.addInstSymbol(nt, name)) {
+        if (tyFactory.getInstSymbol(arrayRefToString(name, 0)) != NULL
+            || !tyFactory.addInstSymbol(nt, name)) {
           error(dd->line, dd->col, "Symbol " + name + " already defined");
         }
       } else {
+        if (tyFactory.getInstSymbol(name) != NULL) {
+          error(dd->line, dd->col, "Symbol " + name + " cannot be defined twice!");
+          continue;
+        }
         for (int j = 0; j < k; j++) {
           if (!tyFactory.addInstSymbol(nt, arrayRefToString(name, j))) {
             error(dd->line, dd->col,
@@ -140,7 +163,12 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
 
 void Semant::transFuncDecl(absyn::FuncDecl* fd) {
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
+  if (rettyp == NULL) return ;
   const std::string& name = fd->getFuncName().getValue();
+  if (lookupNameTy(name) != NULL) {
+    error(fd->line, fd->col, "Function name already defined as Type Name");
+    return;
+  }
   std::vector<std::shared_ptr<ir::VarDecl> > vds;
   for (size_t i = 0; i < fd->argSize(); i++) {
     vds.push_back(transVarDecl(fd->getArg(i)));
@@ -161,11 +189,27 @@ void Semant::transOriginDecl(absyn::OriginDecl* od) {
 }
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
-  std::shared_ptr<ir::Expr> ret;
+  std::shared_ptr<ir::Expr> ret = nullptr;
   if (dynamic_cast<absyn::OpExpr*>(expr) != NULL)
     return (ret = transExpr((absyn::OpExpr*) expr));
   if (dynamic_cast<absyn::FuncApp*>(expr) != NULL)
     return (ret = transExpr((absyn::FuncApp*) expr));
+  if (dynamic_cast<absyn::Expr*>(expr) != NULL)
+    return (ret = transExpr((absyn::DistrExpr*) expr));
+  if (dynamic_cast<absyn::MapExpr*>(expr) != NULL)
+    return (ret = transExpr((absyn::MapExpr*) expr));
+  if (dynamic_cast<absyn::CardinalityExpr*>(expr) != NULL)
+    return (ret = transExpr((absyn::CardinalityExpr*) expr));
+  if (dynamic_cast<absyn::QuantExpr*>(expr) != NULL)
+    return (ret = transExpr((absyn::QuantExpr*) expr));
+  if (dynamic_cast<absyn::VarRef*>(expr) != NULL)
+    return (ret = transExpr((absyn::VarRef*) expr));
+  if (dynamic_cast<absyn::SetExpr*>(expr) != NULL)
+    return (ret = transExpr((absyn::SetExpr*) expr));
+  if (dynamic_cast<absyn::Literal*>(expr) != NULL)
+    return (ret = transExpr((absyn::Literal*) expr));
+  if (dynamic_cast<absyn::ArrayExpr*>(expr) != NULL)
+    return (ret = transExpr((absyn::ArrayExpr*) expr));
   return ret;
 }
 
@@ -254,7 +298,6 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
 }
 
 std::shared_ptr<ir::Clause> Semant::transClause(absyn::Expr* expr) {
-  std::shared_ptr<ir::Clause> ret;
   if (dynamic_cast<absyn::IfExpr*>(expr) != NULL)
     return transIfThen((absyn::IfExpr*) expr);
   if (dynamic_cast<absyn::DistrExpr*>(expr) != NULL &&
@@ -371,6 +414,11 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op, const std::vector<std
     return lookupTy(IRConstString::BOOL);
   case IRConstant::NEQ:
   case IRConstant::EQ:
+    // Check Null Type
+    if (arg[0]->getTyp() == NULL && arg[1]->getTyp() != NULL)
+      arg[0]->setTyp(arg[1]->getTyp());
+    if (arg[0]->getTyp() != NULL && arg[1]->getTyp() == NULL)
+      arg[1]->setTyp(arg[0]->getTyp());
     if (arg[0]->getTyp() != arg[1]->getTyp()) return NULL;
     return lookupTy(IRConstString::BOOL);
   // Numerical Operator
@@ -392,8 +440,9 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op, const std::vector<std
     return arg[0]->getTyp();
 
   // Address Operator
-  case IRConstant::SUB:
+  case IRConstant::SUB: 
     {
+      // TODO: Check Instant Symbol
       if (arg[1]->getTyp() != tyFactory.getTy(ir::IRConstString::INT)
           || (dynamic_cast<const ir::ArrayTy*>(arg[0]->getTyp()) == NULL))
         return NULL;
@@ -401,35 +450,44 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op, const std::vector<std
       if (arr->getDim() == 1)
         return arr->getBase();
       else
-        return new ir::ArrayTy(ir::IRConstant::ARRAY, arr->getBase(), arr->getDim() - 1);
+        return 
+          tyFactory.getUpdateTy(new ir::ArrayTy(arr->getBase(), arr->getDim() - 1));
     }
     break;
   default: return NULL;
   }
 }
 
-std::shared_ptr<ir::OprExpr> Semant::transExpr(absyn::OpExpr* expr) {
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
   std::shared_ptr<ir::OprExpr> ret(new ir::OprExpr(OprExpr_convertOpConst(expr->getOp())));
   if (ret->getOp() == ir::IRConstant::NA
-      || (ret->getOp() == ir::IRConstant::NOT && ret->getArgs().size() != 1)
-      || (ret->getOp() != ir::IRConstant::NOT && ret->getArgs().size() != 2)) {
-    error(expr->line, expr->col, "Invalid Operator!");
+      || (ret->getOp() == ir::IRConstant::NOT && (expr->getLeft() != NULL || expr->getRight() == NULL))
+      || (ret->getOp() != ir::IRConstant::NOT && (expr->getLeft() == NULL || expr->getRight() == NULL))) {
+    error(expr->line, expr->col, "Invalid/Incomplete Operator!");
     return nullptr;
   }
+
+  // Special Case: 
+  //         Replace OprExpr with a InstSymbolRef
+  if (ret->getOp() == ir::IRConstant::SUB
+    && (dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL
+    && (dynamic_cast<absyn::IntLiteral*>(expr->getRight())) != NULL) {
+    std::string var = ((absyn::VarRef*)(expr->getLeft()))->getVar().getValue();
+    int k = ((absyn::IntLiteral*)(expr->getRight()))->getValue();
+    auto sym = tyFactory.getInstSymbol(arrayRefToString(var, k));
+    if (sym != NULL && local_var.count(var) == 0) {
+      auto ref = std::shared_ptr<ir::InstSymbolRef>(new ir::InstSymbolRef(sym));
+      ref->setTyp(lookupNameTy(sym->getRefer()->getName()));
+      return ref;
+    }
+  }
+
   // Unary Operator
   if (ret->getOp() == ir::IRConstant::NOT)  {
-    if (expr->getLeft() != NULL || expr->getRight() == NULL) {
-      error(expr->line, expr->col, "Invalid Unaray Operator Expression!");
-      return nullptr;
-    }
-    ret->addArg(transExpr(expr->getRight()));
+      ret->addArg(transExpr(expr->getRight()));
     if (ret->get(0) == nullptr) return nullptr;
   } 
   else {
-    if (expr->getLeft() == NULL || expr->getRight() == NULL) {
-      error(expr->line, expr->col, "Invalid Binary Operator Expression!");
-      return nullptr;
-    }
     ret->addArg(transExpr(expr->getLeft()));
     ret->addArg(transExpr(expr->getRight()));
     if (ret->get(0) == nullptr || ret->get(1) == nullptr) return nullptr;
@@ -457,7 +515,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   }
 
   if (decl.size() == 1 && (dynamic_cast<const ir::NameTy*>(decl[0]->getTyp()) != NULL)) {
-    const ir::OriginAttr* att = tyFactory.getOriginAttr((const ir::NameTy*)decl[0]->getTyp(), func);
+    auto att = tyFactory.getOriginAttr((const ir::NameTy*)decl[0]->getTyp(), func);
     if (att != NULL) {
       std::shared_ptr<ir::OriginRefer> ptr(new ir::OriginRefer(att, args[0]));
       // type checking
@@ -492,7 +550,7 @@ std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
   }
   std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
   cd->setBody(st);
-  cd->setTyp(tyFactory.getTy(ir::IRConstString::INT));
+  cd->setTyp(lookupTy(ir::IRConstString::INT));
   return cd;
 }
 
@@ -520,8 +578,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
   auto sym = tyFactory.getInstSymbol(var);
   if (sym != NULL) {
     // Const Symbol
-    std::shared_ptr<ir::InstSymbol>ret(new ir::InstSymbol(*sym)); // Note: We MUST Copy the object here!!!
-    ret->setTyp(tyFactory.getNameTy(sym->getRefer()->getName()));
+    std::shared_ptr<ir::InstSymbolRef>ret(new ir::InstSymbolRef(sym));
+    ret->setTyp(lookupNameTy(sym->getRefer()->getName()));
     return ret;
   }
   error(expr->line, expr->col, "Illegal Symbol Reference!");
@@ -544,7 +602,7 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
 }
 
 std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
-  //TODO
+  // TODO: type checking for predecl distribution
   return nullptr;
 }
 
@@ -558,28 +616,33 @@ std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
   if (dynamic_cast<absyn::IntLiteral*>(expr) != NULL) {
     std::shared_ptr<ir::IntLiteral> ret
       (new ir::IntLiteral(((absyn::IntLiteral*)expr)->getValue()));
-    ret->setTyp(tyFactory.getTy(ir::IRConstString::INT));
+    ret->setTyp(lookupTy(ir::IRConstString::INT));
     return ret;
   }
   if (dynamic_cast<absyn::DoubleLiteral*>(expr) != NULL) {
     std::shared_ptr<ir::DoubleLiteral> ret
       (new ir::DoubleLiteral(((absyn::DoubleLiteral*)expr)->getValue()));
-    ret->setTyp(tyFactory.getTy(ir::IRConstString::DOUBLE));
+    ret->setTyp(lookupTy(ir::IRConstString::DOUBLE));
     return ret;
   }
   if (dynamic_cast<absyn::BoolLiteral*>(expr) != NULL) {
     std::shared_ptr<ir::BoolLiteral> ret
       (new ir::BoolLiteral(((absyn::BoolLiteral*)expr)->getValue()));
-    ret->setTyp(tyFactory.getTy(ir::IRConstString::BOOL));
+    ret->setTyp(lookupTy(ir::IRConstString::BOOL));
     return ret;
   }
   if (dynamic_cast<absyn::StringLiteral*>(expr) != NULL) {
     std::shared_ptr<ir::StringLiteral> ret
       (new ir::StringLiteral(((absyn::StringLiteral*)expr)->getValue()));
-    ret->setTyp(tyFactory.getTy(ir::IRConstString::STRING));
+    ret->setTyp(lookupTy(ir::IRConstString::STRING));
     return ret;
   }
   error(expr->line, expr->col, "Illegal Literal!");
+  return nullptr;
+}
+
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
+  // TODO: consider const array
   return nullptr;
 }
 
@@ -661,17 +724,38 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
 }
 
 void Semant::transEvidence(absyn::Evidence* ne) {
-  std::shared_ptr<ir::Evidence> e(
-    new ir::Evidence(transExpr(ne->getLeft()), 
-                     transExpr(ne->getRight())));
-  model->addEvidence(e);
+  auto lhs = transExpr(ne->getLeft());
+  auto rhs = transExpr(ne->getRight());
+  // type checking for equality
+  if (lhs->getTyp() == NULL && rhs->getTyp() != NULL)
+    lhs->setTyp(rhs->getTyp());
+  if (lhs->getTyp() != NULL && rhs->getTyp() == NULL)
+    rhs->setTyp(lhs->getTyp());
+  if (lhs->getTyp() == NULL) // Both are NULL! always hold!
+    return ;
+  if (lhs->getTyp() != rhs->getTyp()) {
+    error(ne->line, ne->col, "Types not match for equality!");
+    return ;
+  }
+  // Format Checking
+  //     we assume that :
+  //         left side  : function call
+  //         right side : const symbol
+  if ((std::dynamic_pointer_cast<ir::ConstSymbol>(rhs)) == nullptr
+    || (std::dynamic_pointer_cast<ir::FunctionCall>(lhs)) == nullptr) {
+    error(ne->line, ne->col, "Evidence format not correct! We assume < FunctionCall = ConstSymbol >!");
+    return ; // TODO: build internal function to avoid this
+  }
+  model->addEvidence(std::shared_ptr<ir::Evidence>
+    (new ir::Evidence(std::dynamic_pointer_cast<ir::FunctionCall>(lhs),
+     std::dynamic_pointer_cast<ir::ConstSymbol>(rhs))));
 }
 
 void Semant::transQuery(absyn::Query* nq) {
   std::shared_ptr<ir::FunctionCall> ptr
     (std::dynamic_pointer_cast<ir::FunctionCall>(transExpr(nq->getExpr())));
   if (ptr == nullptr) {
-    //TODO: build a internal Void Function representing this expr
+    //TODO: build a internal Void Function Call to represent this expr
     error(nq->line, nq->col, "Currently we only accept function call in the query statement!");
     return ;
   }
@@ -684,11 +768,12 @@ const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
   const ir::Ty* ty = tyFactory.getTy(typ.getTyp().getValue());
   if (ty == NULL) {
     error(typ.line, typ.col, "Type " + typ.getTyp().getValue() + " not found");
+    return NULL;
   }
   if (dim == 0) {
     return ty;
   } else {
-    return new ir::ArrayTy(ir::IRConstant::ARRAY, ty, dim);
+    return tyFactory.getUpdateTy(new ir::ArrayTy(ty, dim));
   }
 }
 

@@ -57,7 +57,7 @@ private:
    */
   const ir::Ty* OprExpr_checkType(ir::IRConstant op, const std::vector<std::shared_ptr<ir::Expr>>& arg);
 
-  std::shared_ptr<ir::OprExpr> transExpr(absyn::OpExpr* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::OpExpr* expr);
 
   std::shared_ptr<ir::Expr> transExpr(absyn::FuncApp* expr);
 
@@ -78,6 +78,8 @@ private:
   std::shared_ptr<ir::Distribution> transExpr(absyn::DistrExpr* expr);
 
   std::shared_ptr<ir::ConstSymbol> transExpr(absyn::Literal* expr);
+
+  std::shared_ptr<ir::Expr> transExpr(absyn::ArrayExpr* expr);
 
   /**
    * create a declared type, shout error message if duplicate

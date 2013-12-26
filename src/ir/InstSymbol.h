@@ -1,10 +1,8 @@
 #pragma once
-#include "ConstSymbol.h"
 #include "IRForwardDecl.h"
 
 namespace swift { namespace ir {
-class InstSymbol :
-  public swift::ir::ConstSymbol {
+class InstSymbol {
 public:
   InstSymbol(TypeDomain* refer = NULL, int id = -1);
   virtual ~InstSymbol();
