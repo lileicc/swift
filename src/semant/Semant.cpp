@@ -28,8 +28,8 @@ Semant::~Semant() {
 }
 
 ir::BlogModel* Semant::getModel() {
-  // TODO:
-  // note that since model uses shared_ptr to store type domains
+  // Note: IMPORTANT
+  // Since model uses shared_ptr to store type domains
   // after deleting model, all type domains will be deleted!
   // and they should not be deleted again from tyFactory!
   return model;
@@ -42,7 +42,9 @@ void Semant::process(absyn::BlogProgram* prog) {
   for (auto p : tyFactory.getAllTyTable()) 
     if (p.second->getTyp() == ir::IRConstant::NAMETY)
       model->addTypeDomain(std::shared_ptr<ir::TypeDomain>(((const ir::NameTy*)p.second)->getRefer()));
-  // TODO: Add Functions
+  // Add Functions
+  for (auto p : functory.getAllFuncTable())
+    model->addFunction(std::shared_ptr<ir::FuncDefn>(p.second));
 }
 
 void Semant::processDeclarations(absyn::BlogProgram* prog) {
@@ -442,7 +444,6 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op, const std::vector<std
   // Address Operator
   case IRConstant::SUB: 
     {
-      // TODO: Check Instant Symbol
       if (arg[1]->getTyp() != tyFactory.getTy(ir::IRConstString::INT)
           || (dynamic_cast<const ir::ArrayTy*>(arg[0]->getTyp()) == NULL))
         return NULL;
@@ -602,8 +603,29 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
 }
 
 std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
-  // TODO: type checking for predecl distribution
-  return nullptr;
+  // TODO: add type checking for predecl distribution
+  std::string name = expr->getDistrName().getValue();
+  const predecl::PreDeclDistr* distr = predeclFactory.getDistr(name);
+
+  if (distr == NULL) {
+    // TODO: to allow costumized distribution
+    //warning(expr->line, expr->col, "<" + name + "> costumized distribution assumed! No type checking will be performed!");
+    error(expr->line, expr->col, "distribution not defined");
+    return std::make_shared<ir::Distribution>(name);
+  }
+
+  std::vector<std::shared_ptr<ir::Expr>> args;
+  for (size_t i = 0; i < expr->size(); ++i) {
+    args.push_back(transExpr(expr->get(i)));
+    if (args.back() == nullptr) args.pop_back();
+  }
+
+  std::shared_ptr<ir::Distribution> ret = distr->getNew(args, &tyFactory);
+  if (ret == nullptr) {
+    error(expr->line, expr->col, "Type Checking failed for <" + name + "> distribution!");
+    return std::make_shared<ir::Distribution>(name, distr);
+  }
+  return ret;
 }
 
 std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
@@ -642,8 +664,34 @@ std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
 }
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
-  // TODO: consider const array
-  return nullptr;
+  std::shared_ptr<ir::ArrayExpr> ret = std::make_shared<ir::ArrayExpr>();
+  for (size_t i = 0; i < expr->size(); ++i) {
+    auto ptr = transExpr(expr->get(i));
+    if (ptr != nullptr)
+      ret->addArg(ptr);
+  }
+  const ir::Ty* base = NULL;
+  for (size_t i = 0; i < ret->argSize(); ++i)
+    if (ret->get(i)->getTyp() != NULL)
+       base = ret->get(i)->getTyp();
+  if (base == NULL || base->getTyp() != ir::IRConstant::ARRAY || ((const ir::ArrayTy*)base)->getDim() != expr->getDim()-1) {
+    error(expr->line, expr->col, "Illegal Array Expr");
+  }
+  else {
+    for (size_t i = 0; i < ret->argSize(); ++i) {
+      const ir::Ty* t = ret->get(i)->getTyp();
+      if (t == NULL)
+        ret->get(i)->setTyp(base);
+      else
+      if (t != base) {
+        error(expr->line, expr->col, "Illegal Array Expr");
+        break;
+      }
+    }
+    ret->setTyp(tyFactory.getUpdateTy(new ir::ArrayTy(base, expr->getDim())));
+  }
+
+  return ret;
 }
 
 void Semant::transFuncBody(absyn::FuncDecl* fd) {
@@ -784,6 +832,10 @@ const std::shared_ptr<ir::VarDecl> Semant::transVarDecl(const absyn::VarDecl & v
 
 void Semant::error(int line, int col, std::string info) {
   errorMsg.error(line, col, info);
+}
+
+void Semant::warning(int line, int col, std::string info) {
+  errorMsg.warning(line, col, info);
 }
 
 const ir::NameTy* Semant::lookupNameTy(const std::string & name) {

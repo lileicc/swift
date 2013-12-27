@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CategoricalDistrDecl.h"
+#include "PoissonDistrDecl.h"
 
 namespace swift { namespace predecl {
 
@@ -10,6 +11,7 @@ public:
   ~PreDeclDistrList();
 
   static const CategoricalDistrDecl categoricalDistr;
+  static const PoissonDistrDecl poissonDistr;
 };
 
 }

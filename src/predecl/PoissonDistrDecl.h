@@ -3,11 +3,11 @@
 
 namespace swift { namespace predecl {
 
-class CategoricalDistrDecl :
+class PoissonDistrDecl :
   public swift::predecl::PreDeclDistr {
 public:
-  CategoricalDistrDecl();
-  virtual ~CategoricalDistrDecl();
+  PoissonDistrDecl();
+  virtual ~PoissonDistrDecl();
 
   virtual std::shared_ptr<ir::Distribution>
     getNew(std::vector<std::shared_ptr<ir::Expr>>& args, fabrica::TypeFactory* fact) const ;

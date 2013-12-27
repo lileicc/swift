@@ -154,6 +154,8 @@ private:
   static std::string arrayRefToString(const std::string & name, int idx);
 
   void error(int line, int col, std::string info);
+  void warning(int line, int col, std::string info);
+
   fabrica::TypeFactory tyFactory;
   fabrica::Functory functory;
   fabrica::PreDeclFactory predeclFactory;

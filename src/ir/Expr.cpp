@@ -18,6 +18,10 @@ void Expr::addArg(std::shared_ptr<Expr> expr) {
   args.push_back(expr);
 }
 
+void Expr::setArgs(std::vector<std::shared_ptr<Expr>> a) {
+  args = a;
+}
+
 const std::vector<std::shared_ptr<Expr>>& Expr::getArgs() {
   return args;
 }

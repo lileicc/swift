@@ -10,11 +10,11 @@ MapTy::MapTy(const Ty* from, const Ty* to)
 MapTy::~MapTy() {
 }
 
-const Ty* MapTy::getFrom() {
+const Ty* MapTy::getFrom() const {
   return from;
 }
 
-const Ty* MapTy::getTo() {
+const Ty* MapTy::getTo() const {
   return to;
 }
 

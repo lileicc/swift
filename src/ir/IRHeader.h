@@ -3,6 +3,7 @@
 // For NULL
 #include <cstdio>
 
+#include "ArrayExpr.h"
 #include "ArrayTy.h"
 #include "BlogModel.h"
 #include "BoolLiteral.h"

@@ -37,6 +37,11 @@ public:
    */
   ir::FuncDefn* getFunc(const std::string& name,
       const std::vector<std::shared_ptr<ir::VarDecl> > args);
+
+  /**
+  * get all the FuncDefn*
+  */
+  const std::map<std::string, ir::FuncDefn*>& getAllFuncTable() const;
 private:
   std::map<std::string, ir::FuncDefn*> funTable;
 };

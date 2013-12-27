@@ -7,6 +7,7 @@
 
 namespace swift { namespace ir {
 
+class ArrayExpr;
 class ArrayTy;
 class Branch;
 class BoolLiteral;

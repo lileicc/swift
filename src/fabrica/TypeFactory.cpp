@@ -25,6 +25,12 @@ TypeFactory::TypeFactory() {
 
 TypeFactory::~TypeFactory() {
   // TODO Auto-generated destructor stub
+  for (auto p : tyTable)
+    if (p.second != NULL) delete p.second;
+  for (auto p : instanceTable)
+    if (p.second != NULL) delete p.second;
+  for (auto p : attrTable)
+    if (p.second != NULL) delete p.second;
 }
 
 bool TypeFactory::addNameTy(const std::string& name) {

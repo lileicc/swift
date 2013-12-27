@@ -17,6 +17,7 @@ Functory::Functory() {
 
 Functory::~Functory() {
   // TODO Auto-generated destructor stub
+  // Note: We DO NOT Need to delete all the pointers to FuncDefn here!
 }
 
 bool Functory::addFuncDefn(const std::string& name, const ir::Ty * retTy,
@@ -36,6 +37,10 @@ ir::FuncDefn* Functory::getFunc(const std::string& name,
     return NULL;
   }
   return element->second;
+}
+
+const std::map<std::string, ir::FuncDefn*>& Functory::getAllFuncTable() const {
+  return funTable;
 }
 
 } /* namespace fabrica */
