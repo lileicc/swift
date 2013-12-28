@@ -19,7 +19,7 @@ public:
   const std::shared_ptr<Clause>& getBody() const;
 
   void addArg(const OriginAttr* o, std::string v);
-  void setExpr(std::shared_ptr<Clause> c);
+  void setBody(std::shared_ptr<Clause> c);
 
 private:
   TypeDomain* refer;

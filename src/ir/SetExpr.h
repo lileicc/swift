@@ -10,7 +10,7 @@ public:
   SetExpr(IRConstant kind);
   virtual ~SetExpr();
 
-  IRConstant getKind();
+  IRConstant getKind() const ;
 
 private:
   IRConstant kind;

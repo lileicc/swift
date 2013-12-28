@@ -34,7 +34,7 @@ const std::shared_ptr<Clause>& NumberStmt::getBody() const {
   return body;
 }
 
-void NumberStmt::setExpr(std::shared_ptr<Clause> c) {
+void NumberStmt::setBody(std::shared_ptr<Clause> c) {
   body = c;
 }
 
