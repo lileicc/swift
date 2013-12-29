@@ -8,7 +8,7 @@ MapExpr::MapExpr() {
 MapExpr::~MapExpr() {
 }
 
-size_t MapExpr::mapSize() {
+size_t MapExpr::mapSize() const {
   return argSize() / 2;
 }
 
@@ -17,19 +17,19 @@ void MapExpr::addMap(std::shared_ptr<Expr> a, std::shared_ptr<Expr> b) {
   addArg(b);
 }
 
-std::shared_ptr<Expr> MapExpr::getFrom(int k) {
+std::shared_ptr<Expr> MapExpr::getFrom(int k) const {
   return get(2 * k);
 }
 
-std::shared_ptr<Expr> MapExpr::getTo(int k) {
+std::shared_ptr<Expr> MapExpr::getTo(int k) const {
   return get(2 * k + 1);
 }
 
-const Ty* MapExpr::getFromTyp() {
+const Ty* MapExpr::getFromTyp() const {
   return fromTyp;
 }
 
-const Ty* MapExpr::getToTyp() {
+const Ty* MapExpr::getToTyp() const {
   return toTyp;
 }
 

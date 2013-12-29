@@ -17,7 +17,7 @@ public:
   Clause(const Ty* typ = NULL);
   virtual ~Clause();
   void setTyp(const Ty* typ);
-  const Ty* getTyp();
+  const Ty* getTyp() const;
 private:
   const Ty* typ;
 };

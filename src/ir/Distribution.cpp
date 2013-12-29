@@ -9,11 +9,11 @@ Distribution::Distribution(const std::string& name, const predecl::PreDeclDistr*
 Distribution::~Distribution() {
 }
 
-const std::string& Distribution::getDistrName() {
+const std::string& Distribution::getDistrName() const {
   return name;
 }
 
-const predecl::PreDeclDistr* Distribution::getRefer() {
+const predecl::PreDeclDistr* Distribution::getRefer() const {
   return refer;
 }
 

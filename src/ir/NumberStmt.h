@@ -11,7 +11,7 @@ public:
   NumberStmt(TypeDomain* refer);
   virtual ~NumberStmt();
 
-  size_t size();
+  size_t size() const;
   const OriginAttr* getOrigin(int k) const;
   const std::shared_ptr<VarDecl>& getVar(int k) const;
   const std::vector<std::shared_ptr<VarDecl>>& getAllVars() const;

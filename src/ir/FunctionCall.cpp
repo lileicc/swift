@@ -13,11 +13,11 @@ FunctionCall::FunctionCall(FuncDefn* refer)
 FunctionCall::~FunctionCall() {
 }
 
-IRConstant FunctionCall::getKind() {
+IRConstant FunctionCall::getKind() const {
   return kind;
 }
 
-FuncDefn* FunctionCall::getRefer() {
+FuncDefn* FunctionCall::getRefer() const {
   return refer;
 }
 

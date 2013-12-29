@@ -10,7 +10,7 @@ NumberStmt::NumberStmt(TypeDomain* refer)
 NumberStmt::~NumberStmt() {
 }
 
-size_t NumberStmt::size() {
+size_t NumberStmt::size() const {
   return origin.size();
 }
 

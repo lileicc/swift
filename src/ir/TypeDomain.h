@@ -21,19 +21,19 @@ public:
 
   const std::string& getName() const;
   void addRefer(NameTy* ref);
-  NameTy* getRefer();
+  NameTy* getRefer() const;
   void setPreLen(int l);
-  int getPreLen();
+  int getPreLen() const;
   void addNumberStmt(NumberStmt* num);
   const std::vector<NumberStmt*>& getAllNumberStmt() const;
-  NumberStmt* getNumberStmt(int k);
-  size_t getNumberStmtSize();
+  NumberStmt* getNumberStmt(int k) const;
+  size_t getNumberStmtSize() const;
   void addOrigin(OriginAttr* o);
   const std::vector<OriginAttr*>& getAllOrigin() const;
-  OriginAttr* getOrigin(int k);
-  size_t getOriginSize();
+  OriginAttr* getOrigin(int k) const;
+  size_t getOriginSize() const;
   void setInstName(int k, std::string name);
-  const std::string& getInstName(int k);
+  const std::string& getInstName(int k) const;
   const std::vector<std::string>& getInstNames() const;
 
   int getOriginID(const std::string& str);

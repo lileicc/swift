@@ -22,15 +22,15 @@ void Expr::setArgs(std::vector<std::shared_ptr<Expr>> a) {
   args = a;
 }
 
-const std::vector<std::shared_ptr<Expr>>& Expr::getArgs() {
+const std::vector<std::shared_ptr<Expr>>& Expr::getArgs() const {
   return args;
 }
 
-size_t Expr::argSize() {
+size_t Expr::argSize() const {
   return args.size();
 }
 
-std::shared_ptr<Expr> Expr::get(int k) {
+std::shared_ptr<Expr> Expr::get(int k) const {
   return args[k];
 }
 

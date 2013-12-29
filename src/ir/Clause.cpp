@@ -23,7 +23,7 @@ void Clause::setTyp(const Ty* ty) {
   typ = ty;
 }
 
-const Ty* Clause::getTyp()  {
+const Ty* Clause::getTyp() const {
   return typ;
 }
 

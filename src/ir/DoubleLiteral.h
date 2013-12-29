@@ -9,7 +9,7 @@ public:
   DoubleLiteral(double v=0);
   virtual ~DoubleLiteral();
 
-  double getValue();
+  double getValue() const;
 
 private:
   double value;

@@ -12,7 +12,7 @@ public:
   StringLiteral(const std::string& v = std::string(""));
   virtual ~StringLiteral();
 
-  const std::string& getValue();
+  const std::string& getValue() const;
 
 private:
   std::string value;

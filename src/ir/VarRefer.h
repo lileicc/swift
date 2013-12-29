@@ -10,7 +10,7 @@ public:
   VarRefer(VarDecl* refer = NULL);
   virtual ~VarRefer();
 
-  VarDecl* getRefer();
+  VarDecl* getRefer() const;
 
 private:
   VarDecl* refer;

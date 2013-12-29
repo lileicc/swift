@@ -633,13 +633,56 @@ std::shared_ptr<ir::SetExpr> Semant::transExpr(absyn::SetExpr* expr) {
 }
 
 std::shared_ptr<ir::ListSet> Semant::transExpr(absyn::ListSet* expr) {
-  //TODO
-  return nullptr;
+  auto ptr = std::make_shared<ir::ListSet>();
+  const ir::Ty* base = NULL;
+  for (size_t i = 0; i < expr->size(); ++i) {
+    ptr->addArg(transExpr(expr->get(i)));
+    auto e = ptr->get(i);
+    if (e->getTyp() != NULL) {
+      if (base == NULL) base = e->getTyp();
+      else {
+        if (base != e->getTyp()) {
+          error(expr->line, expr->col, "Set must contain instances of the same type!");
+          break;
+        }
+      }
+    }
+    else {
+      error(expr->line, expr->col, "Set cannot contain NULL!");
+      break;
+    }
+    if (std::dynamic_pointer_cast<ir::ConstSymbol>(e) == nullptr) {
+      error(expr->line, expr->col, "Set must contain constant symbols!");
+      break;
+    }
+  }
+  // Note: when base == NULL, this is an empty set
+  ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(base)));
+  return ptr;
 }
 
 std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
-  //TODO
-  return nullptr;
+  std::shared_ptr<ir::VarDecl> var = transVarDecl(expr->getVar());
+
+  // Add Local Variable
+  if (var->getTyp() != NULL && var->getVar().size() > 0)
+    local_var[var->getVar()].push(var.get());
+  std::shared_ptr<ir::Expr> e = (expr->getCond() == NULL ? nullptr : transExpr(expr->getCond()));
+  // Remove Local Variable
+  if (var->getTyp() != NULL && var->getVar().size() > 0) {
+    auto it = local_var.find(var->getVar());
+    it->second.pop();
+    if (it->second.empty()) local_var.erase(it);
+  }
+
+  auto ptr = std::make_shared<ir::CondSet>(var, e);
+
+  if (e != nullptr && e->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
+    error(expr->line, expr->col, "Condition of the set must return Boolean Value!");
+  }
+
+  ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(var->getTyp())));
+  return ptr;
 }
 
 std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
