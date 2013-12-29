@@ -211,7 +211,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
     return (ret = transExpr((absyn::OpExpr*) expr));
   if (dynamic_cast<absyn::FuncApp*>(expr) != NULL)
     return (ret = transExpr((absyn::FuncApp*) expr));
-  if (dynamic_cast<absyn::Expr*>(expr) != NULL)
+  if (dynamic_cast<absyn::DistrExpr*>(expr) != NULL)
     return (ret = transExpr((absyn::DistrExpr*) expr));
   if (dynamic_cast<absyn::MapExpr*>(expr) != NULL)
     return (ret = transExpr((absyn::MapExpr*) expr));
@@ -547,7 +547,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   auto ptr = std::make_shared<ir::FunctionCall> (functory.getFunc(func, decl));
   
   if (ptr->getRefer() == NULL) {
-    error(expr->line, expr->col, "Error on Function Call! No Such Function.");
+    error(expr->line, expr->col, "Error on Function Call! No Such Function < " + func + " >.");
     return ptr;
   }
 
@@ -619,7 +619,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
     ret->setTyp(lookupNameTy(sym->getRefer()->getName()));
     return ret;
   }
-  error(expr->line, expr->col, "Illegal Symbol Reference!");
+  error(expr->line, expr->col, "Illegal Symbol Reference of < " + var + " >!");
   return std::make_shared<ir::Expr>();
 }
 
@@ -693,7 +693,7 @@ std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
   if (distr == NULL) {
     // TODO: to allow costumized distribution
     //warning(expr->line, expr->col, "<" + name + "> costumized distribution assumed! No type checking will be performed!");
-    error(expr->line, expr->col, "distribution not defined");
+    error(expr->line, expr->col, "distribution < " + name + " > not defined");
     return std::make_shared<ir::Distribution>(name);
   }
 
@@ -940,6 +940,10 @@ const ir::Ty* Semant::lookupTy(const std::string & name) {
 
 std::string Semant::arrayRefToString(const std::string & name, int idx) {
   return name + "[" + std::to_string(idx) + "]";
+}
+
+bool Semant::Okay() {
+  return errorMsg.Okay();
 }
 
 }

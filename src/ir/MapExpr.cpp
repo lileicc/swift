@@ -2,7 +2,7 @@
 
 namespace swift { namespace ir {
 
-MapExpr::MapExpr() {
+MapExpr::MapExpr() : fromTyp(NULL), toTyp(NULL) {
 }
 
 MapExpr::~MapExpr() {

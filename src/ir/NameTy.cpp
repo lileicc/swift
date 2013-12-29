@@ -5,7 +5,7 @@
 namespace swift { namespace ir {
 NameTy::NameTy(TypeDomain* refer)
   :Ty(IRConstant::NAMETY), refer(refer) {
-  refer->addRefer(this);
+  refer->setRefer(this);
 }
 
 NameTy::~NameTy() {

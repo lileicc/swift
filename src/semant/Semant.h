@@ -26,6 +26,7 @@ public:
   ~Semant();
   void process(absyn::BlogProgram* prog);
   ir::BlogModel* getModel();
+  bool Okay();
 private:
   /**
    * process all declarations, including

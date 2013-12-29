@@ -20,8 +20,8 @@ public:
   ~TypeDomain();
 
   const std::string& getName() const;
-  void addRefer(NameTy* ref);
-  NameTy* getRefer() const;
+  void setRefer(const NameTy* ref);
+  const NameTy* getRefer() const;
   void setPreLen(int l);
   int getPreLen() const;
   void addNumberStmt(NumberStmt* num);
@@ -43,7 +43,7 @@ private:
   std::vector<NumberStmt*> gen;
   int prelen;
   std::vector<OriginAttr*> origin;
-  NameTy* refer;
+  const NameTy* refer;
   std::vector<std::string> instName;
 
   std::map<std::string,int> originID;

@@ -39,7 +39,7 @@
 #include "StringLiteral.h"
 #include "Ty.h"
 #include "TypeDomain.h"
-#include "UniformDistr.h"
+#include "UniformChoiceDistr.h"
 #include "VarDecl.h"
 #include "VarRefer.h"
 #include "VoidFuncCall.h"

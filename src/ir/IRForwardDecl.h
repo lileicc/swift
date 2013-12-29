@@ -42,7 +42,7 @@ class SetExpr;
 class StringLiteral;
 class Ty;
 class TypeDomain;
-class UniformDistr;
+class UniformChoiceDistr;
 class VarDecl;
 class VarRefer;
 class VoidFuncCall;

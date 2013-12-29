@@ -10,7 +10,7 @@ Hurricane::~Hurricane() {
   if (root != NULL) delete root;
 }
 
-Absyn* Hurricane::getRoot() {
+BlogProgram* Hurricane::getRoot() {
   return root;
 }
 
@@ -169,7 +169,7 @@ void Hurricane::build(){
 void Hurricane::test(FILE *file)
 {
   build();
-  root->print(file, 0);
+  if(file != NULL) root->print(file, 0);
 }
 
 }

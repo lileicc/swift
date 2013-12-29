@@ -2,6 +2,7 @@
 
 #include "CategoricalDistrDecl.h"
 #include "PoissonDistrDecl.h"
+#include "UniformChoiceDistrDecl.h"
 
 namespace swift { namespace predecl {
 
@@ -12,6 +13,7 @@ public:
 
   static const CategoricalDistrDecl categoricalDistr;
   static const PoissonDistrDecl poissonDistr;
+  static const UniformChoiceDistrDecl uniformChoiceDistr;
 };
 
 }

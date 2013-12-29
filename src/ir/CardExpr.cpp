@@ -3,7 +3,7 @@
 #include "SetTy.h"
 
 namespace swift { namespace ir {
-CardExpr::CardExpr() {
+CardExpr::CardExpr() : refer(NULL) {
 }
 
 CardExpr::~CardExpr() {

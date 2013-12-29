@@ -9,6 +9,8 @@ PreDeclFactory::PreDeclFactory() {
     = &predecl::PreDeclDistrList::categoricalDistr;
   distr[predecl::PreDeclDistrList::poissonDistr.getName()]
     = &predecl::PreDeclDistrList::poissonDistr;
+  distr[predecl::PreDeclDistrList::uniformChoiceDistr.getName()]
+    = &predecl::PreDeclDistrList::uniformChoiceDistr;
 }
 
 

@@ -23,6 +23,10 @@ Functory::~Functory() {
 bool Functory::addFuncDefn(const std::string& name, const ir::Ty * retTy,
     std::vector<std::shared_ptr<ir::VarDecl> > args, bool isRand) {
   if (getFunc(name, args) != NULL) return false;
+  // TODO
+  // DEBUG: function signature not well designed!!
+  //   Note: no arguments is passed to fd!
+  //         toSignature() should not include variable name!
   ir::FuncDefn* fd = new ir::FuncDefn(isRand, std::string(name), retTy);
   funTable[fd->toSignature()] = fd;
   return true;

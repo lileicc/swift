@@ -15,7 +15,7 @@ namespace swift {
 namespace ir {
 
 TypeDomain::TypeDomain(const std::string& name)
-  :name(name) {
+  :name(name), refer(NULL), prelen(0) {
 }
 
 TypeDomain::~TypeDomain()  {
@@ -25,11 +25,11 @@ const std::string& TypeDomain::getName() const {
   return name;
 }
 
-void TypeDomain::addRefer(NameTy* ref) {
+void TypeDomain::setRefer(const NameTy* ref) {
   refer = ref;
 }
 
-NameTy* TypeDomain::getRefer() const {
+const NameTy* TypeDomain::getRefer() const {
   return refer;
 }
 

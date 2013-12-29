@@ -6,6 +6,8 @@ const CategoricalDistrDecl PreDeclDistrList::categoricalDistr = CategoricalDistr
 
 const PoissonDistrDecl PreDeclDistrList::poissonDistr = PoissonDistrDecl();
 
+const UniformChoiceDistrDecl PreDeclDistrList::uniformChoiceDistr = UniformChoiceDistrDecl();
+
 PreDeclDistrList::PreDeclDistrList() {
 }
 

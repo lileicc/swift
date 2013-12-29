@@ -6,8 +6,11 @@
 namespace swift { namespace ir {
 FunctionCall::FunctionCall(FuncDefn* refer)
   :refer(refer) {
-  if (refer->isRand()) kind = IRConstant::RANDOM;
-  if (refer->isFixed()) kind = IRConstant::FIXED;
+  if (refer == NULL) kind = IRConstant::NA;
+  else {
+    if (refer->isRand()) kind = IRConstant::RANDOM;
+    if (refer->isFixed()) kind = IRConstant::FIXED;
+  }
 }
 
 FunctionCall::~FunctionCall() {
