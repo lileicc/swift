@@ -135,7 +135,7 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
         error(dd->line, dd->col, "Dimension of a distinct symbol < "+ name +" >must be positive!");
         continue;
       }
-      if (lookupNameTy(name) != NULL) {
+      if (k == 1 && lookupNameTy(name) != NULL) {
         error(dd->line, dd->col, "Distinct Symbol < "+ name +" > already defined as a Type");
         continue;
       }
@@ -144,8 +144,7 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
         continue;
       }
       if (k == 1) {
-        if (tyFactory.getInstSymbol(arrayRefToString(name, 0)) != NULL
-            || !tyFactory.addInstSymbol(nt, name)) {
+        if (!tyFactory.addInstSymbol(nt, name)) {
           error(dd->line, dd->col, "Distinct Symbol < " + name + " > already defined");
         }
       } else {
@@ -498,11 +497,13 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
     && (dynamic_cast<absyn::IntLiteral*>(expr->getRight())) != NULL) {
     std::string var = ((absyn::VarRef*)(expr->getLeft()))->getVar().getValue();
     int k = ((absyn::IntLiteral*)(expr->getRight()))->getValue();
-    auto sym = tyFactory.getInstSymbol(arrayRefToString(var, k));
-    if (sym != NULL && local_var.count(var) == 0) {
-      auto ref = std::make_shared<ir::InstSymbolRef>(sym);
-      ref->setTyp(lookupNameTy(sym->getRefer()->getName()));
-      return ref;
+    if (k >= 0) {
+      auto sym = tyFactory.getInstSymbol(arrayRefToString(var, k));
+      if (sym != NULL && local_var.count(var) == 0) {
+        auto ref = std::make_shared<ir::InstSymbolRef>(sym);
+        ref->setTyp(lookupNameTy(sym->getRefer()->getName()));
+        return ref;
+      }
     }
   }
 

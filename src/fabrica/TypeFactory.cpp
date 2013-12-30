@@ -18,15 +18,21 @@ const ir::Ty TypeFactory::NA_TY = ir::Ty(ir::IRConstant::NA);
 
 TypeFactory::TypeFactory() {
   // TODO Auto-generated constructor stub
-  tyTable[INT_TY.toString()] = &INT_TY;
-  tyTable[BOOL_TY.toString()] = &BOOL_TY;
-  tyTable[DOUBLE_TY.toString()] = &DOUBLE_TY;
-  tyTable[STRING_TY.toString()] = &STRING_TY;
-  tyTable[NA_TY.toString()] = &NA_TY;
+  tyTable[ir::IRConstString::INT] = tyTable[ir::IRConstString::BLOG_INT] = &INT_TY;
+  tyTable[ir::IRConstString::BOOL] = tyTable[ir::IRConstString::BLOG_BOOL] = &BOOL_TY;
+  tyTable[ir::IRConstString::DOUBLE] = tyTable[ir::IRConstString::BLOG_DOUBLE] = &DOUBLE_TY;
+  tyTable[ir::IRConstString::STRING] = tyTable[ir::IRConstString::BLOG_STRING] = &STRING_TY;
+  tyTable[ir::IRConstString::NA] = &NA_TY;
 }
 
 TypeFactory::~TypeFactory() {
   // TODO Auto-generated destructor stub
+  // Note: Static Element should be removed from tyTable
+  tyTable.erase(ir::IRConstString::BLOG_BOOL); tyTable.erase(ir::IRConstString::BOOL);
+  tyTable.erase(ir::IRConstString::BLOG_INT); tyTable.erase(ir::IRConstString::INT);
+  tyTable.erase(ir::IRConstString::BLOG_DOUBLE); tyTable.erase(ir::IRConstString::DOUBLE);
+  tyTable.erase(ir::IRConstString::BLOG_STRING); tyTable.erase(ir::IRConstString::STRING);
+  tyTable.erase(ir::IRConstString::NA);
   for (auto p : tyTable)
     if (p.second != NULL) delete p.second;
   for (auto p : instanceTable)
