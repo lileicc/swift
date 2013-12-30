@@ -14,6 +14,7 @@ const ir::Ty TypeFactory::INT_TY = ir::Ty(ir::IRConstant::INT);
 const ir::Ty TypeFactory::BOOL_TY = ir::Ty(ir::IRConstant::BOOL);
 const ir::Ty TypeFactory::DOUBLE_TY = ir::Ty(ir::IRConstant::DOUBLE);
 const ir::Ty TypeFactory::STRING_TY = ir::Ty(ir::IRConstant::STRING);
+const ir::Ty TypeFactory::NA_TY = ir::Ty(ir::IRConstant::NA);
 
 TypeFactory::TypeFactory() {
   // TODO Auto-generated constructor stub
@@ -21,6 +22,7 @@ TypeFactory::TypeFactory() {
   tyTable[BOOL_TY.toString()] = &BOOL_TY;
   tyTable[DOUBLE_TY.toString()] = &DOUBLE_TY;
   tyTable[STRING_TY.toString()] = &STRING_TY;
+  tyTable[NA_TY.toString()] = &NA_TY;
 }
 
 TypeFactory::~TypeFactory() {
@@ -36,7 +38,10 @@ TypeFactory::~TypeFactory() {
 bool TypeFactory::addNameTy(const std::string& name) {
   if (tyTable.find(name) != tyTable.end())
     return false;
-  tyTable[name] = new ir::NameTy(new ir::TypeDomain());
+  auto ptr = (new ir::TypeDomain(name));
+  auto ty = new ir::NameTy(ptr);
+  ptr->setRefer(ty);
+  tyTable[name] = ty;
   return true;
 }
 
@@ -55,6 +60,7 @@ bool TypeFactory::addInstSymbol(const ir::NameTy* typ,
   int sz = tydo->getPreLen();
   instanceTable[name] = new ir::InstSymbol(tydo, sz);
   tydo->setPreLen(++sz);
+  tydo->setInstName(sz-1, name);
   return true;
 }
 
@@ -104,7 +110,7 @@ bool TypeFactory::addOriginAttr(const ir::NameTy * srcty,
   return true;
 }
 
-bool TypeFactory::addNumberStmt(ir::NumberStmt* numst) {
+bool TypeFactory::addNumberStmt(std::shared_ptr<ir::NumberStmt> numst) {
   if (numst->getRefer() != NULL) {
     numst->getRefer()->addNumberStmt(numst);
     return true;

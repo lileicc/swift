@@ -18,7 +18,7 @@ std::shared_ptr<ir::Distribution> UniformChoiceDistrDecl::getNew
   auto e = std::dynamic_pointer_cast<ir::SetExpr>(args[0]);
   if (e == nullptr) return nullptr;
   auto ptr = std::make_shared<ir::UniformChoiceDistr>(e);
-  auto ty = (const ir::SetTy*)(ptr->getTyp());
+  auto ty = (const ir::SetTy*)(e->getTyp());
   ptr->setTyp(ty->getRefer());
   return ptr;
 }

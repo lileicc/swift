@@ -121,43 +121,43 @@ void Semant::processBodies(absyn::BlogProgram* prog) {
 void Semant::transTyDecl(absyn::TypDecl* td) {
   if (!tyFactory.addNameTy(td->get().getValue())) {
     error(td->line, td->col,
-        "type name " + td->get().getValue() + " is defined multiple times");
+        "type name < " + td->get().getValue() + " > is defined multiple times");
   }
 }
 
 void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
-  ir::NameTy const* nt = lookupNameTy(dd->getTyp().getValue());
+  const ir::NameTy* nt = lookupNameTy(dd->getTyp().getValue());
   if (nt != NULL) {
     for (size_t i = 0; i < dd->size(); i++) {
       const std::string& name = dd->getVar(i).getValue();
       int k = dd->getLen(i);
       if (k < 1) {
-        error(dd->line, dd->col, "Dimension of a distinct symbol must be positive!");
+        error(dd->line, dd->col, "Dimension of a distinct symbol < "+ name +" >must be positive!");
         continue;
       }
       if (lookupNameTy(name) != NULL) {
-        error(dd->line, dd->col, "Distinct Symbol already defined as a Type");
+        error(dd->line, dd->col, "Distinct Symbol < "+ name +" > already defined as a Type");
         continue;
       }
       if (functory.getFunc(name, std::vector<std::shared_ptr<ir::VarDecl>>()) != NULL) {
-        error(dd->line, dd->col, "Distinct Symbol already defined as a Function");
+        error(dd->line, dd->col, "Distinct Symbol < "+ name + " > already defined as a Function");
         continue;
       }
       if (k == 1) {
         if (tyFactory.getInstSymbol(arrayRefToString(name, 0)) != NULL
             || !tyFactory.addInstSymbol(nt, name)) {
-          error(dd->line, dd->col, "Distinct Symbol " + name + " already defined");
+          error(dd->line, dd->col, "Distinct Symbol < " + name + " > already defined");
         }
       } else {
         if (tyFactory.getInstSymbol(name) != NULL) {
-          error(dd->line, dd->col, "Distinct Symbol " + name + " already defined!");
+          error(dd->line, dd->col, "Distinct Symbol < " + name + " > already defined!");
           continue;
         }
         for (int j = 0; j < k; j++) {
           if (!tyFactory.addInstSymbol(nt, arrayRefToString(name, j))) {
             error(dd->line, dd->col,
-                "Distinct Symbol " + name + "[" + std::to_string(j)
-                    + "] already defined");
+                "Distinct Symbol < " + name + "[" + std::to_string(j)
+                    + "] > already defined");
           }
         }
       }
@@ -170,13 +170,13 @@ void Semant::transDistinctDecl(absyn::DistinctDecl* dd) {
 
 void Semant::transFuncDecl(absyn::FuncDecl* fd) {
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
+  const std::string& name = fd->getFuncName().getValue();
   if (rettyp == NULL) {
-    error(fd->line, fd->col, "Return Type is undefined!");
+    error(fd->line, fd->col, "Return Type of FunctionDecl < " + name + " >is undefined!");
     return;
   }
-  const std::string& name = fd->getFuncName().getValue();
   if (lookupNameTy(name) != NULL) {
-    error(fd->line, fd->col, "Function name already defined as Type Name");
+    error(fd->line, fd->col, "Function name < " + name + " >already defined as Type Name");
     return;
   }
   std::vector<std::shared_ptr<ir::VarDecl> > vds;
@@ -185,7 +185,7 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
   }
   if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom())) {
     error(fd->line, fd->col,
-        "function " + name + " with the same argument type already defined");
+        "function < " + name + " > with the same argument type already defined");
   }
 }
 
@@ -193,15 +193,15 @@ void Semant::transOriginDecl(absyn::OriginDecl* od) {
   const ir::NameTy* retTyp = lookupNameTy(od->getTyp().getValue());
   const ir::NameTy* srcTy = lookupNameTy(od->getArg().getValue());
   if (retTyp == NULL) {
-    error(od->line, od->col, "Return type undefined");
+    error(od->line, od->col, "Return type of Origin Decl <"+od->getTyp().getValue()+"> undefined");
     return ;
   }
   if (srcTy == NULL) {
-    error(od->line, od->col, "Source type undefined");
+    error(od->line, od->col, "Source type of Origin Decl <" + od->getTyp().getValue() + "> undefined");
     return;
   }
   if (!tyFactory.addOriginAttr(srcTy, retTyp, od->getFunc().getValue())) {
-    error(od->line, od->col, "origin attribute already exist!");
+    error(od->line, od->col, "origin attribute <" + od->getFunc().getValue() + "> already exist!");
   }
 }
 
@@ -246,7 +246,7 @@ std::shared_ptr<ir::IfThen> Semant::transIfThen(absyn::IfExpr* expr) {
   // Type Check
   ptr->setTyp(ptr->getThen()->getTyp());
   if (expr->getElse() != NULL)
-    ptr->setElse(transExpr(expr->getElse()));
+    ptr->setElse(transClause(expr->getElse()));
   else
     ptr->setElse(std::make_shared<ir::NullSymbol>());
   if (ptr->getElse()->getTyp() == NULL)
@@ -339,7 +339,7 @@ std::shared_ptr<ir::MapExpr> Semant::transExpr(absyn::MapExpr* expr) {
     ptr->addMap(transExpr(expr->getFrom(i)), transExpr(expr->getTo(i)));
     // Check and Update From Type
     if (ptr->getFrom(i)->getTyp() != NULL) {
-      if (fromTy != NULL) fromTy = ptr->getFrom(i)->getTyp();
+      if (fromTy == NULL) fromTy = ptr->getFrom(i)->getTyp();
       else {
         if (fromTy != ptr->getFrom(i)->getTyp()) {
           error(expr->line, expr->col, "From Terms of MapExpr must have the same type!");
@@ -349,7 +349,7 @@ std::shared_ptr<ir::MapExpr> Semant::transExpr(absyn::MapExpr* expr) {
     }
     // Check and Update To Type
     if (ptr->getTo(i)->getTyp() != NULL) {
-      if (toTy != NULL) toTy = ptr->getTo(i)->getTyp();
+      if (toTy == NULL) toTy = ptr->getTo(i)->getTyp();
       else {
         if (toTy != ptr->getTo(i)->getTyp()) {
           error(expr->line, expr->col, "To Terms of MapExpr must have the same type!");
@@ -487,7 +487,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
   if (ret->getOp() == ir::IRConstant::NA
       || (ret->getOp() == ir::IRConstant::NOT && (expr->getLeft() != NULL || expr->getRight() == NULL))
       || (ret->getOp() != ir::IRConstant::NOT && (expr->getLeft() == NULL || expr->getRight() == NULL))) {
-    error(expr->line, expr->col, "Invalid/Incomplete Operator!");
+    error(expr->line, expr->col, "Invalid/Incomplete Operator for OprExpr!");
     return ret;
   }
 
@@ -566,7 +566,7 @@ std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
   std::shared_ptr<ir::Expr> b = transExpr(expr->get(0));
   std::shared_ptr<ir::SetExpr> st = std::dynamic_pointer_cast<ir::SetExpr>(b);
   if (st == nullptr) {
-    error(expr->line, expr->col, "Invalid Cardinality Expression!");
+    error(expr->line, expr->col, "Invalid Cardinality Expression! Body must be a SetExpr!");
     return cd;
   }
   cd->setBody(st);
@@ -579,7 +579,7 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   ptr->setTyp(lookupTy(ir::IRConstString::BOOL));
   ptr->addVar(transVarDecl(expr->getVar()));
   if (lookupNameTy(expr->getVar().getVar().getValue()) != NULL) {
-    error(expr->line, expr->col, "Variable in Quant Form cannot be a type name!");
+    error(expr->line, expr->col, "Variable <"+expr->getVar().getVar().getValue()+"> in Quant Form cannot be a type name!");
   }
   // Add Local Variable
   local_var[ptr->getVar()->getVar()].push(ptr->getVar().get());
@@ -811,28 +811,28 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
     error(nd->line, nd->col, "Invalid Number Statement! No corresponding type definition!");
     return ;
   }
-  ir::NumberStmt* numst = new ir::NumberStmt(ty->getRefer());
+  auto numst = std::make_shared<ir::NumberStmt>(ty->getRefer());
   std::set<std::string> defined_var, defined_att;
   bool success = true;
   for (size_t k = 0; k < nd->argSize(); k++) {
     std::string var = nd->getArgVar(k).getValue();
     std::string att = nd->getArgOrigin(k).getValue();
     if (defined_var.count(var) != 0) {
-      error(nd->line, nd->col, std::to_string(k+1) + "th arg var is already defined in this number statement!");
+      error(nd->line, nd->col, std::to_string(k+1) + "th arg var <"+var+">of NumberStmt is already defined in this number statement!");
       success = false;
     }
     if (tyFactory.getTy(var) != NULL) {
-      error(nd->line, nd->col, std::to_string(k + 1) + "th arg var cannot be a type!");
+      error(nd->line, nd->col, std::to_string(k + 1) + "th arg var <"+var+"> of NumberStmt cannot be a type!");
       success = false;
     }
     defined_var.insert(var);
     if (defined_att.count(att) != 0) {
-      error(nd->line, nd->col, std::to_string(k + 1) + "th origin field is already declared in this number statement!");
+      error(nd->line, nd->col, std::to_string(k + 1) + "th origin field <"+att+"> is already declared in this number statement!");
       success = false;
     }
     const ir::OriginAttr* o = tyFactory.getOriginAttr(ty, att);
     if (o == NULL) {
-      error(nd->line, nd->col, std::to_string(k + 1) + "th origin field is not declared in the program!");
+      error(nd->line, nd->col, std::to_string(k + 1) + "th origin field <" + att + "> is not declared in the program!");
       success = false;
     }
     defined_att.insert(att);
@@ -841,7 +841,6 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
     numst->addArg(o, var);
   }
   if (!success) {
-    delete numst;
     return ;
   }
 
@@ -875,7 +874,7 @@ void Semant::transEvidence(absyn::Evidence* ne) {
   if (lhs->getTyp() == NULL) // Both are NULL! always hold!
     return ;
   if (lhs->getTyp() != rhs->getTyp()) {
-    error(ne->line, ne->col, "Types not match for equality!");
+    error(ne->line, ne->col, "Types not match for equality in Evidence!");
     return ;
   }
   // Format Checking
@@ -907,7 +906,7 @@ const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
   int dim = typ.getDim();
   const ir::Ty* ty = tyFactory.getTy(typ.getTyp().getValue());
   if (ty == NULL) {
-    error(typ.line, typ.col, "Type " + typ.getTyp().getValue() + " not found");
+    error(typ.line, typ.col, "Type < " + typ.getTyp().getValue() + " > not found");
     return NULL;
   }
   if (dim == 0) {

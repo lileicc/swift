@@ -65,7 +65,7 @@ public:
   /**
    * add a number statement
    */
-  bool addNumberStmt(ir::NumberStmt * numst);
+  bool addNumberStmt(std::shared_ptr<ir::NumberStmt> numst);
 
   /**
    * get the instance symbol for a given name
@@ -93,6 +93,7 @@ private:
   static const ir::Ty BOOL_TY;
   static const ir::Ty DOUBLE_TY;
   static const ir::Ty STRING_TY;
+  static const ir::Ty NA_TY;
 };
 
 }

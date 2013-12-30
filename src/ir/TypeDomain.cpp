@@ -42,15 +42,15 @@ int TypeDomain::getPreLen() const {
   return prelen;
 }
 
-void TypeDomain::addNumberStmt(NumberStmt* num) {
+void TypeDomain::addNumberStmt(std::shared_ptr<NumberStmt> num) {
   gen.push_back(num);
 }
 
-const std::vector<NumberStmt*>& TypeDomain::getAllNumberStmt() const {
+const std::vector<std::shared_ptr<NumberStmt>>& TypeDomain::getAllNumberStmt() const {
   return gen;
 }
 
-NumberStmt* TypeDomain::getNumberStmt(int k) const {
+std::shared_ptr<NumberStmt> TypeDomain::getNumberStmt(int k) const {
   return gen[k];
 }
 

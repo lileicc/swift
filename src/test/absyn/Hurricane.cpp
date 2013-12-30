@@ -137,7 +137,7 @@ void Hurricane::build(){
     tab->add(map_t);
     tab->add(prep);
 
-    FuncDecl* func = new FuncDecl(0, 0, true, Symbol("PrepLevel"), Symbol("Prep"), tab);
+    FuncDecl* func = new FuncDecl(0, 0, true, Symbol("DamageLevel"), Symbol("Damage"), tab);
     func->addArg(VarDecl(0, 0, Symbol("City"), Symbol("c")));
     blog->add(func);
   }
@@ -161,7 +161,7 @@ void Hurricane::build(){
     dam_A->add(new VarRef(0, 0, Symbol("A")));
     blog->add(new Query(0, 0, dam_A));
     FuncApp *dam_B = new FuncApp(0, 0, Symbol("Damage"));
-    dam_B->add(new VarRef(0, 0, Symbol("A")));
+    dam_B->add(new VarRef(0, 0, Symbol("B")));
     blog->add(new Query(0, 0, dam_B));
   }
 }

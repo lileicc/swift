@@ -24,9 +24,9 @@ public:
   const NameTy* getRefer() const;
   void setPreLen(int l);
   int getPreLen() const;
-  void addNumberStmt(NumberStmt* num);
-  const std::vector<NumberStmt*>& getAllNumberStmt() const;
-  NumberStmt* getNumberStmt(int k) const;
+  void addNumberStmt(std::shared_ptr<NumberStmt> num);
+  const std::vector<std::shared_ptr<NumberStmt>>& getAllNumberStmt() const;
+  std::shared_ptr<NumberStmt> getNumberStmt(int k) const;
   size_t getNumberStmtSize() const;
   void addOrigin(OriginAttr* o);
   const std::vector<OriginAttr*>& getAllOrigin() const;
@@ -40,7 +40,7 @@ public:
   OriginAttr* getOrigin(const std::string& str);
 private:
   std::string name;
-  std::vector<NumberStmt*> gen;
+  std::vector<std::shared_ptr<NumberStmt>> gen;
   int prelen;
   std::vector<OriginAttr*> origin;
   const NameTy* refer;
