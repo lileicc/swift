@@ -666,16 +666,15 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
   std::shared_ptr<ir::VarDecl> var = transVarDecl(expr->getVar());
 
   // Add Local Variable
-  if (var->getTyp() != NULL && var->getVar().size() > 0)
+  if (var->getTyp() != NULL && var->getVar().size() > 0 && expr->getCond() != NULL)
     local_var[var->getVar()].push(var.get());
   std::shared_ptr<ir::Expr> e = (expr->getCond() == NULL ? nullptr : transExpr(expr->getCond()));
   // Remove Local Variable
-  if (var->getTyp() != NULL && var->getVar().size() > 0) {
+  if (var->getTyp() != NULL && var->getVar().size() > 0 && expr->getCond() != NULL) {
     auto it = local_var.find(var->getVar());
     it->second.pop();
     if (it->second.empty()) local_var.erase(it);
   }
-
   auto ptr = std::make_shared<ir::CondSet>(var, e);
 
   if (e != nullptr && e->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
@@ -880,24 +879,23 @@ void Semant::transEvidence(absyn::Evidence* ne) {
   }
   // Format Checking
   //     we assume that :
-  //         left side  : function call
+  //         left side  : function call | #TypeName
   //         right side : const symbol
   if ((std::dynamic_pointer_cast<ir::ConstSymbol>(rhs)) == nullptr
-    || (std::dynamic_pointer_cast<ir::FunctionCall>(lhs)) == nullptr) {
-    error(ne->line, ne->col, "Evidence format not correct! We assume < FunctionCall = ConstSymbol >!");
+    || ((std::dynamic_pointer_cast<ir::FunctionCall>(lhs) == nullptr) && !isCardAll(lhs))) {
+    error(ne->line, ne->col, "Evidence format not correct! We assume < FunctionCall | #TypeName = ConstSymbol >!");
     return ; // TODO: build internal function to avoid this
   }
   model->addEvidence(std::make_shared<ir::Evidence>
-    (std::dynamic_pointer_cast<ir::FunctionCall>(lhs),
+    (std::dynamic_pointer_cast<ir::Expr>(lhs),
      std::dynamic_pointer_cast<ir::ConstSymbol>(rhs)));
 }
 
 void Semant::transQuery(absyn::Query* nq) {
-  std::shared_ptr<ir::FunctionCall> ptr
-    (std::dynamic_pointer_cast<ir::FunctionCall>(transExpr(nq->getExpr())));
-  if (ptr == nullptr) {
+  auto ptr = transExpr(nq->getExpr());
+  if (!isCardAll(ptr) && (std::dynamic_pointer_cast<ir::FunctionCall>(ptr) == nullptr)) {
     //TODO: build a internal Void Function Call to represent this expr
-    error(nq->line, nq->col, "Currently we only accept function call in the query statement!");
+    error(nq->line, nq->col, "Currently we only accept [ Function Call | #TypeName ] in the query statement!");
     return ;
   }
   model->addQuery(std::make_shared<ir::Query>(ptr));
@@ -920,6 +918,18 @@ const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
 const std::shared_ptr<ir::VarDecl> Semant::transVarDecl(const absyn::VarDecl & vd) {
   const ir::Ty* ty = transTy(vd.getTyp());
   return std::make_shared<ir::VarDecl>(ty, vd.getVar().getValue());
+}
+
+bool Semant::isCardAll(std::shared_ptr<ir::Expr> ptr) {
+  auto card = std::dynamic_pointer_cast<ir::CardExpr>(ptr);
+  if (card == nullptr) {
+    return false;
+  }
+  auto st = std::dynamic_pointer_cast<ir::CondSet>(card->getBody());
+  if (st == nullptr) {
+    return false;
+  }
+  return st->getCond() == nullptr;
 }
 
 void Semant::error(int line, int col, std::string info) {

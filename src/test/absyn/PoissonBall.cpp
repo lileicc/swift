@@ -157,18 +157,12 @@ void PoissonBall::build(){
   }
 
   /*
-  Original: query #{Ball b};
-  Modified: 
-    random Integer BallNumber = #{Ball};
-    query BallNumber;
+  query #{Ball b};
   */
   {
     CondSet* st = new CondSet(0, 0, VarDecl(0, 0, Symbol("Ball"), Symbol("b")), NULL);
     CardinalityExpr* num = new CardinalityExpr(0, 0, st);
-    FuncDecl* fun = new FuncDecl(0,0,true,Symbol("Integer"),Symbol("BallNumber"),num);
-    blog->add(fun);
-
-    Query* query = new Query(0,0,new VarRef(0,0,Symbol("BallNumber")));
+    Query* query = new Query(0,0,num);
     blog->add(query);
   }
 }

@@ -154,6 +154,9 @@ private:
    */
   static std::string arrayRefToString(const std::string & name, int idx);
 
+  // Check whether an expr is : #TypeDomain
+  static bool isCardAll(std::shared_ptr<ir::Expr> ptr);
+
   void error(int line, int col, std::string info);
   void warning(int line, int col, std::string info);
 

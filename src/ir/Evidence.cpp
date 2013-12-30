@@ -4,14 +4,14 @@
 
 namespace swift { namespace ir {
 
-Evidence::Evidence(std::shared_ptr<FunctionCall> left, std::shared_ptr<ConstSymbol> right)
+Evidence::Evidence(std::shared_ptr<Expr> left, std::shared_ptr<ConstSymbol> right)
   :left(left), right(right) {
 }
 
 Evidence::~Evidence() {
 }
 
-const std::shared_ptr<FunctionCall>& Evidence::getLeft() const {
+const std::shared_ptr<Expr>& Evidence::getLeft() const {
   return left;
 }
 
