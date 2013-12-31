@@ -22,18 +22,19 @@ CategoricalDistribution::~CategoricalDistribution() {
 
 void CategoricalDistribution::init(std::map<int, double>& weights) {
   for (auto it : weights) {
-    keys.push_back( it.first);
+    keys.push_back(it.first);
     weight.push_back(it.second);
   }
+  /*
+  Note: In VS2013, we have to rewrite the last line with the following code
+
+  double* A = new double[weight.size()];
+  for (int i = 0; i<weight.size(); ++i)A[i] = weight[i];
+  auto lis = std::initializer_list<double>(A, A + weight.size());
+  dist = std::discrete_distribution<int>(lis);
+  delete[weight.size()] A;
+  */
   dist = std::discrete_distribution<int>(weight.begin(), weight.end());
-}
-
-double CategoricalDistribution::likeli(int x) {
-  return (x>=0)? weight[x]: 0;
-}
-
-double CategoricalDistribution::loglikeli(int x) {
-  return log(likeli(x));
 }
 
 template <typename _RD>
