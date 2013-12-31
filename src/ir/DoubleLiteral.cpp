@@ -11,7 +11,7 @@ DoubleLiteral::DoubleLiteral(double v)
 DoubleLiteral::~DoubleLiteral() {
 }
 
-double DoubleLiteral::getValue() {
+double DoubleLiteral::getValue() const {
   return value;
 }
 

@@ -10,6 +10,7 @@
 #include <random>
 #include <map>
 #include <cmath>
+#include <vector>
 #include "SwiftDistribution.h"
 
 namespace swift {
@@ -26,11 +27,10 @@ public:
   };
   double likeli(int x);
   double loglikeli(int x);
-
 private:
   std::discrete_distribution<int> dist;
   std::vector<int> keys; // keys for the value
-  std::vector<double> ws; // weights for categorical distribution
+  std::vector<double> weight; // weights for categorical distribution
 };
 
 } /* namespace random */

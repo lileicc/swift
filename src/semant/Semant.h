@@ -8,6 +8,7 @@
 #pragma once
 #include <cstdio>
 #include <memory>
+#include <stack>
 #include <string>
 #include "../absyn/BlogProgram.h"
 #include "../msg/ErrorMsg.h"
@@ -25,6 +26,7 @@ public:
   ~Semant();
   void process(absyn::BlogProgram* prog);
   ir::BlogModel* getModel();
+  bool Okay();
 private:
   /**
    * process all declarations, including
@@ -56,11 +58,29 @@ private:
    */
   const ir::Ty* OprExpr_checkType(ir::IRConstant op, const std::vector<std::shared_ptr<ir::Expr>>& arg);
 
-  std::shared_ptr<ir::OprExpr> transExpr(absyn::OpExpr* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::OpExpr* expr);
 
-  std::shared_ptr<ir::FunctionCall> transExpr(absyn::FuncApp* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::FuncApp* expr);
 
   std::shared_ptr<ir::MapExpr> transExpr(absyn::MapExpr* expr);
+
+  std::shared_ptr<ir::CardExpr> transExpr(absyn::CardinalityExpr* expr);
+
+  std::shared_ptr<ir::QuantForm> transExpr(absyn::QuantExpr* expr);
+
+  std::shared_ptr<ir::Expr> transExpr(absyn::VarRef* expr);
+
+  std::shared_ptr<ir::SetExpr> transExpr(absyn::SetExpr* expr);
+
+  std::shared_ptr<ir::ListSet> transExpr(absyn::ListSet* expr);
+
+  std::shared_ptr<ir::CondSet> transExpr(absyn::CondSet* expr);
+
+  std::shared_ptr<ir::Distribution> transExpr(absyn::DistrExpr* expr);
+
+  std::shared_ptr<ir::ConstSymbol> transExpr(absyn::Literal* expr);
+
+  std::shared_ptr<ir::Expr> transExpr(absyn::ArrayExpr* expr);
 
   /**
    * create a declared type, shout error message if duplicate
@@ -94,6 +114,16 @@ private:
    * process number statement body
    */
   void transNumSt(absyn::NumStDecl* nd);
+
+  /*
+   * process evidence
+   */
+  void transEvidence(absyn::Evidence* ne);
+
+  /*
+  * process query
+  */
+  void transQuery(absyn::Query* nq);
 
   /**
   * process evidence
@@ -134,12 +164,20 @@ private:
    */
   static std::string arrayRefToString(const std::string & name, int idx);
 
-  void error(int line, int col, const std::string & info);
+  // Check whether an expr is : #TypeDomain
+  static bool isCardAll(std::shared_ptr<ir::Expr> ptr);
+
+  void error(int line, int col, std::string info);
+  void warning(int line, int col, std::string info);
+
   fabrica::TypeFactory tyFactory;
   fabrica::Functory functory;
   fabrica::PreDeclFactory predeclFactory;
   msg::ErrorMsg errorMsg;
   ir::BlogModel* model;
+
+  //stack used to store local variable
+  std::map<std::string,std::stack<ir::VarDecl*> > local_var;
 };
 
 }

@@ -14,13 +14,13 @@ public:
   virtual ~Branch();
 
   void setVar(std::shared_ptr<Expr> v);
-  std::shared_ptr<Expr> getVar();
+  std::shared_ptr<Expr> getVar() const ;
   void addBranch(std::shared_ptr<ConstSymbol> c, std::shared_ptr<Clause> b);
-  size_t size();
-  std::shared_ptr<ConstSymbol> getCond(int k);
-  const std::vector<std::shared_ptr<ConstSymbol>>& getConds();
-  std::shared_ptr<Clause> getBranch(int k);
-  const std::vector<std::shared_ptr<Clause>>& getBranches();
+  size_t size() const ;
+  std::shared_ptr<ConstSymbol> getCond(int k) const;
+  const std::vector<std::shared_ptr<ConstSymbol>>& getConds() const;
+  std::shared_ptr<Clause> getBranch(int k) const ;
+  const std::vector<std::shared_ptr<Clause>>& getBranches() const ;
 
 private:
   std::shared_ptr<Expr> var;

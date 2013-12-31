@@ -7,15 +7,15 @@ namespace swift { namespace ir {
 class OriginRefer :
   public swift::ir::Expr {
 public:
-  OriginRefer(OriginAttr* refer, Expr* var);
+  OriginRefer(const OriginAttr* refer, std::shared_ptr<Expr> var);
   virtual ~OriginRefer();
 
-  OriginAttr* getRefer();
-  Expr* getVar();
+  const OriginAttr* getRefer() const;
+  const std::shared_ptr<Expr>& getVar() const;
 
 private:
-  OriginAttr* refer;
-  Expr* var;
+  const OriginAttr* refer;
+  std::shared_ptr<Expr> var;
 };
 
 }

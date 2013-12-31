@@ -17,6 +17,10 @@ ArrayExpr::ArrayExpr(int l, int c, int dim) :
 ArrayExpr::~ArrayExpr() {
 }
 
+int ArrayExpr::getDim() {
+  return dim;
+}
+
 // For Debugging Use
 void ArrayExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s(ArrayExpr:\n", indent, "");

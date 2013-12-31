@@ -6,7 +6,7 @@
 namespace swift { namespace ir {
  
 FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp)
-  :name(name), retTyp(retTyp), isrand(isrand), body(NULL) {
+  :name(name), retTyp(retTyp), isrand(isrand), body(nullptr) {
 }
 
 FuncDefn::~FuncDefn() {
@@ -32,7 +32,7 @@ size_t FuncDefn::argSize() const {
   return args.size();
 }
 
-void FuncDefn::addArgs(const std::vector<std::shared_ptr<VarDecl>>& a) {
+void FuncDefn::setArgs(const std::vector<std::shared_ptr<VarDecl>>& a) {
   args = a;
 }
 
@@ -58,13 +58,11 @@ bool FuncDefn::isFixed() const {
 
 std::string FuncDefn::toSignature() const {
   std::string ret;
-  ret.append(retTyp == NULL ? "NULL" : retTyp->toString());
-  ret.push_back(' ');
   ret.append(name);
   ret.push_back('(');
   for (size_t i = 0; i < args.size(); i++)  {
     if (i > 0) ret.push_back(',');
-    ret.append(args[i]->toString());
+    ret.append(args[i]->toSignature());
   }
   ret.push_back(')');
   return ret;

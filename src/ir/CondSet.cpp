@@ -6,7 +6,7 @@
 
 namespace swift { namespace ir {
 
-CondSet::CondSet(VarDecl* var, std::shared_ptr<Expr> c)
+CondSet::CondSet(std::shared_ptr<VarDecl> var, std::shared_ptr<Expr> c)
   :SetExpr(IRConstant::CONDSET), var(var) {
   addArg(c);
 }
@@ -14,12 +14,12 @@ CondSet::CondSet(VarDecl* var, std::shared_ptr<Expr> c)
 CondSet::~CondSet() {
 }
 
-VarDecl* CondSet::getVar() {
+const std::shared_ptr<VarDecl>& CondSet::getVar() const {
   return var;
 }
 
-std::shared_ptr<Expr> CondSet::getCond() {
-  return get(0);
+std::shared_ptr<Expr> CondSet::getCond() const {
+  return this->get(0);
 }
 
 }

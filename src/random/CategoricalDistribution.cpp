@@ -7,6 +7,10 @@
 
 #include "CategoricalDistribution.h"
 
+#include <cmath>
+#include <numeric>
+#include "SwiftDistribution.cpp"
+
 namespace swift {
 namespace random {
 
@@ -19,13 +23,27 @@ CategoricalDistribution::~CategoricalDistribution() {
 void CategoricalDistribution::init(std::map<int, double>& weights) {
   for (auto it : weights) {
     keys.push_back( it.first);
-    ws.push_back(it.second);
+    weight.push_back(it.second);
   }
-  dist = std::discrete_distribution<int>(ws.begin(), ws.end());
+  dist = std::discrete_distribution<int>(weight.begin(), weight.end());
 }
 
 double CategoricalDistribution::likeli(int x) {
-  return (x>=0)? ws[x]: 0;
+  return (x>=0)? weight[x]: 0;
+}
+
+double CategoricalDistribution::loglikeli(int x) {
+  return log(likeli(x));
+}
+
+template <typename _RD>
+int CategoricalDistribution::gen(_RD& rd) {
+  return dist(engine);
+}
+
+double CategoricalDistribution::likeli(int x) {
+  if(x<0 || x>=(int)weight.size()) return 0;
+  return weight[x];
 }
 
 double CategoricalDistribution::loglikeli(int x) {

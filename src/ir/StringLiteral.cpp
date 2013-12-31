@@ -10,7 +10,7 @@ StringLiteral::StringLiteral(const std::string& v)
 StringLiteral::~StringLiteral() {
 }
 
-const std::string& StringLiteral::getValue() {
+const std::string& StringLiteral::getValue() const {
   return value;
 }
 

@@ -7,6 +7,7 @@
 
 namespace swift { namespace ir {
 
+class ArrayExpr;
 class ArrayTy;
 class Branch;
 class BoolLiteral;
@@ -23,6 +24,7 @@ class FuncDefn;
 class FunctionCall;
 class IfThen;
 class InstSymbol;
+class InstSymbolRef;
 class IntLiteral;
 class ListSet;
 class MapExpr;
@@ -40,7 +42,7 @@ class SetExpr;
 class StringLiteral;
 class Ty;
 class TypeDomain;
-class UniformDistr;
+class UniformChoiceDistr;
 class VarDecl;
 class VarRefer;
 class VoidFuncCall;

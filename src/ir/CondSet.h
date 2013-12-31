@@ -3,19 +3,21 @@
 #include "IRForwardDecl.h"
 #include "SetExpr.h"
 
+#include <memory>
+
 namespace swift { namespace ir {
 
 class CondSet :
   public swift::ir::SetExpr {
 public:
-  CondSet(VarDecl* var, std::shared_ptr<Expr> e);
+  CondSet(std::shared_ptr<VarDecl> var, std::shared_ptr<Expr> e);
   virtual ~CondSet();
 
-  VarDecl* getVar();
-  std::shared_ptr<Expr> getCond();
+  const std::shared_ptr<VarDecl>& getVar() const;
+  std::shared_ptr<Expr> getCond() const;
 
 private:
-  VarDecl* var;
+  std::shared_ptr<VarDecl> var;
 };
 
 }

@@ -10,7 +10,7 @@ public:
   IntLiteral(int v = 0);
   virtual ~IntLiteral();
 
-  int getValue();
+  int getValue() const;
 private:
   int value;
 };

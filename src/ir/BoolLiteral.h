@@ -9,7 +9,7 @@ public:
   BoolLiteral(bool v = false);
   virtual ~BoolLiteral();
 
-  bool getValue();
+  bool getValue() const ;
 
 private:
   bool value;

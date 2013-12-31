@@ -11,8 +11,8 @@ public:
   MapTy(const Ty* from, const Ty* to);
   virtual ~MapTy();
 
-  const Ty* getFrom();
-  const Ty* getTo();
+  const Ty* getFrom() const;
+  const Ty* getTo() const;
 
   virtual std::string toString() const ;
 

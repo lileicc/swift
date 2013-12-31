@@ -15,6 +15,7 @@ public:
   const std::string& getVar() const;
 
   virtual std::string toString() const;
+  virtual std::string toSignature() const;
 
 private:
   const Ty* typ;

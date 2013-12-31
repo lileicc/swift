@@ -3,6 +3,8 @@
 #include "IRConst.h"
 #include "IRForwardDecl.h"
 
+#include <memory>
+
 namespace swift { namespace ir {
 
 class QuantForm :
@@ -11,15 +13,15 @@ public:
   QuantForm(IRConstant op);
   virtual ~QuantForm();
 
-  void addVar(VarDecl* v);
-  VarDecl* getVar();
-  IRConstant getOp();
-  bool isForall();
-  bool isExists();
+  void addVar(std::shared_ptr<VarDecl> v);
+  const std::shared_ptr<VarDecl>& getVar() const;
+  IRConstant getOp() const;
+  bool isForall() const;
+  bool isExists() const;
 
 private:
   IRConstant op;
-  VarDecl* var;
+  std::shared_ptr<VarDecl> var;
 };
 
 }

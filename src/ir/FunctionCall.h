@@ -11,8 +11,8 @@ public:
   FunctionCall(FuncDefn* refer);
   virtual ~FunctionCall();
 
-  IRConstant getKind();
-  FuncDefn* getRefer();
+  IRConstant getKind() const;
+  FuncDefn* getRefer() const;
 
 private:
   IRConstant kind;
