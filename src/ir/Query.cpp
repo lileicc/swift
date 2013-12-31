@@ -1,7 +1,5 @@
 #include "Query.h"
 
-#include "VoidFuncCall.h"
-
 namespace swift { namespace ir {
 
 Query::Query(std::shared_ptr<Expr> var)

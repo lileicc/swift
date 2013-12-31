@@ -901,6 +901,25 @@ void Semant::transQuery(absyn::Query* nq) {
   model->addQuery(std::make_shared<ir::Query>(ptr));
 }
 
+void Semant::transEvidence(absyn::Evidence* ed) {
+  std::shared_ptr<ir::Expr> left = transExpr(ed->getLeft());
+  std::shared_ptr<ir::Expr> right = transExpr(ed->getRight());
+  if (left != nullptr && right != nullptr) {
+    model->addEvidence(std::shared_ptr<ir::Evidence>(
+      new ir::Evidence(left, right)));
+  }
+}
+
+void Semant::transQuery(absyn::Query* ed) {
+  std::shared_ptr<ir::Expr> expr = transExpr(ed->getExpr());
+  std::shared_ptr<ir::FunctionCall> var = std::dynamic_pointer_cast<ir::FunctionCall>(expr);
+  if (var == nullptr) {
+    error(ed->line, ed->col, "The query expression must be a function call term!");
+    return ;
+  }
+  model->addQuery(std::shared_ptr<ir::Query>(new ir::Query(var)));
+}
+
 const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
   int dim = typ.getDim();
   const ir::Ty* ty = tyFactory.getTy(typ.getTyp().getValue());

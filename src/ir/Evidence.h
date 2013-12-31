@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "IRForwardDecl.h"
 
 namespace swift { namespace ir {

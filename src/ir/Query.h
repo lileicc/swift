@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "FunctionCall.h"
 
 namespace swift { namespace ir {
