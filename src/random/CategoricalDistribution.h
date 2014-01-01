@@ -22,9 +22,7 @@ public:
   ~CategoricalDistribution();
   void init(std::map<int, double>& weights);
   template <typename _RD>
-  int gen(_RD& rd) {
-    return dist(rd);
-  };
+  int gen(_RD& rd);
   double likeli(int x);
   double loglikeli(int x);
 private:
