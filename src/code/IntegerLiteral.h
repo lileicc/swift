@@ -16,6 +16,10 @@ class IntegerLiteral: public swift::code::Expr {
 public:
   IntegerLiteral(int v);
   ~IntegerLiteral();
+
+  int getVal() const ;
+  // For Printer
+  void print(printer::Printer* prt);
 private:
   int val;
 };

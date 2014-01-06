@@ -17,6 +17,12 @@ public:
   CallExpr(Expr* fn, std::vector<Expr*> args);
   CallExpr(Expr* fn);
   ~CallExpr();
+
+  Expr* getFunc() const;
+  std::vector<Expr*>& getArgs();
+
+  // For Printer
+  void print(printer::Printer* prt);
 private:
   Expr* fn;
   std::vector<Expr*> args;

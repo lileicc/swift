@@ -19,12 +19,14 @@ namespace code {
 class VarDecl: public swift::code::Decl {
 public:
   VarDecl(DeclContext * context, std::string id, Type ty, Expr* value=NULL);
-  ~VarDecl();
+  virtual ~VarDecl();
 
-  const std::string& getId() const {
-    return id;
-  }
+  const std::string& getId() const;
+  Type& getType();
+  Expr* getValue();
 
+  // For Printer
+  virtual void print(printer::Printer* prt);
 protected:
   DeclContext* parent;
   std::string id;

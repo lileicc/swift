@@ -14,8 +14,24 @@ BinaryOperator::BinaryOperator(Expr* lhs, Expr* rhs, OpKind op) : lhs(lhs), rhs(
 }
 
 BinaryOperator::~BinaryOperator() {
-  delete lhs;
-  delete rhs;
+  if(lhs != NULL) delete lhs;
+  if(rhs != NULL) delete rhs;
+}
+
+Expr* BinaryOperator::getLeft() const {
+  return lhs;
+}
+
+Expr* BinaryOperator::getRight() const {
+  return rhs;
+}
+
+const OpKind& BinaryOperator::getOp() const {
+  return op;
+}
+
+void BinaryOperator::print(printer::Printer* prt) {
+  prt->print(this);
 }
 
 } /* namespace code */

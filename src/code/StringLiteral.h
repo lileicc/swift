@@ -1,31 +1,29 @@
 /*
- * QualType.h
+ * IntegerLiteral.h
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
  */
 
 #pragma once
-#include <string>
 
-#include "../printer/Printer.h"
+#include "Expr.h"
+
+#include <string>
 
 namespace swift {
 namespace code {
 
-class Type {
+class StringLiteral: public swift::code::Expr {
 public:
-  Type(std::string name, bool refTag=false);
-  ~Type();
+  StringLiteral(std::string v);
+  ~StringLiteral();
 
-  const std::string& getName();
-  bool isRef();
-
+  const std::string& getVal() const ;
   // For Printer
   void print(printer::Printer* prt);
 private:
-  std::string name;
-  bool refTag;
+  std::string val;
 };
 
 } /* namespace code */

@@ -7,13 +7,18 @@
 
 #pragma once
 
+#include "../printer/Printer.h"
+
 namespace swift {
 namespace code {
 
 class Stmt {
 public:
   Stmt();
-  ~Stmt();
+  virtual ~Stmt();
+
+  // For Printer
+  virtual void print(printer::Printer* prt) = 0;
 };
 
 } /* namespace code */

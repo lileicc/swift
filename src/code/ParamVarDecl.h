@@ -14,8 +14,11 @@ namespace code {
 
 class ParamVarDecl: public swift::code::VarDecl {
 public:
-  ParamVarDecl(DeclContext * context, std::string id, Type ty);
+  ParamVarDecl(DeclContext * context, std::string id, Type ty, Expr* value = NULL);
   ~ParamVarDecl();
+
+  // For Printer
+  void print(printer::Printer* prt);
 };
 
 } /* namespace code */

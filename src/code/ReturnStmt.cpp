@@ -14,7 +14,16 @@ ReturnStmt::ReturnStmt(Expr* expr) : expr(expr) {
 }
 
 ReturnStmt::~ReturnStmt() {
-  delete expr;
+  if(expr != NULL) delete expr;
+}
+
+Expr* ReturnStmt::getExpr() const {
+  return expr;
+}
+
+// For Printer
+void ReturnStmt::print(printer::Printer* prt) {
+  prt->print(this);
 }
 
 } /* namespace code */

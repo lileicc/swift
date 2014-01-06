@@ -1,22 +1,22 @@
 /*
- * BreakStmt.cpp
+ * ContinueStmt.cpp
  *
  *  Created on: Nov 24, 2013
  *      Author: leili
  */
 
-#include "BreakStmt.h"
+#include "ContinueStmt.h"
 
 namespace swift {
 namespace code {
 
-BreakStmt::BreakStmt() {
+ContinueStmt::ContinueStmt() {
 }
 
-BreakStmt::~BreakStmt() {
+ContinueStmt::~ContinueStmt() {
 }
 
-void BreakStmt::print(printer::Printer* prt) {
+void ContinueStmt::print(printer::Printer* prt) {
   prt->print(this);
 }
 } /* namespace code */

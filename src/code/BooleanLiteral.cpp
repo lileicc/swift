@@ -5,22 +5,22 @@
  *      Author: leili
  */
 
-#include "IntegerLiteral.h"
+#include "BooleanLiteral.h"
 
 namespace swift {
 namespace code {
 
-IntegerLiteral::IntegerLiteral(int v) : val(v) {
+BooleanLiteral::BooleanLiteral(bool v) : val(v) {
 }
 
-IntegerLiteral::~IntegerLiteral() {}
+BooleanLiteral::~BooleanLiteral() {}
 
-int IntegerLiteral::getVal() const {
+bool BooleanLiteral::getVal() const {
   return val;
 }
 
 // For Printer
-void IntegerLiteral::print(printer::Printer* prt) {
+void BooleanLiteral::print(printer::Printer* prt) {
   prt->print(this);
 }
 

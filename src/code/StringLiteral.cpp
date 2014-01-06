@@ -5,22 +5,22 @@
  *      Author: leili
  */
 
-#include "IntegerLiteral.h"
+#include "StringLiteral.h"
 
 namespace swift {
 namespace code {
 
-IntegerLiteral::IntegerLiteral(int v) : val(v) {
+StringLiteral::StringLiteral(std::string v) : val(v) {
 }
 
-IntegerLiteral::~IntegerLiteral() {}
+StringLiteral::~StringLiteral() {}
 
-int IntegerLiteral::getVal() const {
+const std::string& StringLiteral::getVal() const {
   return val;
 }
 
 // For Printer
-void IntegerLiteral::print(printer::Printer* prt) {
+void StringLiteral::print(printer::Printer* prt) {
   prt->print(this);
 }
 
