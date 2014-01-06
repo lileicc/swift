@@ -14,6 +14,7 @@ DeclContext::DeclContext() {
 }
 
 DeclContext::~DeclContext() {
+  // TODO: do we need to test NULL, seems not necessary
   for (auto d : members) {
     delete d;
   }
