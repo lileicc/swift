@@ -19,13 +19,15 @@ namespace code {
 
 class FunctionDecl: public Decl, public DeclContext {
 public:
-  ~FunctionDecl();
+  virtual ~FunctionDecl();
 
   virtual void addStmt(Stmt* st);
   virtual void setParams(std::vector<ParamVarDecl* > params);
-  virtual std::vector<ParamVarDecl*> getParams();
+  virtual std::vector<ParamVarDecl*>& getParams();
   bool isInline();
-
+  Type& getType();
+  CompoundStmt& getBody();
+  const std::string& getName() const;
   static FunctionDecl* createFunctionDecl(DeclContext * context, std::string name, Type ty, bool inlineTag=false);
 
   // For Printer

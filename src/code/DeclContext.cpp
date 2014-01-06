@@ -19,6 +19,13 @@ DeclContext::~DeclContext() {
   }
 }
 
+Decl* DeclContext::getMem(int k) {
+  return members[k];
+}
+
+std::vector<Decl*>& DeclContext::getAllMem() {
+  return members;
+}
 
 void DeclContext::addDecl(Decl* decl) {
   members.push_back(decl);

@@ -10,7 +10,6 @@
 #include <vector>
 #include "ArraySubscriptExpr.h"
 #include "BinaryOperator.h"
-#include "BreakStmt.h"
 #include "CallExpr.h"
 #include "CaseStmt.h"
 #include "ClassDecl.h"
@@ -28,6 +27,7 @@
 #include "ParamVarDecl.h"
 #include "Type.h"
 #include "ReturnStmt.h"
+#include "SpecialStmt.h"
 #include "SwitchStmt.h"
 #include "Stmt.h"
 #include "VarDecl.h"

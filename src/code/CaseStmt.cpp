@@ -13,8 +13,8 @@ namespace code {
 CaseStmt::CaseStmt(Expr* val) : val(val) {
 }
 
-CaseStmt::CaseStmt(Expr* val, Stmt* sub) : val(val) {
-  this->sub.addStmt(sub);
+CaseStmt::CaseStmt(Expr* val, Stmt* stmt) : val(val) {
+  sub.addStmt(stmt);
 }
 
 CaseStmt::~CaseStmt() {

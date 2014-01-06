@@ -17,7 +17,7 @@ FunctionDecl* FunctionDecl::createFunctionDecl(DeclContext* context,
   return fd;
 }
 
-std::vector<ParamVarDecl*> FunctionDecl::getParams() {
+std::vector<ParamVarDecl*>& FunctionDecl::getParams() {
   return params;
 }
 
@@ -42,6 +42,18 @@ void FunctionDecl::setParams(std::vector<ParamVarDecl*> params) {
 
 bool swift::code::FunctionDecl::isInline() {
   return inlineTag;
+}
+
+Type& FunctionDecl::getType() {
+  return retTy;
+}
+
+CompoundStmt& FunctionDecl::getBody() {
+  return body;
+}
+
+const std::string& FunctionDecl::getName() const {
+  return name;
 }
 
 // For Printer

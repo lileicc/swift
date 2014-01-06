@@ -23,6 +23,10 @@ ClassDecl* ClassDecl::createClassDecl(DeclContext* ns, const std::string& name) 
   return cd;
 }
 
+const std::string& ClassDecl::getName() const {
+  return name;
+}
+
 // For Printer
 void ClassDecl::print(printer::CPPPrinter* prt) {
   prt->print(this);

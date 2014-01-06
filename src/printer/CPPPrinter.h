@@ -19,7 +19,6 @@ public:
   // Statements and Expressions
   void print(code::ArraySubscriptExpr* term);
   void print(code::BinaryOperator* term);
-  void print(code::BreakStmt* term);
   void print(code::CallExpr* term);
   void print(code::CaseStmt* term);
   void print(code::ClassDecl* term);
@@ -34,6 +33,7 @@ public:
   void print(code::NamespaceDecl* term);
   void print(code::ParamVarDecl* term);
   void print(code::ReturnStmt* term);
+  void print(code::SpecialStmt* term);
   void print(code::SwitchStmt* term);
   void print(code::Type* term);
   void print(code::VarDecl* term);
