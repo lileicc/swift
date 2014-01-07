@@ -6,7 +6,6 @@
 #include <vector>
 #include <tuple>
 #include "BLOGSymbol.h"
-<<<<<<< HEAD
 #include "../absyn/Absyn.h"
 #include "../absyn/ArrayExpr.h"
 #include "../absyn/BoolLiteral.h"
@@ -41,42 +40,6 @@
 #include "../absyn/TypDecl.h"
 #include "../absyn/VarDecl.h"
 #include "../absyn/VarRef.h"
-=======
-#include "Absyn.h"
-#include "ArrayExpr.h"
-#include "BoolLiteral.h"
-#include "BlogProgram.h"
-#include "CondSet.h"
-#include "Decl.h"
-#include "DistinctDecl.h"
-#include "DistrExpr.h"
-#include "DoubleLiteral.h"
-#include "Evidence.h"
-#include "Expr.h"
-#include "FuncApp.h"
-#include "FuncDecl.h"
-#include "IfExpr.h"
-#include "IntLiteral.h"
-#include "Literal.h"
-#include "ListSet.h"
-#include "MapExpr.h"
-#include "NullLiteral.h"
-#include "NumStDecl.h"
-#include "NumStRef.h"
-#include "OpExpr.h"
-#include "OriginDecl.h"
-#include "QuantExpr.h"
-#include "Query.h"
-#include "SetExpr.h"
-#include "Stmt.h"
-#include "StringLiteral.h"
-#include "Symbol.h"
-#include "TimeStampLiteral.h"
-#include "Ty.h"
-#include "TypDecl.h"
-#include "VarDecl.h"
-#include "VarRef.h"
->>>>>>> d79902b80479f1d013f2b7ae5b5af4e1fd36aa21
 using namespace std;
 using namespace swift::absyn;
 
@@ -87,20 +50,13 @@ extern "C" FILE *yyin;
 extern "C" int yylineno;
 extern "C" int curr_line;
 extern "C" int curr_col;
-<<<<<<< HEAD
 extern "C" int yydebug;
 
-=======
- 
->>>>>>> d79902b80479f1d013f2b7ae5b5af4e1fd36aa21
 void yyerror(const char *s);
 BlogProgram *blog;
 
 BlogProgram* parse(const char* inp) {
-<<<<<<< HEAD
   yydebug = 1;
-=======
->>>>>>> d79902b80479f1d013f2b7ae5b5af4e1fd36aa21
   blog = new BlogProgram(0, 0);
   // open a file handle to a particular file:
   FILE *myfile = fopen(inp, "r");
@@ -283,10 +239,6 @@ type_decl:
 type:
     name_type { $$ = $1; }
   | list_type { $$ = $1; }
-<<<<<<< HEAD
-=======
-  | array_type { $$ = $1; }
->>>>>>> d79902b80479f1d013f2b7ae5b5af4e1fd36aa21
   | map_type { $$ = $1; }
   ;
 
@@ -345,11 +297,7 @@ type_var_lst:
 fixed_func_decl:
     FIXED type ID opt_parenthesized_type_var_lst EQ_ expression SEMI
     { 
-<<<<<<< HEAD
       $$ = new FuncDecl(curr_line, curr_col, false, *($2), Symbol($3->getValue()), $6);
-=======
-      $$ = new FuncDecl(curr_line, curr_col, false, $2->getTyp(), Symbol($3->getValue()), $6);
->>>>>>> d79902b80479f1d013f2b7ae5b5af4e1fd36aa21
       if($4 != NULL){
         for(size_t i = 0; i < $4->size(); i++){
           $$->addArg((*$4)[i]);
@@ -363,11 +311,7 @@ fixed_func_decl:
 rand_func_decl:
     RANDOM type ID opt_parenthesized_type_var_lst dependency_statement_body SEMI
     { 
-<<<<<<< HEAD
       $$ = new FuncDecl(curr_line, curr_col, true, *($2), Symbol($3->getValue()), $5);
-=======
-      $$ = new FuncDecl(curr_line, curr_col, true, $2->getTyp(), Symbol($3->getValue()), $5);
->>>>>>> d79902b80479f1d013f2b7ae5b5af4e1fd36aa21
       if($4 != NULL){
         for(size_t i = 0; i < $4->size(); i++){
           $$->addArg((*$4)[i]);
@@ -418,28 +362,13 @@ distribution_decl:
     ;
     
 distinct_decl:
-<<<<<<< HEAD
     DISTINCT id_or_subid_list SEMI
     {
       $$ = $2;
-=======
-    id_or_subid_list SEMI
-    {
-      $$ = $1;
-      //cout << " found distinct dec " << endl;
-      //$$ = new DistinctDecl(curr_line, curr_col, $2->getTyp());
-      //for(size_t i = 0; i < $3->size(); i++){
-      //  cout << "adding tuple" << endl;
-      //  auto strint = (*$3)[i];
-      //  $$->add(Symbol(get<0>(strint)), get<1>(strint));
-      //  cout << "added tuple" << endl;
-      //}
->>>>>>> d79902b80479f1d013f2b7ae5b5af4e1fd36aa21
     }
     ;
 
 id_or_subid_list:
-<<<<<<< HEAD
     name_type ID
       {
         $$ = new DistinctDecl(curr_line, curr_col, $1->getTyp());
@@ -449,17 +378,6 @@ id_or_subid_list:
       {
         $$ = new DistinctDecl(curr_line, curr_col, $1->getTyp());
         $$->add(Symbol($2->getValue()), $4->getValue());
-=======
-    DISTINCT name_type ID
-      {
-        $$ = new DistinctDecl(curr_line, curr_col, $2->getTyp());
-        $$->add(Symbol($3->getValue()), 1);
-      }
-  | DISTINCT name_type ID LBRACKET INT_LITERAL RBRACKET
-      {
-        $$ = new DistinctDecl(curr_line, curr_col, $2->getTyp());
-        $$->add(Symbol($3->getValue()), $5->getValue());
->>>>>>> d79902b80479f1d013f2b7ae5b5af4e1fd36aa21
       }
   | id_or_subid_list COMMA ID
       { 
@@ -577,11 +495,7 @@ operation_expr:
   | expression DOUBLERIGHTARROW expression
     { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::IMPLY, $1, $3); }
   | expression LBRACKET expression RBRACKET
-<<<<<<< HEAD
     {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, $1, $3); }
-=======
-    { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, $1, $3); }
->>>>>>> d79902b80479f1d013f2b7ae5b5af4e1fd36aa21
   | unary_operation_expr { $$ = $1; }
   ;
   
