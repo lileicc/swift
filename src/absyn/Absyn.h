@@ -31,6 +31,7 @@ enum class AbsynConstant {
   NOT,
   IMPLY,
   SUB,
+  AT,
   // For QuantExpr
   FORALL,
   EXISTS
