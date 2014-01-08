@@ -24,5 +24,9 @@ std::string VarDecl::toString() const {
   return (typ == NULL ? std::string("NULL") : typ->toString()) + " " + var;
 }
 
+std::string VarDecl::toSignature() const {
+  return (typ == NULL ? std::string("NULL") : typ->toString());
+}
+
 }
 }

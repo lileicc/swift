@@ -8,6 +8,8 @@
 #pragma once
 #include <string>
 
+#include "../printer/Printer.h"
+
 namespace swift {
 namespace code {
 
@@ -16,9 +18,11 @@ public:
   Type(std::string name, bool refTag=false);
   ~Type();
 
-  std::string getName();
+  const std::string& getName();
   bool isRef();
 
+  // For Printer
+  void print(printer::Printer* prt);
 private:
   std::string name;
   bool refTag;

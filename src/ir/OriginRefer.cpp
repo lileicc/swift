@@ -2,18 +2,18 @@
 
 namespace swift { namespace ir {
 
-OriginRefer::OriginRefer(OriginAttr* refer, Expr* var)
+OriginRefer::OriginRefer(const OriginAttr* refer, std::shared_ptr<Expr> var)
   :refer(refer), var(var) {
 }
 
 OriginRefer::~OriginRefer() {
 }
 
-OriginAttr* OriginRefer::getRefer()  {
+const OriginAttr* OriginRefer::getRefer() const {
   return refer;
 }
 
-Expr* OriginRefer::getVar() {
+const std::shared_ptr<Expr>& OriginRefer::getVar() const {
   return var;
 }
 

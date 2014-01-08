@@ -11,7 +11,7 @@ IntLiteral::IntLiteral(int v)
 IntLiteral::~IntLiteral() {
 }
 
-int IntLiteral::getValue() {
+int IntLiteral::getValue() const {
   return value;
 }
 

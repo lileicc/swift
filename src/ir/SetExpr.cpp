@@ -9,7 +9,7 @@ SetExpr::SetExpr(IRConstant kind)
 SetExpr::~SetExpr() {
 }
 
-IRConstant SetExpr::getKind() {
+IRConstant SetExpr::getKind() const {
   return kind;
 }
 

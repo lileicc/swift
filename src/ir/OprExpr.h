@@ -11,7 +11,7 @@ public:
   OprExpr(IRConstant op);
   virtual ~OprExpr();
 
-  IRConstant getOp();
+  IRConstant getOp() const;
 
 private:
   IRConstant op;

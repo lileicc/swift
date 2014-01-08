@@ -167,7 +167,7 @@ void CPPTranslator::transFunBody(code::FunctionDecl* fun,
   // now translating::: if (markvar == current sample num) then return value;
   code::Stmt* st = new code::IfStmt(
       new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
-          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQUAL),
+          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQU),
       new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)), NULL);
   fun->addStmt(st);
   // now should sample
@@ -291,7 +291,7 @@ void CPPTranslator::transFunBodyLikeli(code::FunctionDecl* fun,
   // now translating::: if (markvar == current sample num) then return value;
   code::Stmt* st = new code::IfStmt(
       new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
-          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQUAL),
+          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQU),
       new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)), NULL);
   fun->addStmt(st);
   // now should sample

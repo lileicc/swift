@@ -15,8 +15,13 @@ namespace code {
 
 class ReturnStmt: public swift::code::Stmt {
 public:
-  ReturnStmt(Expr* expr);
+  ReturnStmt(Expr* expr = NULL);
   ~ReturnStmt();
+
+  Expr* getExpr() const;
+
+  // For Printer
+  void print(printer::Printer* prt);
 private:
   Expr* expr;
 };

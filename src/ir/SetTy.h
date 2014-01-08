@@ -10,7 +10,7 @@ public:
   SetTy(const Ty* refer);
   virtual ~SetTy();
 
-  const Ty* getRefer();
+  const Ty* getRefer() const ;
 
   virtual std::string toString() const ;
 

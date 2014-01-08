@@ -9,7 +9,7 @@ VarRefer::VarRefer(VarDecl* refer)
 VarRefer::~VarRefer() {
 }
 
-VarDecl* VarRefer::getRefer() {
+VarDecl* VarRefer::getRefer() const {
   return refer;
 }
 

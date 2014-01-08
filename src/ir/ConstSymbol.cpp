@@ -8,7 +8,7 @@ ConstSymbol::ConstSymbol(IRConstant kind)
 ConstSymbol::~ConstSymbol() {
 }
 
-IRConstant ConstSymbol::getKind()  {
+IRConstant ConstSymbol::getKind() const {
   return kind;
 }
 

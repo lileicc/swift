@@ -10,7 +10,6 @@
 #include "Decl.h"
 #include "DeclContext.h"
 
-
 namespace swift {
 namespace code {
 
@@ -19,6 +18,12 @@ public:
   ClassDecl(DeclContext* ns, std::string name);
   ~ClassDecl();
   static ClassDecl* createClassDecl(DeclContext* ns, const std::string & name);
+
+  const std::string& getName() const;
+
+  // For Printer
+  void print(printer::Printer* prt);
+
 private:
   DeclContext* parent; // usually it is a namespace
   std::string name;

@@ -1,18 +1,25 @@
 #include "CardExpr.h"
+#include "SetExpr.h"
+#include "SetTy.h"
 
 namespace swift { namespace ir {
-CardExpr::CardExpr() {
+CardExpr::CardExpr() : refer(NULL) {
 }
 
 CardExpr::~CardExpr() {
 }
 
-void CardExpr::setRefer(Ty* t) {
-  refer = t;
+const Ty* CardExpr::getRefer() const {
+  return refer;
 }
 
-Ty* CardExpr::getRefer() {
-  return refer;
+void CardExpr::setBody(std::shared_ptr<SetExpr> b) {
+  body = b;
+  refer = ((const SetTy*)b->getTyp())->getRefer();
+}
+
+const std::shared_ptr<SetExpr>& CardExpr::getBody() const {
+  return body;
 }
 
 }

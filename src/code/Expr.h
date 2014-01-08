@@ -15,7 +15,10 @@ namespace code {
 class Expr: public swift::code::Stmt {
 public:
   Expr();
-  ~Expr();
+  virtual ~Expr();
+
+  // For Printer
+  virtual void print(printer::Printer* prt) = 0;
 };
 
 } /* namespace code */

@@ -17,6 +17,12 @@ class DeclStmt: public swift::code::Stmt {
 public:
   DeclStmt(Decl* dec);
   ~DeclStmt();
+
+  Decl* getDecl();
+
+  // For Printer
+  void print(printer::Printer* prt);
+
 private:
   Decl* dec;
 };

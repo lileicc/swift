@@ -2,14 +2,14 @@
 
 namespace swift { namespace ir {
 
-  Query::Query(std::shared_ptr<FunctionCall> var)
+Query::Query(std::shared_ptr<Expr> var)
   :var(var) {
 }
 
 Query::~Query() {
 }
 
-std::shared_ptr<FunctionCall> Query::getVar() {
+const std::shared_ptr<Expr>& Query::getVar() const {
   return var;
 }
 

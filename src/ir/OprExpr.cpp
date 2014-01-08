@@ -9,7 +9,7 @@ OprExpr::OprExpr(IRConstant op)
 OprExpr::~OprExpr() {
 }
 
-IRConstant OprExpr::getOp() {
+IRConstant OprExpr::getOp() const {
   return op;
 }
 

@@ -12,7 +12,7 @@ public:
   ConstSymbol(IRConstant typ);
   virtual ~ConstSymbol();
 
-  IRConstant getKind();
+  IRConstant getKind() const;
 
 private:
   IRConstant kind;

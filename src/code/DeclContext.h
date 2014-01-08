@@ -23,6 +23,8 @@ public:
   DeclContext();
   virtual ~DeclContext();
   virtual void addDecl(Decl* decl);
+  Decl* getMem(int k);
+  std::vector<Decl*>& getAllMem();
 private:
   std::vector<Decl* > members; // member declaration
 };

@@ -5,12 +5,21 @@
 namespace swift { namespace fabrica {
 
 PreDeclFactory::PreDeclFactory() {
-  distr[predecl::PreDeclDistrList::categoricalDistr.getName()][""]
+  distr[predecl::PreDeclDistrList::categoricalDistr.getName()]
     = &predecl::PreDeclDistrList::categoricalDistr;
+  distr[predecl::PreDeclDistrList::poissonDistr.getName()]
+    = &predecl::PreDeclDistrList::poissonDistr;
+  distr[predecl::PreDeclDistrList::uniformChoiceDistr.getName()]
+    = &predecl::PreDeclDistrList::uniformChoiceDistr;
 }
 
 
 PreDeclFactory::~PreDeclFactory() {
+}
+
+const predecl::PreDeclDistr* PreDeclFactory::getDistr(std::string name) {
+  if (distr.count(name) == 0) return NULL;
+  return distr[name];
 }
 
 }

@@ -13,8 +13,6 @@
 namespace swift {
 namespace absyn {
 class CondSet: public SetExpr {
-  VarDecl var;
-  Expr* cond;
 public:
   CondSet(int l, int c, VarDecl var, Expr *cond = NULL);
   virtual ~CondSet();
@@ -24,6 +22,9 @@ public:
 
   // For Debugging Use
   void print(FILE *file, int indent);
+private:
+  VarDecl var;
+  Expr* cond;
 };
 
 }

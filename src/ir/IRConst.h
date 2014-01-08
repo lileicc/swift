@@ -33,6 +33,11 @@ public:
   static const std::string DOUBLE;
   static const std::string STRING;
   static const std::string NA;
+  
+  static const std::string BLOG_BOOL;
+  static const std::string BLOG_INT;
+  static const std::string BLOG_DOUBLE;
+  static const std::string BLOG_STRING;
 };
 
 }

@@ -30,15 +30,15 @@ void IfThen::setElse(std::shared_ptr<Clause> c) {
   elcl = c;
 }
 
-std::shared_ptr<Expr> IfThen::getCond() {
+std::shared_ptr<Expr> IfThen::getCond() const {
   return cond;
 }
 
-std::shared_ptr<Clause> IfThen::getThen() {
+std::shared_ptr<Clause> IfThen::getThen() const {
   return thcl;
 }
 
-std::shared_ptr<Clause> IfThen::getElse() {
+std::shared_ptr<Clause> IfThen::getElse() const {
   return elcl;
 }
 

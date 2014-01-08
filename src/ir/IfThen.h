@@ -22,9 +22,9 @@ public:
   void setCond(std::shared_ptr<Expr> e);
   void setThen(std::shared_ptr<Clause> c);
   void setElse(std::shared_ptr<Clause> c);
-  std::shared_ptr<Expr> getCond();
-  std::shared_ptr<Clause> getThen();
-  std::shared_ptr<Clause> getElse();
+  std::shared_ptr<Expr> getCond() const;
+  std::shared_ptr<Clause> getThen() const;
+  std::shared_ptr<Clause> getElse() const;
 
 private:
   std::shared_ptr<Expr> cond;

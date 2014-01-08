@@ -7,6 +7,8 @@
 #include "Clause.h"
 
 #include "Ty.h"
+#include "ArrayTy.h"
+#include "SetTy.h"
 
 namespace swift {
 namespace ir {
@@ -21,7 +23,7 @@ void Clause::setTyp(const Ty* ty) {
   typ = ty;
 }
 
-const Ty* Clause::getTyp()  {
+const Ty* Clause::getTyp() const {
   return typ;
 }
 

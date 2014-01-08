@@ -3,6 +3,7 @@
 // For NULL
 #include <cstdio>
 
+#include "ArrayExpr.h"
 #include "ArrayTy.h"
 #include "BlogModel.h"
 #include "BoolLiteral.h"
@@ -20,6 +21,7 @@
 #include "FunctionCall.h"
 #include "IfThen.h"
 #include "InstSymbol.h"
+#include "InstSymbolRef.h"
 #include "IntLiteral.h"
 #include "ListSet.h"
 #include "MapExpr.h"
@@ -37,7 +39,7 @@
 #include "StringLiteral.h"
 #include "Ty.h"
 #include "TypeDomain.h"
-#include "UniformDistr.h"
+#include "UniformChoiceDistr.h"
 #include "VarDecl.h"
 #include "VarRefer.h"
 #include "VoidFuncCall.h"

@@ -9,6 +9,7 @@
 
 #include "Stmt.h"
 #include "Expr.h"
+#include "CompoundStmt.h"
 
 namespace swift {
 namespace code {
@@ -18,8 +19,14 @@ namespace code {
  */
 class CaseStmt: public swift::code::Stmt {
 public:
-  CaseStmt(Expr* val, Stmt* sub);
+  CaseStmt(Expr* val, Stmt* stmt = NULL);
   ~CaseStmt();
+
+  Stmt* getSub() const;
+  Expr* getVal() const;
+
+  // For Printer
+  void print(printer::Printer* prt);
 private:
   Expr* val;
   Stmt* sub;

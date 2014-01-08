@@ -2,19 +2,16 @@
 
 #include <string>
 
-#include "../predecl/PreDeclDistrList.h"
-
 namespace swift { namespace ir {
 
-CategoricalDistr::CategoricalDistr()
-  :Distribution(std::string("Categorical"),
-  &(predecl::PreDeclDistrList::categoricalDistr)) {
+CategoricalDistr::CategoricalDistr(const predecl::PreDeclDistr* refer)
+  :Distribution(std::string("Categorical"), refer) {
 }
 
 CategoricalDistr::~CategoricalDistr() {
 }
 
-size_t CategoricalDistr::size() {
+size_t CategoricalDistr::size() const {
   return weights.size();
 }
 
@@ -22,23 +19,23 @@ void CategoricalDistr::addWeight(double w) {
   weights.push_back(w);
 }
 
-double CategoricalDistr::getWeight(int k) {
+double CategoricalDistr::getWeight(int k) const {
   return weights[k];
 }
 
-const std::vector<double>& CategoricalDistr::getWeights() {
+const std::vector<double>& CategoricalDistr::getWeights() const {
   return weights;
 }
 
-void CategoricalDistr::addSymbol(ConstSymbol* c) {
+void CategoricalDistr::addSymbol(std::shared_ptr<ConstSymbol> c) {
   symbols.push_back(c);
 }
 
-ConstSymbol* CategoricalDistr::getSymbol(int k) {
+std::shared_ptr<ConstSymbol> CategoricalDistr::getSymbol(int k) const {
   return symbols[k];
 }
 
-const std::vector<ConstSymbol*>& CategoricalDistr::getSymbols() {
+const std::vector<std::shared_ptr<ConstSymbol> >& CategoricalDistr::getSymbols() const {
   return symbols;
 }
 

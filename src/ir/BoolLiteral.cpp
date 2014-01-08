@@ -10,7 +10,7 @@ BoolLiteral::BoolLiteral(bool v)
 BoolLiteral::~BoolLiteral() {
 }
 
-bool BoolLiteral::getValue() {
+bool BoolLiteral::getValue() const {
   return value;
 }
 

@@ -19,6 +19,9 @@ class BreakStmt: public swift::code::Stmt {
 public:
   BreakStmt();
   ~BreakStmt();
+
+  // For Printer
+  void print(printer::Printer* prt);
 };
 
 } /* namespace code */

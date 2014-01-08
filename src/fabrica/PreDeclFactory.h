@@ -12,8 +12,10 @@ public:
   PreDeclFactory();
   ~PreDeclFactory();
 
+  const predecl::PreDeclDistr* getDistr(std::string name);
+
 private:
-  std::map<std::string,std::map<std::string,const predecl::PreDeclDistr*>> distr;
+  std::map<std::string,const predecl::PreDeclDistr*> distr;
 };
 
 }
