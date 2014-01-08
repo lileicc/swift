@@ -20,19 +20,19 @@ namespace code {
  */
 class SwitchStmt: public swift::code::Stmt {
 public:
-  SwitchStmt(Expr* cond, CompoundStmt* body);
+  SwitchStmt(Expr* cond);
   ~SwitchStmt();
 
   Expr* getCond() const;
   void addStmt(Stmt* st);
   
-  CompoundStmt* getBody() const;
+  CompoundStmt& getBody() const;
   // For Printer
   void print(printer::Printer* prt);
 
 private:
   Expr* cond;
-  CompoundStmt* body;
+  CompoundStmt body;
 };
 
 } /* namespace code */

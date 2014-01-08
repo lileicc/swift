@@ -29,7 +29,7 @@ void SwitchStmt::setBody(CompoundStmt b) {
   body = b;
 }
 
-CompoundStmt& SwitchStmt::getBody() {
+CompoundStmt& SwitchStmt::getBody() const {
   return body;
 }
 
