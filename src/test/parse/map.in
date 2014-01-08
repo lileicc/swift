@@ -1,0 +1,1 @@
+random Ball x ~ Categorical({b[0]->0.5, b[1]->0.5});

@@ -7,10 +7,9 @@
 
 #pragma once
 
-#include <vector>
 #include "Stmt.h"
 #include "Expr.h"
-#include "CaseStmt.h"
+#include "CompoundStmt.h"
 
 namespace swift {
 namespace code {
@@ -21,20 +20,19 @@ namespace code {
  */
 class SwitchStmt: public swift::code::Stmt {
 public:
-  SwitchStmt(Expr* cond);
+  SwitchStmt(Expr* cond, CompoundStmt* body);
   ~SwitchStmt();
 
   Expr* getCond() const;
   void addStmt(Stmt* st);
-  void setBody(CompoundStmt b);
-  CompoundStmt& getBody();
   
+  CompoundStmt* getBody() const;
   // For Printer
   void print(printer::Printer* prt);
 
 private:
   Expr* cond;
-  CompoundStmt body;
+  CompoundStmt* body;
 };
 
 } /* namespace code */

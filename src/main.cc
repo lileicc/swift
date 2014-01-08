@@ -5,7 +5,7 @@
 #include <cstring>
 #include <vector>
 #include <tuple>
-#include "absyn\BlogProgram.h"
+#include "BlogProgram.h"
 using namespace std;
 using namespace swift::absyn;
 
@@ -18,7 +18,6 @@ main(int argc, char* argv[]) {
   }
   const char* inp;
   const char* out;
-  
   for(int i = 1; i < argc; i++){
     if(strcmp(argv[i], "-i") == 0) inp = argv[i+1];
     if(strcmp(argv[i], "-o") == 0) out = argv[i+1];
