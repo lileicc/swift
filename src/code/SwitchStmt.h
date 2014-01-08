@@ -20,7 +20,7 @@ namespace code {
  */
 class SwitchStmt: public swift::code::Stmt {
 public:
-  SwitchStmt(Expr* cond, CompoundStmt* body);
+  SwitchStmt(Expr* cond);
   ~SwitchStmt();
 
   Expr* getCond() const;
