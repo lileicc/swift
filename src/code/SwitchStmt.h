@@ -26,7 +26,7 @@ public:
   Expr* getCond() const;
   void addStmt(Stmt* st);
   
-  CompoundStmt& getBody() const;
+  CompoundStmt* getBody() const;
   // For Printer
   void print(printer::Printer* prt);
 

@@ -25,8 +25,8 @@ void SwitchStmt::addStmt(Stmt* st) {
   body.addStmt(st);
 }
 
-CompoundStmt& SwitchStmt::getBody() const {
-  return body;
+CompoundStmt* SwitchStmt::getBody() const {
+  return &body;
 }
 
 // For Printer

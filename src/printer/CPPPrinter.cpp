@@ -482,7 +482,7 @@ void CPPPrinter::print(code::SwitchStmt* term) {
   fprintf(file, ")");
   printLine();
 
-  term->getBody().print(this);
+  term->getBody()->print(this);
 }
 
 void CPPPrinter::print(code::Type* term) {
