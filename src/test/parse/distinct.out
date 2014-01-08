@@ -2,7 +2,10 @@
   (args:
     (DistinctDecl:
       :type Ball
-      :var (:        (: a 10 )        (: b 1 )      ) )
+      :var (:
+        (: a 10 )
+        (: b 1 )
+      )
     )
   )
 )

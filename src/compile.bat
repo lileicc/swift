@@ -1,5 +1,5 @@
 cd parse
-yacc -d parser.y
-flex scanner.l
+yacc -d blog.yacc
+flex blog.flex
 cd ..
-g++ -std=gnu++0x -I absyn -enable-auto-import absyn\*.cpp main.cc parse\y.tab.c parse\lex.yy.c -o parseex
+g++ -std=gnu++11 absyn\*.cpp ir\*.cpp fabrica\*.cpp msg\*.cpp predecl\*.cpp semant\Semant.cpp main.cpp parse\y.tab.c parse\lex.yy.c -o parseex

@@ -520,9 +520,9 @@ static char *yy_last_accepting_cpos;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "scanner.l"
+#line 1 "blog.flex"
 #define INITIAL 0
-#line 2 "scanner.l"
+#line 2 "blog.flex"
 #include <cstdio>
 #include <iostream>
 #include <string.h>
@@ -723,7 +723,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 85 "scanner.l"
+#line 85 "blog.flex"
 
 #line 729 "lex.yy.c"
 
@@ -810,7 +810,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 86 "scanner.l"
+#line 86 "blog.flex"
 { 
     string_buf_ptr = string_buf;
     buf_len = 0;
@@ -819,7 +819,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 91 "scanner.l"
+#line 91 "blog.flex"
 { 
     string_buf_ptr = string_buf;
     buf_len = 0;
@@ -828,122 +828,122 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 97 "scanner.l"
+#line 97 "blog.flex"
 { return TYPE; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 98 "scanner.l"
+#line 98 "blog.flex"
 { return RANDOM; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 99 "scanner.l"
+#line 99 "blog.flex"
 { return FIXED; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 100 "scanner.l"
+#line 100 "blog.flex"
 { return FIXED; }			   
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 101 "scanner.l"
+#line 101 "blog.flex"
 { return ORIGIN; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 102 "scanner.l"
+#line 102 "blog.flex"
 { return ORIGIN; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 103 "scanner.l"
+#line 103 "blog.flex"
 { return DISTINCT; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 104 "scanner.l"
+#line 104 "blog.flex"
 { return DISTINCT; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 105 "scanner.l"
+#line 105 "blog.flex"
 { return FACTOR; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 106 "scanner.l"
+#line 106 "blog.flex"
 { return PARFACTOR; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 107 "scanner.l"
+#line 107 "blog.flex"
 { return THEN; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 108 "scanner.l"
+#line 108 "blog.flex"
 { return ELSE; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 109 "scanner.l"
+#line 109 "blog.flex"
 { return FOR; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 110 "scanner.l"
+#line 110 "blog.flex"
 { return ELSEIF; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 111 "scanner.l"
+#line 111 "blog.flex"
 { return IF; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 112 "scanner.l"
+#line 112 "blog.flex"
 { return QUERY;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 113 "scanner.l"
+#line 113 "blog.flex"
 { return OBS;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 114 "scanner.l"
+#line 114 "blog.flex"
 { return PARAM;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 115 "scanner.l"
+#line 115 "blog.flex"
 { return EXISTS_; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 116 "scanner.l"
+#line 116 "blog.flex"
 { return FORALL_; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 117 "scanner.l"
+#line 117 "blog.flex"
 { return LIST; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 118 "scanner.l"
+#line 118 "blog.flex"
 { return MAP; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 119 "scanner.l"
+#line 119 "blog.flex"
 { return DISTRIBUTION; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 122 "scanner.l"
+#line 122 "blog.flex"
 { 
             yylval.boolval = new BLOGSymbol<bool>(curr_line, curr_col, true);
             return BOOLEAN_LITERAL; 
@@ -951,7 +951,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 126 "scanner.l"
+#line 126 "blog.flex"
 { 
             yylval.boolval = new BLOGSymbol<bool>(curr_line, curr_col, false);
             return BOOLEAN_LITERAL;
@@ -959,187 +959,187 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 130 "scanner.l"
+#line 130 "blog.flex"
 {return NULLITY; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 131 "scanner.l"
+#line 131 "blog.flex"
 {yylval.ival = new BLOGSymbol<int>(curr_line, curr_col, atoi( yytext )); return INT_LITERAL;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 132 "scanner.l"
+#line 132 "blog.flex"
 {yylval.dblval = new BLOGSymbol<double>(curr_line, curr_col, atof( yytext )); return DOUBLE_LITERAL;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 134 "scanner.l"
+#line 134 "blog.flex"
 { return PLUS_; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 135 "scanner.l"
+#line 135 "blog.flex"
 { return MINUS_; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 136 "scanner.l"
+#line 136 "blog.flex"
 { return MULT_; }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 137 "scanner.l"
+#line 137 "blog.flex"
 { return DIV_; }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 138 "scanner.l"
+#line 138 "blog.flex"
 { return MOD_; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 139 "scanner.l"
+#line 139 "blog.flex"
 { return POWER_; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 140 "scanner.l"
+#line 140 "blog.flex"
 { return LT_; }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 141 "scanner.l"
+#line 141 "blog.flex"
 { return GT_; }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 142 "scanner.l"
+#line 142 "blog.flex"
 { return LEQ_; }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 143 "scanner.l"
+#line 143 "blog.flex"
 { return GEQ_; }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 144 "scanner.l"
+#line 144 "blog.flex"
 { return EQEQ_; }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 145 "scanner.l"
+#line 145 "blog.flex"
 { return NEQ_; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 146 "scanner.l"
+#line 146 "blog.flex"
 { return AND_; }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 147 "scanner.l"
+#line 147 "blog.flex"
 { return OR_; }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 148 "scanner.l"
+#line 148 "blog.flex"
 { return NOT_; }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 149 "scanner.l"
+#line 149 "blog.flex"
 { return AT_; }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 150 "scanner.l"
+#line 150 "blog.flex"
 { return RIGHTARROW; }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 151 "scanner.l"
+#line 151 "blog.flex"
 { return DOUBLERIGHTARROW; }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 153 "scanner.l"
+#line 153 "blog.flex"
 { return LPAREN; }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 154 "scanner.l"
+#line 154 "blog.flex"
 { return RPAREN; }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 155 "scanner.l"
+#line 155 "blog.flex"
 { return RBRACE; }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 156 "scanner.l"
+#line 156 "blog.flex"
 { return LBRACE; }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 157 "scanner.l"
+#line 157 "blog.flex"
 { return LBRACKET; }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 158 "scanner.l"
+#line 158 "blog.flex"
 { return RBRACKET; }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 159 "scanner.l"
+#line 159 "blog.flex"
 { return SEMI; }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 160 "scanner.l"
+#line 160 "blog.flex"
 { return COLON;}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 161 "scanner.l"
+#line 161 "blog.flex"
 { return DOT; }
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 162 "scanner.l"
+#line 162 "blog.flex"
 { return COMMA;}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 163 "scanner.l"
+#line 163 "blog.flex"
 { return EQ_; }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 164 "scanner.l"
+#line 164 "blog.flex"
 { return DISTRIB; }
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 165 "scanner.l"
+#line 165 "blog.flex"
 { return NUMSIGN; }
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 167 "scanner.l"
+#line 167 "blog.flex"
 { /* ignore */ }
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 169 "scanner.l"
+#line 169 "blog.flex"
 { /* Do nothing */}
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 171 "scanner.l"
+#line 171 "blog.flex"
 { 
   string s(yytext);
   yylval.sval = new BLOGSymbol<string>(curr_line, curr_col, s);
@@ -1148,7 +1148,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 177 "scanner.l"
+#line 177 "blog.flex"
 {
             *string_buf_ptr = '\0';
             //char * s = (char *) malloc (buf_len + 1);
@@ -1161,7 +1161,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 186 "scanner.l"
+#line 186 "blog.flex"
 {
             *string_buf_ptr = '\0';
             if (buf_len == 1){
@@ -1177,47 +1177,47 @@ YY_RULE_SETUP
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 198 "scanner.l"
+#line 198 "blog.flex"
 { *string_buf_ptr++ = '\b'; buf_len++; }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 199 "scanner.l"
+#line 199 "blog.flex"
 { *string_buf_ptr++ = '\t'; buf_len++; }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 200 "scanner.l"
+#line 200 "blog.flex"
 { *string_buf_ptr++ = '\n'; buf_len++; }
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 201 "scanner.l"
+#line 201 "blog.flex"
 { *string_buf_ptr++ = '\f'; buf_len++;}
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 202 "scanner.l"
+#line 202 "blog.flex"
 { *string_buf_ptr++ = '\r'; buf_len++; }
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 203 "scanner.l"
+#line 203 "blog.flex"
 { *string_buf_ptr++ = '\"'; buf_len++; }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 204 "scanner.l"
+#line 204 "blog.flex"
 { *string_buf_ptr++ = '\''; buf_len++; }
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 205 "scanner.l"
+#line 205 "blog.flex"
 { *string_buf_ptr++ = '\\'; buf_len++; }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 206 "scanner.l"
+#line 206 "blog.flex"
 {
             char *yptr = yytext;
             while(*yptr){
@@ -1228,12 +1228,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 214 "scanner.l"
+#line 214 "blog.flex"
 ;
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 215 "scanner.l"
+#line 215 "blog.flex"
 ECHO;
 	YY_BREAK
 #line 1240 "lex.yy.c"
@@ -2124,4 +2124,4 @@ int main()
 	return 0;
 	}
 #endif
-#line 215 "scanner.l"
+#line 215 "blog.flex"
