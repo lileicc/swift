@@ -25,7 +25,7 @@ void SwitchStmt::addStmt(Stmt* st) {
   body.addStmt(st);
 }
 
-CompoundStmt* SwitchStmt::getBody() const {
+CompoundStmt* SwitchStmt::getBody() {
   return &body;
 }
 
