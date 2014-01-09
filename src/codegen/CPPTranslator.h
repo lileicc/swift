@@ -29,8 +29,8 @@ private:
   void transFun(std::shared_ptr<ir::FuncDefn> fd);
 
   /**
-   * create declaration of variables/fileds
-   * initializaton statements
+   * create declaration of variables/fields
+   * initialization statements
    */
   void createInit();
   /**
