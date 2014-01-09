@@ -83,13 +83,15 @@ CPPTranslator::~CPPTranslator() {
 }
 
 void CPPTranslator::translate(swift::ir::BlogModel* model) {
-
   code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
       INT_TYPE);
   for (auto ty : model->getTypes())
     transTypeDomain(ty);
   for (auto fun : model->getRandFuncs())
     transFun(fun);
+
+  // TODO translate evidence
+  // TODO translate query
 }
 
 
