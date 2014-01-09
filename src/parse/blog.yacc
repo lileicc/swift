@@ -50,13 +50,11 @@ extern "C" FILE *yyin;
 extern "C" int yylineno;
 extern "C" int curr_line;
 extern "C" int curr_col;
-extern "C" int yydebug;
 
 void yyerror(const char *s);
 BlogProgram *blog;
 
 BlogProgram* parse(const char* inp) {
-  yydebug = 1;
   blog = new BlogProgram(0, 0);
   // open a file handle to a particular file:
   FILE *myfile = fopen(inp, "r");

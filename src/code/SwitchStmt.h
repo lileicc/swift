@@ -26,13 +26,13 @@ public:
   Expr* getCond() const;
   void addStmt(Stmt* st);
   
-  CompoundStmt* getBody() const;
+  CompoundStmt* getBody();
   // For Printer
   void print(printer::Printer* prt);
 
 private:
   Expr* cond;
-  CompoundStmt* body;
+  CompoundStmt body;
 };
 
 } /* namespace code */
