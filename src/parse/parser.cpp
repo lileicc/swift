@@ -5,7 +5,7 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
-#define YYPATCH 20130925
+#define YYPATCH 20140101
 
 #define YYEMPTY        (-1)
 #define yyclearin      (yychar = YYEMPTY)
@@ -603,6 +603,7 @@ static const short yycheck[] = {                          6,
 #define YYDEBUG 0
 #endif
 #define YYMAXTOKEN 316
+#define YYTRANSLATE(a) ((a) > YYMAXTOKEN ? (YYMAXTOKEN + 1) : (a))
 #if YYDEBUG
 static const char *yyname[] = {
 
@@ -620,7 +621,7 @@ static const char *yyname[] = {
 "POWER_","MINUS_","LST","LT_","GT_","LEQ_","GEQ_","EQEQ_","NEQ_","EQ_",
 "DISTRIB","NOT_","AND_","OR_","DOUBLERIGHTARROW","COMMA","SEMI","COLON","DOT",
 "NUMSIGN","RIGHTARROW","LPAREN","RPAREN","LBRACE","RBRACE","LBRACKET",
-"RBRACKET",
+"RBRACKET","illegal-symbol",
 };
 static const char *yyrule[] = {
 "$accept : program",
@@ -895,9 +896,7 @@ yyloop:
 #if YYDEBUG
         if (yydebug)
         {
-            yys = 0;
-            if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
-            if (!yys) yys = "illegal-symbol";
+            yys = yyname[YYTRANSLATE(yychar)];
             printf("%sdebug: state %d, reading %d (%s)\n",
                     YYPREFIX, yystate, yychar, yys);
         }
@@ -979,9 +978,7 @@ yyinrecovery:
 #if YYDEBUG
         if (yydebug)
         {
-            yys = 0;
-            if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
-            if (!yys) yys = "illegal-symbol";
+            yys = yyname[YYTRANSLATE(yychar)];
             printf("%sdebug: state %d, error recovery discards token %d (%s)\n",
                     YYPREFIX, yystate, yychar, yys);
         }
@@ -1637,7 +1634,7 @@ case 127:
 #line 695 "blog.yacc"
 	{ yyval.stmt = new Query(curr_line, curr_col, yystack.l_mark[0].exp); }
 break;
-#line 1640 "parser.cpp"
+#line 1636 "parser.cpp"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
@@ -1659,9 +1656,7 @@ break;
 #if YYDEBUG
             if (yydebug)
             {
-                yys = 0;
-                if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
-                if (!yys) yys = "illegal-symbol";
+                yys = yyname[YYTRANSLATE(yychar)];
                 printf("%sdebug: state %d, reading %d (%s)\n",
                         YYPREFIX, YYFINAL, yychar, yys);
             }
