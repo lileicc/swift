@@ -21,12 +21,14 @@ const std::string CPPTranslator::DISTRIBUTION_GEN_FUN_NAME = "gen";
 const std::string CPPTranslator::DISTRIBUTION_LIKELI_FUN_NAME = "likeli";
 const std::string CPPTranslator::DISTRIBUTION_LOGLIKELI_FUN_NAME = "loglikeli";
 const std::string CPPTranslator::CURRENT_SAMPLE_NUM_VARNAME = "__cur_loop";
-const std::string CPPTranslator::RETURN_VAR_NAME = "__ret_value";
+const std::string CPPTranslator::WEIGHT_VAR_NAME = "__ret_value";
+const std::string CPPTranslator::FUNAPP_VAR_NAME = "__value";
 const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
 
 // randomness
 const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
-const code::Type CPPTranslator::RANDOM_ENGINE_TYPE("std::default_random_engine");
+const code::Type CPPTranslator::RANDOM_ENGINE_TYPE(
+    "std::default_random_engine");
 const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
 const int CPPTranslator::INIT_SAMPLE_NUM = -1;
 
@@ -85,17 +87,23 @@ CPPTranslator::~CPPTranslator() {
 void CPPTranslator::translate(swift::ir::BlogModel* model) {
   code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
       INT_TYPE);
+  // translate type and distinct symbols;
   for (auto ty : model->getTypes())
     transTypeDomain(ty);
+
+  // translate random function
   for (auto fun : model->getRandFuncs())
     transFun(fun);
 
-  // TODO translate evidence
+  // translate fixed function
+
+  // translate evidence
+  for (auto evid : model->getEvidences()) {
+    transEvidence(evid);
+  }
+
   // TODO translate query
 }
-
-
-
 
 code::Code* CPPTranslator::getResult() const {
   return prog;
@@ -147,22 +155,26 @@ void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
       getterfunname, retty);
   fun->setParams(transParamVarDecls(fun, fd->getArgs()));
   if (fd->isRand()) {
+    // __value__name for recording the value of the function application variable
     std::string valuevarname = getValueVarName(name);
+    // __mark__name
     std::string markvarname = getMarkVarName(name);
     transFunBody(fun, fd->getBody(), valuevarname, markvarname);
 
+    // add likelihood function::: double likeli_fun(int, ...);
     std::string likelifunname = getLikeliFunName(name);
     code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
         coreCls, likelifunname, DOUBLE_TYPE);
-    likelifun->setParams(transParamVarDecls(fun, fd->getArgs()));
+    likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
     transFunBodyLikeli(likelifun, fd->getBody(), valuevarname, markvarname);
   }
+  // TODO handle fixed function
 }
 
 void CPPTranslator::transFunBody(code::FunctionDecl* fun,
     std::shared_ptr<ir::Clause> clause, std::string valuevarname,
     std::string markvarname) {
-  addFunValueRefStmt(fun, valuevarname, RETURN_VAR_NAME);
+  addFunValueRefStmt(fun, valuevarname, FUNAPP_VAR_NAME);
 
   addFunValueRefStmt(fun, markvarname, MARK_VAR_REF_NAME);
 
@@ -170,7 +182,7 @@ void CPPTranslator::transFunBody(code::FunctionDecl* fun,
   code::Stmt* st = new code::IfStmt(
       new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
           new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQU),
-      new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)), NULL);
+      new code::ReturnStmt(new code::VarRef(FUNAPP_VAR_NAME)), NULL);
   fun->addStmt(st);
   // now should sample
   // mark the variable first
@@ -178,9 +190,9 @@ void CPPTranslator::transFunBody(code::FunctionDecl* fun,
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
   fun->addStmt(st);
   //now translate actual sampling part
-  transClause(clause, RETURN_VAR_NAME);
+  transClause(clause, FUNAPP_VAR_NAME);
   // now return the value
-  fun->addStmt(new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)));
+  fun->addStmt(new code::ReturnStmt(new code::VarRef(FUNAPP_VAR_NAME)));
 }
 
 code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
@@ -278,23 +290,31 @@ code::Expr* CPPTranslator::transDistribution(
 }
 
 void CPPTranslator::createInit() {
-  code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME, RANDOM_ENGINE_TYPE);
+  code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME,
+      RANDOM_ENGINE_TYPE);
 }
-
-
 
 void CPPTranslator::transFunBodyLikeli(code::FunctionDecl* fun,
     std::shared_ptr<ir::Clause> clause, std::string valuevarname,
     std::string markvarname) {
+  // now the value of this function app var is in RETURN_VAR_NAME
+  addFunValueRefStmt(fun, valuevarname, FUNAPP_VAR_NAME);
 
-  addFunValueRefStmt(fun, valuevarname, RETURN_VAR_NAME);
+  // declare the weight variable and setting its init value
+  // it is recording the log likelihood
+  // ::: __weight = 0
+  code::VarDecl* weightvar = new code::VarDecl(fun, WEIGHT_VAR_NAME,
+      DOUBLE_TYPE, new code::FloatingLiteral(0));
+  fun->addStmt(new code::DeclStmt(weightvar));
+
 
   // TODO add likelihood calculation
+
   // now translating::: if (markvar == current sample num) then return value;
   code::Stmt* st = new code::IfStmt(
       new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
           new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQU),
-      new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)), NULL);
+      new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_NAME)), NULL);
   fun->addStmt(st);
   // now should sample
   // mark the variable first
@@ -302,23 +322,31 @@ void CPPTranslator::transFunBodyLikeli(code::FunctionDecl* fun,
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
   fun->addStmt(st);
   //now translate actual sampling part
-  transClause(clause, RETURN_VAR_NAME);
+  transClause(clause, FUNAPP_VAR_NAME);
   // now return the value
-  fun->addStmt(new code::ReturnStmt(new code::VarRef(RETURN_VAR_NAME)));
+  fun->addStmt(new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_NAME)));
 }
 
 void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
     std::string valuevarname, std::string valuerefname) {
-  // for value_var
+  // the value of this function application variable is stored in
+  // valuevarname[index1][index2]...
+  // where the index are corresponding to the arguments
   code::Expr* exp = new code::VarRef(valuevarname);
   for (auto prm : fun->getParams()) {
     exp = new code::ArraySubscriptExpr(exp, new code::VarRef(prm->getId()));
   }
 
-  code::VarDecl* retvar = new code::VarDecl(fun, valuerefname, INT_REF_TYPE,
-      exp); // todo support for other return type
+  // assign the function application variable value to valuerefname
+  code::VarDecl* retvar = new code::VarDecl(fun, valuerefname, INT_TYPE, exp); // todo support other type
   code::DeclStmt* dst = new code::DeclStmt(retvar);
   fun->addStmt(dst);
+}
+
+void CPPTranslator::transEvidence(std::shared_ptr<ir::Evidence> evid) {
+  const std::shared_ptr<ir::Expr>& left = evid->getLeft();
+  // check whether left is a function application variable
+
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {

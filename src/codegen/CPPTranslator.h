@@ -53,6 +53,11 @@ private:
   code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> ith, std::string retvar);
   code::Expr* transExpr(std::shared_ptr<ir::Expr> expr);
 
+  /**
+   * translate the evidence in obs statement
+   */
+  void transEvidence(std::shared_ptr<ir::Evidence> evid);
+
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname, std::string valuerefname);
   /**
    * translate the distribution expression
@@ -115,9 +120,14 @@ private:
   static const std::string CURRENT_SAMPLE_NUM_VARNAME;
 
   /**
-   * name for the return variable;
+   * name for the local variable holding likelihood weight;
    */
-  static const std::string RETURN_VAR_NAME;
+  static const std::string WEIGHT_VAR_NAME;
+
+  /**
+   * name for the local variable holding FuncAppVar
+   */
+  static const std::string FUNAPP_VAR_NAME;
 
   /**
    * name for the mark variable, which is refering the mark var
