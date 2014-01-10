@@ -196,26 +196,27 @@ void CPPTranslator::transFunBody(code::FunctionDecl* fun,
 }
 
 code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
-    std::string retvar) {
+    std::string retvar, std::string valuevar) {
   std::shared_ptr<ir::Branch> br = std::dynamic_pointer_cast<ir::Branch>(
       clause);
   if (br) {
-    return transBranch(br, retvar);
+    return transBranch(br, retvar, valuevar);
   }
   std::shared_ptr<ir::IfThen> ith = std::dynamic_pointer_cast<ir::IfThen>(
       clause);
   if (ith) {
-    return transIfThen(ith, retvar);
+    return transIfThen(ith, retvar, valuevar);
   }
   std::shared_ptr<ir::Expr> expr = std::dynamic_pointer_cast<ir::Expr>(clause);
   if (expr) {
     code::CompoundStmt* cst = new code::CompoundStmt();
     cst->addStmt(
-        new code::BinaryOperator(new code::VarRef(retvar), transExpr(expr),
-            code::OpKind::BO_ASSIGN));
-    // TODO no 100% correct here
+        new code::BinaryOperator(new code::VarRef(retvar),
+            transExpr(expr, valuevar), code::OpKind::BO_ASSIGN));
+    // TODO no 100% correct here why??
     return cst;
   }
+  //todo: warning should not reach here
   return NULL;
 }
 
@@ -236,7 +237,7 @@ std::vector<code::ParamVarDecl*> CPPTranslator::transParamVarDecls(
 }
 
 code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
-    std::string retvar) {
+    std::string retvar, std::string valuevar) {
   code::SwitchStmt* sst = new code::SwitchStmt(transExpr(br->getVar()));
   code::CaseStmt* cst;
   for (size_t i = 0; i < br->size(); i++) {
@@ -249,12 +250,13 @@ code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
 }
 
 code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
-    std::string retvar) {
+    std::string retvar, std::string valuevar) {
   // TODO translate ifthenelse
   return NULL;
 }
 
-code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
+code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
+    std::string valuevar) {
   std::vector<code::Expr*> args;
   for (size_t k = 0; k < expr->argSize(); k++) {
     args.push_back(transExpr(expr->get(k)));
@@ -262,14 +264,16 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr) {
   std::shared_ptr<ir::Distribution> dist = std::dynamic_pointer_cast<
       ir::Distribution>(expr);
   if (dist) {
-    return transDistribution(dist, args);
+    return transDistribution(dist, args, valuevar);
   }
   // TODO translate other expression
+  // if valuevar is provided it should be
   return NULL;
 }
 
 code::Expr* CPPTranslator::transDistribution(
-    std::shared_ptr<ir::Distribution> dist, std::vector<code::Expr*> args) {
+    std::shared_ptr<ir::Distribution> dist, std::vector<code::Expr*> args,
+    std::string valuevar) {
   std::string name = dist->getDistrName();
   std::string distname = name + std::to_string((size_t) dist.get());
   // define a field in the main class corresponding to the distribution
@@ -280,13 +284,24 @@ code::Expr* CPPTranslator::transDistribution(
           new code::BinaryOperator(new code::VarRef(distname),
               new code::VarRef(DISTRIBUTION_INIT_FUN_NAME),
               code::OpKind::BO_FIELD), args));
-  // now actual sampling a value from the distribution
-  std::vector<code::Expr *> rd;
-  rd.push_back(new code::VarRef(RANDOM_ENGINE_VAR_NAME));
-  return new code::CallExpr(
-      new code::BinaryOperator(new code::VarRef(distname),
-          new code::VarRef(DISTRIBUTION_GEN_FUN_NAME), code::OpKind::BO_FIELD),
-      rd);
+  if (valuevar.empty()) {
+    // now actual sampling a value from the distribution
+    // :::==> distribution.gen(random_engine);
+    std::vector<code::Expr *> rd;
+    rd.push_back(new code::VarRef(RANDOM_ENGINE_VAR_NAME));
+    return new code::CallExpr(
+        new code::BinaryOperator(new code::VarRef(distname),
+            new code::VarRef(DISTRIBUTION_GEN_FUN_NAME),
+            code::OpKind::BO_FIELD), rd);
+  } else {
+    // calculating likelihood
+    // :::==> distribution.loglikeli
+    std::vector<code::Expr *> args;
+    args.push_back(new code::VarRef(valuevar));
+    return new code::CallExpr(new code::BinaryOperator(new code::VarRef(distname),
+                new code::VarRef(DISTRIBUTION_LOGLIKELI_FUN_NAME),
+                code::OpKind::BO_FIELD), args);
+  }
 }
 
 void CPPTranslator::createInit() {
@@ -307,20 +322,11 @@ void CPPTranslator::transFunBodyLikeli(code::FunctionDecl* fun,
       DOUBLE_TYPE, new code::FloatingLiteral(0));
   fun->addStmt(new code::DeclStmt(weightvar));
 
+  // translate the Clause and calculate weight
 
   // TODO add likelihood calculation
 
-  // now translating::: if (markvar == current sample num) then return value;
-  code::Stmt* st = new code::IfStmt(
-      new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
-          new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQU),
-      new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_NAME)), NULL);
-  fun->addStmt(st);
   // now should sample
-  // mark the variable first
-  st = new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
-      new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
-  fun->addStmt(st);
   //now translate actual sampling part
   transClause(clause, FUNAPP_VAR_NAME);
   // now return the value
