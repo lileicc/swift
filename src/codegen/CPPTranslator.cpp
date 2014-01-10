@@ -352,7 +352,12 @@ void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
 void CPPTranslator::transEvidence(std::shared_ptr<ir::Evidence> evid) {
   const std::shared_ptr<ir::Expr>& left = evid->getLeft();
   // check whether left is a function application variable
+  std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
+        ir::FunctionCall>(left);
+  if (leftexp) {
+    // left side of the evidence is a function application
 
+  }
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
