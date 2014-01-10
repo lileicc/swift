@@ -12,7 +12,7 @@
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #include "BLOGSymbol.h"
-#include "y.tab.h"  // to get the token types that we return
+#include "parser.h"  // to get the token types that we return
 
 char string_buf[100000];
 int buf_len;
