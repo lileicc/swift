@@ -93,6 +93,10 @@ private:
       std::vector<code::Expr*> args, std::string valuevar = std::string());
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
       const std::shared_ptr<ir::VarDecl> var);
+  /**
+   * given a list of Parameter variable declarations in ir, translate into a
+   * vector of parameter varible declaration in code
+   */
   std::vector<code::ParamVarDecl*> transParamVarDecls(
       code::DeclContext* context,
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
@@ -108,6 +112,8 @@ private:
   static const code::Type STRING_TYPE;
 
   static const code::Type BOOL_TYPE;
+
+  static const code::Type VOID_TYPE;
 
   /**
    * field name inside class for declared type
