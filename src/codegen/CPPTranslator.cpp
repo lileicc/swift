@@ -59,6 +59,14 @@ std::string getLikeliFunName(std::string name) {
 
 /**
  * given the name of a variable (can be number var, or random function)
+ * return the function name to set the value
+ */
+std::string getSetterFunName(std::string name) {
+  return "__set_" + name;
+}
+
+/**
+ * given the name of a variable (can be number var, or random function)
  * return the variable name to get the number of samples for the current variable
  */
 std::string getMarkVarName(std::string name) {
@@ -148,24 +156,38 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
 void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
   const std::string & name = fd->getName();
   std::string getterfunname = getGetterFunName(name);
-  code::Type retty = mapIRTypeToCodeType(fd->getRetTyp());
+  code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
   // translate random function
   // create gettfunname function
-  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
-      getterfunname, retty);
-  fun->setParams(transParamVarDecls(fun, fd->getArgs()));
+  code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
+      coreCls, getterfunname, valuetype);
+  getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
   if (fd->isRand()) {
     // __value__name for recording the value of the function application variable
     std::string valuevarname = getValueVarName(name);
     // __mark__name
     std::string markvarname = getMarkVarName(name);
-    transFunBody(fun, fd->getBody(), valuevarname, markvarname);
+    transFunBody(getterfun, fd->getBody(), valuevarname, markvarname);
+
+    // add setter function::: void set_fun(int, ,,,);
+    std::string setterfunname = getSetterFunName(name);
+    code::FunctionDecl* setterfun = code::FunctionDecl::createFunctionDecl(
+        coreCls, setterfunname, VOID_TYPE);
+    std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
+        setterfun, fd->getArgs());
+    args_with_value.push_back(
+        new code::ParamVarDecl(setterfun, valuevarname, valuetype));
+    setterfun->setParams(args_with_value);
+    // todo add func body for setter function
 
     // add likelihood function::: double likeli_fun(int, ...);
     std::string likelifunname = getLikeliFunName(name);
     code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
         coreCls, likelifunname, DOUBLE_TYPE);
-    likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
+    args_with_value = transParamVarDecls(likelifun, fd->getArgs());
+    args_with_value.push_back(
+        new code::ParamVarDecl(likelifun, valuevarname, valuetype));
+    likelifun->setParams(args_with_value);
     transFunBodyLikeli(likelifun, fd->getBody(), valuevarname, markvarname);
   }
   // TODO handle fixed function
@@ -298,9 +320,10 @@ code::Expr* CPPTranslator::transDistribution(
     // :::==> distribution.loglikeli
     std::vector<code::Expr *> args;
     args.push_back(new code::VarRef(valuevar));
-    return new code::CallExpr(new code::BinaryOperator(new code::VarRef(distname),
-                new code::VarRef(DISTRIBUTION_LOGLIKELI_FUN_NAME),
-                code::OpKind::BO_FIELD), args);
+    return new code::CallExpr(
+        new code::BinaryOperator(new code::VarRef(distname),
+            new code::VarRef(DISTRIBUTION_LOGLIKELI_FUN_NAME),
+            code::OpKind::BO_FIELD), args);
   }
 }
 
@@ -353,7 +376,7 @@ void CPPTranslator::transEvidence(std::shared_ptr<ir::Evidence> evid) {
   const std::shared_ptr<ir::Expr>& left = evid->getLeft();
   // check whether left is a function application variable
   std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
-        ir::FunctionCall>(left);
+      ir::FunctionCall>(left);
   if (leftexp) {
     // left side of the evidence is a function application
 
