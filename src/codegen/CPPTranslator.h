@@ -45,26 +45,52 @@ private:
    * given the returnvalue-variable name
    * and the mark variable name
    */
-  void transFunBodyLikeli(code::FunctionDecl* fun, std::shared_ptr<ir::Clause> clause,
-      std::string valuevarname, std::string markvarname);
+  void transFunBodyLikeli(code::FunctionDecl* fun,
+      std::shared_ptr<ir::Clause> clause, std::string valuevarname,
+      std::string markvarname);
+  /**
+   * translate a clause in ir to a statement in code,
+   * retvar is for return variable
+   * if valuevar is given, then it will calculate weight instead of sampling
+   */
   code::Stmt* transClause(std::shared_ptr<ir::Clause> clause,
-      std::string retvar);
-  code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar);
-  code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> ith, std::string retvar);
-  code::Expr* transExpr(std::shared_ptr<ir::Expr> expr);
+      std::string retvar, std::string valuevar = NULL);
+  /**
+   * translate a Branch in ir to a statement in code,
+   * retvar is for return variable
+   * if valuevar is nonempty, then it will calculate weight instead of sampling
+   */
+  code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
+      std::string valuevar = std::string());
+  /**
+   * translate a IfThen in ir to a statement in code,
+   * retvar is for return variable
+   * if valuevar is nonempty, then it will calculate weight instead of sampling
+   */
+  code::Stmt* transIfThen(std::shared_ptr<ir::IfThen> ith, std::string retvar,
+      std::string valuevar = std::string());
+  /**
+   * translate an expression in ir to a statement in code,
+   * retvar is for return variable
+   * if valuevar is nonempty, then it will calculate weight instead of sampling
+   */
+  code::Expr* transExpr(std::shared_ptr<ir::Expr> expr, std::string valuevar =
+      std::string());
 
   /**
    * translate the evidence in obs statement
    */
   void transEvidence(std::shared_ptr<ir::Evidence> evid);
 
-  void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname, std::string valuerefname);
+  void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
+      std::string valuerefname);
   /**
    * translate the distribution expression
-   * given the arguments
+   * given the arguments,
+   * if valuevar is nonempty, it evaluates the likelihood instead of sampling
    */
   code::Expr* transDistribution(std::shared_ptr<ir::Distribution> dist,
-      std::vector<code::Expr*> args);
+      std::vector<code::Expr*> args, std::string valuevar = std::string());
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
       const std::shared_ptr<ir::VarDecl> var);
   std::vector<code::ParamVarDecl*> transParamVarDecls(
@@ -107,7 +133,6 @@ private:
    * function name for the distribution calculating the log-likelihood of a sample
    */
   static const std::string DISTRIBUTION_LOGLIKELI_FUN_NAME;
-
 
   /**
    * initial value set to mark_var (default -1)
