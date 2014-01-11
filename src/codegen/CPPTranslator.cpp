@@ -227,6 +227,23 @@ void CPPTranslator::transSetterFun(code::FunctionDecl* fun,
   fun->addStmt(st);
 }
 
+void CPPTranslator::transFunBodyLikeli(code::FunctionDecl* fun,
+    std::shared_ptr<ir::Clause> clause, std::string valuevarname,
+    std::string markvarname) {
+  // now the value of this function app var is in RETURN_VAR_NAME
+  addFunValueRefStmt(fun, valuevarname, VALUE_VAR_REF_NAME);
+  // declare the weight variable and setting its init value
+  // it is recording the log likelihood
+  // ::: __weight = 0
+  code::VarDecl* weightvar = new code::VarDecl(fun, WEIGHT_VAR_NAME,
+      DOUBLE_TYPE, new code::FloatingLiteral(0));
+  fun->addStmt(new code::DeclStmt(weightvar));
+  // translate the Clause and calculate weight
+  transClause(clause, WEIGHT_VAR_NAME, VALUE_VAR_REF_NAME);
+  // now return the value
+  fun->addStmt(new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_NAME)));
+}
+
 code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
     std::string retvar, std::string valuevar) {
   std::shared_ptr<ir::Branch> br = std::dynamic_pointer_cast<ir::Branch>(
@@ -340,30 +357,6 @@ code::Expr* CPPTranslator::transDistribution(
 void CPPTranslator::createInit() {
   code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME,
       RANDOM_ENGINE_TYPE);
-}
-
-void CPPTranslator::transFunBodyLikeli(code::FunctionDecl* fun,
-    std::shared_ptr<ir::Clause> clause, std::string valuevarname,
-    std::string markvarname) {
-  // now the value of this function app var is in RETURN_VAR_NAME
-  addFunValueRefStmt(fun, valuevarname, VALUE_VAR_REF_NAME);
-
-  // declare the weight variable and setting its init value
-  // it is recording the log likelihood
-  // ::: __weight = 0
-  code::VarDecl* weightvar = new code::VarDecl(fun, WEIGHT_VAR_NAME,
-      DOUBLE_TYPE, new code::FloatingLiteral(0));
-  fun->addStmt(new code::DeclStmt(weightvar));
-
-  // translate the Clause and calculate weight
-
-  // TODO add likelihood calculation
-
-  // now should sample
-  //now translate actual sampling part
-  transClause(clause, VALUE_VAR_REF_NAME);
-  // now return the value
-  fun->addStmt(new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_NAME)));
 }
 
 void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
