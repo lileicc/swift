@@ -1,0 +1,37 @@
+(BlogProgram:
+  (args:
+    (FuncDecl:
+      :kind random
+      :type Ball
+      :func x
+      expr:
+        (DistrExpr:
+          :distr Categorical
+          (args:
+            (MapExpr:
+              :from#0
+                (OpExpr:
+                  :op 16
+                  :left
+                    (VarRef: b )
+                  :right
+                    (IntLiteral: 0 )
+                )
+              :to#0
+                (DoubleLiteral: 0.500000 )
+              :from#1
+                (OpExpr:
+                  :op 16
+                  :left
+                    (VarRef: b )
+                  :right
+                    (IntLiteral: 1 )
+                )
+              :to#1
+                (DoubleLiteral: 0.500000 )
+            )
+          )
+        )
+    )
+  )
+)

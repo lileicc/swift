@@ -6,10 +6,10 @@
 #include <vector>
 #include <tuple>
 #include <tclap/CmdLine.h>
-#include "absyn\BlogProgram.h"
-#include "semant\Semant.h"
-#include "codegen\CPPTranslator.h"
-#include "ir\BlogModel.h"
+#include "absyn/BlogProgram.h"
+#include "semant/Semant.h"
+#include "codegen/CPPTranslator.h"
+#include "ir/BlogModel.h"
 using namespace std;
 using namespace swift;
 

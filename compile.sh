@@ -1,4 +1,5 @@
-#!/bin/bash 
+#!/bin/bash
+
 cd src
 cd parse
 yacc -d -o parser.cpp blog.yacc
