@@ -1,0 +1,11 @@
+(BlogProgram:
+  (args:
+    (DistinctDecl:
+      :type Ball
+      :var (:
+        (: a 10 )
+        (: b 1 )
+      )
+    )
+  )
+)
