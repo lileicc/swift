@@ -48,6 +48,13 @@ private:
   void transFunBodyLikeli(code::FunctionDecl* fun,
       std::shared_ptr<ir::Clause> clause, std::string valuevarname,
       std::string markvarname);
+
+  /**
+   * setup the Setter function for a predicate
+   * will set a value for the given Function Application variable
+   */
+  void transSetterFun(code::FunctionDecl* fun, std::string valuevarname,
+      std::string markvarname);
   /**
    * translate a clause in ir to a statement in code,
    * retvar is for return variable
@@ -83,7 +90,7 @@ private:
   void transEvidence(std::shared_ptr<ir::Evidence> evid);
 
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
-      std::string valuerefname);
+      std::string valuerefname, code::Type varType = INT_TYPE);
   /**
    * translate the distribution expression
    * given the arguments,
@@ -158,7 +165,12 @@ private:
   /**
    * name for the local variable holding FuncAppVar
    */
-  static const std::string FUNAPP_VAR_NAME;
+  static const std::string VALUE_VAR_REF_NAME;
+
+  /**
+   * name for the argument holding FuncAppVar value
+   */
+  static const std::string VALUE_ARG_NAME;
 
   /**
    * name for the mark variable, which is refering the mark var
