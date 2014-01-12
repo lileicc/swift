@@ -26,6 +26,9 @@ private:
   code::NamespaceDecl* coreNs; // main namespace
   code::FunctionDecl* coreClsInit; // init function for main class
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
+  /**
+   * translate blog function
+   */
   void transFun(std::shared_ptr<ir::FuncDefn> fd);
 
   /**
@@ -34,27 +37,21 @@ private:
    */
   void createInit();
   /**
-   * translate the function body,
-   * given the returnvalue-variable name
-   * and the mark variable name
+   * translate the blog function to getter function
+   * ::: random Color truecolor(Ball b) => int get_truecolor(int i)
    */
-  void transFunBody(code::FunctionDecl* fun, std::shared_ptr<ir::Clause> clause,
-      std::string valuevarname, std::string markvarname);
+  code::FunctionDecl* transGetterFun(std::shared_ptr<ir::FuncDefn> fd);
   /**
-   * translate the function body to likelihood function,
-   * given the returnvalue-variable name
-   * and the mark variable name
+   * translate the blog function body to likelihood function
    */
-  void transFunBodyLikeli(code::FunctionDecl* fun,
-      std::shared_ptr<ir::Clause> clause, std::string valuevarname,
-      std::string markvarname);
-
+  code::FunctionDecl* transLikeliFun(std::shared_ptr<ir::FuncDefn> fd);
   /**
    * setup the Setter function for a predicate
    * will set a value for the given Function Application variable
+   * and calculate the likelihood (need to call the likelifun)
    */
-  void transSetterFun(code::FunctionDecl* fun, std::string valuevarname,
-      std::string markvarname);
+  code::FunctionDecl* transSetterFun(std::shared_ptr<ir::FuncDefn> fd);
+
   /**
    * translate a clause in ir to a statement in code,
    * retvar is for return variable
@@ -84,9 +81,11 @@ private:
   code::Expr* transExpr(std::shared_ptr<ir::Expr> expr, std::string valuevar =
       std::string());
   /**
-   * translate the evidence in obs statement
+   * translate the evidence in obs statement, the resulting statement is added
+   * to the declaration context
    */
-  void transEvidence(std::shared_ptr<ir::Evidence> evid);
+  void transEvidence(code::FunctionDecl* context,
+      std::shared_ptr<ir::Evidence> evid);
 
   /**
    * translate all evidences
@@ -94,7 +93,8 @@ private:
   void transAllEvidence(std::vector<std::shared_ptr<ir::Evidence>> evids);
 
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
-      std::string valuerefname, code::Type varType = INT_TYPE);
+      std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
+      code::Type varType = INT_TYPE);
   /**
    * translate the distribution expression
    * given the arguments,
@@ -169,7 +169,7 @@ private:
   /**
    * name for the local variable holding likelihood weight;
    */
-  static const std::string WEIGHT_VAR_NAME;
+  static const std::string WEIGHT_VAR_REF_NAME;
 
   /**
    * name for the local variable holding FuncAppVar

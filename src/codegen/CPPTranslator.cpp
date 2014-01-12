@@ -22,7 +22,7 @@ const std::string CPPTranslator::DISTRIBUTION_GEN_FUN_NAME = "gen";
 const std::string CPPTranslator::DISTRIBUTION_LIKELI_FUN_NAME = "likeli";
 const std::string CPPTranslator::DISTRIBUTION_LOGLIKELI_FUN_NAME = "loglikeli";
 const std::string CPPTranslator::CURRENT_SAMPLE_NUM_VARNAME = "__cur_loop";
-const std::string CPPTranslator::WEIGHT_VAR_NAME = "__ret_value";
+const std::string CPPTranslator::WEIGHT_VAR_REF_NAME = "__ret_value";
 const std::string CPPTranslator::VALUE_VAR_REF_NAME = "__value";
 const std::string CPPTranslator::VALUE_ARG_NAME = "_value_arg";
 const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
@@ -108,9 +108,6 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
   // translate fixed function
 
   // translate evidence
-//  for (auto evid : model->getEvidences()) {
-//    transEvidence(evid);
-//  }
   transAllEvidence(model->getEvidences());
 
   // TODO translate query
@@ -157,93 +154,123 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
 }
 
 void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
-  const std::string & name = fd->getName();
-  std::string getterfunname = getGetterFunName(name);
-  code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
-  // translate random function
-  // create gettfunname function
-  code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
-      coreCls, getterfunname, valuetype);
-  getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
   if (fd->isRand()) {
-    // __value__name for recording the value of the function application variable
-    std::string valuevarname = getValueVarName(name);
-    // __mark__name
-    std::string markvarname = getMarkVarName(name);
-    transFunBody(getterfun, fd->getBody(), valuevarname, markvarname);
-
-    // add setter function::: void set_fun(int, ,,,);
-    std::string setterfunname = getSetterFunName(name);
-    code::FunctionDecl* setterfun = code::FunctionDecl::createFunctionDecl(
-        coreCls, setterfunname, VOID_TYPE);
-    std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
-        setterfun, fd->getArgs());
-    args_with_value.push_back(
-        new code::ParamVarDecl(setterfun, VALUE_ARG_NAME, valuetype));
-    setterfun->setParams(args_with_value);
-    transSetterFun(setterfun, valuevarname, markvarname);
+    // translate random function
+    // create gettfunname function
+    transGetterFun(fd);
 
     // add likelihood function::: double likeli_fun(int, ...);
-    std::string likelifunname = getLikeliFunName(name);
-    code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
-        coreCls, likelifunname, DOUBLE_TYPE);
-    likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
-    transFunBodyLikeli(likelifun, fd->getBody(), valuevarname, markvarname);
+    transLikeliFun(fd);
+
+    // add setter function::: double set_fun(int, ,,,);
+    transSetterFun(fd);
   }
   // TODO handle fixed function
 }
 
-void CPPTranslator::transFunBody(code::FunctionDecl* fun,
-    std::shared_ptr<ir::Clause> clause, std::string valuevarname,
-    std::string markvarname) {
-  addFunValueRefStmt(fun, valuevarname, VALUE_VAR_REF_NAME);
-  addFunValueRefStmt(fun, markvarname, MARK_VAR_REF_NAME);
+code::FunctionDecl* CPPTranslator::transGetterFun(
+    std::shared_ptr<ir::FuncDefn> fd) {
+  const std::string & name = fd->getName();
+  std::string getterfunname = getGetterFunName(name);
+  code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+  // __value__name for recording the value of the function application variable
+  std::string valuevarname = getValueVarName(name);
+  // __mark__name
+  std::string markvarname = getMarkVarName(name);
+  code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
+      coreCls, getterfunname, valuetype);
+  getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
+
+  addFunValueRefStmt(getterfun, valuevarname, getterfun->getParams(),
+      VALUE_VAR_REF_NAME);
+  addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
+      MARK_VAR_REF_NAME);
   // now translating::: if (markvar == current sample num) then return value;
   code::Stmt* st = new code::IfStmt(
       new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
           new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQU),
       new code::ReturnStmt(new code::VarRef(VALUE_VAR_REF_NAME)), NULL);
-  fun->addStmt(st);
+  getterfun->addStmt(st);
   // now should sample
   // mark the variable first
   st = new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
-  fun->addStmt(st);
+  getterfun->addStmt(st);
   //now translate actual sampling part
-  transClause(clause, VALUE_VAR_REF_NAME);
+  transClause(fd->getBody(), VALUE_VAR_REF_NAME);
   // now return the value
-  fun->addStmt(new code::ReturnStmt(new code::VarRef(VALUE_VAR_REF_NAME)));
+  getterfun->addStmt(
+      new code::ReturnStmt(new code::VarRef(VALUE_VAR_REF_NAME)));
+  return getterfun;
 }
 
-void CPPTranslator::transSetterFun(code::FunctionDecl* fun,
-    std::string valuevarname, std::string markvarname) {
-  addFunValueRefStmt(fun, valuevarname, VALUE_VAR_REF_NAME, fun->getType());
-  addFunValueRefStmt(fun, markvarname, MARK_VAR_REF_NAME);
-  code::Stmt* st = new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
-      new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
-  fun->addStmt(st);
-  // :::==> value_var = value_arg
-  st = new code::BinaryOperator(new code::VarRef(VALUE_VAR_REF_NAME),
-      new code::VarRef(((fun->getParams()).back())->getId()),
-      code::OpKind::BO_ASSIGN);
-  fun->addStmt(st);
-}
+code::FunctionDecl* CPPTranslator::transLikeliFun(
+    std::shared_ptr<ir::FuncDefn> fd) {
+  const std::string & name = fd->getName();
+  std::string likelifunname = getLikeliFunName(name);
+  code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+  // __value__name for recording the value of the function application variable
+  std::string valuevarname = getValueVarName(name);
+  // __mark__name
+  std::string markvarname = getMarkVarName(name);
 
-void CPPTranslator::transFunBodyLikeli(code::FunctionDecl* fun,
-    std::shared_ptr<ir::Clause> clause, std::string valuevarname,
-    std::string markvarname) {
+  code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
+      coreCls, likelifunname, DOUBLE_TYPE);
+  likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
+
   // now the value of this function app var is in RETURN_VAR_NAME
-  addFunValueRefStmt(fun, valuevarname, VALUE_VAR_REF_NAME);
+  addFunValueRefStmt(likelifun, valuevarname, likelifun->getParams(),
+      VALUE_VAR_REF_NAME);
   // declare the weight variable and setting its init value
   // it is recording the log likelihood
   // ::: __weight = 0
-  code::VarDecl* weightvar = new code::VarDecl(fun, WEIGHT_VAR_NAME,
+  code::VarDecl* weightvar = new code::VarDecl(likelifun, WEIGHT_VAR_REF_NAME,
       DOUBLE_TYPE, new code::FloatingLiteral(0));
-  fun->addStmt(new code::DeclStmt(weightvar));
+  likelifun->addStmt(new code::DeclStmt(weightvar));
   // translate the Clause and calculate weight
-  transClause(clause, WEIGHT_VAR_NAME, VALUE_VAR_REF_NAME);
+  transClause(fd->getBody(), WEIGHT_VAR_REF_NAME, VALUE_VAR_REF_NAME);
   // now return the value
-  fun->addStmt(new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_NAME)));
+  likelifun->addStmt(
+      new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_REF_NAME)));
+  return likelifun;
+}
+
+code::FunctionDecl* CPPTranslator::transSetterFun(
+    std::shared_ptr<ir::FuncDefn> fd) {
+  const std::string & name = fd->getName();
+  std::string likelifunname = getLikeliFunName(name);
+  code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+  // __value__name for recording the value of the function application variable
+  std::string valuevarname = getValueVarName(name);
+  // __mark__name
+  std::string markvarname = getMarkVarName(name);
+  std::string setterfunname = getSetterFunName(name);
+  code::FunctionDecl* setterfun = code::FunctionDecl::createFunctionDecl(
+      coreCls, setterfunname, VOID_TYPE);
+  std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
+      setterfun, fd->getArgs());
+  addFunValueRefStmt(setterfun, valuevarname, args_with_value,
+      VALUE_VAR_REF_NAME, valuetype);
+  addFunValueRefStmt(setterfun, markvarname, args_with_value,
+      MARK_VAR_REF_NAME);
+  args_with_value.push_back(
+      new code::ParamVarDecl(setterfun, VALUE_ARG_NAME, valuetype));
+  setterfun->setParams(args_with_value);
+  code::Stmt* st = new code::BinaryOperator(new code::VarRef(MARK_VAR_REF_NAME),
+      new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
+  setterfun->addStmt(st);
+  // :::==> value_var = value_arg
+  st = new code::BinaryOperator(new code::VarRef(VALUE_VAR_REF_NAME),
+      new code::VarRef(VALUE_ARG_NAME), code::OpKind::BO_ASSIGN);
+  setterfun->addStmt(st);
+  std::vector<code::Expr*> args_ref;
+  for (auto a : fd->getArgs()) {
+    args_ref.push_back(new code::VarRef(a->getVar()));
+  }
+  st = new code::ReturnStmt(
+      new code::CallExpr(new code::VarRef(likelifunname), args_ref));
+  setterfun->addStmt(st);
+  return setterfun;
 }
 
 code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
@@ -362,12 +389,13 @@ void CPPTranslator::createInit() {
 }
 
 void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
-    std::string valuevarname, std::string valuerefname, code::Type varType) {
+    std::string valuevarname, std::vector<code::ParamVarDecl*>& valueindex,
+    std::string valuerefname, code::Type varType) {
   // the value of this function application variable is stored in
   // valuevarname[index1][index2]...
   // where the index are corresponding to the arguments
   code::Expr* exp = new code::VarRef(valuevarname);
-  for (auto prm : fun->getParams()) {
+  for (auto prm : valueindex) {
     exp = new code::ArraySubscriptExpr(exp, new code::VarRef(prm->getId()));
   }
 
@@ -377,22 +405,46 @@ void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
   fun->addStmt(dst);
 }
 
-void CPPTranslator::transEvidence(std::shared_ptr<ir::Evidence> evid) {
+void CPPTranslator::transEvidence(code::FunctionDecl* fun,
+    std::shared_ptr<ir::Evidence> evid) {
   const std::shared_ptr<ir::Expr>& left = evid->getLeft();
   // check whether left is a function application variable
   std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
       ir::FunctionCall>(left);
   if (leftexp) {
     // left side of the evidence is a function application
-
+    std::string blogfunname = leftexp->getRefer()->getName(); // the function name in blog model
+    std::string setterfunname = getSetterFunName(blogfunname); // setter function for the blog function predicate
+    std::vector<code::Expr*> args;
+    // now translate arguments to this setter function
+    for (auto a : leftexp->getArgs()) {
+      args.push_back(transExpr(a));
+    }
+    // assign the right side of the evidence to left function application variable
+    args.push_back(transExpr(evid->getRight()));
+    // call setter function and calculate likelihood
+    code::Stmt* st = new code::BinaryOperator(
+        new code::VarRef(WEIGHT_VAR_REF_NAME),
+        new code::CallExpr(new code::VarRef(setterfunname), args),
+        code::OpKind::BO_SPLUS);
+    fun->addStmt(st);
   }
+  // TODO adding support for other evidence
+  // 1. Cardinality evidence
+  // 2. Set evidence
 }
 
 void CPPTranslator::transAllEvidence(
     std::vector<std::shared_ptr<ir::Evidence> > evids) {
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
       SET_EVIDENCE_FUN_NAME, DOUBLE_TYPE);
-
+  code::VarDecl* weightvar = new code::VarDecl(fun, WEIGHT_VAR_REF_NAME,
+      DOUBLE_TYPE, new code::FloatingLiteral(0));
+  fun->addStmt(new code::DeclStmt(weightvar));
+  for (auto evid : evids) {
+    transEvidence(fun, evid);
+  }
+  fun->addStmt(new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_REF_NAME)));
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
