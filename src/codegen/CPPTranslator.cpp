@@ -15,6 +15,7 @@ const code::Type CPPTranslator::INT_REF_TYPE("int", true);
 const code::Type CPPTranslator::DOUBLE_TYPE("double");
 const code::Type CPPTranslator::STRING_TYPE("std::string");
 const code::Type CPPTranslator::BOOL_TYPE("bool");
+const std::string CPPTranslator::SET_EVIDENCE_FUN_NAME = "set_evidence";
 const std::string CPPTranslator::DISTINCT_FIELDNAME = "__name_";
 const std::string CPPTranslator::DISTRIBUTION_INIT_FUN_NAME = "init";
 const std::string CPPTranslator::DISTRIBUTION_GEN_FUN_NAME = "gen";
@@ -389,6 +390,9 @@ void CPPTranslator::transEvidence(std::shared_ptr<ir::Evidence> evid) {
 
 void CPPTranslator::transAllEvidence(
     std::vector<std::shared_ptr<ir::Evidence> > evids) {
+  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
+      SET_EVIDENCE_FUN_NAME, DOUBLE_TYPE);
+
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {

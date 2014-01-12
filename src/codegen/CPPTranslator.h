@@ -132,6 +132,11 @@ private:
   static const std::string DISTINCT_FIELDNAME;
 
   /**
+   * function name for set evidence
+   */
+  static const std::string SET_EVIDENCE_FUN_NAME;
+
+  /**
    * function name for the distribution init
    */
   static const std::string DISTRIBUTION_INIT_FUN_NAME;
