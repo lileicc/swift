@@ -83,11 +83,15 @@ private:
    */
   code::Expr* transExpr(std::shared_ptr<ir::Expr> expr, std::string valuevar =
       std::string());
-
   /**
    * translate the evidence in obs statement
    */
   void transEvidence(std::shared_ptr<ir::Evidence> evid);
+
+  /**
+   * translate all evidences
+   */
+  void transAllEvidence(std::vector<std::shared_ptr<ir::Evidence>> evids);
 
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
       std::string valuerefname, code::Type varType = INT_TYPE);

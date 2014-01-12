@@ -107,9 +107,10 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
   // translate fixed function
 
   // translate evidence
-  for (auto evid : model->getEvidences()) {
-    transEvidence(evid);
-  }
+//  for (auto evid : model->getEvidences()) {
+//    transEvidence(evid);
+//  }
+  transAllEvidence(model->getEvidences());
 
   // TODO translate query
 }
@@ -384,6 +385,10 @@ void CPPTranslator::transEvidence(std::shared_ptr<ir::Evidence> evid) {
     // left side of the evidence is a function application
 
   }
+}
+
+void CPPTranslator::transAllEvidence(
+    std::vector<std::shared_ptr<ir::Evidence> > evids) {
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
