@@ -141,6 +141,7 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   fun->addStmt(
       new code::DeclStmt(
           new code::VarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)));
+  // TODO to call the initialization function
   code::Stmt* init = new code::BinaryOperator(
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME),
       new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN);
@@ -437,6 +438,10 @@ code::Expr* CPPTranslator::transDistribution(
 }
 
 void CPPTranslator::createInit() {
+  // TODO adding setup for
+  // 1. core class,
+  // 2. member declarations for core class, need valuearray, mark array, ...
+  // 3. initialization function to initialize the values (function called in sample(n)
   code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME,
       RANDOM_ENGINE_TYPE);
 }
