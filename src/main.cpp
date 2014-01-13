@@ -13,8 +13,7 @@ using namespace std;
 using namespace swift;
 
 extern absyn::BlogProgram* parse(const char*);
-main(int argc, char** argv) {
-  
+int main(int argc, char** argv) {
   if (argc != 5){
     cout << "Incorrect number of arguments: " << argc << endl;
     exit(0);
@@ -39,4 +38,5 @@ main(int argc, char** argv) {
   
   FILE *output = fopen(out, "w");
   test->print(output, 0);
+  return 0;
 }
