@@ -15,7 +15,8 @@ const code::Type CPPTranslator::INT_REF_TYPE("int", true);
 const code::Type CPPTranslator::DOUBLE_TYPE("double");
 const code::Type CPPTranslator::STRING_TYPE("std::string");
 const code::Type CPPTranslator::BOOL_TYPE("bool");
-const std::string CPPTranslator::SET_EVIDENCE_FUN_NAME = "set_evidence";
+const std::string CPPTranslator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
+const std::string CPPTranslator::QUERY_EVALUATE_FUN_NAME = "_evaluate_query";
 const std::string CPPTranslator::DISTINCT_FIELDNAME = "__name_";
 const std::string CPPTranslator::DISTRIBUTION_INIT_FUN_NAME = "init";
 const std::string CPPTranslator::DISTRIBUTION_GEN_FUN_NAME = "gen";
@@ -111,6 +112,7 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
   transAllEvidence(model->getEvidences());
 
   // TODO translate query
+  transAllQuery(model->getQueries());
 }
 
 code::Code* CPPTranslator::getResult() const {
@@ -447,6 +449,19 @@ void CPPTranslator::transAllEvidence(
   fun->addStmt(new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_REF_NAME)));
 }
 
+void CPPTranslator::transAllQuery(
+    std::vector<std::shared_ptr<ir::Query> > queries) {
+  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
+      QUERY_EVALUATE_FUN_NAME, VOID_TYPE);
+  for (auto qr : queries) {
+    transQuery(qr);
+  }
+}
+
+void CPPTranslator::transQuery(std::shared_ptr<ir::Query> qr) {
+  // TODO
+}
+
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
   switch (ty->getTyp()) {
   case ir::IRConstant::BOOL:
@@ -464,4 +479,5 @@ code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
 
 } /* namespace codegen */
 } /* namespace swift */
+
 

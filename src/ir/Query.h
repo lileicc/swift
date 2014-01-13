@@ -10,6 +10,7 @@ public:
   Query(std::shared_ptr<Expr> var);
   virtual ~Query();
 
+  // TODO refactor name
   const std::shared_ptr<Expr>& getVar() const;
 
 private:

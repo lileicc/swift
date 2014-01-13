@@ -80,6 +80,7 @@ private:
    */
   code::Expr* transExpr(std::shared_ptr<ir::Expr> expr, std::string valuevar =
       std::string());
+
   /**
    * translate the evidence in obs statement, the resulting statement is added
    * to the declaration context
@@ -92,6 +93,17 @@ private:
    */
   void transAllEvidence(std::vector<std::shared_ptr<ir::Evidence>> evids);
 
+  /**
+   * translate all queries
+   */
+  void transAllQuery(std::vector<std::shared_ptr<ir::Query>> queries);
+  /**
+   * translate one query
+   */
+  void transQuery(std::shared_ptr<ir::Query> qr);
+  /**
+   * create reference to blog function value
+   */
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
       std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
       code::Type varType = INT_TYPE);
@@ -135,6 +147,11 @@ private:
    * function name for set evidence
    */
   static const std::string SET_EVIDENCE_FUN_NAME;
+
+  /**
+   * function name for query evaluation
+   */
+  static const std::string QUERY_EVALUATE_FUN_NAME;
 
   /**
    * function name for the distribution init
