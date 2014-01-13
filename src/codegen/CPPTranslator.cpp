@@ -27,15 +27,17 @@ const std::string CPPTranslator::WEIGHT_VAR_REF_NAME = "__ret_value";
 const std::string CPPTranslator::VALUE_VAR_REF_NAME = "__value";
 const std::string CPPTranslator::VALUE_ARG_NAME = "_value_arg";
 const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
-
+const std::string CPPTranslator::ANSWER_PROCESS_CLASS_NAME = "Hist";
+const std::string CPPTranslator::ANSWER_PROCESS_METHOD_NAME = "add";
+const std::string CPPTranslator::MAIN_SAMPLING_FUN_NAME = "sample";
+const std::string CPPTranslator::LOCAL_NUM_SAMPLE_ARG_NAME = "n";
 // randomness
 const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
 const code::Type CPPTranslator::RANDOM_ENGINE_TYPE(
     "std::default_random_engine");
 const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
-const int CPPTranslator::INIT_SAMPLE_NUM = -1;
+const int CPPTranslator::INIT_SAMPLE_NUM = 1;
 
-namespace {
 /**
  * give the name of the type,
  * return the variable name corresponding to the number of objects for this type
@@ -84,6 +86,12 @@ std::string getValueVarName(std::string name) {
   return "__value_" + name;
 }
 
+/**
+ * get the answer histogram type
+ */
+code::Type getTemplatedType(std::string containerType, code::Type elementType) {
+  code::Type ty(containerType + "<" + elementType.getName() + ">");
+  return ty;
 }
 
 CPPTranslator::CPPTranslator() {
@@ -111,12 +119,55 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
   // translate evidence
   transAllEvidence(model->getEvidences());
 
+  transSampleAlg();
+
   // TODO translate query
   transAllQuery(model->getQueries());
 }
 
 code::Code* CPPTranslator::getResult() const {
   return prog;
+}
+
+code::FunctionDecl* CPPTranslator::transSampleAlg() {
+  // for the moment, only supporting likelihood weighting algorithm
+  // declare the sample method within coreCls
+  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
+      MAIN_SAMPLING_FUN_NAME, VOID_TYPE);
+  std::vector<code::ParamVarDecl*> args;
+  args.push_back(
+      new code::ParamVarDecl(fun, LOCAL_NUM_SAMPLE_ARG_NAME, INT_TYPE));
+  fun->setParams(args);
+  fun->addStmt(
+      new code::DeclStmt(
+          new code::VarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)));
+  code::Stmt* init = new code::BinaryOperator(
+      new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME),
+      new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN);
+  code::Expr* cond = new code::BinaryOperator(
+      new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME),
+      new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME), code::OpKind::BO_LEQ);
+  code::Expr* step = new code::BinaryOperator(
+      new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME), NULL, code::OpKind::BO_INC);
+  code::CompoundStmt* body = new code::CompoundStmt();
+  // :::=> weight = set_evidence();
+  body->addStmt(
+      new code::BinaryOperator(new code::VarRef(WEIGHT_VAR_REF_NAME),
+          new code::CallExpr(new code::VarRef(SET_EVIDENCE_FUN_NAME)),
+          code::OpKind::BO_ASSIGN));
+  std::vector<code::Expr*> weightArg;
+  weightArg.push_back(new code::VarRef(WEIGHT_VAR_REF_NAME));
+  body->addStmt(
+      new code::CallExpr(new code::VarRef(QUERY_EVALUATE_FUN_NAME), weightArg));
+  // :::==> weight[current_loop] = w;
+  body->addStmt(
+      new code::BinaryOperator(
+          new code::ArraySubscriptExpr(new code::VarRef(GLOBAL_WEIGHT_VARNAME),
+              new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME)),
+          new code::VarRef(WEIGHT_VAR_REF_NAME), code::OpKind::BO_ASSIGN));
+  fun->addStmt(new code::ForStmt(init, cond, step, body));
+  return fun;
+  //TODO adding other algorithms
 }
 
 void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
@@ -452,15 +503,32 @@ void CPPTranslator::transAllEvidence(
 void CPPTranslator::transAllQuery(
     std::vector<std::shared_ptr<ir::Query> > queries) {
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
-      QUERY_EVALUATE_FUN_NAME, VOID_TYPE);
+      QUERY_EVALUATE_FUN_NAME, VOID_TYPE, true);
+  std::vector<code::ParamVarDecl*> args;
+  // query function has one argument of double, for weight
+  args.push_back(new code::ParamVarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE));
+  fun->setParams(args);
+  int index = 0;
   for (auto qr : queries) {
-    transQuery(qr);
+    transQuery(fun, qr, index);
+    ++index;
   }
 }
 
-void CPPTranslator::transQuery(std::shared_ptr<ir::Query> qr) {
-  // TODO
-
+void CPPTranslator::transQuery(code::FunctionDecl* fun,
+    std::shared_ptr<ir::Query> qr, int n) {
+  std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+  code::FieldDecl(coreCls, answervarname,
+      getTemplatedType(ANSWER_PROCESS_CLASS_NAME,
+          mapIRTypeToCodeType(qr->getVar()->getTyp())));
+  std::vector<code::Expr*> args;
+  args.push_back(transExpr(qr->getVar()));
+  args.push_back(new code::VarRef(WEIGHT_VAR_REF_NAME));
+  fun->addStmt(
+      new code::CallExpr(
+          new code::BinaryOperator(new code::VarRef(answervarname),
+              new code::VarRef(ANSWER_PROCESS_METHOD_NAME),
+              code::OpKind::BO_FIELD), args));
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
@@ -480,5 +548,4 @@ code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
 
 } /* namespace codegen */
 } /* namespace swift */
-
 

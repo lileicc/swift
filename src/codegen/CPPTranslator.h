@@ -25,6 +25,9 @@ private:
   code::ClassDecl* coreCls; // main Class for the sampler;
   code::NamespaceDecl* coreNs; // main namespace
   code::FunctionDecl* coreClsInit; // init function for main class
+
+  code::FunctionDecl* transSampleAlg();
+
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   /**
    * translate blog function
@@ -98,9 +101,10 @@ private:
    */
   void transAllQuery(std::vector<std::shared_ptr<ir::Query>> queries);
   /**
-   * translate one query
+   * translate n-th query
    */
-  void transQuery(std::shared_ptr<ir::Query> qr);
+  void transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr,
+      int n);
   /**
    * create reference to blog function value
    */
@@ -138,6 +142,8 @@ private:
 
   static const code::Type VOID_TYPE;
 
+  static const std::string MAIN_SAMPLING_FUN_NAME;
+
   /**
    * field name inside class for declared type
    */
@@ -152,6 +158,23 @@ private:
    * function name for query evaluation
    */
   static const std::string QUERY_EVALUATE_FUN_NAME;
+
+  /**
+   * variable name prefix for holding the answer for a query
+   */
+  static const std::string ANSWER_VAR_NAME_PREFIX;
+
+  static const std::string LOCAL_NUM_SAMPLE_ARG_NAME;
+
+  /**
+   * function name for processing query answer
+   */
+  static const std::string ANSWER_PROCESS_CLASS_NAME;
+
+  /**
+   * function name for processing query answer
+   */
+  static const std::string ANSWER_PROCESS_METHOD_NAME;
 
   /**
    * function name for the distribution init
@@ -182,6 +205,11 @@ private:
    * name of variable for current_loop or current sample num
    */
   static const std::string CURRENT_SAMPLE_NUM_VARNAME;
+
+  /**
+   * name for the global variable holding weight of each possible world
+   */
+  static const std::string GLOBAL_WEIGHT_VARNAME;
 
   /**
    * name for the local variable holding likelihood weight;

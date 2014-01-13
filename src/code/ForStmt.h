@@ -5,18 +5,17 @@
  *      Author: leili
  */
 
-#pragma once
-
 #include "Stmt.h"
 #include "Expr.h"
 #include "CompoundStmt.h"
+#pragma once
 
 namespace swift {
 namespace code {
 
 class ForStmt: public swift::code::Stmt {
 public:
-  ForStmt();
+  ForStmt(Stmt* init, Expr* cond, Expr* step, Stmt* body=NULL);
   ~ForStmt();
 
   void setInit(Stmt* it);
@@ -27,17 +26,16 @@ public:
   Expr* getStep();
   void setRange(bool r);
   bool isRange() const;
-  void addStmt(Stmt* st);
-  CompoundStmt& getBody();
+  Stmt* getBody();
 
   // For Printer
   void print(printer::Printer* prt);
 
 private:
-  CompoundStmt body;
   Stmt* init;
   Expr* cond;
   Expr* step;
+  Stmt* body;
   bool range;
   /*
     if range == true

@@ -306,14 +306,12 @@ void CPPPrinter::print(code::ForStmt* term) {
   fprintf(file, ")");
   newline = backup;
 
-  if (term->getBody().size() == 0) {
-    fprintf(file, ";");
+  if (term->getBody() != NULL) {
     printLine();
+    term->getBody()->print(this);
   }
-  else {
-    printLine();
-    term->getBody().print(this);
-  }
+  fprintf(file, ";");
+  printLine();
 }
 
 void CPPPrinter::print(code::FunctionDecl* term) {
