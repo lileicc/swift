@@ -8,7 +8,7 @@
 #include "absyn/BlogProgram.h"
 using namespace swift::absyn;
 
-main(int argc, char **argv){
+int main(int argc, char **argv){
   FILE* output;
   
   /* distinct Ball a[10], b; */
@@ -149,5 +149,5 @@ main(int argc, char **argv){
   output = fopen("test/parse/numref.out", "w");
   numreftest->print(output, 0);
   }
-  
+  return 0;
 }
