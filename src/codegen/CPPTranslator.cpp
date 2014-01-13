@@ -460,6 +460,7 @@ void CPPTranslator::transAllQuery(
 
 void CPPTranslator::transQuery(std::shared_ptr<ir::Query> qr) {
   // TODO
+
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
