@@ -10,7 +10,10 @@
 namespace swift {
 namespace code {
 
-NewExpr::NewExpr(Expr* expr): expr(expr), isArray(false) {
+NewExpr::NewExpr(Expr* expr) {
+  ty("NULL");
+  this->expr = expr;
+  isArray = false;
 }
 
 NewExpr::~NewExpr() {
