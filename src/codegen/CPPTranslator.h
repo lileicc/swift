@@ -131,10 +131,11 @@ private:
   static code::Type mapIRTypeToCodeType(const ir::Ty * ty); // map ir type to code type
 
   static const code::Type INT_TYPE;
-
+  static const code::Type INT_POINTER_TYPE;
   static const code::Type INT_REF_TYPE;
 
   static const code::Type DOUBLE_TYPE;
+  static const code::Type DOUBLE_POINTER_TYPE;
 
   static const code::Type STRING_TYPE;
 

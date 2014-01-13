@@ -12,7 +12,9 @@ namespace codegen {
 
 const code::Type CPPTranslator::INT_TYPE("int");
 const code::Type CPPTranslator::INT_REF_TYPE("int", true);
+const code::Type CPPTranslator::INT_POINTER_TYPE("int*");
 const code::Type CPPTranslator::DOUBLE_TYPE("double");
+const code::Type CPPTranslator::DOUBLE_POINTER_TYPE("double*");
 const code::Type CPPTranslator::STRING_TYPE("std::string");
 const code::Type CPPTranslator::BOOL_TYPE("bool");
 const std::string CPPTranslator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
@@ -104,8 +106,9 @@ CPPTranslator::~CPPTranslator() {
 }
 
 void CPPTranslator::translate(swift::ir::BlogModel* model) {
-  code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
-      INT_TYPE);
+
+  createInit();
+
   // translate type and distinct symbols;
   for (auto ty : model->getTypes())
     transTypeDomain(ty);
@@ -142,6 +145,14 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
       new code::DeclStmt(
           new code::VarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)));
   // TODO to call the initialization function
+  code::FieldDecl::createFieldDecl(coreCls, GLOBAL_WEIGHT_VARNAME, DOUBLE_POINTER_TYPE);
+  coreClsInit->addStmt(
+      new code::DeleteStmt(new code::VarRef(GLOBAL_WEIGHT_VARNAME), true));
+  coreClsInit->addStmt(
+      new code::BinaryOperator(new code::VarRef(GLOBAL_WEIGHT_VARNAME),
+          new code::NewExpr(DOUBLE_TYPE,
+              new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
+          code::OpKind::BO_ASSIGN));
   code::Stmt* init = new code::BinaryOperator(
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME),
       new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN);
@@ -231,6 +242,24 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   std::string valuevarname = getValueVarName(name);
   // __mark__name
   std::string markvarname = getMarkVarName(name);
+  // adding in the initialization function
+  code::FieldDecl::createFieldDecl(coreCls, valuevarname, INT_POINTER_TYPE);
+  coreClsInit->addStmt(
+      new code::DeleteStmt(new code::VarRef(valuevarname), true));
+  coreClsInit->addStmt(
+      new code::BinaryOperator(new code::VarRef(valuevarname),
+          new code::NewExpr(INT_TYPE,
+              new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
+          code::OpKind::BO_ASSIGN));
+  // adding in the initialization function
+  code::FieldDecl::createFieldDecl(coreCls, markvarname, INT_POINTER_TYPE);
+  coreClsInit->addStmt(
+      new code::DeleteStmt(new code::VarRef(markvarname), true));
+  coreClsInit->addStmt(
+      new code::BinaryOperator(new code::VarRef(markvarname),
+          new code::NewExpr(INT_TYPE,
+              new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
+          code::OpKind::BO_ASSIGN));
   code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
       coreCls, getterfunname, valuetype);
   getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
@@ -442,6 +471,9 @@ void CPPTranslator::createInit() {
   // 1. core class,
   // 2. member declarations for core class, need valuearray, mark array, ...
   // 3. initialization function to initialize the values (function called in sample(n)
+  coreCls = new code::ClassDecl::createClassDecl(coreNs, );
+  code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
+      INT_TYPE);
   code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME,
       RANDOM_ENGINE_TYPE);
 }
