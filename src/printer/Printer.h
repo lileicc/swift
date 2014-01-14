@@ -26,6 +26,7 @@ public:
   virtual void print(code::ClassDecl* term)=0;
   virtual void print(code::CompoundStmt* term)=0;
   virtual void print(code::ContinueStmt* term) = 0;
+  virtual void print(code::DeclContext* term)=0;
   virtual void print(code::DeclStmt* term)=0;
   virtual void print(code::DeleteStmt* term)=0;
   virtual void print(code::FieldDecl* term)=0;
@@ -38,7 +39,7 @@ public:
   virtual void print(code::NewExpr* term)=0;
   virtual void print(code::ParamVarDecl* term)=0;
   virtual void print(code::ReturnStmt* term)=0;
-  virtual void print(code::SpecialStmt* term)=0;
+  virtual void print(code::SpecialMacro* term)=0;
   virtual void print(code::StringLiteral* term)=0;
   virtual void print(code::SwitchStmt* term)=0;
   virtual void print(code::Type* term)=0;

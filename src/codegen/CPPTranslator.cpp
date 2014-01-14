@@ -102,19 +102,21 @@ code::Type getTemplatedType(std::string containerType, code::Type elementType) {
 }
 
 CPPTranslator::CPPTranslator() {
-  // TODO Auto-generated constructor stub
-
+  useTag = false;
+  prog = new code::Code();
+  coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
+  prog->addDecl(coreNs);
+  coreCls = NULL;
+  coreClsInit = NULL;
 }
 
 CPPTranslator::~CPPTranslator() {
-  // TODO Auto-generated destructor stub
+  if (!useTag)
+    delete prog;
 }
 
 void CPPTranslator::translate(swift::ir::BlogModel* model) {
-
-  coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
   coreCls = code::ClassDecl::createClassDecl(coreNs, model->getName());
-
   createInit();
 
   // translate type and distinct symbols;
@@ -136,7 +138,8 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
   transAllQuery(model->getQueries());
 }
 
-code::Code* CPPTranslator::getResult() const {
+code::Code* CPPTranslator::getResult() {
+  useTag = true;
   return prog;
 }
 
@@ -203,8 +206,7 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   int len = td->getPreLen();
   std::string numvar = getVarOfNumType(name);
   // create a field in the main class:::    int numvar;
-  code::FieldDecl::createFieldDecl(coreCls, numvar,
-      INT_TYPE);
+  code::FieldDecl::createFieldDecl(coreCls, numvar, INT_TYPE);
   // create a field in the main class:::    int mark_numvar;
   std::string marknumvar = getMarkVarName(numvar);
   code::FieldDecl::createFieldDecl(coreCls, marknumvar, INT_TYPE);

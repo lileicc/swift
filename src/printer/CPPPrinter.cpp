@@ -3,9 +3,11 @@
 #include <cassert>
 #include "../code/Code.h"
 
-namespace swift { namespace printer {
+namespace swift {
+namespace printer {
 
-CPPPrinter::CPPPrinter(std::string str) : Printer(str), isforward(false) {
+CPPPrinter::CPPPrinter(std::string str) :
+    Printer(str), isforward(false) {
 }
 
 CPPPrinter::~CPPPrinter() {
@@ -14,37 +16,69 @@ CPPPrinter::~CPPPrinter() {
 std::string CPPPrinter::OpConvert(code::OpKind op) {
   using code::OpKind;
   switch (op) {
-  case OpKind::BO_COMP: return "~"; // complement
-  case OpKind::BO_NEG: return "!"; // negate
-  case OpKind::BO_INC: return "++"; // increment
-  case OpKind::BO_DEC: return "--"; // decrement
-  case OpKind::BO_NEW: return "new "; // new or malloc
-  case OpKind::BO_DEL: return "delete "; // delete or dispose
-  case OpKind::BO_ASSIGN: return "=";   // Assignment
-  case OpKind::BO_FIELD: return ".";    // reference to a field
-  case OpKind::BO_RANGE: return ": ";    // range operator
-  case OpKind::BO_LSHGT: return "<<";    // binary left shift
-  case OpKind::BO_RSHGT: return ">>";    // binary right shift
-  case OpKind::BO_BAND: return "&";     // binary and
-  case OpKind::BO_BOR: return "|";      // binary or
-  case OpKind::BO_XOR: return "^";      // binary xor
-  case OpKind::BO_EQU: return "==";      // equal
-  case OpKind::BO_NEQ: return "!=";      // not equal
-  case OpKind::BO_LE: return "<";        // less than
-  case OpKind::BO_RE: return ">"; // greater than
-  case OpKind::BO_LEQ: return "<="; // less then or equal
-  case OpKind::BO_REQ: return ">="; // greater then or equal
-  case OpKind::BO_PLUS: return "+"; // plus
-  case OpKind::BO_MINUS: return "-"; // minus
-  case OpKind::BO_MUL: return "*"; // multiply
-  case OpKind::BO_DIV: return "/"; // divide
-  case OpKind::BO_MOD: return "%"; // module
-  case OpKind::BO_SPLUS: return "+="; // self plus
-  case OpKind::BO_SMINUS: return "-="; // self minus
-  case OpKind::BO_SMUL: return "*="; // self multiply
-  case OpKind::BO_SDIV: return "/="; // self divide
-  case OpKind::BO_SMOD: return "%="; // self module
-  default: assert(false); return "";
+  case OpKind::BO_COMP:
+    return "~"; // complement
+  case OpKind::BO_NEG:
+    return "!"; // negate
+  case OpKind::BO_INC:
+    return "++"; // increment
+  case OpKind::BO_DEC:
+    return "--"; // decrement
+  case OpKind::BO_NEW:
+    return "new "; // new or malloc
+  case OpKind::BO_DEL:
+    return "delete "; // delete or dispose
+  case OpKind::BO_ASSIGN:
+    return "="; // Assignment
+  case OpKind::BO_FIELD:
+    return "."; // reference to a field
+  case OpKind::BO_RANGE:
+    return ": "; // range operator
+  case OpKind::BO_LSHGT:
+    return "<<"; // binary left shift
+  case OpKind::BO_RSHGT:
+    return ">>"; // binary right shift
+  case OpKind::BO_BAND:
+    return "&"; // binary and
+  case OpKind::BO_BOR:
+    return "|"; // binary or
+  case OpKind::BO_XOR:
+    return "^"; // binary xor
+  case OpKind::BO_EQU:
+    return "=="; // equal
+  case OpKind::BO_NEQ:
+    return "!="; // not equal
+  case OpKind::BO_LE:
+    return "<"; // less than
+  case OpKind::BO_RE:
+    return ">"; // greater than
+  case OpKind::BO_LEQ:
+    return "<="; // less then or equal
+  case OpKind::BO_REQ:
+    return ">="; // greater then or equal
+  case OpKind::BO_PLUS:
+    return "+"; // plus
+  case OpKind::BO_MINUS:
+    return "-"; // minus
+  case OpKind::BO_MUL:
+    return "*"; // multiply
+  case OpKind::BO_DIV:
+    return "/"; // divide
+  case OpKind::BO_MOD:
+    return "%"; // module
+  case OpKind::BO_SPLUS:
+    return "+="; // self plus
+  case OpKind::BO_SMINUS:
+    return "-="; // self minus
+  case OpKind::BO_SMUL:
+    return "*="; // self multiply
+  case OpKind::BO_SDIV:
+    return "/="; // self divide
+  case OpKind::BO_SMOD:
+    return "%="; // self module
+  default:
+    assert(false);
+    return "";
   }
 }
 
@@ -61,11 +95,11 @@ void CPPPrinter::addHeader(std::string h) {
 void CPPPrinter::print(code::Code* prog) {
   /*
 
-  stmt contains all the includes, using and defines
-     Note: standard includes will be printed automatically 
-  decl contains the body of the program
+   stmt contains all the includes, using and defines
+   Note: standard includes will be printed automatically
+   decl contains the body of the program
 
-  */
+   */
   indent = 0;
   newline = true;
   prefix.clear();
@@ -89,24 +123,24 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include<string>\n");
 
   // output costumized include
-  for (auto h: header) 
+  for (auto h : header)
     fprintf(file, "#include %s\n", h.c_str());
   printLine();
 
   // print special include/statements
-  for (auto s : prog->getStmts().getAll())
+  for (auto s : prog->getAllMacros())
     s->print(this);
   printLine();
 
   // print forward declaration
   isforward = true;
-  for (auto p : prog->getDecls().getAllMem())
+  for (auto p : prog->getAllDecls())
     p->print(this);
   printLine();
 
   // print main body
   isforward = false;
-  for (auto p : prog->getDecls().getAllMem())
+  for (auto p : prog->getAllDecls())
     p->print(this);
 }
 
@@ -139,8 +173,7 @@ void CPPPrinter::print(code::BinaryOperator* term) {
     fprintf(file, ",");
     term->getRight()->print(this);
     fprintf(file, ")");
-  }
-  else {
+  } else {
     if (!newline)
       fprintf(file, "(");
     std::string op = OpConvert(term->getOp());
@@ -185,8 +218,10 @@ void CPPPrinter::print(code::CallExpr* term) {
   fprintf(file, "(");
   bool not_first = false;
   for (auto p : term->getArgs()) {
-    if (not_first) fprintf(file, ",");
-    else not_first = true;
+    if (not_first)
+      fprintf(file, ",");
+    else
+      not_first = true;
     p->print(this);
   }
   fprintf(file, ")");
@@ -215,16 +250,19 @@ void CPPPrinter::print(code::CaseStmt* term) {
 
 void CPPPrinter::print(code::ClassDecl* term) {
   if (isforward) { // print everything except body of FunctionDecl
-    printIndent(); fprintf(file, "class %s { public:", term->getName().c_str()); printLine();
+    printIndent();
+    fprintf(file, "class %s { public:", term->getName().c_str());
+    printLine();
     indent += 2;
-    for (auto p : term->getAllMem())
+    for (auto p : term->getAllDecls())
       p->print(this);
     indent -= 2;
-    printIndent(); fprintf(file, "};"); printLine();
-  }
-  else { // print body of FunctionDecl
+    printIndent();
+    fprintf(file, "};");
+    printLine();
+  } else { // print body of FunctionDecl
     prefix.push_back(term->getName());
-    for (auto p : term->getAllMem())
+    for (auto p : term->getAllDecls())
       p->print(this);
     prefix.pop_back();
   }
@@ -262,7 +300,8 @@ void CPPPrinter::print(code::DeclStmt* term) {
 }
 
 void CPPPrinter::print(code::FieldDecl* term) {
-  if (!isforward) return ;
+  if (!isforward)
+    return;
   printIndent();
   bool backup = newline;
   newline = false;
@@ -277,7 +316,8 @@ void CPPPrinter::print(code::FloatingLiteral* term) {
   // Special Case!
   //   Here we keep 7 digits after decimal point
   fprintf(file, "%.7lf", term->getVal());
-  if (newline) fprintf(file, ";");
+  if (newline)
+    fprintf(file, ";");
   printLine();
 }
 
@@ -291,8 +331,7 @@ void CPPPrinter::print(code::ForStmt* term) {
   if (term->isRange()) {
     fprintf(file, "auto ");
     term->getInit()->print(this);
-  }
-  else {
+  } else {
     if (term->getInit() != NULL)
       term->getInit()->print(this);
     fprintf(file, ";");
@@ -323,22 +362,24 @@ void CPPPrinter::print(code::FunctionDecl* term) {
     if (term->isInline())
       fprintf(file, "inline ");
     term->getType().print(this);
-    fprintf(file, " %s(",term->getName().c_str());
+    fprintf(file, " %s(", term->getName().c_str());
     bool not_first = false;
     for (auto p : term->getParams()) {
-      if (not_first) fprintf(file, ",");
-      else not_first = true;
+      if (not_first)
+        fprintf(file, ",");
+      else
+        not_first = true;
       p->print(this);
     }
     fprintf(file, ");");
     newline = backup;
     printLine();
-  }
-  else {
+  } else {
     printIndent();
     backup = newline;
     newline = false;
-    if (term->isInline()) fprintf(file, "inline ");
+    if (term->isInline())
+      fprintf(file, "inline ");
     term->getType().print(this);
 
     fprintf(file, " ");
@@ -347,8 +388,10 @@ void CPPPrinter::print(code::FunctionDecl* term) {
     fprintf(file, "%s(", term->getName().c_str());
     bool not_first = false;
     for (auto p : term->getParams()) {
-      if (not_first) fprintf(file, ", ");
-      else not_first = true;
+      if (not_first)
+        fprintf(file, ", ");
+      else
+        not_first = true;
       p->print(this);
     }
     fprintf(file, ")");
@@ -370,13 +413,11 @@ void CPPPrinter::print(code::IfStmt* term) {
   if (term->getThen().size() == 0) {
     fprintf(file, ";");
     printLine();
-  }
-  else if (term->getThen().size() == 1) {
+  } else if (term->getThen().size() == 1) {
     indent += 2;
     term->getThen().get(0)->print(this);
     indent -= 2;
-  }
-  else {
+  } else {
     printLine();
     term->getThen().print(this);
   }
@@ -396,29 +437,35 @@ void CPPPrinter::print(code::IfStmt* term) {
 void CPPPrinter::print(code::IntegerLiteral* term) {
   printIndent();
   fprintf(file, "%d", term->getVal());
-  if (newline) fprintf(file, ";");
+  if (newline)
+    fprintf(file, ";");
   printLine();
 }
 
 void CPPPrinter::print(code::NamespaceDecl* term) {
-  if (isforward) return ;
+  if (isforward)
+    return;
 
-  printIndent(); fprintf(file, "namespace %s {", term->getName().c_str()); printLine();
+  printIndent();
+  fprintf(file, "namespace %s {", term->getName().c_str());
+  printLine();
   printLine();
 
   // print forward declaration
   isforward = true;
-  for (auto p : term->getAllMem())
+  for (auto p : term->getAllDecls())
     p->print(this);
   printLine();
 
   // print body
   isforward = false;
-  for (auto p : term->getAllMem())
+  for (auto p : term->getAllDecls())
     p->print(this);
   printLine();
 
-  printIndent(); fprintf(file, "}"); printLine();
+  printIndent();
+  fprintf(file, "}");
+  printLine();
 }
 
 void CPPPrinter::print(code::ParamVarDecl* term) {
@@ -430,11 +477,10 @@ void CPPPrinter::print(code::ParamVarDecl* term) {
   if (isforward) {
     term->getType().print(this);
     if (term->getValue() != NULL) {
-      fprintf(file,"=");
+      fprintf(file, "=");
       term->getValue()->print(this);
     }
-  }
-  else {
+  } else {
     term->getType().print(this);
     fprintf(file, " %s", term->getId().c_str());
   }
@@ -456,17 +502,18 @@ void CPPPrinter::print(code::ReturnStmt* term) {
   printLine();
 }
 
-void CPPPrinter::print(code::SpecialStmt* term) {
+void CPPPrinter::print(code::SpecialMacro* term) {
   // Note: No need to print ';' here!
   printIndent();
-  fprintf(file, "%s", term->getStmt().c_str());
+  fprintf(file, "%s", term->getMacro().c_str());
   printLine();
 }
 
 void CPPPrinter::print(code::StringLiteral* term) {
   printIndent();
   fprintf(file, "\"%s\"", term->getVal().c_str());
-  if (newline) fprintf(file, ";");
+  if (newline)
+    fprintf(file, ";");
   printLine();
 }
 
@@ -491,7 +538,8 @@ void CPPPrinter::print(code::Type* term) {
 }
 
 void CPPPrinter::print(code::VarDecl* term) {
-  if (!isforward) return ;
+  if (!isforward)
+    return;
 
   bool backup = newline;
   newline = false;
@@ -513,8 +561,9 @@ void CPPPrinter::print(code::VarDecl* term) {
 void CPPPrinter::print(code::VarRef* term) {
   printIndent();
   fprintf(file, "%s", term->getId().c_str());
-  
-  if (newline) fprintf(file, ";");
+
+  if (newline)
+    fprintf(file, ";");
   printLine();
 }
 
@@ -540,12 +589,15 @@ void CPPPrinter::print(code::NewExpr* term) {
     fprintf(file, "[");
     term->getExpr()->print(this);
     fprintf(file, "]");
-    } else {
-      term->getExpr()->print(this);
-    }
+  } else {
+    term->getExpr()->print(this);
+  }
+}
+
+void CPPPrinter::print(code::DeclContext* term) {
+  term->print(this);
 }
 
 }
 }
-
 

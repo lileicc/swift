@@ -11,22 +11,19 @@ namespace swift {
 namespace code {
 
 DeclContext::DeclContext() {
-  // TODO Auto-generated constructor stub
-
 }
 
 DeclContext::~DeclContext() {
-  // TODO: do we need to test NULL, seems not necessary
   for (auto d : members) {
     delete d;
   }
 }
 
-Decl* DeclContext::getMem(int k) {
-  return members[k];
-}
+//Decl* DeclContext::getMem(int k) {
+//  return members[k];
+//}
 
-std::vector<Decl*>& DeclContext::getAllMem() {
+std::vector<Decl*>& DeclContext::getAllDecls() {
   return members;
 }
 

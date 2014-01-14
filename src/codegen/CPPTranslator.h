@@ -18,10 +18,11 @@ public:
   CPPTranslator();
   virtual ~CPPTranslator();
   void translate(swift::ir::BlogModel* model);
-  code::Code* getResult() const;
+  code::Code* getResult();
 
 private:
   code::Code* prog; // holder for result target code
+  bool useTag;
   code::ClassDecl* coreCls; // main Class for the sampler;
   code::NamespaceDecl* coreNs; // main namespace
   code::FunctionDecl* coreClsInit; // init function for main class

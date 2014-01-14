@@ -8,7 +8,7 @@
 #pragma once
 #include <vector>
 #include "Decl.h"
-
+#include "../printer/Printer.h"
 
 namespace swift {
 namespace code {
@@ -23,8 +23,9 @@ public:
   DeclContext();
   virtual ~DeclContext();
   virtual void addDecl(Decl* decl);
-  Decl* getMem(int k);
-  std::vector<Decl*>& getAllMem();
+//  virtual Decl* getMem(int k);
+  virtual std::vector<Decl*>& getAllDecls();
+  virtual void print(printer::Printer* prt) = 0;
 private:
   std::vector<Decl* > members; // member declaration
 };

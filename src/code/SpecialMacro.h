@@ -1,5 +1,5 @@
 /*
- * SpecialStmt.h
+ * SpecialMacro.h
  *
  *  Created on: Nov 24, 2013
  *      Author: leili
@@ -13,7 +13,6 @@ Special Statement can be any single statement in the source code.
 Note that: ';' (if applicable) must be included!
 
 For example:
-   std::exit(0);
    using namespace std;
    #include <iostream>
    #define LL long long
@@ -21,19 +20,19 @@ etc.
  -- Yi Wu
 */
 
-#include "Stmt.h"
 
 #include <string>
+#include "../printer/Printer.h"
 
 namespace swift {
 namespace code {
 
-class SpecialStmt: public swift::code::Stmt {
+class SpecialMacro {
 public:
-  SpecialStmt(std::string stmt = std::string("break"));
-  ~SpecialStmt();
+  SpecialMacro(std::string stmt = std::string(""));
+  ~SpecialMacro();
 
-  const std::string& getStmt() const;
+  const std::string& getMacro() const;
 
   // For Printer
   void print(printer::Printer* prt);
