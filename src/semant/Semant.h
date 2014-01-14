@@ -168,6 +168,8 @@ private:
 
   //stack used to store local variable
   std::map<std::string,std::stack<ir::VarDecl*> > local_var;
+
+  bool isResultUsed;
 };
 
 }
