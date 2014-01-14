@@ -33,6 +33,7 @@ public:
   void print(code::CompoundStmt* term);
   void print(code::ContinueStmt* term);
   void print(code::DeclStmt* term);
+  void print(code::DeleteStmt* term);
   void print(code::FieldDecl* term);
   void print(code::FloatingLiteral* term);
   void print(code::ForStmt* term);
@@ -40,6 +41,7 @@ public:
   void print(code::IfStmt* term);
   void print(code::IntegerLiteral* term);
   void print(code::NamespaceDecl* term);
+  void print(code::NewExpr* term);
   void print(code::ParamVarDecl* term);
   void print(code::ReturnStmt* term);
   void print(code::SpecialStmt* term);

@@ -18,7 +18,7 @@ public:
   DeleteStmt(VarRef* var, bool arrayDel=false);
   ~DeleteStmt();
   bool isArray() const;
-  const VarRef* getVar() const;
+  VarRef* getVar();
   void print(printer::Printer* prt);
 private:
   VarRef* var;

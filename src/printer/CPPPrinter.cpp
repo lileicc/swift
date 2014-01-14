@@ -518,5 +518,34 @@ void CPPPrinter::print(code::VarRef* term) {
   printLine();
 }
 
+void CPPPrinter::print(code::DeleteStmt* term) {
+  printIndent();
+  if (term->isArray()) {
+    fprintf(file, "delete[] ");
+  } else {
+    fprintf(file, "delete ");
+  }
+  bool backup = newline;
+  newline = false;
+  term->getVar()->print(this);
+  newline = backup;
+  fprintf(file, ";");
+  printLine();
+}
+
+void CPPPrinter::print(code::NewExpr* term) {
+  fprintf(file, "new ");
+  if (term->isArray()) {
+    term->getType().print(this);
+    fprintf(file, "[");
+    term->getExpr()->print(this);
+    fprintf(file, "]");
+    } else {
+      term->getExpr()->print(this);
+    }
+}
+
 }
 }
+
+

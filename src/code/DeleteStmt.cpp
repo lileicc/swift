@@ -21,7 +21,7 @@ bool DeleteStmt::isArray() const {
   return arrayDel;
 }
 
-const VarRef* DeleteStmt::getVar() const {
+VarRef* DeleteStmt::getVar() {
   return var;
 }
 

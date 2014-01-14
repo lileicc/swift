@@ -17,12 +17,15 @@ class NewExpr: public swift::code::Expr {
 public:
   NewExpr(Expr * expr);
   NewExpr(Type ty, Expr* size);
+  Type& getType();
+  Expr* getExpr() const;
+  bool isArray() const;
   virtual ~NewExpr();
   void print(printer::Printer* prt);
 private:
   Type ty;
   Expr* expr;
-  bool isArray;
+  bool arrayTag;
 };
 
 } /* namespace code */
