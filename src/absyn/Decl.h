@@ -1,9 +1,9 @@
 /*
-* Decl.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * Decl.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -11,13 +11,12 @@
 #include "Stmt.h"
 
 namespace swift {
-
-class Decl :
-  public swift::Stmt
-{
+namespace absyn {
+class Decl: public Stmt {
 public:
   Decl(int l, int c);
   virtual ~Decl();
 };
 
+}
 }

@@ -1,23 +1,25 @@
 /*
-* NumStDecl.cpp
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * NumStDecl.cpp
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #include "NumStDecl.h"
 
 namespace swift {
+namespace absyn {
 
-NumStDecl::NumStDecl(int l, int c, Symbol typ, Expr* expr)
-  :Decl(l, c), typ(typ), expr(expr) {
+NumStDecl::NumStDecl(int l, int c, Symbol typ, Expr* expr) :
+    Decl(l, c), typ(typ), expr(expr) {
 }
 
 NumStDecl::~NumStDecl() {
-  if (expr != NULL) delete expr;
+  if (expr != NULL)
+    delete expr;
 }
 
-Symbol& NumStDecl::getTyp() {
+const Symbol& NumStDecl::getTyp() {
   return typ;
 }
 
@@ -29,11 +31,11 @@ size_t NumStDecl::argSize() {
   return origin.size();
 }
 
-Symbol& NumStDecl::getArgOrigin(int k) {
+const Symbol& NumStDecl::getArgOrigin(int k) {
   return origin[k];
 }
 
-Symbol& NumStDecl::getArgVar(int k) {
+const Symbol& NumStDecl::getArgVar(int k) {
   return var[k];
 }
 
@@ -48,10 +50,10 @@ void NumStDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s:type %s\n", indent + 2, "", typ.getValue().c_str());
   if (origin.size() > 0) {
     fprintf(file, "%*s(args:\n", indent + 2, "");
-    for (size_t i = 0; i < origin.size(); i++)
-    {
-      fprintf(file, "%*sorigin#%d: %s", indent + 4, "", origin[i].getValue().c_str());
-      fprintf(file, "%*svar#%d: %s", indent + 4, "", var[i].getValue().c_str());
+    for (size_t i = 0; i < origin.size(); i++) {
+      fprintf(file, "%*sorigin# %s", indent + 4, "",
+          origin[i].getValue().c_str());
+      fprintf(file, "%*svar# %s", indent + 4, "", var[i].getValue().c_str());
     }
     fprintf(file, "%*s)\n", indent + 2, "");
   }
@@ -62,4 +64,5 @@ void NumStDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+}
 }

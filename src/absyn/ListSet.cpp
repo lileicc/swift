@@ -1,16 +1,17 @@
 /*
-* ListSet.cpp
-*
-*  Created on: Oct 31, 2013
-*      Author: yiwu
-*/
+ * ListSet.cpp
+ *
+ *  Created on: Oct 31, 2013
+ *      Author: yiwu
+ */
 
 #include "ListSet.h"
 
 namespace swift {
+namespace absyn {
 
-ListSet::ListSet(int l, int c)
-  :SetExpr(l, c) {
+ListSet::ListSet(int l, int c) :
+    SetExpr(l, c) {
 }
 
 ListSet::~ListSet() {
@@ -25,4 +26,5 @@ void ListSet::print(FILE* file, int indent) {
   fprintf(file, "%*s) )\n", indent, "");
 }
 
+}
 }

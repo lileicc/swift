@@ -1,0 +1,24 @@
+(BlogProgram:
+  (args:
+    (Query:
+      :expr
+        (QuantExpr:
+          :typ 19
+          (VarDecl: (: Person x ) )
+          :cond
+            (QuantExpr:
+              :typ 19
+              (VarDecl: (: Person y ) )
+              :cond
+                (OpExpr:
+                  :op 6
+                  :left
+                    (VarRef: x )
+                  :right
+                    (VarRef: y )
+                )
+            )
+        )
+    )
+  )
+)

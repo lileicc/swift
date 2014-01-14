@@ -1,9 +1,9 @@
 /*
-* DistinctDecl.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * DistinctDecl.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -13,10 +13,9 @@
 #include "Symbol.h"
 
 namespace swift {
+namespace absyn {
 
-class DistinctDecl :
-  public swift::Decl
-{
+class DistinctDecl: public Decl {
   Symbol typ;
   std::vector<Symbol> var;
   std::vector<int> len;
@@ -25,8 +24,8 @@ public:
   virtual ~DistinctDecl();
 
   size_t size();
-  Symbol& getTyp();
-  Symbol& getVar(int k);
+  const Symbol& getTyp();
+  const Symbol& getVar(int k);
   int getLen(int k);
   void add(Symbol v, int l = 1);
 
@@ -34,4 +33,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

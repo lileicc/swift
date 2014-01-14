@@ -1,19 +1,18 @@
 /*
-* NullLiteral.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * NullLiteral.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
 #include "Literal.h"
 
 namespace swift {
+namespace absyn {
 
-class NullLiteral :
-  public swift::Literal
-{
+class NullLiteral: public Literal {
 public:
   NullLiteral(int l, int c);
   virtual ~NullLiteral();
@@ -22,4 +21,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

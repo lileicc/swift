@@ -1,19 +1,18 @@
 /*
-* DoubleLiteral.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * DoubleLiteral.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
 #include "Literal.h"
 
 namespace swift {
+namespace absyn {
 
-class DoubleLiteral :
-  public swift::Literal
-{
+class DoubleLiteral: public Literal {
   double value;
 public:
   DoubleLiteral(int l, int c, double value);
@@ -25,4 +24,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

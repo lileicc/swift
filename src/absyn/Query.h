@@ -1,9 +1,9 @@
 /*
-* Query.h
-*
-*  Created on: Oct 30, 2013
-*      Author: yiwu
-*/
+ * Query.h
+ *
+ *  Created on: Oct 30, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
@@ -11,10 +11,8 @@
 #include "Stmt.h"
 
 namespace swift {
-
-class Query :
-  public swift::Stmt
-{
+namespace absyn {
+class Query: public Stmt {
   Expr* expr;
 public:
   Query(int l, int c, Expr* expr);
@@ -26,4 +24,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

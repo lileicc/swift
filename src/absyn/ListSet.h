@@ -1,19 +1,18 @@
 /*
-* ListSet.h
-*
-*  Created on: Oct 31, 2013
-*      Author: yiwu
-*/
+ * ListSet.h
+ *
+ *  Created on: Oct 31, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
 #include "SetExpr.h"
 
 namespace swift {
+namespace absyn {
 
-class ListSet :
-  public swift::SetExpr
-{
+class ListSet: public SetExpr {
 public:
   ListSet(int l, int c);
   virtual ~ListSet();
@@ -22,4 +21,5 @@ public:
   void print(FILE *file, int indent);
 };
 
+}
 }

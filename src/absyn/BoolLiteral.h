@@ -1,19 +1,18 @@
 /*
-* BoolLiteral.h
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * BoolLiteral.h
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #pragma once
 
 #include "Literal.h"
 
 namespace swift {
+namespace absyn {
 
-class BoolLiteral :
-  public swift::Literal
-{
+class BoolLiteral: public Literal {
   bool value;
 public:
   BoolLiteral(int l, int c, bool value);
@@ -25,4 +24,5 @@ public:
   void print(FILE* file, int indent);
 };
 
+}
 }

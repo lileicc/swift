@@ -1,0 +1,31 @@
+(BlogProgram:
+  (args:
+    (FuncDecl:
+      :kind random
+      :type Ball
+      :func x
+      expr:
+        (DistrExpr:
+          :distr UniformChoice
+          (args:
+            (ListSet: (:
+              (OpExpr:
+                :op 16
+                :left
+                  (VarRef: b )
+                :right
+                  (IntLiteral: 0 )
+              )
+              (OpExpr:
+                :op 16
+                :left
+                  (VarRef: b )
+                :right
+                  (IntLiteral: 1 )
+              )
+            ) )
+          )
+        )
+    )
+  )
+)

@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg height="1242" version="1.1" width="2138" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#ffffff" height="138" stroke="#ffffff" stroke-width="1" width="222" x="886" y="262"/>
+<rect fill="none" height="138" stroke="#000000" stroke-width="1" width="222" x="886" y="262"/>
+<text font-family="Dialog" font-size="12" x="970" y="275">
+FuncDefn</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="222" x="886" y="285"/>
+<text font-family="Dialog" font-size="12" x="890" y="299">
+name : string</text>
+<text font-family="Dialog" font-size="12" x="890" y="315">
+args : vector&lt;VarDecl*&gt;</text>
+<text font-family="Dialog" font-size="12" x="890" y="331">
+body : Clause*</text>
+<text font-family="Dialog" font-size="12" x="890" y="347">
+retTy : Ty*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="222" x="886" y="366"/>
+<text font-family="Dialog" font-size="12" x="890" y="380">
+getRetTy() : Ty*</text>
+<rect fill="#ffffff" height="75" stroke="#ffffff" stroke-width="1" width="154" x="670" y="534"/>
+<rect fill="none" height="75" stroke="#000000" stroke-width="1" width="154" x="670" y="534"/>
+<text font-family="Dialog" font-size="12" x="728" y="547">
+Clause</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="154" x="670" y="557"/>
+<text font-family="Dialog" font-size="12" x="674" y="571">
+typ : Ty*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="154" x="670" y="584"/>
+<rect fill="#ffffff" height="101" stroke="#ffffff" stroke-width="1" width="97" x="270" y="678"/>
+<rect fill="none" height="101" stroke="#000000" stroke-width="1" width="97" x="270" y="678"/>
+<text font-family="Dialog" font-size="12" x="300" y="691">
+IfThen</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="97" x="270" y="701"/>
+<text font-family="Dialog" font-size="12" x="274" y="715">
+cond : Expr*</text>
+<text font-family="Dialog" font-size="12" x="274" y="731">
+then : Clause*</text>
+<text font-family="Dialog" font-size="12" x="274" y="747">
+else : Clause*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="97" x="270" y="757"/>
+<rect fill="#ffffff" height="113" stroke="#ffffff" stroke-width="1" width="196" x="451" y="674"/>
+<rect fill="none" height="113" stroke="#000000" stroke-width="1" width="196" x="451" y="674"/>
+<text font-family="Dialog" font-size="12" x="531" y="687">
+Switch</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="196" x="451" y="697"/>
+<text font-family="Dialog" font-size="12" x="455" y="711">
+var : Expr*</text>
+<text font-family="Dialog" font-size="12" x="455" y="727">
+cond : vector&lt;ConstSymbol*&gt;</text>
+<text font-family="Dialog" font-size="12" x="455" y="743">
+branch : vector&lt;Clause*&gt;</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="196" x="451" y="759"/>
+<rect fill="#ffffff" height="75" stroke="#ffffff" stroke-width="1" width="168" x="1005" y="674"/>
+<rect fill="none" height="75" stroke="#000000" stroke-width="1" width="168" x="1005" y="674"/>
+<text font-family="Dialog" font-size="12" x="1075" y="687">
+Expr</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="168" x="1005" y="697"/>
+<text font-family="Dialog" font-size="12" x="1009" y="711">
+args : vector&lt;Expr*&gt;</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="168" x="1005" y="724"/>
+<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="206" x="78" y="870"/>
+<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="206" x="78" y="870"/>
+<text font-family="Dialog" font-size="12" x="144" y="883">
+ConstSymbol</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="206" x="78" y="893"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="206" x="78" y="915"/>
+<rect fill="#ffffff" height="117" stroke="#ffffff" stroke-width="1" width="152" x="14" y="1062"/>
+<rect fill="none" height="117" stroke="#000000" stroke-width="1" width="152" x="14" y="1062"/>
+<text font-family="Dialog" font-size="12" x="59" y="1075">
+InstSymbol</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="152" x="14" y="1085"/>
+<text font-family="Dialog" font-size="12" x="18" y="1099">
+name : string</text>
+<text font-family="Dialog" font-size="12" x="18" y="1115">
+refer : BlogClass*</text>
+<text font-family="Dialog" font-size="12" x="18" y="1131">
+id : int</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="152" x="14" y="1149"/>
+<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="192" x="254" y="1062"/>
+<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="192" x="254" y="1062"/>
+<text font-family="Dialog" font-size="12" x="332" y="1075">
+Literal</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="192" x="254" y="1085"/>
+<text font-family="Dialog" font-size="12" x="258" y="1099">
+value : Integer/double/bool</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="192" x="254" y="1109"/>
+<rect fill="#ffffff" height="109" stroke="#ffffff" stroke-width="1" width="113" x="326" y="870"/>
+<rect fill="none" height="109" stroke="#000000" stroke-width="1" width="113" x="326" y="870"/>
+<text font-family="Dialog" font-size="12" x="357" y="883">
+VarRefer</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="326" y="893"/>
+<text font-family="Dialog" font-size="12" x="330" y="907">
+typ : Ty*</text>
+<text font-family="Dialog" font-size="12" x="330" y="923">
+name : string</text>
+<text font-family="Dialog" font-size="12" x="330" y="939">
+refer : VarDecl*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="326" y="953"/>
+<rect fill="#ffffff" height="94" stroke="#ffffff" stroke-width="1" width="177" x="910" y="1134"/>
+<rect fill="none" height="94" stroke="#000000" stroke-width="1" width="177" x="910" y="1134"/>
+<text font-family="Dialog" font-size="12" x="962" y="1147">
+VoidFuncCall</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="177" x="910" y="1157"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="177" x="910" y="1192"/>
+<rect fill="#ffffff" height="114" stroke="#ffffff" stroke-width="1" width="160" x="878" y="870"/>
+<rect fill="none" height="114" stroke="#000000" stroke-width="1" width="160" x="878" y="870"/>
+<text font-family="Dialog" font-size="12" x="924" y="883">
+FunctionCall</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="160" x="878" y="893"/>
+<text font-family="Dialog" font-size="12" x="882" y="907">
+func : string</text>
+<text font-family="Dialog" font-size="12" x="882" y="923">
+refer : FuncDefn*</text>
+<text font-family="Dialog" font-size="12" x="882" y="939">
+kind : ENUM</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="160" x="878" y="955"/>
+<polyline fill="none" points="320,678 320,646 707,646 707,608" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="707,608 714,620 700,620" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="707,608 714,620 700,620" stroke="#333399" stroke-width="1"/>
+<polyline fill="none" points="547,674 547,646 707,646 707,608" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="707,608 714,620 700,620" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="707,608 714,620 700,620" stroke="#333399" stroke-width="1"/>
+<polyline fill="none" points="1073,674 1073,646 707,646 707,608" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="707,608 714,620 700,620" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="707,608 714,620 700,620" stroke="#333399" stroke-width="1"/>
+<polyline fill="none" points="174,870 174,838 1073,839 1073,748" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="1073,748 1080,760 1066,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
+<polyline fill="none" points="270,1062 270,1030 150,1030 150,938" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="150,938 157,950 143,950" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="150,938 157,950 143,950" stroke="#333399" stroke-width="1"/>
+<polyline fill="none" points="86,1062 86,1030 150,1030 150,938" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="150,938 157,950 143,950" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="150,938 157,950 143,950" stroke="#333399" stroke-width="1"/>
+<polyline fill="none" points="958,870 958,839 1073,839 1073,748" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="1073,748 1080,760 1066,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
+<rect fill="#ffffff" height="85" stroke="#ffffff" stroke-width="1" width="148" x="1122" y="867"/>
+<rect fill="none" height="85" stroke="#000000" stroke-width="1" width="148" x="1122" y="867"/>
+<text font-family="Dialog" font-size="12" x="1164" y="880">
+Distrbution</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="148" x="1122" y="890"/>
+<text font-family="Dialog" font-size="12" x="1126" y="904">
+distr : string</text>
+<text font-family="Dialog" font-size="12" x="1126" y="920">
+refer : DistribClass*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="148" x="1122" y="930"/>
+<polyline fill="none" points="1181,867 1181,839 1073,839 1073,748" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="1073,748 1080,760 1066,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
+<rect fill="#ffffff" height="72" stroke="#ffffff" stroke-width="1" width="97" x="1342" y="870"/>
+<rect fill="none" height="72" stroke="#000000" stroke-width="1" width="97" x="1342" y="870"/>
+<text font-family="Dialog" font-size="12" x="1366" y="883">
+OprExpr</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="97" x="1342" y="893"/>
+<text font-family="Dialog" font-size="12" x="1346" y="907">
+op : int</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="97" x="1342" y="918"/>
+<polyline fill="none" points="1370,870 1370,839 1073,839 1073,748" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="1073,748 1080,760 1066,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
+<rect fill="#ffffff" height="85" stroke="#ffffff" stroke-width="1" width="158" x="1500" y="867"/>
+<rect fill="none" height="85" stroke="#000000" stroke-width="1" width="158" x="1500" y="867"/>
+<text font-family="Dialog" font-size="12" x="1563" y="880">
+Cardi</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="158" x="1500" y="890"/>
+<text font-family="Dialog" font-size="12" x="1504" y="904">
+belong : string</text>
+<text font-family="Dialog" font-size="12" x="1504" y="920">
+refer : Ty*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="158" x="1500" y="930"/>
+<polyline fill="none" points="1554,867 1554,839 1073,839 1073,748" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="1073,748 1080,760 1066,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
+<rect fill="#ffffff" height="70" stroke="#ffffff" stroke-width="1" width="147" x="1693" y="867"/>
+<rect fill="none" height="70" stroke="#000000" stroke-width="1" width="147" x="1693" y="867"/>
+<text font-family="Dialog" font-size="12" x="1758" y="880">
+Set</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="147" x="1693" y="890"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="147" x="1693" y="913"/>
+<polyline fill="none" points="1724,867 1724,839 1073,839 1073,748" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="1073,748 1080,760 1066,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#333399" stroke-width="1"/>
+<rect fill="#ffffff" height="85" stroke="#ffffff" stroke-width="1" width="270" x="1854" y="870"/>
+<rect fill="none" height="85" stroke="#000000" stroke-width="1" width="270" x="1854" y="870"/>
+<text font-family="Dialog" font-size="12" x="1957" y="883">
+QuanfForm</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="270" x="1854" y="893"/>
+<text font-family="Dialog" font-size="12" x="1858" y="907">
+op : Int</text>
+<text font-family="Dialog" font-size="12" x="1858" y="923">
+var : VarDecl</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="270" x="1854" y="933"/>
+<rect fill="#ffffff" height="143" stroke="#ffffff" stroke-width="1" width="205" x="382" y="278"/>
+<rect fill="none" height="143" stroke="#000000" stroke-width="1" width="205" x="382" y="278"/>
+<text font-family="Dialog" font-size="12" x="448" y="291">
+TypeDomain</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="205" x="382" y="301"/>
+<text font-family="Dialog" font-size="12" x="386" y="315">
+name : string</text>
+<text font-family="Dialog" font-size="12" x="386" y="331">
+generator : vector&lt;NumStmt*&gt;</text>
+<text font-family="Dialog" font-size="12" x="386" y="347">
+prelen : int</text>
+<text font-family="Dialog" font-size="12" x="386" y="363">
+origin : vector&lt;OriginAttr*&gt;</text>
+<text font-family="Dialog" font-size="12" x="386" y="379">
+refer : NameTy*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="205" x="382" y="394"/>
+<rect fill="#ffffff" height="132" stroke="#ffffff" stroke-width="1" width="161" x="318" y="454"/>
+<rect fill="none" height="132" stroke="#000000" stroke-width="1" width="161" x="318" y="454"/>
+<text font-family="Dialog" font-size="12" x="362" y="467">
+NumberStmt</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="161" x="318" y="477"/>
+<text font-family="Dialog" font-size="12" x="322" y="491">
+name : string</text>
+<text font-family="Dialog" font-size="12" x="322" y="507">
+refer : BlogClass*</text>
+<text font-family="Dialog" font-size="12" x="322" y="523">
+args : vector&lt;VarDecl*&gt;</text>
+<text font-family="Dialog" font-size="12" x="322" y="539">
+body : Clause*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="161" x="318" y="555"/>
+<text font-family="Dialog" font-size="12" x="322" y="569">
+getRetTy() : Ty*</text>
+<rect fill="#ffffff" height="173" stroke="#ffffff" stroke-width="1" width="278" x="848" y="54"/>
+<rect fill="none" height="173" stroke="#000000" stroke-width="1" width="278" x="848" y="54"/>
+<text font-family="Dialog" font-size="12" x="957" y="67">
+BlogModel</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="278" x="848" y="77"/>
+<text font-family="Dialog" font-size="12" x="852" y="91">
+fixFunc : vector&lt;FuncDefn&gt;</text>
+<text font-family="Dialog" font-size="12" x="852" y="107">
+variables : vector&lt;FuncDefn&gt;</text>
+<text font-family="Dialog" font-size="12" x="852" y="123">
+randFunc : vector&lt;FuncDefn&gt;</text>
+<text font-family="Dialog" font-size="12" x="852" y="139">
+classes : vector&lt;TypeDomain&gt;</text>
+<text font-family="Dialog" font-size="12" x="852" y="155">
+query : vector&lt;Query&gt;</text>
+<text font-family="Dialog" font-size="12" x="852" y="171">
+evidence : vector&lt;Evidence&gt;</text>
+<text font-family="Dialog" font-size="12" x="852" y="187">
+symbols : map</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="278" x="848" y="201"/>
+<rect fill="#ffffff" height="94" stroke="#ffffff" stroke-width="1" width="95" x="758" y="406"/>
+<rect fill="none" height="94" stroke="#000000" stroke-width="1" width="95" x="758" y="406"/>
+<text font-family="Dialog" font-size="12" x="783" y="419">
+VarDecl</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="95" x="758" y="429"/>
+<text font-family="Dialog" font-size="12" x="762" y="443">
+typ : Ty*</text>
+<text font-family="Dialog" font-size="12" x="762" y="459">
+var : string</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="95" x="758" y="473"/>
+<polyline fill="none" points="369,870 369,839 1164,839 1164,748" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="1164,748 1171,760 1157,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1164,748 1171,760 1157,760" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="1893,870 1893,839 1073,839 1073,748" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="1073,748 1080,760 1066,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1073,748 1080,760 1066,760" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="1014,226 1014,262" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="1014,226 1019,236 1014,246 1009,236" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1014,226 1019,236 1014,246 1009,236" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="848,226 586,278" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="848,226 839,232 829,229 837,223" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="848,226 839,232 829,229 837,223" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="886,399 852,406" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="886,399 877,405 866,403 875,396" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="886,399 877,405 866,403 875,396" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="478,499 758,499" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="478,499 488,494 498,499 488,504" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="478,499 488,494 498,499 488,504" stroke="#000000" stroke-width="1"/>
+<rect fill="#ffffff" height="85" stroke="#ffffff" stroke-width="1" width="113" x="1406" y="414"/>
+<rect fill="none" height="85" stroke="#000000" stroke-width="1" width="113" x="1406" y="414"/>
+<text font-family="Dialog" font-size="12" x="1437" y="427">
+Evidence</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="1406" y="437"/>
+<text font-family="Dialog" font-size="12" x="1410" y="451">
+left : Expr*</text>
+<text font-family="Dialog" font-size="12" x="1410" y="467">
+right : Expr*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="1406" y="477"/>
+<polyline fill="none" points="1125,226 1406,414" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="1125,226 1136,227 1141,237 1130,235" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1125,226 1136,227 1141,237 1130,235" stroke="#000000" stroke-width="1"/>
+<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="124" x="1422" y="286"/>
+<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="124" x="1422" y="286"/>
+<text font-family="Dialog" font-size="12" x="1467" y="299">
+Query</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="124" x="1422" y="309"/>
+<text font-family="Dialog" font-size="12" x="1426" y="323">
+var : VoidFuncCall*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="124" x="1422" y="333"/>
+<polyline fill="none" points="1125,226 1422,286" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="1125,226 1135,223 1144,229 1133,232" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1125,226 1135,223 1144,229 1133,232" stroke="#000000" stroke-width="1"/>
+<rect fill="#ffffff" height="72" stroke="#ffffff" stroke-width="1" width="113" x="158" y="38"/>
+<rect fill="none" height="72" stroke="#000000" stroke-width="1" width="113" x="158" y="38"/>
+<text font-family="Dialog" font-size="12" x="207" y="51">
+Ty</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="158" y="61"/>
+<text font-family="Dialog" font-size="12" x="162" y="75">
+name : ENUM</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="158" y="85"/>
+<text font-family="Dialog" font-size="12" x="162" y="99">
+equal(Ty*) : bool</text>
+<polyline fill="none" points="382,420 382,454" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="382,420 387,430 382,440 377,430" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="382,420 387,430 382,440 377,430" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="998,1134 998,983" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="998,983 1005,995 991,995" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="998,983 1005,995 991,995" stroke="#000000" stroke-width="1"/>
+<rect fill="#ffffff" height="101" stroke="#ffffff" stroke-width="1" width="118" x="62" y="174"/>
+<rect fill="none" height="101" stroke="#000000" stroke-width="1" width="118" x="62" y="174"/>
+<text font-family="Dialog" font-size="12" x="98" y="187">
+ArrayTy</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="118" x="62" y="197"/>
+<text font-family="Dialog" font-size="12" x="66" y="211">
+size : vector&lt;int&gt;</text>
+<text font-family="Dialog" font-size="12" x="66" y="227">
+base : Ty*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="118" x="62" y="243"/>
+<text font-family="Dialog" font-size="12" x="66" y="257">
+equal(Ty*) : bool</text>
+<polyline fill="none" points="179,174 179,109" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="179,109 186,121 172,121" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="179,109 186,121 172,121" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="848,109 270,109" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="848,109 838,114 828,109 838,104" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="848,109 838,114 828,109 838,104" stroke="#000000" stroke-width="1"/>
+<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="115" x="654" y="894"/>
+<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="115" x="654" y="894"/>
+<text font-family="Dialog" font-size="12" x="679" y="907">
+OriginRefer</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="115" x="654" y="917"/>
+<text font-family="Dialog" font-size="12" x="658" y="931">
+refer : OriginAttr*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="115" x="654" y="941"/>
+<rect fill="#ffffff" height="117" stroke="#ffffff" stroke-width="1" width="121" x="86" y="390"/>
+<rect fill="none" height="117" stroke="#000000" stroke-width="1" width="121" x="86" y="390"/>
+<text font-family="Dialog" font-size="12" x="119" y="403">
+OriginAttr</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="121" x="86" y="413"/>
+<text font-family="Dialog" font-size="12" x="90" y="427">
+name : string</text>
+<text font-family="Dialog" font-size="12" x="90" y="443">
+ty : Ty*</text>
+<text font-family="Dialog" font-size="12" x="90" y="459">
+id : int</text>
+<text font-family="Dialog" font-size="12" x="90" y="475">
+src : TypeDomain*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="121" x="86" y="485"/>
+<polyline fill="none" points="382,390 206,390" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="382,390 372,395 362,390 372,385" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="382,390 372,395 362,390 372,385" stroke="#000000" stroke-width="1"/>
+<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="132" x="206" y="150"/>
+<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="132" x="206" y="150"/>
+<text font-family="Dialog" font-size="12" x="248" y="163">
+NameTy</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="132" x="206" y="173"/>
+<text font-family="Dialog" font-size="12" x="210" y="187">
+refer : TypeDomain*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="132" x="206" y="197"/>
+<polyline fill="none" points="262,150 262,109" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="262,109 269,121 255,121" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="262,109 269,121 255,121" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="337,218 382,278" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="337,218 347,223 349,234 339,229" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="337,218 347,223 349,234 339,229" stroke="#000000" stroke-width="1"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="369" x2="382" y1="272" y2="278"/>
+<line fill="#000000" stroke="#000000" stroke-width="1" x1="380" x2="382" y1="264" y2="278"/>
+<rect fill="#ffffff" height="85" stroke="#ffffff" stroke-width="1" width="113" x="430" y="14"/>
+<rect fill="none" height="85" stroke="#000000" stroke-width="1" width="113" x="430" y="14"/>
+<text font-family="Dialog" font-size="12" x="467" y="27">
+MapTy</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="430" y="37"/>
+<text font-family="Dialog" font-size="12" x="434" y="51">
+from : Ty*</text>
+<text font-family="Dialog" font-size="12" x="434" y="67">
+to : Ty*</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="430" y="77"/>
+<polyline fill="none" points="430,70 270,70" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="270,70 282,63 282,77" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="270,70 282,63 282,77" stroke="#000000" stroke-width="1"/>
+<polyline fill="none" points="701,894 701,838 1072,839 1072,748" stroke="#000000" stroke-width="1"/>
+<polygon fill="#ffffff" points="1072,748 1079,760 1065,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1072,748 1079,760 1065,760" stroke="#000000" stroke-width="1"/>
+<rect fill="#ffffff" height="69" stroke="#ffffff" stroke-width="1" width="113" x="510" y="895"/>
+<rect fill="none" height="69" stroke="#000000" stroke-width="1" width="113" x="510" y="895"/>
+<text font-family="Dialog" font-size="12" x="540" y="908">
+MapExpr</text>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="510" y="918"/>
+<rect fill="#000000" height="1" stroke="#000000" stroke-width="1" width="113" x="510" y="940"/>
+<polyline fill="none" points="544,895 544,838 1070,838 1070,748" stroke="#333399" stroke-width="1"/>
+<polygon fill="#ffffff" points="1070,748 1077,760 1063,760" stroke="#ffffff" stroke-width="1"/>
+<polygon fill="none" points="1070,748 1077,760 1063,760" stroke="#333399" stroke-width="1"/>
+</svg>

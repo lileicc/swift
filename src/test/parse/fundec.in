@@ -1,0 +1,1 @@
+random Ball x ~ UniformChoice({b[0], b[1]});

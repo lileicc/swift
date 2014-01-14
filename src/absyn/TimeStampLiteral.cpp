@@ -1,16 +1,17 @@
 /*
-* TimeStamp.cpp
-*
-*  Created on: Oct 29, 2013
-*      Author: yiwu
-*/
+ * TimeStamp.cpp
+ *
+ *  Created on: Oct 29, 2013
+ *      Author: yiwu
+ */
 
 #include "TimeStampLiteral.h"
 
-namespace swift{
+namespace swift {
+namespace absyn {
 
-TimeStampLiteral::TimeStampLiteral(int l, int c, int value)
-  :Literal(l, c), value(value) {
+TimeStampLiteral::TimeStampLiteral(int l, int c, int value) :
+    Literal(l, c), value(value) {
 }
 
 TimeStampLiteral::~TimeStampLiteral() {
@@ -25,4 +26,5 @@ void TimeStampLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(TimeStampLiteral: @%d )\n", indent, "", value);
 }
 
+}
 }
