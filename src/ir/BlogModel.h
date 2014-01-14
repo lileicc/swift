@@ -1,14 +1,14 @@
 #pragma once
 
 #include <vector>
-
+#include <string>
 #include "IRForwardDecl.h"
 
 namespace swift { namespace ir {
 
 class BlogModel {
 public:
-  BlogModel();
+  BlogModel(const std::string name = std::string("BLOGProgram"));
   virtual ~BlogModel();
 
   void addFunction(std::shared_ptr<FuncDefn> func);
@@ -22,6 +22,7 @@ public:
   const std::vector<std::shared_ptr<Query>>& getQueries();
   const std::vector<std::shared_ptr<Evidence>>& getEvidences();
   const std::vector<std::shared_ptr<TypeDomain>>& getTypes();
+  const std::string & getName() const;
 
 private:
   std::vector<std::shared_ptr<FuncDefn>> fixFunc;
@@ -30,6 +31,7 @@ private:
   std::vector<std::shared_ptr<Query>> query;
   std::vector<std::shared_ptr<Evidence>> evidence;
   std::vector<std::shared_ptr<TypeDomain>> types;
+  std::string name;
 };
 
 }

@@ -145,6 +145,9 @@ private:
 
   static const std::string MAIN_SAMPLING_FUN_NAME;
 
+  static const std::string MAIN_NAMESPACE_NAME;
+
+  static const std::string MAIN_INIT_FUN_NAME;
   /**
    * field name inside class for declared type
    */
@@ -198,7 +201,7 @@ private:
   static const std::string DISTRIBUTION_LOGLIKELI_FUN_NAME;
 
   /**
-   * initial value set to mark_var (default -1)
+   * initial value set to mark_var (default 1)
    */
   static const int INIT_SAMPLE_NUM;
 

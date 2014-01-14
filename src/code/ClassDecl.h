@@ -15,7 +15,6 @@ namespace code {
 
 class ClassDecl: public Decl, public DeclContext {
 public:
-  ClassDecl(DeclContext* ns, std::string name);
   ~ClassDecl();
   static ClassDecl* createClassDecl(DeclContext* ns, const std::string & name);
 
@@ -23,6 +22,9 @@ public:
 
   // For Printer
   void print(printer::Printer* prt);
+
+protected:
+  ClassDecl(DeclContext* ns, std::string name);
 
 private:
   DeclContext* parent; // usually it is a namespace

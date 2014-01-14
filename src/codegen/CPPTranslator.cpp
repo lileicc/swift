@@ -17,21 +17,26 @@ const code::Type CPPTranslator::DOUBLE_TYPE("double");
 const code::Type CPPTranslator::DOUBLE_POINTER_TYPE("double*");
 const code::Type CPPTranslator::STRING_TYPE("std::string");
 const code::Type CPPTranslator::BOOL_TYPE("bool");
+const code::Type CPPTranslator::VOID_TYPE("void");
 const std::string CPPTranslator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
 const std::string CPPTranslator::QUERY_EVALUATE_FUN_NAME = "_evaluate_query";
-const std::string CPPTranslator::DISTINCT_FIELDNAME = "__name_";
+const std::string CPPTranslator::DISTINCT_FIELDNAME = "_name";
 const std::string CPPTranslator::DISTRIBUTION_INIT_FUN_NAME = "init";
 const std::string CPPTranslator::DISTRIBUTION_GEN_FUN_NAME = "gen";
 const std::string CPPTranslator::DISTRIBUTION_LIKELI_FUN_NAME = "likeli";
 const std::string CPPTranslator::DISTRIBUTION_LOGLIKELI_FUN_NAME = "loglikeli";
-const std::string CPPTranslator::CURRENT_SAMPLE_NUM_VARNAME = "__cur_loop";
-const std::string CPPTranslator::WEIGHT_VAR_REF_NAME = "__ret_value";
+const std::string CPPTranslator::CURRENT_SAMPLE_NUM_VARNAME = "_cur_loop";
+const std::string CPPTranslator::WEIGHT_VAR_REF_NAME = "__local_weight";
+const std::string CPPTranslator::GLOBAL_WEIGHT_VARNAME = "_weight";
 const std::string CPPTranslator::VALUE_VAR_REF_NAME = "__value";
-const std::string CPPTranslator::VALUE_ARG_NAME = "_value_arg";
+const std::string CPPTranslator::VALUE_ARG_NAME = "__value_arg";
 const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
 const std::string CPPTranslator::ANSWER_PROCESS_CLASS_NAME = "Hist";
 const std::string CPPTranslator::ANSWER_PROCESS_METHOD_NAME = "add";
+const std::string CPPTranslator::ANSWER_VAR_NAME_PREFIX = "_answer_";
 const std::string CPPTranslator::MAIN_SAMPLING_FUN_NAME = "sample";
+const std::string CPPTranslator::MAIN_NAMESPACE_NAME = "swift";
+const std::string CPPTranslator::MAIN_INIT_FUN_NAME = "init";
 const std::string CPPTranslator::LOCAL_NUM_SAMPLE_ARG_NAME = "n";
 // randomness
 const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
@@ -107,6 +112,9 @@ CPPTranslator::~CPPTranslator() {
 
 void CPPTranslator::translate(swift::ir::BlogModel* model) {
 
+  coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
+  coreCls = code::ClassDecl::createClassDecl(coreNs, model->getName());
+
   createInit();
 
   // translate type and distinct symbols;
@@ -144,8 +152,8 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   fun->addStmt(
       new code::DeclStmt(
           new code::VarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)));
-  // TODO to call the initialization function
-  code::FieldDecl::createFieldDecl(coreCls, GLOBAL_WEIGHT_VARNAME, DOUBLE_POINTER_TYPE);
+  code::FieldDecl::createFieldDecl(coreCls, GLOBAL_WEIGHT_VARNAME,
+      DOUBLE_POINTER_TYPE);
   coreClsInit->addStmt(
       new code::DeleteStmt(new code::VarRef(GLOBAL_WEIGHT_VARNAME), true));
   coreClsInit->addStmt(
@@ -153,6 +161,12 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
           new code::NewExpr(DOUBLE_TYPE,
               new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
           code::OpKind::BO_ASSIGN));
+  //call the initialization function
+  std::vector<code::Expr*> initArg;
+  initArg.push_back(new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME));
+  fun->addStmt(
+      new code::CallExpr(new code::VarRef(MAIN_INIT_FUN_NAME), initArg));
+  // create for loop for the sampling
   code::Stmt* init = new code::BinaryOperator(
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME),
       new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN);
@@ -189,11 +203,11 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   int len = td->getPreLen();
   std::string numvar = getVarOfNumType(name);
   // create a field in the main class:::    int numvar;
-  code::FieldDecl* fd = code::FieldDecl::createFieldDecl(coreCls, numvar,
+  code::FieldDecl::createFieldDecl(coreCls, numvar,
       INT_TYPE);
   // create a field in the main class:::    int mark_numvar;
   std::string marknumvar = getMarkVarName(numvar);
-  fd = code::FieldDecl::createFieldDecl(coreCls, marknumvar, INT_TYPE);
+  code::FieldDecl::createFieldDecl(coreCls, marknumvar, INT_TYPE);
   // add in the init function:::            numvar = len;
   coreClsInit->addStmt(
       new code::BinaryOperator(new code::VarRef(numvar),
@@ -468,10 +482,10 @@ code::Expr* CPPTranslator::transDistribution(
 
 void CPPTranslator::createInit() {
   // TODO adding setup for
-  // 1. core class,
   // 2. member declarations for core class, need valuearray, mark array, ...
   // 3. initialization function to initialize the values (function called in sample(n)
-  coreCls = new code::ClassDecl::createClassDecl(coreNs, );
+  coreClsInit = code::FunctionDecl::createFunctionDecl(coreCls,
+      MAIN_INIT_FUN_NAME, VOID_TYPE);
   code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
       INT_TYPE);
   code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME,
