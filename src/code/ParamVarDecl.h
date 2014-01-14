@@ -14,7 +14,8 @@ namespace code {
 
 class ParamVarDecl: public swift::code::VarDecl {
 public:
-  ParamVarDecl(DeclContext * context, std::string id, Type ty, Expr* value = NULL);
+  ParamVarDecl(DeclContext * context, std::string id, Type ty, Expr* value =
+      NULL);
   ~ParamVarDecl();
 
   // For Printer

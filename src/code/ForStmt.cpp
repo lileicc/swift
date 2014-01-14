@@ -12,18 +12,15 @@
 namespace swift {
 namespace code {
 
-ForStmt::ForStmt(): range(false) {
-  // TODO Auto-generated constructor stub
-  init = NULL;
-  cond = NULL;
-  step = NULL;
+ForStmt::ForStmt(Stmt* init, Expr* cond, Expr* step, Stmt* body) :
+    init(init), cond(cond), step(step), body(body), range(false) {
 }
 
 ForStmt::~ForStmt() {
-  // TODO Auto-generated destructor stub
-  if (init != NULL) delete init;
-  if (cond != NULL) delete cond;
-  if (step != NULL) delete step;
+  delete init;
+  delete cond;
+  delete step;
+  delete body;
 }
 
 Stmt* ForStmt::getInit() {
@@ -58,11 +55,7 @@ void ForStmt::setRange(bool r) {
   range = r;
 }
 
-void ForStmt::addStmt(Stmt* st) {
-  body.addStmt(st);
-}
-
-CompoundStmt& ForStmt::getBody() {
+Stmt* ForStmt::getBody() {
   return body;
 }
 

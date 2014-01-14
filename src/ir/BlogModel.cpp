@@ -7,9 +7,6 @@
 
 namespace swift { namespace ir {
 
-BlogModel::BlogModel() {
-}
-
 BlogModel::~BlogModel() {
 }
 
@@ -54,8 +51,15 @@ const std::vector<std::shared_ptr<Evidence>>& BlogModel::getEvidences() {
   return evidence;
 }
 
+BlogModel::BlogModel(const std::string name): name(name) {
+}
+
 const std::vector<std::shared_ptr<TypeDomain>>& BlogModel::getTypes() {
   return types;
+}
+
+const std::string& BlogModel::getName() const {
+  return name;
 }
 
 }

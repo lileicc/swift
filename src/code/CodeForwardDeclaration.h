@@ -22,6 +22,7 @@ class ContinueStmt;
 class Decl;
 class DeclContext;
 class DeclStmt;
+class DeleteStmt;
 class Expr;
 class FieldDecl;
 class FloatingLiteral;
@@ -30,6 +31,7 @@ class FunctionDecl;
 class IfStmt;
 class IntegerLiteral;
 class NamespaceDecl;
+class NewExpr;
 class ParamVarDecl;
 class ReturnStmt;
 class SpecialStmt;
@@ -39,6 +41,5 @@ class SwitchStmt;
 class Type;
 class VarDecl;
 class VarRef;
-
 }
 }

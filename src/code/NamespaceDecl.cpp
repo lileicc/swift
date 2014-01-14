@@ -11,12 +11,9 @@ namespace swift {
 namespace code {
 
 NamespaceDecl::NamespaceDecl(std::string name): name(name) {
-  // TODO Auto-generated constructor stub
-
 }
 
 NamespaceDecl::~NamespaceDecl() {
-  // TODO Auto-generated destructor stub
 }
 
 const std::string& NamespaceDecl::getName() {
