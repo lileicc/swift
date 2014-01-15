@@ -18,13 +18,15 @@ namespace semant {
 
 Semant::Semant() :
     errorMsg(stderr) {
-  // TODO Auto-generated constructor stub
   model = new ir::BlogModel();
+  isResultUsed = false;
 }
 
 Semant::~Semant() {
-  // TODO Auto-generated destructor stub
-  delete model;
+  // model should be externally deleted
+  // if the model is not used through getModel(), then delete the model
+  if (! isResultUsed)
+    delete model;
 }
 
 ir::BlogModel* Semant::getModel() {
@@ -32,6 +34,7 @@ ir::BlogModel* Semant::getModel() {
   // Since model uses shared_ptr to store type domains
   // after deleting model, all type domains will be deleted!
   // and they should not be deleted again from tyFactory!
+  isResultUsed = true;
   return model;
 }
 
@@ -554,6 +557,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
 
   // Type Checking
   ptr->setTyp(ptr->getRefer()->getRetTyp());
+  ptr->setArgs(args);
   return ptr;
 }
 

@@ -12,32 +12,23 @@ namespace swift {
 namespace code {
 
 Code::Code() {
-  // TODO Auto-generated constructor stub
-
 }
 
 Code::~Code() {
-  // TODO Auto-generated destructor stub
-}
-
-void Code::addDecl(Decl* d) {
-  decls.addDecl(d);
-}
-
-void Code::addStmt(Stmt* st) {
-  stmts.addStmt(st);
-}
-
-DeclContext& Code::getDecls() {
-  return decls;
-}
-
-CompoundStmt& Code::getStmts() {
-  return stmts;
+  for (auto mc : macros)
+    delete mc;
 }
 
 void Code::print(printer::Printer* prt) {
   prt->print(this);
+}
+
+void swift::code::Code::addMacro(SpecialMacro* macro) {
+  macros.push_back(macro);
+}
+
+std::vector<SpecialMacro*>& swift::code::Code::getAllMacros() {
+  return macros;
 }
 
 } /* namespace code */

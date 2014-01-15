@@ -64,6 +64,11 @@
 #endif
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
+#include "BLOGSymbol.h"
+#include <vector>
+#include <string>
+#include <tuple>
+using namespace std;
 typedef union {
   int i;
   class BLOGSymbol<int>* ival;

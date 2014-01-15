@@ -16,20 +16,19 @@ namespace code {
 
 class IfStmt: public swift::code::Stmt {
 public:
-  IfStmt(Expr* cond);
-  IfStmt(Expr* cond, Stmt* th_st, Stmt* el_st);
+  IfStmt(Expr* cond, Stmt* th, Stmt* el);
   ~IfStmt();
 
   Expr* getCond();
-  CompoundStmt& getThen();
-  CompoundStmt& getElse();
+  Stmt* getThen();
+  Stmt* getElse();
 
   // For Printer
   void print(printer::Printer* prt);
 private:
   Expr* cond;
-  CompoundStmt th;
-  CompoundStmt el;
+  Stmt* th;
+  Stmt* el;
 };
 
 } /* namespace code */

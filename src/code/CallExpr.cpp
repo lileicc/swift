@@ -10,12 +10,10 @@
 namespace swift {
 namespace code {
 
-CallExpr::CallExpr(Expr* fn, std::vector<Expr*> args) :
+CallExpr::CallExpr(code::Expr* fn, std::vector<code::Expr*> args) :
     fn(fn), args(args) {
 }
 
-CallExpr::CallExpr(Expr* fn): fn(fn) {
-}
 
 CallExpr::~CallExpr() {
   delete fn;
@@ -24,11 +22,11 @@ CallExpr::~CallExpr() {
   args.clear();
 }
 
-Expr* CallExpr::getFunc() const {
+code::Expr* CallExpr::getFunc() {
   return fn;
 }
 
-std::vector<Expr*>& CallExpr::getArgs() {
+std::vector<code::Expr*>& CallExpr::getArgs() {
   return args;
 }
 

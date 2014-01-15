@@ -32,6 +32,7 @@ public:
   void print(code::ClassDecl* term);
   void print(code::CompoundStmt* term);
   void print(code::ContinueStmt* term);
+  void print(code::DeclContext* term);
   void print(code::DeclStmt* term);
   void print(code::DeleteStmt* term);
   void print(code::FieldDecl* term);
@@ -44,7 +45,7 @@ public:
   void print(code::NewExpr* term);
   void print(code::ParamVarDecl* term);
   void print(code::ReturnStmt* term);
-  void print(code::SpecialStmt* term);
+  void print(code::SpecialMacro* term);
   void print(code::StringLiteral* term);
   void print(code::SwitchStmt* term);
   void print(code::Type* term);
@@ -52,7 +53,6 @@ public:
   void print(code::VarRef* term);
 
 private:
-
   std::vector<std::string> header;
 
   bool isforward; // whether the current phase is to print forward declaration
