@@ -23,6 +23,8 @@ public:
   const std::vector<std::shared_ptr<VarDecl> >& getArgs() const;
   bool isRand() const;
   bool isFixed() const;
+  // For Debugging Use
+  void print(FILE* file, int indent);
 
   std::string toSignature() const;
 

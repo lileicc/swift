@@ -68,5 +68,11 @@ std::string FuncDefn::toSignature() const {
   return ret;
 }
 
+void FuncDefn::print(FILE* file, int indent){
+  fprintf(file, "%*s(FuncDefn:\n", indent, "");
+  fprintf(file, "%*s%s\n", indent+2, "", toSignature().c_str());
+  fprintf(file, "%*s)\n", indent, "");
+}
+
 }
 }

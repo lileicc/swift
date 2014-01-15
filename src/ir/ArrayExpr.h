@@ -8,6 +8,8 @@ class ArrayExpr :
 public:
   ArrayExpr();
   virtual ~ArrayExpr();
+  // For Debugging Use
+  void print(FILE* file, int indent);
 };
 
 }

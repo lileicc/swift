@@ -13,5 +13,11 @@ const std::shared_ptr<Expr>& Query::getVar() const {
   return var;
 }
 
+void Query::print(FILE* file, int indent){
+  fprintf(file, "%*s(Query:\n", indent, "");
+  getVar()->print(file, indent+2);
+  fprintf(file, "%*s)\n", indent, "");
+}
+
 }
 }

@@ -62,5 +62,14 @@ const std::string& BlogModel::getName() const {
   return name;
 }
 
+void BlogModel::print(FILE* file, int indent){
+  fprintf(file, "%*s(FixFuncs:\n", indent, "");
+  auto fixFuncs = getFixFuncs();
+  for(size_t i = 0; i < fixFuncs.size(); i++){
+    fixFuncs[i]->print(file, indent+2);
+  }
+  fprintf(file, "%*s)\n", indent, "");
+}
+
 }
 }
