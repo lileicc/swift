@@ -12,13 +12,12 @@
 namespace swift {
 namespace code {
 
-class CallExpr: public swift::code::Expr {
+class CallExpr: public Expr {
 public:
-  CallExpr(Expr* fn, std::vector<Expr*> args);
-  CallExpr(Expr* fn);
+  CallExpr(Expr* fn, std::vector<Expr*> args = std::vector<Expr *>());
   ~CallExpr();
 
-  Expr* getFunc() const;
+  Expr* getFunc();
   std::vector<Expr*>& getArgs();
 
   // For Printer

@@ -10,12 +10,7 @@
 namespace swift {
 namespace code {
 
-IfStmt::IfStmt(Expr* cond) : cond(cond) {
-}
-
-IfStmt::IfStmt(Expr* cond, Stmt* th_st, Stmt* el_st) : cond(cond) {
-  th.addStmt(th_st);
-  el.addStmt(el_st);
+IfStmt::IfStmt(Expr* cond, Stmt* th, Stmt* el) : cond(cond), th(th), el(el) {
 }
 
 IfStmt::~IfStmt() {
@@ -26,11 +21,11 @@ Expr* IfStmt::getCond() {
   return cond;
 }
 
-CompoundStmt& IfStmt::getThen() {
+Stmt* IfStmt::getThen() {
   return th;
 }
 
-CompoundStmt& IfStmt::getElse() {
+Stmt* IfStmt::getElse() {
   return el;
 }
 

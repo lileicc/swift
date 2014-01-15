@@ -34,7 +34,7 @@ class NamespaceDecl;
 class NewExpr;
 class ParamVarDecl;
 class ReturnStmt;
-class SpecialStmt;
+class SpecialMacro;
 class Stmt;
 class StringLiteral;
 class SwitchStmt;

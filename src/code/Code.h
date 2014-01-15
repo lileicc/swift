@@ -18,6 +18,7 @@
 #include "CompoundStmt.h"
 #include "ContinueStmt.h"
 #include "Decl.h"
+#include "DeclContext.h"
 #include "DeclStmt.h"
 #include "DeleteStmt.h"
 #include "Expr.h"
@@ -32,7 +33,7 @@
 #include "ParamVarDecl.h"
 #include "Type.h"
 #include "ReturnStmt.h"
-#include "SpecialStmt.h"
+#include "SpecialMacro.h"
 #include "SwitchStmt.h"
 #include "Stmt.h"
 #include "StringLiteral.h"
@@ -55,22 +56,18 @@ class Stmt;
 namespace swift {
 namespace code {
 
-class Code {
+class Code : public code::DeclContext {
 public:
   Code();
   ~Code();
-  void addDecl(Decl* d);
-  void addStmt(Stmt* st);
 
-  DeclContext& getDecls();
-  CompoundStmt& getStmts();
+  void addMacro(SpecialMacro* macro);
+  std::vector<SpecialMacro*> & getAllMacros();
 
   // For Printer
   void print(printer::Printer* prt);
-
 private:
-  DeclContext decls;
-  CompoundStmt stmts;
+  std::vector<SpecialMacro*> macros;
 };
 
 } /* namespace code */

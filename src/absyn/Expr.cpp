@@ -24,7 +24,7 @@ void Expr::add(Expr* e) {
   args.push_back(e);
 }
 
-Expr* Expr::get(int id) {
+Expr* Expr::get(size_t id) {
   return args[id];
 }
 
