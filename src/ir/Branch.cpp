@@ -1,5 +1,6 @@
 #include "Branch.h"
 #include "Expr.h"
+#include "ConstSymbol.h"
 
 namespace swift { namespace ir {
 Branch::Branch() {
@@ -39,6 +40,18 @@ std::shared_ptr<Clause> Branch::getBranch(int k) const {
 
 const std::vector<std::shared_ptr<Clause>>& Branch::getBranches() const {
   return branch;
+}
+
+void Branch::print(FILE* file, int indent){
+  fprintf(file, "%*s(Branch:\n", indent, "");
+  fprintf(file, "%*svar:\n", indent+2, "");
+  getVar()->print(file, indent+2);
+  for(size_t i = 0; i < size(); i++){
+    fprintf(file, "%*scond %d: %d\n", indent+2, "", i, getCond(i)->getKind());
+    fprintf(file, "%*sbranch %d:\n", indent+2, "", i);
+    getBranch(i)->print(file, indent+4);
+  }
+  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

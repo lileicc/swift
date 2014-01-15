@@ -22,5 +22,15 @@ std::shared_ptr<Expr> CondSet::getCond() const {
   return this->get(0);
 }
 
+void CondSet::print(FILE* file, int indent){
+  fprintf(file, "%*s(CondSet:\n", indent, "");
+  fprintf(file, "%*s:var\n%s", indent+2, "", var->toString().c_str());
+  if (getCond() != nullptr){
+    fprintf(file, "%*s:cond\n", indent+2, "");
+    getCond()->print(file, indent+4);
+  }
+  fprintf(file, "%*s)\n", indent, "");
+}
+
 }
 }

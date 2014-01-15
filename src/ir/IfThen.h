@@ -25,6 +25,7 @@ public:
   std::shared_ptr<Expr> getCond() const;
   std::shared_ptr<Clause> getThen() const;
   std::shared_ptr<Clause> getElse() const;
+  void print(FILE* file, int indent);
 
 private:
   std::shared_ptr<Expr> cond;

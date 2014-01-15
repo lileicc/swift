@@ -12,6 +12,7 @@ public:
 
   const std::shared_ptr<Expr>& getLeft() const;
   const std::shared_ptr<ConstSymbol>& getRight() const;
+  void print(FILE* file, int indent);
 
 private:
   // Note: left can be [ FunctionCall | #TypeName ]

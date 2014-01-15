@@ -27,5 +27,9 @@ const Ty* Clause::getTyp() const {
   return typ;
 }
 
+void Clause::print(FILE* file, int indent){
+
+}
+
 }
 }

@@ -21,6 +21,7 @@ public:
   const std::vector<std::shared_ptr<ConstSymbol>>& getConds() const;
   std::shared_ptr<Clause> getBranch(int k) const ;
   const std::vector<std::shared_ptr<Clause>>& getBranches() const ;
+  void print(FILE* file, int indent);
 
 private:
   std::shared_ptr<Expr> var;

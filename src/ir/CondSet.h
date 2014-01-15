@@ -15,6 +15,7 @@ public:
 
   const std::shared_ptr<VarDecl>& getVar() const;
   std::shared_ptr<Expr> getCond() const;
+  void print(FILE* file, int indent);
 
 private:
   std::shared_ptr<VarDecl> var;

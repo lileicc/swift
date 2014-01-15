@@ -42,6 +42,23 @@ std::shared_ptr<Clause> IfThen::getElse() const {
   return elcl;
 }
 
+void IfThen::print(FILE* file, int indent){
+  fprintf(file, "%*s(IfThen:\n", indent, "");
+  if (getCond() != nullptr) {
+    fprintf(file, "%*s:cond\n", indent + 2, "");
+    getCond()->print(file, indent + 4);
+  }
+  if (getThen() != nullptr) {
+    fprintf(file, "%*s:then\n", indent + 2, "");
+    getThen()->print(file, indent + 4);
+  }
+  if (getElse() != nullptr) {
+    fprintf(file, "%*s:else\n", indent + 2, "");
+    getElse()->print(file, indent + 4);
+  }
+  fprintf(file, "%*s)\n", indent, "");
+}
+
 }
 }
 

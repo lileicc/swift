@@ -1,6 +1,7 @@
 #include "Evidence.h"
 
 #include "Expr.h"
+#include "ConstSymbol.h"
 
 namespace swift { namespace ir {
 
@@ -18,5 +19,18 @@ const std::shared_ptr<Expr>& Evidence::getLeft() const {
 const std::shared_ptr<ConstSymbol>& Evidence::getRight() const {
   return right;
 }
+
+void Evidence::print(FILE* file, int indent){
+  fprintf(file, "%*s(Evidence:\n", indent, "");
+  if (getLeft() != nullptr){
+    fprintf(file, "%*s:left\n", indent+2, "");
+    getLeft()->print(file, indent+4);
+  }
+  if (getRight() != nullptr){
+    fprintf(file, "%*s:right: %d\n", indent+2, "", getRight()->getKind());
+  }
+
+}
+
 }
 }

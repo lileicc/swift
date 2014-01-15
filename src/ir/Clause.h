@@ -18,6 +18,8 @@ public:
   virtual ~Clause();
   void setTyp(const Ty* typ);
   const Ty* getTyp() const;
+  // For Debugging Use
+  void print(FILE* file, int indent);
 private:
   const Ty* typ;
 };

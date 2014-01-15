@@ -39,5 +39,9 @@ const std::vector<std::shared_ptr<ConstSymbol> >& CategoricalDistr::getSymbols()
   return symbols;
 }
 
+void CategoricalDistr::print(FILE* file, int indent){
+  
+}
+
 }
 }

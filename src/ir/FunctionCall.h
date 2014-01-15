@@ -13,6 +13,7 @@ public:
 
   IRConstant getKind() const;
   FuncDefn* getRefer() const;
+  void print(FILE* file, int indent);
 
 private:
   IRConstant kind;

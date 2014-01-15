@@ -21,6 +21,7 @@ public:
   void addSymbol(std::shared_ptr<ConstSymbol> c);
   std::shared_ptr<ConstSymbol> getSymbol(int k) const ;
   const std::vector<std::shared_ptr<ConstSymbol>>& getSymbols() const ;
+  void print(FILE* file, int indent);
 
 private:
   std::vector<double> weights;

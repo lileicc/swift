@@ -13,6 +13,7 @@ public:
   const Ty* getRefer() const;
   void setBody(std::shared_ptr<SetExpr> b);
   const std::shared_ptr<SetExpr>& getBody() const;
+  void print(FILE* file, int indent);
 
 private:
   const Ty* refer;

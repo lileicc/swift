@@ -24,5 +24,9 @@ FuncDefn* FunctionCall::getRefer() const {
   return refer;
 }
 
+void FunctionCall::print(FILE* file, int indent){
+  
+}
+
 }
 }

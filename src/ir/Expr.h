@@ -22,8 +22,6 @@ public:
   const std::vector<std::shared_ptr<Expr>>& getArgs() const ;
   std::shared_ptr<Expr> get(int k) const ;
   size_t argSize() const ;
-  // For Debugging Use
-  virtual void print(FILE* file, int indent = 0) = 0;
 private:
   std::vector<std::shared_ptr<Expr>> args;
 };
