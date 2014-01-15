@@ -557,6 +557,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
 
   // Type Checking
   ptr->setTyp(ptr->getRefer()->getRetTyp());
+  ptr->setArgs(args);
   return ptr;
 }
 

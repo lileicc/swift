@@ -452,6 +452,14 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   if (fc) {
     return transFunctionCall(fc, args);
   }
+  
+  std::shared_ptr<ir::ConstSymbol> cs =
+      std::dynamic_pointer_cast<ir::ConstSymbol>(expr);
+  if (cs) {
+    // TODO translate the constsymbol
+    // for the moment just simple trick
+    return new code::IntegerLiteral(0);
+  }
 
   // TODO translate other expression
   // if valuevar is provided it should be

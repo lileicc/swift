@@ -19,7 +19,7 @@ public:
   virtual ~Expr();
 
   void add(Expr* e);
-  Expr* get(int id);
+  Expr* get(size_t id);
   size_t size();
 
 protected:

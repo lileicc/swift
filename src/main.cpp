@@ -11,7 +11,7 @@
 #include "ir/BlogModel.h"
 #include "printer/CPPPrinter.h"
 
-extern swift::absyn::BlogProgram* parse(const char*);
+extern swift::absyn::BlogProgram* parse(const char* inp);
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
