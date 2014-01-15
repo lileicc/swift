@@ -438,11 +438,21 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   for (size_t k = 0; k < expr->argSize(); k++) {
     args.push_back(transExpr(expr->get(k)));
   }
+  // warning::: better to put the above code in separate function
+  // translate distribution expression
   std::shared_ptr<ir::Distribution> dist = std::dynamic_pointer_cast<
       ir::Distribution>(expr);
   if (dist) {
     return transDistribution(dist, args, valuevar);
   }
+
+  // translate variable reference
+  std::shared_ptr<ir::FunctionCall> fc = std::dynamic_pointer_cast<
+      ir::FunctionCall>(expr);
+  if (fc) {
+    return transFunctionCall(fc, args);
+  }
+
   // TODO translate other expression
   // if valuevar is provided it should be
   return NULL;
@@ -599,6 +609,21 @@ code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
   }
 }
 
+code::Expr* CPPTranslator::transFunctionCall(
+    std::shared_ptr<ir::FunctionCall> fc, std::vector<code::Expr*> args) {
+  std::string getterfunname;
+  switch (fc->getKind()) {
+  case ir::IRConstant::RANDOM:
+    getterfunname = getGetterFunName(fc->getRefer()->getName());
+    return new code::CallExpr(new code::VarRef(getterfunname), args);
+  case ir::IRConstant::FIXED:
+    // todo
+  default:
+    return NULL;
+  }
+}
+
 } /* namespace codegen */
 } /* namespace swift */
+
 

@@ -62,7 +62,7 @@ private:
    * if valuevar is given, then it will calculate weight instead of sampling
    */
   code::Stmt* transClause(std::shared_ptr<ir::Clause> clause,
-      std::string retvar, std::string valuevar = NULL);
+      std::string retvar, std::string valuevar = std::string());
   /**
    * translate a Branch in ir to a statement in code,
    * retvar is for return variable
@@ -119,6 +119,12 @@ private:
    */
   code::Expr* transDistribution(std::shared_ptr<ir::Distribution> dist,
       std::vector<code::Expr*> args, std::string valuevar = std::string());
+  /**
+   * translate the function call expression
+   */
+  code::Expr* transFunctionCall(std::shared_ptr<ir::FunctionCall> fc,
+      std::vector<code::Expr*> args);
+
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
       const std::shared_ptr<ir::VarDecl> var);
   /**

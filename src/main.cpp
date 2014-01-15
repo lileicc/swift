@@ -13,19 +13,19 @@
 
 extern swift::absyn::BlogProgram* parse(const char*);
 int main(int argc, char** argv) {
-  if (argc != 5) {
+  if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
     std::cout << "\t[main] -i <input filename> -o <output filename>"
         << std::endl;
     exit(0);
   }
-  const char* inp;
-  const char* out;
+  const char* inp = "";
+  const char* out = "";
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-i") == 0)
-      inp = argv[i + 1];
+      inp = argv[++i];
     if (strcmp(argv[i], "-o") == 0)
-      out = argv[i + 1];
+      out = argv[++i];
   }
 
   // parse the input file to get abstract syntax

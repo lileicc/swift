@@ -1,17 +1,24 @@
 #include "Printer.h"
 
-namespace swift { namespace printer {
+namespace swift {
+namespace printer {
 
-Printer::Printer(std::string str) : indent(0), newline(true) {
-  file = fopen(str.c_str(), "w");
+Printer::Printer(std::string str) :
+    indent(0), newline(true) {
+  if (str.empty())
+    file = stdout;
+  else
+    file = fopen(str.c_str(), "w");
   if (file == NULL) {
-    fprintf(stderr, "Warning: the output file is not modifiable! set defualt to stdout.\n");
+    fprintf(stderr,
+        "Warning: the output file is not modifiable! set defualt to stdout.\n");
     file = stdout;
   }
 }
 
 Printer::~Printer() {
-  if (file != stdout) fclose(file);
+  if (file != stdout)
+    fclose(file);
 }
 
 void Printer::printIndent() {
@@ -23,6 +30,7 @@ void Printer::printLine() {
   if (newline)
     fprintf(file, "\n");
 }
+
 
 }
 }

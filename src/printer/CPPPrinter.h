@@ -53,7 +53,6 @@ public:
   void print(code::VarRef* term);
 
 private:
-
   std::vector<std::string> header;
 
   bool isforward; // whether the current phase is to print forward declaration

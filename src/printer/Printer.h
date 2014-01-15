@@ -50,13 +50,24 @@ protected:
   FILE* file;
   int indent;
   bool newline; // whether need to print a newline after a statement
+  /**
+   * add one more indent defined by the TAB_SIZE
+   */
+  void incIndent() {
+    indent += TAB_SIZE;
+  }
+  /**
+   * reduce one indent defined by the TAB_SIZE
+   */
+  void decIndent() {
+    indent -= TAB_SIZE;
+  }
+  static const int TAB_SIZE = 2;
 
   void printIndent();
   void printLine();
-
 };
 
 }
 }
-
 

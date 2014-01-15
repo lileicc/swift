@@ -233,7 +233,7 @@ void CPPPrinter::print(code::CallExpr* term) {
 }
 
 void CPPPrinter::print(code::CaseStmt* term) {
-  indent -= 2;
+  decIndent();
   printIndent();
   fprintf(file, "case ");
   bool backup = newline;
@@ -242,7 +242,7 @@ void CPPPrinter::print(code::CaseStmt* term) {
   newline = backup;
   fprintf(file, ":");
   printLine();
-  indent += 2;
+  incIndent();
 
   if (term != NULL)
     term->getSub()->print(this);
@@ -253,10 +253,10 @@ void CPPPrinter::print(code::ClassDecl* term) {
     printIndent();
     fprintf(file, "class %s { public:", term->getName().c_str());
     printLine();
-    indent += 2;
+    incIndent();
     for (auto p : term->getAllDecls())
       p->print(this);
-    indent -= 2;
+    decIndent();
     printIndent();
     fprintf(file, "};");
     printLine();
@@ -272,12 +272,12 @@ void CPPPrinter::print(code::CompoundStmt* term) {
   printIndent();
   fprintf(file, "{");
   printLine();
-  indent += 2;
+  incIndent();
 
   for (auto p : term->getAll())
     p->print(this);
 
-  indent -= 2;
+  decIndent();
   printIndent();
   fprintf(file, "}");
   printLine();
@@ -410,27 +410,20 @@ void CPPPrinter::print(code::IfStmt* term) {
   term->getCond()->print(this);
   fprintf(file, ")");
   newline = backup;
-  if (term->getThen().size() == 0) {
-    fprintf(file, ";");
+
+  if (term->getThen() != NULL) {
     printLine();
-  } else if (term->getThen().size() == 1) {
-    indent += 2;
-    term->getThen().get(0)->print(this);
-    indent -= 2;
-  } else {
-    printLine();
-    term->getThen().print(this);
+    incIndent();
+    term->getThen()->print(this);
+    decIndent();
   }
-  if (term->getElse().size() != 0) {
+  if (term->getElse() != NULL) {
     printIndent();
     fprintf(file, "else");
     printLine();
-    if (term->getElse().size() == 1) {
-      indent += 2;
-      term->getElse().get(0)->print(this);
-      indent -= 2;
-    } else
-      term->getElse().print(this);
+    incIndent();
+    term->getElse()->print(this);
+    decIndent();
   }
 }
 
@@ -598,6 +591,8 @@ void CPPPrinter::print(code::DeclContext* term) {
   term->print(this);
 }
 
+
 }
 }
+
 
