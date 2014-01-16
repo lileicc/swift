@@ -466,10 +466,21 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
     // for the moment just simple trick
     return new code::IntegerLiteral(0);
   }
+  
+  std::shared_ptr<ir::MapExpr> mex = std::dynamic_pointer_cast<
+      ir::MapExpr>(expr);
+  if (mex) {
+    return transMapExpr(mex);
+  }
+  
 
   // TODO translate other expression
   // if valuevar is provided it should be
   return NULL;
+}
+
+code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
+  
 }
 
 code::Expr* CPPTranslator::transDistribution(
@@ -477,16 +488,16 @@ code::Expr* CPPTranslator::transDistribution(
     std::string valuevar) {
   std::string name = dist->getDistrName();
   std::string distname = name + std::to_string((size_t) dist.get());
-  //put initialization in coreClasInit
-  coreClsInit->addStmt(
-      new code::CallExpr(
-          new code::BinaryOperator(new code::VarRef(distname),
-              new code::VarRef(DISTRIBUTION_INIT_FUN_NAME),
-              code::OpKind::BO_FIELD), args));
   if (valuevar.empty()) {
     // now actual sampling a value from the distribution
     // define a field in the main class corresponding to the distribution
     code::FieldDecl::createFieldDecl(coreCls, distname, code::Type(name));
+    //put initialization in coreClasInit
+    coreClsInit->addStmt(
+        new code::CallExpr(
+            new code::BinaryOperator(new code::VarRef(distname),
+                new code::VarRef(DISTRIBUTION_INIT_FUN_NAME),
+                code::OpKind::BO_FIELD), args));
     // :::==> distribution.gen(random_engine);
     std::vector<code::Expr *> rd;
     rd.push_back(new code::VarRef(RANDOM_ENGINE_VAR_NAME));
@@ -513,8 +524,8 @@ void CPPTranslator::createInit() {
   coreClsInit = code::FunctionDecl::createFunctionDecl(coreCls,
       MAIN_INIT_FUN_NAME, VOID_TYPE);
   std::vector<code::ParamVarDecl*> args;
-  args.push_back(new code::ParamVarDecl(coreClsInit,
-      LOCAL_NUM_SAMPLE_ARG_NAME, INT_TYPE));
+  args.push_back(
+      new code::ParamVarDecl(coreClsInit, LOCAL_NUM_SAMPLE_ARG_NAME, INT_TYPE));
   coreClsInit->setParams(args);
   code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
       INT_TYPE);

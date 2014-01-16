@@ -90,7 +90,8 @@ private:
    */
   code::Expr* transExpr(std::shared_ptr<ir::Expr> expr, std::string valuevar =
       std::string());
-
+  
+  code::Expr* transMapExpr(std::shared_ptr<ir::MapExpr> mex);
   /**
    * translate the evidence in obs statement, the resulting statement is added
    * to the declaration context
