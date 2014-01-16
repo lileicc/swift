@@ -14,13 +14,13 @@
 namespace swift {
 namespace random {
 
-CategoricalDistribution::CategoricalDistribution() {
+Categorical::Categorical() {
 }
 
-CategoricalDistribution::~CategoricalDistribution() {
+Categorical::~Categorical() {
 }
 
-void CategoricalDistribution::init(std::map<int, double>& weights) {
+void Categorical::init(std::map<int, double>& weights) {
   for (auto it : weights) {
     keys.push_back(it.first);
     weight.push_back(it.second);
@@ -38,16 +38,16 @@ void CategoricalDistribution::init(std::map<int, double>& weights) {
 }
 
 template <typename _RD>
-int CategoricalDistribution::gen(_RD& rd) {
+int Categorical::gen(_RD& rd) {
   return dist(engine);
 }
 
-double CategoricalDistribution::likeli(int x) {
+double Categorical::likeli(int x) {
   if(x<0 || x>=(int)weight.size()) return 0;
   return weight[x];
 }
 
-double CategoricalDistribution::loglikeli(int x) {
+double Categorical::loglikeli(int x) {
   return log(likeli(x));
 }
 

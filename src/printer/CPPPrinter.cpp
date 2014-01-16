@@ -132,8 +132,8 @@ void CPPPrinter::print(code::Code* prog) {
     s->print(this);
   printLine();
   
-  fprintf(file, "using std;\n");
-  fprintf(file, "using swift::random;\n");
+  fprintf(file, "using namespace std;\n");
+  fprintf(file, "using namespace swift::random;\n");
 
   printLine();
   // print forward declaration

@@ -351,7 +351,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   std::string markvarname = getMarkVarName(name);
   std::string setterfunname = getSetterFunName(name);
   code::FunctionDecl* setterfun = code::FunctionDecl::createFunctionDecl(
-      coreCls, setterfunname, VOID_TYPE);
+      coreCls, setterfunname, DOUBLE_TYPE);
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
       setterfun, fd->getArgs());
   addFunValueRefStmt(setterfun, valuevarname, args_with_value,
@@ -477,8 +477,6 @@ code::Expr* CPPTranslator::transDistribution(
     std::string valuevar) {
   std::string name = dist->getDistrName();
   std::string distname = name + std::to_string((size_t) dist.get());
-  // define a field in the main class corresponding to the distribution
-  code::FieldDecl::createFieldDecl(coreCls, distname, code::Type(name));
   //put initialization in coreClasInit
   coreClsInit->addStmt(
       new code::CallExpr(
@@ -487,6 +485,8 @@ code::Expr* CPPTranslator::transDistribution(
               code::OpKind::BO_FIELD), args));
   if (valuevar.empty()) {
     // now actual sampling a value from the distribution
+    // define a field in the main class corresponding to the distribution
+    code::FieldDecl::createFieldDecl(coreCls, distname, code::Type(name));
     // :::==> distribution.gen(random_engine);
     std::vector<code::Expr *> rd;
     rd.push_back(new code::VarRef(RANDOM_ENGINE_VAR_NAME));
