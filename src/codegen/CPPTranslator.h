@@ -26,7 +26,7 @@ private:
   code::ClassDecl* coreCls; // main Class for the sampler;
   code::NamespaceDecl* coreNs; // main namespace
   code::FunctionDecl* coreClsInit; // init function for main class
-
+  code::FunctionDecl* mainFun; //main function
   code::FunctionDecl* transSampleAlg();
 
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
@@ -40,6 +40,12 @@ private:
    * initialization statements
    */
   void createInit();
+
+  /**
+   * create main function
+   */
+  void createMain();
+  static const std::string MAIN_FUN_NAME;
   /**
    * translate the blog function to getter function
    * ::: random Color truecolor(Ball b) => int get_truecolor(int i)
@@ -84,7 +90,13 @@ private:
    */
   code::Expr* transExpr(std::shared_ptr<ir::Expr> expr, std::string valuevar =
       std::string());
-
+  
+  code::Expr* transMapExpr(std::shared_ptr<ir::MapExpr> mex);
+  /**
+   * translate the operation expression 
+   */
+  code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr);
+  code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
   /**
    * translate the evidence in obs statement, the resulting statement is added
    * to the declaration context
@@ -111,7 +123,7 @@ private:
    */
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
       std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
-      code::Type varType = INT_TYPE);
+      code::Type varType = INT_REF_TYPE);
   /**
    * translate the distribution expression
    * given the arguments,
@@ -150,6 +162,8 @@ private:
 
   static const code::Type VOID_TYPE;
 
+  static const std::string SAMPLER_VAR_NAME;
+
   static const std::string MAIN_SAMPLING_FUN_NAME;
 
   static const std::string MAIN_NAMESPACE_NAME;
@@ -175,6 +189,7 @@ private:
    */
   static const std::string ANSWER_VAR_NAME_PREFIX;
 
+  //number of samples, argument for init() and sample()
   static const std::string LOCAL_NUM_SAMPLE_ARG_NAME;
 
   /**

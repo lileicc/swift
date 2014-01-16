@@ -24,8 +24,8 @@ std::shared_ptr<ir::Distribution> CategoricalDistrDecl::getNew
   if (m == nullptr) return nullptr;
 
   // TODO:
-  // Currently, We ONLY Allow [ constant symbold -> ouble_literal ]
-  std::shared_ptr<ir::CategoricalDistr> ret = std::make_shared<ir::CategoricalDistr>(this);
+  // Currently, We ONLY Allow [ constant symbold -> double_literal ]
+    std::shared_ptr<ir::CategoricalDistr> ret = std::make_shared<ir::CategoricalDistr>(this);
   for (size_t i = 0; i < m->mapSize(); ++i) {
     std::shared_ptr<ir::ConstSymbol> x = std::dynamic_pointer_cast<ir::ConstSymbol>(m->getFrom(i));
     std::shared_ptr<ir::DoubleLiteral> y = std::dynamic_pointer_cast<ir::DoubleLiteral>(m->getTo(i));
@@ -33,6 +33,7 @@ std::shared_ptr<ir::Distribution> CategoricalDistrDecl::getNew
     ret->addWeight(y->getValue());
     ret->addSymbol(x);
   }
+  ret->addArg(m);
   ret->setTyp(ty->getTo());
   return ret;
 }

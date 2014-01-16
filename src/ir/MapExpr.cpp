@@ -17,11 +17,11 @@ void MapExpr::addMap(std::shared_ptr<Expr> a, std::shared_ptr<Expr> b) {
   addArg(b);
 }
 
-std::shared_ptr<Expr> MapExpr::getFrom(int k) const {
+std::shared_ptr<Expr> MapExpr::getFrom(size_t k) const {
   return get(2 * k);
 }
 
-std::shared_ptr<Expr> MapExpr::getTo(int k) const {
+std::shared_ptr<Expr> MapExpr::getTo(size_t k) const {
   return get(2 * k + 1);
 }
 

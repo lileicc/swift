@@ -16,10 +16,10 @@
 namespace swift {
 namespace random {
 
-class CategoricalDistribution: public swift::random::SwiftDistribution<int> {
+class Categorical: public swift::random::SwiftDistribution<int> {
 public:
-  CategoricalDistribution();
-  ~CategoricalDistribution();
+  Categorical();
+  ~Categorical();
   void init(std::map<int, double>& weights);
   template <typename _RD>
   int gen(_RD& rd);
