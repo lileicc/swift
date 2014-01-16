@@ -6,6 +6,8 @@
  */
 
 #include "CallExpr.h"
+#include "VarRef.h"
+#include "BinaryOperator.h"
 
 namespace swift {
 namespace code {
@@ -13,7 +15,6 @@ namespace code {
 CallExpr::CallExpr(code::Expr* fn, std::vector<code::Expr*> args) :
     fn(fn), args(args) {
 }
-
 
 CallExpr::~CallExpr() {
   delete fn;
@@ -35,5 +36,13 @@ void CallExpr::print(printer::Printer* prt) {
   prt->print(this);
 }
 
+CallExpr* CallExpr::createMethodCall(std::string varname,
+    std::string methodname, std::vector<Expr*> args) {
+  return new CallExpr(
+      new BinaryOperator(new VarRef(varname), new VarRef(methodname),
+          OpKind::BO_FIELD), args);
+}
+
 } /* namespace code */
 } /* namespace swift */
+

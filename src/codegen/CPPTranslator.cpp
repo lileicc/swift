@@ -35,8 +35,10 @@ const std::string CPPTranslator::ANSWER_PROCESS_CLASS_NAME = "Hist";
 const std::string CPPTranslator::ANSWER_PROCESS_METHOD_NAME = "add";
 const std::string CPPTranslator::ANSWER_VAR_NAME_PREFIX = "_answer_";
 const std::string CPPTranslator::MAIN_SAMPLING_FUN_NAME = "sample";
+const std::string CPPTranslator::SAMPLER_VAR_NAME = "sampler";
 const std::string CPPTranslator::MAIN_NAMESPACE_NAME = "swift";
 const std::string CPPTranslator::MAIN_INIT_FUN_NAME = "init";
+const std::string CPPTranslator::MAIN_FUN_NAME = "main";
 const std::string CPPTranslator::LOCAL_NUM_SAMPLE_ARG_NAME = "n";
 // randomness
 const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
@@ -116,8 +118,10 @@ CPPTranslator::~CPPTranslator() {
 }
 
 void CPPTranslator::translate(swift::ir::BlogModel* model) {
-  coreCls = code::ClassDecl::createClassDecl(coreNs, model->getName());
-  createInit();
+  if (coreCls == NULL) {
+    coreCls = code::ClassDecl::createClassDecl(coreNs, model->getName());
+    createInit();
+  }
 
   // translate type and distinct symbols;
   for (auto ty : model->getTypes())
@@ -136,6 +140,8 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
 
   // TODO translate query
   transAllQuery(model->getQueries());
+
+  createMain();
 }
 
 code::Code* CPPTranslator::getResult() {
@@ -452,9 +458,9 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   if (fc) {
     return transFunctionCall(fc, args);
   }
-  
-  std::shared_ptr<ir::ConstSymbol> cs =
-      std::dynamic_pointer_cast<ir::ConstSymbol>(expr);
+
+  std::shared_ptr<ir::ConstSymbol> cs = std::dynamic_pointer_cast<
+      ir::ConstSymbol>(expr);
   if (cs) {
     // TODO translate the constsymbol
     // for the moment just simple trick
@@ -631,7 +637,23 @@ code::Expr* CPPTranslator::transFunctionCall(
   }
 }
 
+void CPPTranslator::createMain() {
+  mainFun = code::FunctionDecl::createFunctionDecl(prog, MAIN_FUN_NAME,
+      INT_TYPE);
+  // todo better way to name the type
+  code::Stmt* st = new code::DeclStmt(
+      new code::VarDecl(mainFun, SAMPLER_VAR_NAME,
+          code::Type(
+              coreNs->getName() + std::string("::") + coreCls->getName())));
+  mainFun->addStmt(st);
+  std::vector<code::Expr*> args;
+  args.push_back(new code::IntegerLiteral(10000));
+  st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
+      MAIN_SAMPLING_FUN_NAME, args);
+  mainFun->addStmt(st);
+  // todo add printing
+}
+
 } /* namespace codegen */
 } /* namespace swift */
-
 

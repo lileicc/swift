@@ -26,7 +26,7 @@ private:
   code::ClassDecl* coreCls; // main Class for the sampler;
   code::NamespaceDecl* coreNs; // main namespace
   code::FunctionDecl* coreClsInit; // init function for main class
-
+  code::FunctionDecl* mainFun; //main function
   code::FunctionDecl* transSampleAlg();
 
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
@@ -40,6 +40,12 @@ private:
    * initialization statements
    */
   void createInit();
+
+  /**
+   * create main function
+   */
+  void createMain();
+  static const std::string MAIN_FUN_NAME;
   /**
    * translate the blog function to getter function
    * ::: random Color truecolor(Ball b) => int get_truecolor(int i)
@@ -149,6 +155,8 @@ private:
   static const code::Type BOOL_TYPE;
 
   static const code::Type VOID_TYPE;
+
+  static const std::string SAMPLER_VAR_NAME;
 
   static const std::string MAIN_SAMPLING_FUN_NAME;
 
