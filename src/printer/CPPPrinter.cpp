@@ -121,17 +121,21 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include<random>\n");
   fprintf(file, "#include<numeric>\n");
   fprintf(file, "#include<string>\n");
-
+  fprintf(file, "#include \"random/CategoricalDistribution.h\"\n");
+  
   // output costumized include
   for (auto h : header)
     fprintf(file, "#include %s\n", h.c_str());
-  printLine();
 
   // print special include/statements
   for (auto s : prog->getAllMacros())
     s->print(this);
   printLine();
+  
+  fprintf(file, "using std;\n");
+  fprintf(file, "using swift::random;\n");
 
+  printLine();
   // print forward declaration
   isforward = true;
   for (auto p : prog->getAllDecls())
@@ -142,6 +146,7 @@ void CPPPrinter::print(code::Code* prog) {
   isforward = false;
   for (auto p : prog->getAllDecls())
     p->print(this);
+  
 }
 
 void CPPPrinter::print(code::ArraySubscriptExpr* term) {

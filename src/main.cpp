@@ -45,5 +45,10 @@ int main(int argc, char** argv) {
   swift::printer::Printer * prt = new swift::printer::CPPPrinter(
       std::string(out));
   program->print(prt);
+  
+  delete blog_absyn;
+  delete model;
+  delete program;
+  delete prt;
   return 0;
 }

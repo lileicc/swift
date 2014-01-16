@@ -183,6 +183,7 @@ private:
    */
   static const std::string ANSWER_VAR_NAME_PREFIX;
 
+  //number of samples, argument for init() and sample()
   static const std::string LOCAL_NUM_SAMPLE_ARG_NAME;
 
   /**

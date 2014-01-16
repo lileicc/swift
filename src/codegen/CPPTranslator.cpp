@@ -512,6 +512,10 @@ void CPPTranslator::createInit() {
   // 3. initialization function to initialize the values (function called in sample(n)
   coreClsInit = code::FunctionDecl::createFunctionDecl(coreCls,
       MAIN_INIT_FUN_NAME, VOID_TYPE);
+  std::vector<code::ParamVarDecl*> args;
+  args.push_back(new code::ParamVarDecl(coreClsInit,
+      LOCAL_NUM_SAMPLE_ARG_NAME, INT_TYPE));
+  coreClsInit->setParams(args);
   code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
       INT_TYPE);
   code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME,
