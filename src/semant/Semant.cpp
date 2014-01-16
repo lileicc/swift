@@ -613,7 +613,9 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
   auto func = functory.getFunc(var, std::vector<std::shared_ptr<ir::VarDecl> >());
   if (func != NULL) {
     // Void Function Call
-    std::shared_ptr<ir::VoidFuncCall> ret(new ir::VoidFuncCall(func));
+    // TODO: To Change to Void Function Call
+    //std::shared_ptr<ir::VoidFuncCall> ret(new ir::VoidFuncCall(func));
+    auto ret = std::make_shared<ir::FunctionCall>(ir::FunctionCall(func));
     ret->setTyp(func->getRetTyp());
     return ret;
   }
@@ -791,7 +793,7 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
   ir::FuncDefn * fun = functory.getFunc(name, vds);
   if (fun != NULL) {
     // Add Local Variables
-    for (auto v : vds)
+    for (auto v : fun->getArgs())
       local_var[v->getVar()].push(v.get());
 
     fun->setBody( transClause(fd->getExpr()) );
@@ -799,7 +801,7 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
       fun->getBody()->setTyp(rettyp);
 
     // Remove Local Variables
-    for (auto v : vds) {
+    for (auto v : fun->getArgs()) {
       auto it = local_var.find(v->getVar());
       it->second.pop();
       if (it->second.empty())
