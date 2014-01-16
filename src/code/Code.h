@@ -28,6 +28,7 @@
 #include "FloatingLiteral.h"
 #include "IfStmt.h"
 #include "IntegerLiteral.h"
+#include "ListInitExpr.h"
 #include "NamespaceDecl.h"
 #include "NewExpr.h"
 #include "ParamVarDecl.h"

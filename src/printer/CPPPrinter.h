@@ -41,6 +41,7 @@ public:
   void print(code::FunctionDecl* term);
   void print(code::IfStmt* term);
   void print(code::IntegerLiteral* term);
+  void print(code::ListInitExpr* term);
   void print(code::NamespaceDecl* term);
   void print(code::NewExpr* term);
   void print(code::ParamVarDecl* term);

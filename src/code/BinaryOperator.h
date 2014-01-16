@@ -31,10 +31,10 @@ enum class OpKind {
   BO_XOR,      // binary xor
   BO_EQU,      // equal
   BO_NEQ,      // not equal
-  BO_LE,        // less than
-  BO_RE, // greater than
+  BO_LT,        // less than
+  BO_GT, // greater than
   BO_LEQ, // less then or equal
-  BO_REQ, // greater then or equal
+  BO_GEQ, // greater then or equal
   BO_PLUS, // plus
   BO_MINUS, // minus
   BO_MUL, // multiply

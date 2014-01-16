@@ -48,13 +48,13 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "=="; // equal
   case OpKind::BO_NEQ:
     return "!="; // not equal
-  case OpKind::BO_LE:
+  case OpKind::BO_LT:
     return "<"; // less than
-  case OpKind::BO_RE:
+  case OpKind::BO_GT:
     return ">"; // greater than
   case OpKind::BO_LEQ:
     return "<="; // less then or equal
-  case OpKind::BO_REQ:
+  case OpKind::BO_GEQ:
     return ">="; // greater then or equal
   case OpKind::BO_PLUS:
     return "+"; // plus
@@ -118,6 +118,7 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include<vector>\n");
   fprintf(file, "#include<set>\n");
   fprintf(file, "#include<map>\n");
+  fprintf(file, "#include<unordered_map>\n");
   fprintf(file, "#include<random>\n");
   fprintf(file, "#include<numeric>\n");
   fprintf(file, "#include<string>\n");
@@ -531,8 +532,9 @@ void CPPPrinter::print(code::SwitchStmt* term) {
 void CPPPrinter::print(code::Type* term) {
   // assume newline == false;
   assert(newline == false);
-
   fprintf(file, "%s", term->getName().c_str());
+  if (term->isRef())
+    fprintf(file, "&");
 }
 
 void CPPPrinter::print(code::VarDecl* term) {
@@ -593,9 +595,23 @@ void CPPPrinter::print(code::NewExpr* term) {
 }
 
 void CPPPrinter::print(code::DeclContext* term) {
+  // note should not reach here!!
   term->print(this);
 }
 
+void CPPPrinter::print(code::ListInitExpr* term) {
+  bool first = true;
+  fprintf(file, "{");
+  for (auto ex : term->getSubExprs()) {
+    if (! first) {
+      fprintf(file, ", ");
+    } else {
+      first = false;
+    }
+    ex->print(this);
+  }
+  fprintf(file, "}");
+}
 
 }
 }

@@ -264,7 +264,7 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   std::string valuevarname = getValueVarName(name);
   // __mark__name
   std::string markvarname = getMarkVarName(name);
-  // adding in the initialization function
+  // adding in the initialization function for value of a random variable
   code::FieldDecl::createFieldDecl(coreCls, valuevarname, INT_POINTER_TYPE);
   coreClsInit->addStmt(
       new code::DeleteStmt(new code::VarRef(valuevarname), true));
@@ -273,7 +273,7 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
           new code::NewExpr(INT_TYPE,
               new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
           code::OpKind::BO_ASSIGN));
-  // adding in the initialization function
+  // adding in the initialization function for mark of a random variable
   code::FieldDecl::createFieldDecl(coreCls, markvarname, INT_POINTER_TYPE);
   coreClsInit->addStmt(
       new code::DeleteStmt(new code::VarRef(markvarname), true));
@@ -302,7 +302,7 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
   getterfun->addStmt(st);
   //now translate actual sampling part
-  transClause(fd->getBody(), VALUE_VAR_REF_NAME);
+  getterfun->addStmt(transClause(fd->getBody(), VALUE_VAR_REF_NAME));
   // now return the value
   getterfun->addStmt(
       new code::ReturnStmt(new code::VarRef(VALUE_VAR_REF_NAME)));
@@ -333,7 +333,8 @@ code::FunctionDecl* CPPTranslator::transLikeliFun(
       DOUBLE_TYPE, new code::FloatingLiteral(0));
   likelifun->addStmt(new code::DeclStmt(weightvar));
   // translate the Clause and calculate weight
-  transClause(fd->getBody(), WEIGHT_VAR_REF_NAME, VALUE_VAR_REF_NAME);
+  likelifun->addStmt(transClause(fd->getBody(), WEIGHT_VAR_REF_NAME,
+                                 VALUE_VAR_REF_NAME));
   // now return the value
   likelifun->addStmt(
       new code::ReturnStmt(new code::VarRef(WEIGHT_VAR_REF_NAME)));
@@ -392,12 +393,9 @@ code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
   }
   std::shared_ptr<ir::Expr> expr = std::dynamic_pointer_cast<ir::Expr>(clause);
   if (expr) {
-    code::CompoundStmt* cst = new code::CompoundStmt();
-    cst->addStmt(
-        new code::BinaryOperator(new code::VarRef(retvar),
-            transExpr(expr, valuevar), code::OpKind::BO_ASSIGN));
+    return  new code::BinaryOperator(new code::VarRef(retvar),
+        transExpr(expr, valuevar), code::OpKind::BO_ASSIGN);
     // TODO no 100% correct here why??
-    return cst;
   }
   //todo: warning should not reach here
   return NULL;
@@ -425,7 +423,7 @@ code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
   code::CaseStmt* cst;
   for (size_t i = 0; i < br->size(); i++) {
     cst = new code::CaseStmt(transExpr(br->getCond(i)),
-        transClause(br->getBranch(i), retvar));
+        transClause(br->getBranch(i), retvar, valuevar));
     sst->addStmt(cst);
     sst->addStmt(new code::BreakStmt());
   }
@@ -434,8 +432,12 @@ code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
 
 code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
     std::string retvar, std::string valuevar) {
-  // TODO translate ifthenelse
-  return NULL;
+  code::Expr* cond = transExpr(ith->getCond());
+  code::Stmt* ifcl = transClause(ith->getThen(), retvar, valuevar);
+  code::Stmt* elcl = NULL;
+  if (ith->getElse())
+    transClause(ith->getElse(), retvar, valuevar);
+  return new code::IfStmt(cond, ifcl, elcl);
 }
 
 code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
@@ -462,9 +464,7 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   std::shared_ptr<ir::ConstSymbol> cs = std::dynamic_pointer_cast<
       ir::ConstSymbol>(expr);
   if (cs) {
-    // TODO translate the constsymbol
-    // for the moment just simple trick
-    return new code::IntegerLiteral(0);
+    return transConstSymbol(cs);
   }
   
   std::shared_ptr<ir::MapExpr> mex = std::dynamic_pointer_cast<
@@ -473,6 +473,17 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
     return transMapExpr(mex);
   }
   
+  std::shared_ptr<ir::VarRefer> vref = std::dynamic_pointer_cast<
+      ir::VarRefer>(expr);
+  if (vref) {
+    return new code::VarRef(vref->getRefer()->getVar());
+  }
+  
+  std::shared_ptr<ir::OprExpr> opexp = std::dynamic_pointer_cast<
+  ir::OprExpr>(expr);
+  if (opexp) {
+    return transOprExpr(opexp);
+  }
 
   // TODO translate other expression
   // if valuevar is provided it should be
@@ -480,29 +491,69 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
 }
 
 code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
-  
+  std::vector<code::Expr*> args;
+  std::vector<code::Expr*> inside;
+  for (size_t i=0; i < mex->mapSize(); i++) {
+    inside.clear();
+    inside.push_back(transExpr(mex->getFrom(i)));
+    inside.push_back(transExpr(mex->getTo(i)));
+    args.push_back(new code::ListInitExpr(inside));
+  }
+  code::Expr* list = new code::ListInitExpr(args);
+  std::vector<code::Expr*> maparg;
+  maparg.push_back(list);
+  // todo just a hack for the moment, need to support templated type
+  return new code::CallExpr(new code::VarRef("unordered_map<int, int>"),
+                            maparg);
 }
+  
+  code::Expr* CPPTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr) {
+    code::OpKind kind;
+    code::Expr* lhs = transExpr(opr->get(0));
+    code::Expr* rhs = NULL;
+    if (opr->argSize() > 1)
+      rhs = transExpr(opr->get(1));
+    // only need two arguments
+    switch (opr->getOp()) {
+      case ir::IRConstant::EQ:
+        kind = code::OpKind::BO_EQU;
+      case ir::IRConstant::NEQ:
+        kind = code::OpKind::BO_NEQ;
+      case ir::IRConstant::LE:
+        kind = code::OpKind::BO_LEQ;
+      case ir::IRConstant::GE:
+        kind = code::OpKind::BO_GEQ;
+      case ir::IRConstant::LT:
+        kind = code::OpKind::BO_LT;
+      case ir::IRConstant::GT:
+        kind = code::OpKind::BO_GT;
+        
+      return new code::BinaryOperator(lhs, rhs, kind);
+    }
+    // wrong operation
+    return NULL;
+  }
 
 code::Expr* CPPTranslator::transDistribution(
     std::shared_ptr<ir::Distribution> dist, std::vector<code::Expr*> args,
     std::string valuevar) {
   std::string name = dist->getDistrName();
-  std::string distname = name + std::to_string((size_t) dist.get());
+  std::string distvarname = name + std::to_string((size_t) & (dist->getArgs()));
   if (valuevar.empty()) {
     // now actual sampling a value from the distribution
     // define a field in the main class corresponding to the distribution
-    code::FieldDecl::createFieldDecl(coreCls, distname, code::Type(name));
+    code::FieldDecl::createFieldDecl(coreCls, distvarname, code::Type(name));
     //put initialization in coreClasInit
     coreClsInit->addStmt(
         new code::CallExpr(
-            new code::BinaryOperator(new code::VarRef(distname),
+            new code::BinaryOperator(new code::VarRef(distvarname),
                 new code::VarRef(DISTRIBUTION_INIT_FUN_NAME),
                 code::OpKind::BO_FIELD), args));
     // :::==> distribution.gen(random_engine);
     std::vector<code::Expr *> rd;
     rd.push_back(new code::VarRef(RANDOM_ENGINE_VAR_NAME));
     return new code::CallExpr(
-        new code::BinaryOperator(new code::VarRef(distname),
+        new code::BinaryOperator(new code::VarRef(distvarname),
             new code::VarRef(DISTRIBUTION_GEN_FUN_NAME),
             code::OpKind::BO_FIELD), rd);
   } else {
@@ -511,7 +562,7 @@ code::Expr* CPPTranslator::transDistribution(
     std::vector<code::Expr *> args;
     args.push_back(new code::VarRef(valuevar));
     return new code::CallExpr(
-        new code::BinaryOperator(new code::VarRef(distname),
+        new code::BinaryOperator(new code::VarRef(distvarname),
             new code::VarRef(DISTRIBUTION_LOGLIKELI_FUN_NAME),
             code::OpKind::BO_FIELD), args);
   }
@@ -638,6 +689,35 @@ code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
   }
 }
 
+code::Expr* CPPTranslator::transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs) {
+  std::shared_ptr<ir::InstSymbolRef> isr = std::dynamic_pointer_cast<ir::InstSymbolRef>(cs);
+  if (isr) {
+    return new code::IntegerLiteral(isr->getInst()->getID());
+  }
+  std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<ir::BoolLiteral>(cs);
+  if (bl) {
+    return new code::BooleanLiteral(bl->getValue());
+  }
+  std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<ir::DoubleLiteral>(cs);
+  if (dl) {
+    return new code::FloatingLiteral(dl->getValue());
+  }
+  std::shared_ptr<ir::IntLiteral> il = std::dynamic_pointer_cast<ir::IntLiteral>(cs);
+  if (il) {
+    return new code::IntegerLiteral(il->getValue());
+  }
+  std::shared_ptr<ir::NullSymbol> nl = std::dynamic_pointer_cast<ir::NullSymbol>(cs);
+  if (bl) {
+    // todo change the translation of null
+    return new code::IntegerLiteral(-1);
+  }
+  std::shared_ptr<ir::StringLiteral> sl = std::dynamic_pointer_cast<ir::StringLiteral>(cs);
+  if (sl) {
+    return new code::StringLiteral(sl->getValue());
+  }
+  return NULL;
+}
+  
 code::Expr* CPPTranslator::transFunctionCall(
     std::shared_ptr<ir::FunctionCall> fc, std::vector<code::Expr*> args) {
   std::string getterfunname;

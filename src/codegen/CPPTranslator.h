@@ -93,6 +93,11 @@ private:
   
   code::Expr* transMapExpr(std::shared_ptr<ir::MapExpr> mex);
   /**
+   * translate the operation expression 
+   */
+  code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr);
+  code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
+  /**
    * translate the evidence in obs statement, the resulting statement is added
    * to the declaration context
    */
@@ -118,7 +123,7 @@ private:
    */
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
       std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
-      code::Type varType = INT_TYPE);
+      code::Type varType = INT_REF_TYPE);
   /**
    * translate the distribution expression
    * given the arguments,

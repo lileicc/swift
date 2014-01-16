@@ -30,6 +30,7 @@ class ForStmt;
 class FunctionDecl;
 class IfStmt;
 class IntegerLiteral;
+class ListInitExpr;
 class NamespaceDecl;
 class NewExpr;
 class ParamVarDecl;
