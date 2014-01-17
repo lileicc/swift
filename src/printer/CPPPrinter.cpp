@@ -123,6 +123,7 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include<numeric>\n");
   fprintf(file, "#include<string>\n");
   fprintf(file, "#include \"random/CategoricalDistribution.h\"\n");
+  fprintf(file, "#include \"util/Hist.h\"\n");
   
   // output costumized include
   for (auto h : header)
@@ -360,6 +361,10 @@ void CPPPrinter::print(code::ForStmt* term) {
 }
 
 void CPPPrinter::print(code::FunctionDecl* term) {
+  print(term, true);
+}
+
+void CPPPrinter::print(code::FunctionDecl* term, bool hasRetType) {
   bool backup;
   if (isforward) {
     printIndent();
@@ -367,8 +372,11 @@ void CPPPrinter::print(code::FunctionDecl* term) {
     newline = false;
     if (term->isInline())
       fprintf(file, "inline ");
-    term->getType().print(this);
-    fprintf(file, " %s(", term->getName().c_str());
+    if (hasRetType) {
+      term->getType().print(this);
+      fprintf(file, " ");
+    }
+    fprintf(file, "%s(", term->getName().c_str());
     bool not_first = false;
     for (auto p : term->getParams()) {
       if (not_first)
@@ -386,10 +394,10 @@ void CPPPrinter::print(code::FunctionDecl* term) {
     newline = false;
     if (term->isInline())
       fprintf(file, "inline ");
-    term->getType().print(this);
-
-    fprintf(file, " ");
-
+    if (hasRetType) {
+      term->getType().print(this);
+      fprintf(file, " ");
+    }
     printPrefix();
     fprintf(file, "%s(", term->getName().c_str());
     bool not_first = false;
@@ -611,6 +619,10 @@ void CPPPrinter::print(code::ListInitExpr* term) {
     ex->print(this);
   }
   fprintf(file, "}");
+}
+
+void CPPPrinter::print(code::ClassConstructor* term) {
+  print(term, false);
 }
 
 }

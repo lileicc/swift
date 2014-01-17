@@ -4,16 +4,14 @@
 namespace swift { namespace ir {
 class InstSymbol {
 public:
-  InstSymbol(TypeDomain* refer = NULL, int id = -1);
+  InstSymbol(TypeDomain* refer, size_t id);
   virtual ~InstSymbol();
 
   TypeDomain* getRefer() const ;
-  int getID() const ;
-  bool isNull() const ;
-
+  size_t getID() const ;
 private:
   TypeDomain* refer;
-  int id;
+  size_t id;
 };
 
 }

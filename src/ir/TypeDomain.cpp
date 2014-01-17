@@ -33,12 +33,12 @@ const NameTy* TypeDomain::getRefer() const {
   return refer;
 }
 
-void TypeDomain::setPreLen(int l) {
+void TypeDomain::setPreLen(size_t l) {
   prelen = l;
   instName.resize(l);
 }
 
-int TypeDomain::getPreLen() const {
+size_t TypeDomain::getPreLen() const {
   return prelen;
 }
 
@@ -68,7 +68,7 @@ const std::vector<OriginAttr*>& TypeDomain::getAllOrigin() const {
   return origin;
 }
 
-OriginAttr* TypeDomain::getOrigin(int k) const {
+OriginAttr* TypeDomain::getOrigin(size_t k) const {
   return origin[k];
 }
 
@@ -78,7 +78,7 @@ size_t TypeDomain::getOriginSize() const {
 
 int TypeDomain::getOriginID(const std::string& str) {
   if (originID.find(str) == originID.end()) return -1;
-  return originID[str];
+  return (int) originID[str];
 }
 
 OriginAttr* TypeDomain::getOrigin(const std::string& str) {
@@ -87,12 +87,12 @@ OriginAttr* TypeDomain::getOrigin(const std::string& str) {
   return origin[id];
 }
 
-void TypeDomain::setInstName(int k, std::string name) {
-  if (k >= 0 && k < prelen)
+void TypeDomain::setInstName(size_t k, std::string name) {
+  if (k < prelen)
     instName[k] = name;
 }
 
-const std::string& TypeDomain::getInstName(int k) const {
+const std::string& TypeDomain::getInstName(size_t k) const {
   return instName[k];
 }
 

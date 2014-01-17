@@ -17,9 +17,9 @@ public:
   std::shared_ptr<Expr> getVar() const ;
   void addBranch(std::shared_ptr<ConstSymbol> c, std::shared_ptr<Clause> b);
   size_t size() const ;
-  std::shared_ptr<ConstSymbol> getCond(int k) const;
+  std::shared_ptr<ConstSymbol> getCond(size_t k) const;
   const std::vector<std::shared_ptr<ConstSymbol>>& getConds() const;
-  std::shared_ptr<Clause> getBranch(int k) const ;
+  std::shared_ptr<Clause> getBranch(size_t k) const ;
   const std::vector<std::shared_ptr<Clause>>& getBranches() const ;
 
 private:

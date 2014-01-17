@@ -25,6 +25,7 @@ private:
   bool useTag;
   code::ClassDecl* coreCls; // main Class for the sampler;
   code::NamespaceDecl* coreNs; // main namespace
+  code::FunctionDecl* coreClsConstructor; // construction function for main class
   code::FunctionDecl* coreClsInit; // init function for main class
   code::FunctionDecl* mainFun; //main function
   code::FunctionDecl* transSampleAlg();
@@ -161,6 +162,8 @@ private:
   static const code::Type BOOL_TYPE;
 
   static const code::Type VOID_TYPE;
+  
+  static const code::Type MAP_BASE_TYPE;
 
   static const std::string SAMPLER_VAR_NAME;
 

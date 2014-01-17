@@ -64,10 +64,10 @@ bool TypeFactory::addInstSymbol(const ir::NameTy* typ,
   if (instanceTable.find(name) != instanceTable.end())
     return false;
   ir::TypeDomain* tydo = typ->getRefer();
-  int sz = tydo->getPreLen();
+  size_t sz = tydo->getPreLen();
   instanceTable[name] = new ir::InstSymbol(tydo, sz);
-  tydo->setPreLen(++sz);
-  tydo->setInstName(sz-1, name);
+  tydo->setPreLen(sz+1);
+  tydo->setInstName(sz, name);
   return true;
 }
 

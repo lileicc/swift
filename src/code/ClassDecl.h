@@ -17,7 +17,6 @@ class ClassDecl: public Decl, public DeclContext {
 public:
   ~ClassDecl();
   static ClassDecl* createClassDecl(DeclContext* ns, const std::string & name);
-
   const std::string& getName() const;
 
   // For Printer

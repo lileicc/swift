@@ -24,6 +24,7 @@ public:
   virtual void print(code::CallExpr* term)=0;
   virtual void print(code::CaseStmt* term)=0;
   virtual void print(code::ClassDecl* term)=0;
+  virtual void print(code::ClassConstructor* term)=0;
   virtual void print(code::CompoundStmt* term)=0;
   virtual void print(code::ContinueStmt* term) = 0;
   virtual void print(code::DeclContext* term)=0;

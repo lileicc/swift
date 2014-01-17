@@ -4,12 +4,9 @@
  *  Created on: Nov 23, 2013
  *      Author: leili
  */
-
-#include "CategoricalDistribution.h"
-
-#include <cmath>
 #include <numeric>
-#include "SwiftDistribution.cpp"
+#include <cmath>
+#include "CategoricalDistribution.h"
 
 namespace swift {
 namespace random {
@@ -20,10 +17,16 @@ Categorical::Categorical() {
 Categorical::~Categorical() {
 }
 
-void Categorical::init(std::map<int, double>& weights) {
-  for (auto it : weights) {
-    keys.push_back(it.first);
-    weight.push_back(it.second);
+void Categorical::init(const std::map<int, double>& ws) {
+  values.clear();
+  weights.clear();
+  values_to_indic.clear();
+  for (auto it : ws) {
+    if (it.second > 0 && it.second <= 1) {
+      values.push_back(it.first);
+      weights.push_back(it.second);
+      log_weights.push_back(log(it.second));
+    }
   }
   /*
   Note: In VS2013, we have to rewrite the last line with the following code
@@ -34,21 +37,33 @@ void Categorical::init(std::map<int, double>& weights) {
   dist = std::discrete_distribution<int>(lis);
   delete[weight.size()] A;
   */
-  dist = std::discrete_distribution<int>(weight.begin(), weight.end());
+  dist = std::discrete_distribution<int>(weights.begin(), weights.end());
 }
 
 template <typename _RD>
 int Categorical::gen(_RD& rd) {
-  return dist(engine);
+  return values[dist(rd)];
+}
+  
+int Categorical::gen(){
+  return gen(engine);
 }
 
 double Categorical::likeli(int x) {
-  if(x<0 || x>=(int)weight.size()) return 0;
-  return weight[x];
+  auto e = values_to_indic.find(x);
+  if (e!=values_to_indic.end())
+    x = e->second;
+  else return 0;
+  return weights[x];
 }
 
 double Categorical::loglikeli(int x) {
-  return log(likeli(x));
+  // todo: check -infinity!!!
+  auto e = values_to_indic.find(x);
+  if (e!=values_to_indic.end())
+    x = e->second;
+  else return 0;
+  return log_weights[x];
 }
 
 } /* namespace random */
