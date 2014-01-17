@@ -4,7 +4,7 @@
 
 namespace swift { namespace ir {
 
-OriginAttr::OriginAttr(const std::string& name, const Ty* ty, TypeDomain* src, int id)
+OriginAttr::OriginAttr(const std::string& name, const Ty* ty, TypeDomain* src, size_t id)
   :name(name), typ(ty), src(src), id(id) {
 }
 
@@ -23,11 +23,11 @@ TypeDomain* OriginAttr::getSrc() const {
   return src;
 }
 
-void OriginAttr::setID(int k) {
+void OriginAttr::setID(size_t k) {
   id = k;
 }
 
-int OriginAttr::getID() const {
+size_t OriginAttr::getID() const {
   return id;
 }
 

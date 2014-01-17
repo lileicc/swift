@@ -22,18 +22,20 @@ public:
   virtual ~FunctionDecl();
 
   virtual void addStmt(Stmt* st);
-  virtual void setParams(std::vector<ParamVarDecl* > params);
+  virtual void setParams(std::vector<ParamVarDecl*> params);
   virtual std::vector<ParamVarDecl*>& getParams();
   bool isInline();
   Type& getType();
   CompoundStmt& getBody();
   const std::string& getName() const;
-  static FunctionDecl* createFunctionDecl(DeclContext * context, std::string name, Type ty, bool inlineTag=false);
+  static FunctionDecl* createFunctionDecl(DeclContext * context,
+      std::string name, Type ty, bool inlineTag = false);
 
   // For Printer
   virtual void print(printer::Printer* prt);
 protected:
-  FunctionDecl(DeclContext * context, std::string name, Type ty, bool inlineTag);
+  FunctionDecl(DeclContext * context, std::string name, Type ty,
+      bool inlineTag);
 
 private:
   DeclContext* parent;

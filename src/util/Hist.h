@@ -15,8 +15,8 @@ class Hist {
 private:
   std::map<T, double> table;
 public:
-  Hist();
-  virtual ~Hist();
+  Hist() {};
+  virtual ~Hist() {};
   void add(T element, double weight) {
     if (table.find(element) != table.end()) {
       weight += table[element];

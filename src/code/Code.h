@@ -14,6 +14,7 @@
 #include "BreakStmt.h"
 #include "CallExpr.h"
 #include "CaseStmt.h"
+#include "ClassConstructor.h"
 #include "ClassDecl.h"
 #include "CompoundStmt.h"
 #include "ContinueStmt.h"

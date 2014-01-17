@@ -16,6 +16,7 @@ class BreakStmt;
 class CallExpr;
 class CaseStmt;
 class ClassDecl;
+class ClassConstructor;
 class Code;
 class CompoundStmt;
 class ContinueStmt;

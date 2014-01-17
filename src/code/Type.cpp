@@ -10,17 +10,17 @@
 namespace swift {
 namespace code {
 
-Type::Type(std::string name, bool refTag) : name(name), refTag(refTag) {
+Type::Type(const std::string name, bool refTag) : name(name), refTag(refTag) {
 }
 
 Type::~Type() {
 }
 
-const std::string& Type::getName() {
+const std::string& Type::getName() const {
   return name;
 }
 
-bool Type::isRef() {
+bool Type::isRef() const {
   return refTag;
 }
 

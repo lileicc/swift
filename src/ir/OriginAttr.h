@@ -8,20 +8,20 @@ namespace swift { namespace ir {
 
 class OriginAttr {
 public:
-  OriginAttr(const std::string& name, const Ty* ty, TypeDomain* src, int id);
+  OriginAttr(const std::string& name, const Ty* ty, TypeDomain* src, size_t id);
   virtual ~OriginAttr();
 
   const std::string& getName() const;
   const Ty* getTyp() const;
-  void setID(int k);
-  int getID() const;
+  void setID(size_t k);
+  size_t getID() const;
   TypeDomain* getSrc() const;
 
 private:
   std::string name;
   const Ty* typ;
   TypeDomain* src;
-  int id;
+  size_t id;
 };
 
 }

@@ -3,7 +3,7 @@
 #include "TypeDomain.h"
 
 namespace swift { namespace ir {
-InstSymbol::InstSymbol(TypeDomain* refer, int id)
+InstSymbol::InstSymbol(TypeDomain* refer, size_t id)
   :refer(refer), id(id) {
 }
 
@@ -14,12 +14,8 @@ TypeDomain* InstSymbol::getRefer() const {
   return refer;
 }
 
-int InstSymbol::getID() const {
+size_t InstSymbol::getID() const {
   return id;
-}
-
-bool InstSymbol::isNull() const {
-  return refer == NULL;
 }
 
 }
