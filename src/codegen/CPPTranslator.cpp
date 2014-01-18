@@ -46,7 +46,7 @@ const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
 const code::Type CPPTranslator::RANDOM_ENGINE_TYPE(
     "std::default_random_engine");
 const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
-const int CPPTranslator::INIT_SAMPLE_NUM = 1;
+const int CPPTranslator::INIT_SAMPLE_NUM = 0;
 
 /**
  * give the name of the type,
@@ -196,6 +196,7 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   fun->addStmt(
       new code::CallExpr(new code::VarRef(MAIN_INIT_FUN_NAME), initArg));
   // create for loop for the sampling
+  // :::=> for (int i=0; i < number of sample; i++)
   code::Stmt* init = new code::BinaryOperator(
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME),
       new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN);
@@ -243,7 +244,7 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   // add in the init function:::            mark_numvar = -1;
   coreClsInit->addStmt(
       new code::BinaryOperator(new code::VarRef(marknumvar),
-          new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN));
+          new code::IntegerLiteral(INIT_SAMPLE_NUM - 1), code::OpKind::BO_ASSIGN));
   if (len > 0) {
     // create the function for getting number of objects in this instance, i.e. numvar
     code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
@@ -282,42 +283,12 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
   // __value__name for recording the value of the function application variable
   std::string valuevarname = getValueVarName(name);
+    // adding in the main class a declaration of field for value of a random variable
+  addFieldForFunVar(valuevarname, fd->getArgs());
   // __mark__name
   std::string markvarname = getMarkVarName(name);
-  code::Type valueType = INT_TYPE;
-  if (fd->argSize() > 0) {
-    valueType = INT_POINTER_TYPE;
-    // adding in the class constructor function for initial value ::: = null;
-    coreClsConstructor->addStmt(new code::BinaryOperator(
-        new code::VarRef(valuevarname), new code::NullLiteral(),
-            code::OpKind::BO_ASSIGN));
-    // adding in the initialization function for value of a random variable
-    coreClsInit->addStmt(
-        new code::DeleteStmt(new code::VarRef(valuevarname), true));
-    coreClsInit->addStmt(
-        new code::BinaryOperator(new code::VarRef(valuevarname),
-            new code::NewExpr(INT_TYPE,
-                new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
-            code::OpKind::BO_ASSIGN));
-    // adding in the class constructor function for initial value ::: = null;
-    coreClsConstructor->addStmt(new code::BinaryOperator(
-        new code::VarRef(markvarname), new code::NullLiteral(),
-            code::OpKind::BO_ASSIGN));
-    // adding in the initialization function for mark of a random variable
-    coreClsInit->addStmt(
-        new code::DeleteStmt(new code::VarRef(markvarname), true));
-    coreClsInit->addStmt(
-        new code::BinaryOperator(new code::VarRef(markvarname),
-            new code::NewExpr(INT_TYPE,
-                new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
-            code::OpKind::BO_ASSIGN));
-  }
-  // adding in the main class a declaration of field for value of a random variable
-  code::FieldDecl::createFieldDecl(coreCls, valuevarname, valueType);
-
   // adding in the main class a declaration of field for mark of a random variable
-  code::FieldDecl::createFieldDecl(coreCls, markvarname, valueType);
-
+  addFieldForFunVar(markvarname, fd->getArgs());
   // define getter function :::==> __get_value()
   code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
       coreCls, getterfunname, valuetype);
@@ -628,6 +599,32 @@ void CPPTranslator::createInit() {
   code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME,
       RANDOM_ENGINE_TYPE);
 }
+  
+  void CPPTranslator::addFieldForFunVar(std::string varname, const std::vector<std::shared_ptr<ir::VarDecl> >& params) {
+    code::Type valueType = INT_TYPE;
+    if (!params.empty()){
+      valueType = INT_POINTER_TYPE;
+      // NOTE: currently only support single argument
+      // todo support more arguments!
+      std::string argtypename = params[0]->toSignature();
+      std::string numvarname_for_arg = getVarOfNumType(argtypename);
+    // adding in the class constructor function for initial value ::: = null;
+    coreClsConstructor->addStmt(new code::BinaryOperator(
+                                                         new code::VarRef(varname), new code::NullLiteral(),
+                                                         code::OpKind::BO_ASSIGN));
+    // adding in the initialization function for value of a random variable
+    coreClsInit->addStmt(
+                         new code::DeleteStmt(new code::VarRef(varname), true));
+    // ::: valuevar = new int[number_of_instantce];
+    coreClsInit->addStmt(
+                         new code::BinaryOperator(new code::VarRef(varname),
+                                                  new code::NewExpr(INT_TYPE,
+                                                                    new code::VarRef(numvarname_for_arg)),
+                                                  code::OpKind::BO_ASSIGN));
+    }
+    // adding in the main class a declaration of field for value of a random variable
+    code::FieldDecl::createFieldDecl(coreCls, varname, valueType);
+  }
 
 void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
     std::string valuevarname, std::vector<code::ParamVarDecl*>& valueindex,

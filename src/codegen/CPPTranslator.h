@@ -140,6 +140,8 @@ private:
 
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
       const std::shared_ptr<ir::VarDecl> var);
+  
+  void addFieldForFunVar(std::string varname, const std::vector<std::shared_ptr<ir::VarDecl> >& params);
   /**
    * given a list of Parameter variable declarations in ir, translate into a
    * vector of parameter varible declaration in code
