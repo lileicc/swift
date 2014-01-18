@@ -150,7 +150,7 @@ private:
       code::DeclContext* context,
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
-  static code::Type mapIRTypeToCodeType(const ir::Ty * ty); // map ir type to code type
+  static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef=false); // map ir type to code type
 
   static const code::Type INT_TYPE;
   static const code::Type INT_POINTER_TYPE;

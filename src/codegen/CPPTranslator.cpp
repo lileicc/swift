@@ -195,15 +195,17 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   fun->addStmt(
       new code::CallExpr(new code::VarRef(MAIN_INIT_FUN_NAME), initArg));
   // create for loop for the sampling
-  // :::=> for (int i=0; i < number of sample; i++)
+  // :::=> for (int cur_loop=0; cur_loop < number of sample; cur_loop++)
   code::Stmt* init = new code::BinaryOperator(
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME),
-      new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN);
+      new code::IntegerLiteral(INIT_SAMPLE_NUM + 1), code::OpKind::BO_ASSIGN);
+  // ::: => cur_loop < n
   code::Expr* cond = new code::BinaryOperator(
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME),
       new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME), code::OpKind::BO_LT);
+  // ::: =>cur_loop++
   code::Expr* step = new code::BinaryOperator(
-      new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME), NULL, code::OpKind::BO_INC);
+      new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME), NULL, code::OpKind::BO_INC);
   code::CompoundStmt* body = new code::CompoundStmt();
   // :::=> weight = set_evidence();
   body->addStmt(
@@ -365,7 +367,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
       setterfun, fd->getArgs());
   addFunValueRefStmt(setterfun, valuevarname, args_with_value,
-      VALUE_VAR_REF_NAME, valuetype);
+      VALUE_VAR_REF_NAME);
   addFunValueRefStmt(setterfun, markvarname, args_with_value,
       MARK_VAR_REF_NAME);
   // set the argument of setter function
@@ -721,7 +723,8 @@ void CPPTranslator::transQuery(code::FunctionDecl* fun,
               code::OpKind::BO_FIELD), args));
 }
 
-code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
+code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty,  bool isRef) {
+  // todo add support for more ref type
   switch (ty->getTyp()) {
   case ir::IRConstant::BOOL:
     return BOOL_TYPE;
@@ -732,7 +735,7 @@ code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty) {
   case ir::IRConstant::STRING:
     return STRING_TYPE;
   default:
-    return INT_TYPE; // all declared type return int type
+      return isRef ? INT_REF_TYPE : INT_TYPE; // all declared type return int type
   }
 }
 
