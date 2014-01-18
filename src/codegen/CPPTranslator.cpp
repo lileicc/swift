@@ -172,15 +172,24 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   fun->addStmt(
       new code::DeclStmt(
           new code::VarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)));
+  // declaring weight field in the class::: double* weight;
   code::FieldDecl::createFieldDecl(coreCls, GLOBAL_WEIGHT_VARNAME,
       DOUBLE_POINTER_TYPE);
+  // add initialization null value to main class construction method
+  coreClsConstructor->addStmt(
+      new code::BinaryOperator(new code::VarRef(GLOBAL_WEIGHT_VARNAME),
+                               new code::NullLiteral(),
+                                                code::OpKind::BO_ASSIGN));
+  // add deleteion to remove previous values ::: delete[] weight
   coreClsInit->addStmt(
       new code::DeleteStmt(new code::VarRef(GLOBAL_WEIGHT_VARNAME), true));
+  // add initialization function in init()
   coreClsInit->addStmt(
       new code::BinaryOperator(new code::VarRef(GLOBAL_WEIGHT_VARNAME),
           new code::NewExpr(DOUBLE_TYPE,
               new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
           code::OpKind::BO_ASSIGN));
+  // todo: delete the pointer in the destruction method.
   //call the initialization function
   std::vector<code::Expr*> initArg;
   initArg.push_back(new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME));
@@ -351,7 +360,7 @@ code::FunctionDecl* CPPTranslator::transLikeliFun(
       coreCls, likelifunname, DOUBLE_TYPE);
   likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
 
-  // now the value of this function app var is in RETURN_VAR_NAME
+  // now the value of this function app var is in VALUE_VAR_REF_NAME
   addFunValueRefStmt(likelifun, valuevarname, likelifun->getParams(),
       VALUE_VAR_REF_NAME);
   // declare the weight variable and setting its init value
@@ -379,6 +388,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   // __mark__name
   std::string markvarname = getMarkVarName(name);
   std::string setterfunname = getSetterFunName(name);
+  // adding setter method delcaration in the main class
   code::FunctionDecl* setterfun = code::FunctionDecl::createFunctionDecl(
       coreCls, setterfunname, DOUBLE_TYPE);
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
@@ -387,6 +397,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
       VALUE_VAR_REF_NAME, valuetype);
   addFunValueRefStmt(setterfun, markvarname, args_with_value,
       MARK_VAR_REF_NAME);
+  // set the argument of setter function
   args_with_value.push_back(
       new code::ParamVarDecl(setterfun, VALUE_ARG_NAME, valuetype));
   setterfun->setParams(args_with_value);
@@ -683,8 +694,10 @@ void CPPTranslator::transAllEvidence(
 
 void CPPTranslator::transAllQuery(
     std::vector<std::shared_ptr<ir::Query> > queries) {
+  // create evaluate function
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
       QUERY_EVALUATE_FUN_NAME, VOID_TYPE, true);
+  // setting arguments for queryfun
   std::vector<code::ParamVarDecl*> args;
   // query function has one argument of double, for weight
   args.push_back(new code::ParamVarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE));
