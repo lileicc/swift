@@ -46,6 +46,7 @@ public:
   void print(code::ListInitExpr* term);
   void print(code::NamespaceDecl* term);
   void print(code::NewExpr* term);
+  void print(code::NullLiteral* term);
   void print(code::ParamVarDecl* term);
   void print(code::ReturnStmt* term);
   void print(code::SpecialMacro* term);

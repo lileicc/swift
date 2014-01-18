@@ -104,11 +104,14 @@ code::Type getTemplatedType(std::string containerType, code::Type elementType) {
   return ty;
 }
 
-  code::Type getTemplatedType(std::string containerType, code::Type elementType1, code::Type elementType2) {
-    code::Type ty(containerType + "<" + elementType1.getName() + "," + elementType2.getName() + ">");
-    return ty;
-  }
-  
+code::Type getTemplatedType(std::string containerType, code::Type elementType1,
+    code::Type elementType2) {
+  code::Type ty(
+      containerType + "<" + elementType1.getName() + ","
+          + elementType2.getName() + ">");
+  return ty;
+}
+
 CPPTranslator::CPPTranslator() {
   useTag = false;
   prog = new code::Code();
@@ -275,29 +278,37 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   code::Type valueType = INT_TYPE;
   if (fd->argSize() > 0) {
     valueType = INT_POINTER_TYPE;
+    // adding in the class constructor function for initial value ::: = null;
+    coreClsConstructor->addStmt(new code::BinaryOperator(
+        new code::VarRef(valuevarname), new code::NullLiteral(),
+            code::OpKind::BO_ASSIGN));
     // adding in the initialization function for value of a random variable
     coreClsInit->addStmt(
-                         new code::DeleteStmt(new code::VarRef(valuevarname), true));
+        new code::DeleteStmt(new code::VarRef(valuevarname), true));
     coreClsInit->addStmt(
-                         new code::BinaryOperator(new code::VarRef(valuevarname),
-                                                  new code::NewExpr(INT_TYPE,
-                                                                    new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
-                                                  code::OpKind::BO_ASSIGN));
+        new code::BinaryOperator(new code::VarRef(valuevarname),
+            new code::NewExpr(INT_TYPE,
+                new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
+            code::OpKind::BO_ASSIGN));
+    // adding in the class constructor function for initial value ::: = null;
+    coreClsConstructor->addStmt(new code::BinaryOperator(
+        new code::VarRef(markvarname), new code::NullLiteral(),
+            code::OpKind::BO_ASSIGN));
     // adding in the initialization function for mark of a random variable
     coreClsInit->addStmt(
-                         new code::DeleteStmt(new code::VarRef(markvarname), true));
+        new code::DeleteStmt(new code::VarRef(markvarname), true));
     coreClsInit->addStmt(
-                         new code::BinaryOperator(new code::VarRef(markvarname),
-                                                  new code::NewExpr(INT_TYPE,
-                                                                new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
-                                                  code::OpKind::BO_ASSIGN));
+        new code::BinaryOperator(new code::VarRef(markvarname),
+            new code::NewExpr(INT_TYPE,
+                new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME)),
+            code::OpKind::BO_ASSIGN));
   }
   // adding in the main class a declaration of field for value of a random variable
   code::FieldDecl::createFieldDecl(coreCls, valuevarname, valueType);
-  
-  // adding in the main class a declaration of field for value of a random variable
+
+  // adding in the main class a declaration of field for mark of a random variable
   code::FieldDecl::createFieldDecl(coreCls, markvarname, valueType);
-  
+
   // define getter function :::==> __get_value()
   code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
       coreCls, getterfunname, valuetype);
@@ -335,7 +346,7 @@ code::FunctionDecl* CPPTranslator::transLikeliFun(
   std::string valuevarname = getValueVarName(name);
   // __mark__name
   std::string markvarname = getMarkVarName(name);
-
+  // adding method declaration in the main class
   code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
       coreCls, likelifunname, DOUBLE_TYPE);
   likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
@@ -522,7 +533,8 @@ code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   std::vector<code::Expr*> maparg;
   maparg.push_back(list);
   // todo just a hack for the moment, need to support templated type natively
-  code::Type maptype = getTemplatedType(MAP_BASE_TYPE.getName(), fromType, toType);
+  code::Type maptype = getTemplatedType(MAP_BASE_TYPE.getName(), fromType,
+      toType);
   return new code::CallExpr(new code::VarRef(maptype.getName()), maparg);
 }
 
@@ -595,7 +607,7 @@ void CPPTranslator::createInit() {
   coreClsConstructor = code::ClassConstructor::createClassConstructor(coreCls);
   coreClsInit = code::FunctionDecl::createFunctionDecl(coreCls,
       MAIN_INIT_FUN_NAME, VOID_TYPE);
-  
+
   std::vector<code::ParamVarDecl*> args;
   args.push_back(
       new code::ParamVarDecl(coreClsInit, LOCAL_NUM_SAMPLE_ARG_NAME, INT_TYPE));
