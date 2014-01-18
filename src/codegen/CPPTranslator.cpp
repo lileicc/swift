@@ -178,8 +178,7 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   // add initialization null value to main class construction method
   coreClsConstructor->addStmt(
       new code::BinaryOperator(new code::VarRef(GLOBAL_WEIGHT_VARNAME),
-                               new code::NullLiteral(),
-                                                code::OpKind::BO_ASSIGN));
+          new code::NullLiteral(), code::OpKind::BO_ASSIGN));
   // add deleteion to remove previous values ::: delete[] weight
   coreClsInit->addStmt(
       new code::DeleteStmt(new code::VarRef(GLOBAL_WEIGHT_VARNAME), true));
@@ -244,7 +243,8 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   // add in the init function:::            mark_numvar = -1;
   coreClsInit->addStmt(
       new code::BinaryOperator(new code::VarRef(marknumvar),
-          new code::IntegerLiteral(INIT_SAMPLE_NUM - 1), code::OpKind::BO_ASSIGN));
+          new code::IntegerLiteral(INIT_SAMPLE_NUM - 1),
+          code::OpKind::BO_ASSIGN));
   if (len > 0) {
     // create the function for getting number of objects in this instance, i.e. numvar
     code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
@@ -283,7 +283,7 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
   // __value__name for recording the value of the function application variable
   std::string valuevarname = getValueVarName(name);
-    // adding in the main class a declaration of field for value of a random variable
+  // adding in the main class a declaration of field for value of a random variable
   addFieldForFunVar(valuevarname, fd->getArgs());
   // __mark__name
   std::string markvarname = getMarkVarName(name);
@@ -599,32 +599,31 @@ void CPPTranslator::createInit() {
   code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME,
       RANDOM_ENGINE_TYPE);
 }
-  
-  void CPPTranslator::addFieldForFunVar(std::string varname, const std::vector<std::shared_ptr<ir::VarDecl> >& params) {
-    code::Type valueType = INT_TYPE;
-    if (!params.empty()){
-      valueType = INT_POINTER_TYPE;
-      // NOTE: currently only support single argument
-      // todo support more arguments!
-      std::string argtypename = params[0]->toSignature();
-      std::string numvarname_for_arg = getVarOfNumType(argtypename);
+
+void CPPTranslator::addFieldForFunVar(std::string varname,
+    const std::vector<std::shared_ptr<ir::VarDecl> >& params) {
+  code::Type valueType = INT_TYPE;
+  if (!params.empty()) {
+    valueType = INT_POINTER_TYPE;
+    // NOTE: currently only support single argument
+    // todo support more arguments!
+    std::string argtypename = params[0]->toSignature();
+    std::string numvarname_for_arg = getVarOfNumType(argtypename);
     // adding in the class constructor function for initial value ::: = null;
-    coreClsConstructor->addStmt(new code::BinaryOperator(
-                                                         new code::VarRef(varname), new code::NullLiteral(),
-                                                         code::OpKind::BO_ASSIGN));
+    coreClsConstructor->addStmt(
+        new code::BinaryOperator(new code::VarRef(varname),
+            new code::NullLiteral(), code::OpKind::BO_ASSIGN));
     // adding in the initialization function for value of a random variable
-    coreClsInit->addStmt(
-                         new code::DeleteStmt(new code::VarRef(varname), true));
+    coreClsInit->addStmt(new code::DeleteStmt(new code::VarRef(varname), true));
     // ::: valuevar = new int[number_of_instantce];
     coreClsInit->addStmt(
-                         new code::BinaryOperator(new code::VarRef(varname),
-                                                  new code::NewExpr(INT_TYPE,
-                                                                    new code::VarRef(numvarname_for_arg)),
-                                                  code::OpKind::BO_ASSIGN));
-    }
-    // adding in the main class a declaration of field for value of a random variable
-    code::FieldDecl::createFieldDecl(coreCls, varname, valueType);
+        new code::BinaryOperator(new code::VarRef(varname),
+            new code::NewExpr(INT_TYPE, new code::VarRef(numvarname_for_arg)),
+            code::OpKind::BO_ASSIGN));
   }
+  // adding in the main class a declaration of field for value of a random variable
+  code::FieldDecl::createFieldDecl(coreCls, varname, valueType);
+}
 
 void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
     std::string valuevarname, std::vector<code::ParamVarDecl*>& valueindex,
