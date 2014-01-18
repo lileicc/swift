@@ -21,11 +21,14 @@ void Categorical::init(const std::map<int, double>& ws) {
   values.clear();
   weights.clear();
   values_to_indic.clear();
+  int i = 0;
   for (auto it : ws) {
     if (it.second > 0 && it.second <= 1) {
       values.push_back(it.first);
       weights.push_back(it.second);
+      values_to_indic[it.first] = i;
       log_weights.push_back(log(it.second));
+      i++;
     }
   }
   /*

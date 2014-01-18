@@ -449,6 +449,14 @@ void CPPPrinter::print(code::IntegerLiteral* term) {
   printLine();
 }
 
+void CPPPrinter::print(code::NullLiteral* term) {
+  fprintf(file, "NULL");
+  if (newline) {
+    fprintf(file, ";");
+    printLine();
+  }
+}
+
 void CPPPrinter::print(code::NamespaceDecl* term) {
   if (isforward)
     return;

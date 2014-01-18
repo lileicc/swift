@@ -34,6 +34,7 @@ class IntegerLiteral;
 class ListInitExpr;
 class NamespaceDecl;
 class NewExpr;
+class NullLiteral;
 class ParamVarDecl;
 class ReturnStmt;
 class SpecialMacro;

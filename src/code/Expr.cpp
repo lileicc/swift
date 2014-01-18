@@ -11,12 +11,9 @@ namespace swift {
 namespace code {
 
 Expr::Expr() {
-  // TODO Auto-generated constructor stub
-
 }
 
 Expr::~Expr() {
-  // TODO Auto-generated destructor stub
 }
 
 } /* namespace code */

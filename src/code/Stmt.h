@@ -16,7 +16,6 @@ class Stmt {
 public:
   Stmt();
   virtual ~Stmt();
-
   // For Printer
   virtual void print(printer::Printer* prt) = 0;
 };

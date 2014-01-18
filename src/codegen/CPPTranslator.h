@@ -140,6 +140,8 @@ private:
 
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
       const std::shared_ptr<ir::VarDecl> var);
+  
+  void addFieldForFunVar(std::string varname, const std::vector<std::shared_ptr<ir::VarDecl> >& params);
   /**
    * given a list of Parameter variable declarations in ir, translate into a
    * vector of parameter varible declaration in code
@@ -148,7 +150,7 @@ private:
       code::DeclContext* context,
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
-  static code::Type mapIRTypeToCodeType(const ir::Ty * ty); // map ir type to code type
+  static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef=false); // map ir type to code type
 
   static const code::Type INT_TYPE;
   static const code::Type INT_POINTER_TYPE;
