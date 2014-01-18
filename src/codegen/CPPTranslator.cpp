@@ -201,7 +201,7 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
       new code::IntegerLiteral(INIT_SAMPLE_NUM), code::OpKind::BO_ASSIGN);
   code::Expr* cond = new code::BinaryOperator(
       new code::VarRef(CURRENT_SAMPLE_NUM_VARNAME),
-      new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME), code::OpKind::BO_LEQ);
+      new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME), code::OpKind::BO_LT);
   code::Expr* step = new code::BinaryOperator(
       new code::VarRef(LOCAL_NUM_SAMPLE_ARG_NAME), NULL, code::OpKind::BO_INC);
   code::CompoundStmt* body = new code::CompoundStmt();
