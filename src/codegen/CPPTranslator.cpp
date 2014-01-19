@@ -448,7 +448,7 @@ code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
   code::Stmt* ifcl = transClause(ith->getThen(), retvar, valuevar);
   code::Stmt* elcl = NULL;
   if (ith->getElse())
-    transClause(ith->getElse(), retvar, valuevar);
+    elcl = transClause(ith->getElse(), retvar, valuevar);
   return new code::IfStmt(cond, ifcl, elcl);
 }
 
@@ -532,19 +532,24 @@ code::Expr* CPPTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr) {
   switch (opr->getOp()) {
   case ir::IRConstant::EQ:
     kind = code::OpKind::BO_EQU;
+      break;
   case ir::IRConstant::NEQ:
     kind = code::OpKind::BO_NEQ;
+      break;
   case ir::IRConstant::LE:
     kind = code::OpKind::BO_LEQ;
+      break;
   case ir::IRConstant::GE:
     kind = code::OpKind::BO_GEQ;
+      break;
   case ir::IRConstant::LT:
     kind = code::OpKind::BO_LT;
+      break;
   case ir::IRConstant::GT:
     kind = code::OpKind::BO_GT;
-
-    return new code::BinaryOperator(lhs, rhs, kind);
+      break;
   }
+  return new code::BinaryOperator(lhs, rhs, kind);
   // wrong operation
   return NULL;
 }
