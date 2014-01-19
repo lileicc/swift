@@ -32,9 +32,11 @@ const std::string CPPTranslator::GLOBAL_WEIGHT_VARNAME = "_weight";
 const std::string CPPTranslator::VALUE_VAR_REF_NAME = "__value";
 const std::string CPPTranslator::VALUE_ARG_NAME = "__value_arg";
 const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
-const std::string CPPTranslator::ANSWER_PROCESS_CLASS_NAME = "Hist";
-const std::string CPPTranslator::ANSWER_PROCESS_METHOD_NAME = "add";
+const std::string CPPTranslator::HISTOGRAM_CLASS_NAME = "Hist";
+const std::string CPPTranslator::HISTOGRAM_ADD_METHOD_NAME = "add";
+const std::string CPPTranslator::HISTOGRAM_PRINT_METHOD_NAME = "print";
 const std::string CPPTranslator::ANSWER_VAR_NAME_PREFIX = "_answer_";
+const std::string CPPTranslator::ANSWER_PRINT_METHOD_NAME = "print";
 const std::string CPPTranslator::MAIN_SAMPLING_FUN_NAME = "sample";
 const std::string CPPTranslator::SAMPLER_VAR_NAME = "sampler";
 const std::string CPPTranslator::MAIN_NAMESPACE_NAME = "swift";
@@ -590,12 +592,16 @@ code::Expr* CPPTranslator::transDistribution(
 }
 
 void CPPTranslator::createInit() {
-  // TODO adding setup for
+  // dding setup for
+  // 1. print function
   // 2. member declarations for core class, need valuearray, mark array, ...
   // 3. initialization function to initialize the values (function called in sample(n)
   coreClsConstructor = code::ClassConstructor::createClassConstructor(coreCls);
   coreClsInit = code::FunctionDecl::createFunctionDecl(coreCls,
       MAIN_INIT_FUN_NAME, VOID_TYPE);
+  
+  // add method print() in main class to print the answers
+  coreClsPrintFun = code::FunctionDecl::createFunctionDecl(coreCls, ANSWER_PRINT_METHOD_NAME, VOID_TYPE);
 
   std::vector<code::ParamVarDecl*> args;
   args.push_back(
@@ -716,7 +722,7 @@ void CPPTranslator::transQuery(code::FunctionDecl* fun,
     std::shared_ptr<ir::Query> qr, int n) {
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
   code::FieldDecl::createFieldDecl(coreCls, answervarname,
-      getTemplatedType(ANSWER_PROCESS_CLASS_NAME,
+      getTemplatedType(HISTOGRAM_CLASS_NAME,
           mapIRTypeToCodeType(qr->getVar()->getTyp())));
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
@@ -724,8 +730,16 @@ void CPPTranslator::transQuery(code::FunctionDecl* fun,
   fun->addStmt(
       new code::CallExpr(
           new code::BinaryOperator(new code::VarRef(answervarname),
-              new code::VarRef(ANSWER_PROCESS_METHOD_NAME),
+              new code::VarRef(HISTOGRAM_ADD_METHOD_NAME),
               code::OpKind::BO_FIELD), args));
+  // add print this result in print()
+  // :::=> answer_id.print();
+  coreClsPrintFun->addStmt(
+                           new code::CallExpr(
+                                              new code::BinaryOperator(new code::VarRef(answervarname),
+                                                                       new code::VarRef(HISTOGRAM_PRINT_METHOD_NAME),
+                                                                       code::OpKind::BO_FIELD))
+  );
 }
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty,  bool isRef) {
@@ -808,7 +822,9 @@ void CPPTranslator::createMain() {
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
       MAIN_SAMPLING_FUN_NAME, args);
   mainFun->addStmt(st);
-  // todo add printing
+  st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
+                                        ANSWER_PRINT_METHOD_NAME);
+  mainFun->addStmt(st);
 }
 
 } /* namespace codegen */

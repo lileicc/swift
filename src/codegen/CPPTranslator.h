@@ -28,7 +28,9 @@ private:
   code::FunctionDecl* coreClsConstructor; // construction function for main class
   code::FunctionDecl* coreClsInit; // init function for main class
   code::FunctionDecl* mainFun; //main function
+    code::FunctionDecl* coreClsPrintFun; // print function for answers
   code::FunctionDecl* transSampleAlg();
+
 
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   /**
@@ -198,14 +200,24 @@ private:
   static const std::string LOCAL_NUM_SAMPLE_ARG_NAME;
 
   /**
-   * function name for processing query answer
+   * class name for processing query answer (Using historgram)
    */
-  static const std::string ANSWER_PROCESS_CLASS_NAME;
+  static const std::string HISTOGRAM_CLASS_NAME;
 
   /**
    * function name for processing query answer
    */
-  static const std::string ANSWER_PROCESS_METHOD_NAME;
+  static const std::string HISTOGRAM_ADD_METHOD_NAME;
+  
+  /**
+   * function name for processing query answer
+   */
+  static const std::string HISTOGRAM_PRINT_METHOD_NAME;
+  
+  /**
+   * function name for printing query answer
+   */
+  static const std::string ANSWER_PRINT_METHOD_NAME;
 
   /**
    * function name for the distribution init
