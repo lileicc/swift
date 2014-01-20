@@ -199,7 +199,7 @@ private:
    * variable name prefix for holding the answer for a query
    */
   static const std::string ANSWER_VAR_NAME_PREFIX;
-
+  
   //number of samples, argument for init() and sample()
   static const std::string LOCAL_NUM_SAMPLE_ARG_NAME;
 
@@ -247,6 +247,11 @@ private:
    * initial value set to mark_var (default 1)
    */
   static const int INIT_SAMPLE_NUM;
+  
+  /**
+   * how many samples to take in total
+   */
+  static const int TOTAL_NUM_SAMPLES;
 
   /**
    * name of variable for current_loop or current sample num

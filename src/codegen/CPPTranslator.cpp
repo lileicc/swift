@@ -50,6 +50,7 @@ const code::Type CPPTranslator::RANDOM_ENGINE_TYPE(
     "std::default_random_engine");
 const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
 const int CPPTranslator::INIT_SAMPLE_NUM = 0;
+const int CPPTranslator::TOTAL_NUM_SAMPLES = 1000000;
 
 /**
  * give the name of the type,
@@ -819,7 +820,7 @@ void CPPTranslator::createMain() {
               coreNs->getName() + std::string("::") + coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;
-  args.push_back(new code::IntegerLiteral(10000));
+  args.push_back(new code::IntegerLiteral(TOTAL_NUM_SAMPLES));
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
       MAIN_SAMPLING_FUN_NAME, args);
   mainFun->addStmt(st);
