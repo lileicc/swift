@@ -24,6 +24,7 @@ public:
   virtual void print(code::CallExpr* term)=0;
   virtual void print(code::CaseStmt* term)=0;
   virtual void print(code::ClassDecl* term)=0;
+  virtual void print(code::ClassConstructor* term)=0;
   virtual void print(code::CompoundStmt* term)=0;
   virtual void print(code::ContinueStmt* term) = 0;
   virtual void print(code::DeclContext* term)=0;
@@ -35,8 +36,10 @@ public:
   virtual void print(code::FunctionDecl* term)=0;
   virtual void print(code::IfStmt* term)=0;
   virtual void print(code::IntegerLiteral* term)=0;
+  virtual void print(code::ListInitExpr* term)=0;
   virtual void print(code::NamespaceDecl* term)=0;
   virtual void print(code::NewExpr* term)=0;
+  virtual void print(code::NullLiteral* term)=0;
   virtual void print(code::ParamVarDecl* term)=0;
   virtual void print(code::ReturnStmt* term)=0;
   virtual void print(code::SpecialMacro* term)=0;

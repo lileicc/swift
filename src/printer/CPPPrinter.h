@@ -30,6 +30,7 @@ public:
   void print(code::CallExpr* term);
   void print(code::CaseStmt* term);
   void print(code::ClassDecl* term);
+  void print(code::ClassConstructor* term);
   void print(code::CompoundStmt* term);
   void print(code::ContinueStmt* term);
   void print(code::DeclContext* term);
@@ -39,10 +40,13 @@ public:
   void print(code::FloatingLiteral* term);
   void print(code::ForStmt* term);
   void print(code::FunctionDecl* term);
+  void print(code::FunctionDecl* term, bool hasRetType);
   void print(code::IfStmt* term);
   void print(code::IntegerLiteral* term);
+  void print(code::ListInitExpr* term);
   void print(code::NamespaceDecl* term);
   void print(code::NewExpr* term);
+  void print(code::NullLiteral* term);
   void print(code::ParamVarDecl* term);
   void print(code::ReturnStmt* term);
   void print(code::SpecialMacro* term);

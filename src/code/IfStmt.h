@@ -16,7 +16,7 @@ namespace code {
 
 class IfStmt: public swift::code::Stmt {
 public:
-  IfStmt(Expr* cond, Stmt* th, Stmt* el);
+  IfStmt(Expr* cond, Stmt* th, Stmt* el = NULL);
   ~IfStmt();
 
   Expr* getCond();

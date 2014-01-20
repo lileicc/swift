@@ -33,8 +33,9 @@ TypeFactory::~TypeFactory() {
   tyTable.erase(ir::IRConstString::BLOG_DOUBLE); tyTable.erase(ir::IRConstString::DOUBLE);
   tyTable.erase(ir::IRConstString::BLOG_STRING); tyTable.erase(ir::IRConstString::STRING);
   tyTable.erase(ir::IRConstString::NA);
-  for (auto p : tyTable)
-    if (p.second != NULL) delete p.second;
+  // IMPORTANT:
+  //   tyTable should NOT be deleted!
+  //   it will be deleted by shared_ptr in blog_model!
   for (auto p : instanceTable)
     if (p.second != NULL) delete p.second;
   for (auto p : attrTable)
@@ -63,10 +64,10 @@ bool TypeFactory::addInstSymbol(const ir::NameTy* typ,
   if (instanceTable.find(name) != instanceTable.end())
     return false;
   ir::TypeDomain* tydo = typ->getRefer();
-  int sz = tydo->getPreLen();
+  size_t sz = tydo->getPreLen();
   instanceTable[name] = new ir::InstSymbol(tydo, sz);
-  tydo->setPreLen(++sz);
-  tydo->setInstName(sz-1, name);
+  tydo->setPreLen(sz+1);
+  tydo->setInstName(sz, name);
   return true;
 }
 

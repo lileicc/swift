@@ -11,13 +11,12 @@ namespace swift {
 namespace code {
 
 Stmt::Stmt() {
-  // TODO Auto-generated constructor stub
-
 }
 
 Stmt::~Stmt() {
-  // TODO Auto-generated destructor stub
 }
 
 } /* namespace code */
 } /* namespace swift */
+
+

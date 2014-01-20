@@ -18,8 +18,8 @@ public:
   Type(std::string name, bool refTag=false);
   ~Type();
 
-  const std::string& getName();
-  bool isRef();
+  const std::string& getName() const;
+  bool isRef() const;
 
   // For Printer
   void print(printer::Printer* prt);

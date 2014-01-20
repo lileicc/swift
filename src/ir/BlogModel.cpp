@@ -13,9 +13,11 @@ BlogModel::~BlogModel() {
 void BlogModel::addFunction(std::shared_ptr<FuncDefn> func) {
   if (func->isFixed()) fixFunc.push_back(func);
   else
+  /* TODO : To Add VoidFuncCall
   if (func->argSize() == 0)
     voidFunc.push_back(func);
   else
+  */
     randFunc.push_back(func);
 }
 

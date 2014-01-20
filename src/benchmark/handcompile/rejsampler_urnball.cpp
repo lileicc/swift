@@ -88,8 +88,9 @@ then ~ TabularCPD({Blue -> ~ Categorical({Blue -> 0.8, Green -> 0.2}),
 */
 int mark_obscolor[10];
 int ret_obscolor[10];
+  
 int get_obscolor(int d) {
-  if (mark_obscolor[d] == cur_loop) return ret_obscolor[10];
+  if (mark_obscolor[d] == cur_loop) return ret_obscolor[d];
   mark_obscolor[d]=cur_loop;
   int&ret = ret_obscolor[d];
   if (get_balldrawn(d) != -1) {

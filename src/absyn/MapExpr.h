@@ -18,8 +18,8 @@ public:
   virtual ~MapExpr();
 
   size_t mapSize();
-  Expr* getFrom(int k);
-  Expr* getTo(int k);
+  Expr* getFrom(size_t k);
+  Expr* getTo(size_t k);
   void addMap(Expr* from, Expr* to);
 
   // For Debugging Use

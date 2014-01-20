@@ -30,7 +30,7 @@ size_t Expr::argSize() const {
   return args.size();
 }
 
-std::shared_ptr<Expr> Expr::get(int k) const {
+std::shared_ptr<Expr> Expr::get(size_t k) const {
   return args[k];
 }
 

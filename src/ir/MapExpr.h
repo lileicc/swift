@@ -11,8 +11,8 @@ public:
 
   size_t mapSize() const;
   void addMap(std::shared_ptr<Expr> a, std::shared_ptr<Expr> b);
-  std::shared_ptr<Expr> getFrom(int k) const;
-  std::shared_ptr<Expr> getTo(int k) const;
+  std::shared_ptr<Expr> getFrom(size_t k) const;
+  std::shared_ptr<Expr> getTo(size_t k) const;
   const Ty* getFromTyp() const;
   const Ty* getToTyp() const;
   void setFromTyp(const Ty* t);

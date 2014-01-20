@@ -22,31 +22,31 @@ public:
   const std::string& getName() const;
   void setRefer(const NameTy* ref);
   const NameTy* getRefer() const;
-  void setPreLen(int l);
-  int getPreLen() const;
+  void setPreLen(size_t l);
+  size_t getPreLen() const;
   void addNumberStmt(std::shared_ptr<NumberStmt> num);
   const std::vector<std::shared_ptr<NumberStmt>>& getAllNumberStmt() const;
   std::shared_ptr<NumberStmt> getNumberStmt(int k) const;
   size_t getNumberStmtSize() const;
   void addOrigin(OriginAttr* o);
   const std::vector<OriginAttr*>& getAllOrigin() const;
-  OriginAttr* getOrigin(int k) const;
+  OriginAttr* getOrigin(size_t k) const;
   size_t getOriginSize() const;
-  void setInstName(int k, std::string name);
-  const std::string& getInstName(int k) const;
+  void setInstName(size_t k, std::string name);
+  const std::string& getInstName(size_t k) const;
   const std::vector<std::string>& getInstNames() const;
-
+  // this must be signed int, since it can be -1 (not found)
   int getOriginID(const std::string& str);
   OriginAttr* getOrigin(const std::string& str);
 private:
   std::string name;
   std::vector<std::shared_ptr<NumberStmt>> gen;
-  int prelen;
+  size_t prelen;
   std::vector<OriginAttr*> origin;
   const NameTy* refer;
   std::vector<std::string> instName;
 
-  std::map<std::string,int> originID;
+  std::map<std::string,size_t> originID;
 };
 
 }

@@ -26,7 +26,7 @@ size_t Branch::size() const {
   return branch.size();
 }
 
-std::shared_ptr<ConstSymbol> Branch::getCond(int k) const {
+std::shared_ptr<ConstSymbol> Branch::getCond(size_t k) const {
   return cond[k];
 }
 
@@ -34,7 +34,7 @@ const std::vector<std::shared_ptr<ConstSymbol>>& Branch::getConds() const {
   return cond;
 }
 
-std::shared_ptr<Clause> Branch::getBranch(int k) const {
+std::shared_ptr<Clause> Branch::getBranch(size_t k) const {
   return branch[k];
 }
 
