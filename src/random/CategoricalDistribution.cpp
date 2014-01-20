@@ -55,10 +55,10 @@ int Categorical::gen(){
 //  return gen(engine);
   double u = (double)rand() / RAND_MAX;
   int x=0;
-  for (u -= weights[0]; x < weights.size() && u>=0; x++) {
+  for (; x < weights.size() && u>=0; x++) {
     u -= weights[x];
   }
-  if (x >= weights.size()) x--;
+  x--;
   return values[x];
 }
 
