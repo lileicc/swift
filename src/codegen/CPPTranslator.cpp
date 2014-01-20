@@ -604,7 +604,7 @@ void CPPTranslator::createInit() {
 
   // add method debug() in main class to print the current state of the possible world
   // TODO add a flag to support debug or not
-  coreClsPrint = code::FunctionDecl::createFunctionDecl(coreCls,
+  coreClsDebug = code::FunctionDecl::createFunctionDecl(coreCls,
       MAIN_DEBUG_METHOD_NAME, VOID_TYPE);
 
   std::vector<code::ParamVarDecl*> args;
