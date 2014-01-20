@@ -23,6 +23,7 @@
 #include <ctime>
 #include <random>
 #include <typeinfo>
+#include <chrono>
 
 #include "rejsampler_hurricane.h"
 
@@ -294,15 +295,13 @@ void OutputDamage(int * ans, const char* buf) {// for City A or B
 }
 
 void run() {
+  std::chrono::time_point<std::chrono::system_clock> start;
+  start = std::chrono::system_clock::now();
   srand((unsigned)time(0));
-
-  int t = clock();
 
   initDistinct();
   for (cur_loop = 1; cur_loop <= Loops; ++cur_loop)
     LWSample();
-
-  t = clock() - t;
 
   // Compute Answer
   OutputCity(Ans[0], "First: ");
@@ -312,7 +311,8 @@ void run() {
   printf("++++++++++++++++++++++++++++++++\n");
   printf(" Sample Number: %d\n", Loops);
   printf(" Consistent Rate: %.5lf\n", total_weight / Loops);
-  printf(" Time Elapsed: %d.%03ds\n", t / 1000, t % 1000);
+  std::chrono::duration<double> elapsed = std::chrono::system_clock::now() - start;
+  printf("Time Elapsed = %fs\n", elapsed.count());
 }
 }
 

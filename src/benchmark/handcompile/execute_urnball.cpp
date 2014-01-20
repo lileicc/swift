@@ -12,6 +12,8 @@
 #include <iostream>
 #include <random>
 #include <cstdio>
+#include <chrono>
+
 using namespace std;
 int main(int argc, char* argv[]) {
 
@@ -22,13 +24,14 @@ int main(int argc, char* argv[]) {
 
   URNBALL_REJ::run(N);
 
-  int t = clock();
+  std::chrono::time_point<std::chrono::system_clock> start;
+  start = std::chrono::system_clock::now();
 
   lwsampler::LWSamplerUrnBall lwsampler;
   lwsampler.sample(N);
   printf("sampling using LWSampler\n");
   lwsampler.printResult();
-  t = clock() - t;
-  printf("Time Elapsed = %d.%03ds\n", t/1000000, t%1000000);
+  std::chrono::duration<double> elapsed = std::chrono::system_clock::now() - start;
+  printf("Time Elapsed = %fs\n", elapsed.count());
   return 0;
 }
