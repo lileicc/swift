@@ -13,7 +13,7 @@ DeleteStmt::~DeleteStmt() {
   delete var;
 }
 
-DeleteStmt::DeleteStmt(VarRef* var, bool arrayDel) :
+DeleteStmt::DeleteStmt(Identifier* var, bool arrayDel) :
     var(var), arrayDel(arrayDel) {
 }
 
@@ -21,7 +21,7 @@ bool DeleteStmt::isArray() const {
   return arrayDel;
 }
 
-VarRef* DeleteStmt::getVar() {
+Identifier* DeleteStmt::getVar() {
   return var;
 }
 

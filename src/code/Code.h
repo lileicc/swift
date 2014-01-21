@@ -41,7 +41,7 @@
 #include "Stmt.h"
 #include "StringLiteral.h"
 #include "VarDecl.h"
-#include "VarRef.h"
+#include "Identifier.h"
 
 namespace swift {
 namespace printer {

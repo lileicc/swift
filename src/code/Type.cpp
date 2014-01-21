@@ -10,7 +10,10 @@
 namespace swift {
 namespace code {
 
-Type::Type(const std::string name, bool refTag) : name(name), refTag(refTag) {
+Type::Type(const std::string name, bool refTag) : scope(nullptr), name(name), refTag(refTag) {
+}
+
+Type::Type(Expr* scope, std::string name, bool refTag) : scope(scope), name(name), refTag(refTag) {
 }
 
 Type::~Type() {
@@ -24,6 +27,10 @@ bool Type::isRef() const {
   return refTag;
 }
 
+Expr* Type::getScope() {
+  return scope;
+}
+
 // For Printer
 void Type::print(printer::Printer* prt) {
   prt->print(this);
@@ -31,3 +38,5 @@ void Type::print(printer::Printer* prt) {
 
 } /* namespace code */
 } /* namespace swift */
+
+

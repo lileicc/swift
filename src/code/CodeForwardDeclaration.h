@@ -43,6 +43,6 @@ class StringLiteral;
 class SwitchStmt;
 class Type;
 class VarDecl;
-class VarRef;
+class Identifier;
 }
 }
