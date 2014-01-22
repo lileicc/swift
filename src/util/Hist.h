@@ -70,6 +70,12 @@ public:
       printf("%s -> %s\n", std::to_string(it.first).c_str(), std::to_string(it.second).c_str());
     }
   }
+  
+  void debug() {
+    for (auto& it : getResult()) {
+      fprintf(stderr, "%s -> %s\n", std::to_string(it.first).c_str(), std::to_string(isLogarithm?exp(it.second):it.second).c_str());
+    }
+  }
 };
 
 
