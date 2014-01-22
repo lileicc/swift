@@ -14,6 +14,7 @@
 #include <random>
 #include <map>
 #include <ctime>
+#include <chrono>
 #include "rejsampler_urnball.h"
 
 using namespace std;
@@ -165,8 +166,11 @@ void OutputInt(int* ans, const char * buf) {
 }
 
 void run(int N) {
+  
+  std::chrono::time_point<std::chrono::system_clock> start;
+  start = std::chrono::system_clock::now();
+  
   Loops = N;
-  int t = clock();
   ans = new int[Loops+1];
   Wei = new double[Loops+1];
   // Init
@@ -185,8 +189,8 @@ void run(int N) {
   // Output Result
   OutputInt(ans, "#{Ball b}");
 
-  t = clock() - t;
-  printf("Time Elapsed = %d.%03ds\n", t/1000000, t%1000000);
+  std::chrono::duration<double> elapsed = std::chrono::system_clock::now() - start;
+  printf("Time Elapsed = %fs\n", elapsed.count());
   delete [] ans;
   delete [] Wei;
 }

@@ -37,6 +37,7 @@ const std::string CPPTranslator::HISTOGRAM_ADD_METHOD_NAME = "add";
 const std::string CPPTranslator::HISTOGRAM_PRINT_METHOD_NAME = "print";
 const std::string CPPTranslator::ANSWER_VAR_NAME_PREFIX = "_answer_";
 const std::string CPPTranslator::ANSWER_PRINT_METHOD_NAME = "print";
+const std::string CPPTranslator::MAIN_DEBUG_METHOD_NAME = "debug";
 const std::string CPPTranslator::MAIN_SAMPLING_FUN_NAME = "sample";
 const std::string CPPTranslator::SAMPLER_VAR_NAME = "sampler";
 const std::string CPPTranslator::MAIN_NAMESPACE_NAME = "swift";
@@ -49,6 +50,7 @@ const code::Type CPPTranslator::RANDOM_ENGINE_TYPE(
     "std::default_random_engine");
 const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
 const int CPPTranslator::INIT_SAMPLE_NUM = 0;
+const int CPPTranslator::TOTAL_NUM_SAMPLES = 1000000;
 
 /**
  * give the name of the type,
@@ -122,6 +124,8 @@ CPPTranslator::CPPTranslator() {
   coreCls = NULL;
   coreClsInit = NULL;
   coreClsConstructor = NULL;
+  coreClsPrint = NULL;
+  coreClsDebug = NULL;
   mainFun = NULL;
 }
 
@@ -534,22 +538,22 @@ code::Expr* CPPTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr) {
   switch (opr->getOp()) {
   case ir::IRConstant::EQ:
     kind = code::OpKind::BO_EQU;
-      break;
+    break;
   case ir::IRConstant::NEQ:
     kind = code::OpKind::BO_NEQ;
-      break;
+    break;
   case ir::IRConstant::LE:
     kind = code::OpKind::BO_LEQ;
-      break;
+    break;
   case ir::IRConstant::GE:
     kind = code::OpKind::BO_GEQ;
-      break;
+    break;
   case ir::IRConstant::LT:
     kind = code::OpKind::BO_LT;
-      break;
+    break;
   case ir::IRConstant::GT:
     kind = code::OpKind::BO_GT;
-      break;
+    break;
   }
   return new code::BinaryOperator(lhs, rhs, kind);
   // wrong operation
@@ -567,41 +571,42 @@ code::Expr* CPPTranslator::transDistribution(
     code::FieldDecl::createFieldDecl(coreCls, distvarname, code::Type(name));
     //put initialization in coreClasInit
     coreClsInit->addStmt(
-        new code::CallExpr(
-            new code::BinaryOperator(new code::VarRef(distvarname),
-                new code::VarRef(DISTRIBUTION_INIT_FUN_NAME),
-                code::OpKind::BO_FIELD), args));
+        code::CallExpr::createMethodCall(distvarname,
+            DISTRIBUTION_INIT_FUN_NAME, args));
     // :::==> distribution.gen();
     // the following two lines of code are not used right now, just use the default engine
 //    std::vector<code::Expr *> rd;
 //    rd.push_back(new code::VarRef(RANDOM_ENGINE_VAR_NAME));
-    return new code::CallExpr(
-        new code::BinaryOperator(new code::VarRef(distvarname),
-            new code::VarRef(DISTRIBUTION_GEN_FUN_NAME),
-            code::OpKind::BO_FIELD));
+    return code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_GEN_FUN_NAME);
   } else {
     // calculating likelihood
     // :::==> distribution.loglikeli
     std::vector<code::Expr *> args;
     args.push_back(new code::VarRef(valuevar));
-    return new code::CallExpr(
-        new code::BinaryOperator(new code::VarRef(distvarname),
-            new code::VarRef(DISTRIBUTION_LOGLIKELI_FUN_NAME),
-            code::OpKind::BO_FIELD), args);
+    return code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_LOGLIKELI_FUN_NAME, args);
   }
 }
 
 void CPPTranslator::createInit() {
-  // dding setup for
-  // 1. print function
-  // 2. member declarations for core class, need valuearray, mark array, ...
-  // 3. initialization function to initialize the values (function called in sample(n)
+  // adding setup for
+  // 1. member declarations for core class, need valuearray, mark array, ...
+  // 2. initialization function to initialize the values (function called in sample(n)
+  // 3. print method
+  // 4. debug method
   coreClsConstructor = code::ClassConstructor::createClassConstructor(coreCls);
   coreClsInit = code::FunctionDecl::createFunctionDecl(coreCls,
       MAIN_INIT_FUN_NAME, VOID_TYPE);
-  
+
   // add method print() in main class to print the answers
-  coreClsPrintFun = code::FunctionDecl::createFunctionDecl(coreCls, ANSWER_PRINT_METHOD_NAME, VOID_TYPE);
+  coreClsPrint = code::FunctionDecl::createFunctionDecl(coreCls,
+      ANSWER_PRINT_METHOD_NAME, VOID_TYPE);
+
+  // add method debug() in main class to print the current state of the possible world
+  // TODO add a flag to support debug or not
+  coreClsDebug = code::FunctionDecl::createFunctionDecl(coreCls,
+      MAIN_DEBUG_METHOD_NAME, VOID_TYPE);
 
   std::vector<code::ParamVarDecl*> args;
   args.push_back(
@@ -633,6 +638,8 @@ void CPPTranslator::addFieldForFunVar(std::string varname,
         new code::BinaryOperator(new code::VarRef(varname),
             new code::NewExpr(INT_TYPE, new code::VarRef(numvarname_for_arg)),
             code::OpKind::BO_ASSIGN));
+    // adding printing this variable in debug method
+    // ::: for (int i = 0; i < length of var; i++) print( );
   }
   // adding in the main class a declaration of field for value of a random variable
   code::FieldDecl::createFieldDecl(coreCls, varname, valueType);
@@ -728,21 +735,16 @@ void CPPTranslator::transQuery(code::FunctionDecl* fun,
   args.push_back(transExpr(qr->getVar()));
   args.push_back(new code::VarRef(WEIGHT_VAR_REF_NAME));
   fun->addStmt(
-      new code::CallExpr(
-          new code::BinaryOperator(new code::VarRef(answervarname),
-              new code::VarRef(HISTOGRAM_ADD_METHOD_NAME),
-              code::OpKind::BO_FIELD), args));
+      code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
+          args));
   // add print this result in print()
   // :::=> answer_id.print();
-  coreClsPrintFun->addStmt(
-                           new code::CallExpr(
-                                              new code::BinaryOperator(new code::VarRef(answervarname),
-                                                                       new code::VarRef(HISTOGRAM_PRINT_METHOD_NAME),
-                                                                       code::OpKind::BO_FIELD))
-  );
+  coreClsPrint->addStmt(
+      code::CallExpr::createMethodCall(answervarname,
+          HISTOGRAM_PRINT_METHOD_NAME));
 }
 
-code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty,  bool isRef) {
+code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef) {
   // todo add support for more ref type
   switch (ty->getTyp()) {
   case ir::IRConstant::BOOL:
@@ -754,7 +756,7 @@ code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty,  bool isRef) {
   case ir::IRConstant::STRING:
     return STRING_TYPE;
   default:
-      return isRef ? INT_REF_TYPE : INT_TYPE; // all declared type return int type
+    return isRef ? INT_REF_TYPE : INT_TYPE; // all declared type return int type
   }
 }
 
@@ -818,12 +820,12 @@ void CPPTranslator::createMain() {
               coreNs->getName() + std::string("::") + coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;
-  args.push_back(new code::IntegerLiteral(10000));
+  args.push_back(new code::IntegerLiteral(TOTAL_NUM_SAMPLES));
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
       MAIN_SAMPLING_FUN_NAME, args);
   mainFun->addStmt(st);
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
-                                        ANSWER_PRINT_METHOD_NAME);
+      ANSWER_PRINT_METHOD_NAME);
   mainFun->addStmt(st);
 }
 

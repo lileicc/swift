@@ -1,5 +1,7 @@
 FLAGS=-O2 -std=c++11
 
+BENCHMARK_DIR=src/benchmark/handcompile/
+
 all: urnball hurricane
 
 urnball:
