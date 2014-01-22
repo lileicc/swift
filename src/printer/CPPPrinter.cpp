@@ -576,7 +576,7 @@ void CPPPrinter::print(code::Type* term) {
       it->print(this);
       for (it++; it != term->getTypeArgs().end(); it++) {
         fprintf(file, ",");
-        it->print();
+        it->print(this);
       }
     fprintf(file, ">");
     }
