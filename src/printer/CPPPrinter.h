@@ -53,6 +53,7 @@ public:
   void print(code::StringLiteral* term);
   void print(code::SwitchStmt* term);
   void print(code::Type* term);
+  void print(code::TemplatedType* term)=0;
   void print(code::VarDecl* term);
   void print(code::Identifier* term);
 

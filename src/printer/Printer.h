@@ -46,6 +46,7 @@ public:
   virtual void print(code::StringLiteral* term)=0;
   virtual void print(code::SwitchStmt* term)=0;
   virtual void print(code::Type* term)=0;
+  virtual void print(code::TemplatedType* term)=0;
   virtual void print(code::VarDecl* term)=0;
   virtual void print(code::Identifier* term)=0;
 

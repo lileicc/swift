@@ -123,6 +123,7 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include<set>\n");
   fprintf(file, "#include<map>\n");
   fprintf(file, "#include<unordered_map>\n");
+  fprintf(file, "#include<chrono>\n");
   fprintf(file, "#include<random>\n");
   fprintf(file, "#include<numeric>\n");
   fprintf(file, "#include<string>\n");
@@ -560,6 +561,28 @@ void CPPPrinter::print(code::Type* term) {
   if (term->isRef())
     fprintf(file, "&");
 }
+  
+  void CPPPrinter::print(code::TemplatedType* term) {
+    // assume newline == false;
+    assert(newline == false);
+    if (term->getScope() != nullptr) {
+      term->print(this);
+      fprintf(file, "::");
+    }
+    fprintf(file, "%s", term->getName().c_str());
+    if (term->getTypeArgs().size() > 0) {
+    fprintf(file, "<");
+    auto it = term->getTypeArgs().begin();
+      it->print(this);
+      for (it++; it != term->getTypeArgs().end(); it++) {
+        fprintf(file, ",");
+        it->print();
+      }
+    fprintf(file, ">");
+    }
+    if (term->isRef())
+      fprintf(file, "&");
+  }
 
 void CPPPrinter::print(code::VarDecl* term) {
   if (!isforward)

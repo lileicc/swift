@@ -10,7 +10,7 @@
 namespace swift {
 namespace code {
 
-Type::Type(const std::string name, bool refTag) : scope(nullptr), name(name), refTag(refTag) {
+Type::Type(const std::string name, bool refTag) : Type(nullptr, name,refTag) {
 }
 
 Type::Type(Expr* scope, std::string name, bool refTag) : scope(scope), name(name), refTag(refTag) {

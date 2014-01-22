@@ -25,7 +25,7 @@ public:
   Expr* getScope();
 
   // For Printer
-  void print(printer::Printer* prt);
+  virtual void print(printer::Printer* prt);
 private:
   std::string name;
   bool refTag;
