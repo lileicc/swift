@@ -42,7 +42,8 @@ class Stmt;
 class StringLiteral;
 class SwitchStmt;
 class Type;
+class TemplatedType;
 class VarDecl;
-class VarRef;
+class Identifier;
 }
 }

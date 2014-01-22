@@ -16,17 +16,17 @@ CPPPrinter::~CPPPrinter() {
 std::string CPPPrinter::OpConvert(code::OpKind op) {
   using code::OpKind;
   switch (op) {
-  case OpKind::BO_COMP:
+  case OpKind::UO_CMPT:
     return "~"; // complement
-  case OpKind::BO_NEG:
+  case OpKind::UO_NEG:
     return "!"; // negate
-  case OpKind::BO_INC:
+  case OpKind::UO_INC:
     return "++"; // increment
-  case OpKind::BO_DEC:
+  case OpKind::UO_DEC:
     return "--"; // decrement
-  case OpKind::BO_NEW:
+  case OpKind::UO_NEW:
     return "new "; // new or malloc
-  case OpKind::BO_DEL:
+  case OpKind::UO_DEL:
     return "delete "; // delete or dispose
   case OpKind::BO_ASSIGN:
     return "="; // Assignment
@@ -76,6 +76,10 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "/="; // self divide
   case OpKind::BO_SMOD:
     return "%="; // self module
+  case OpKind::BO_POINTER:
+    return "->"; // pointer to a field
+  case OpKind::BO_SCOPE:
+    return "::";
   default:
     assert(false);
     return "";
@@ -119,6 +123,7 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include<set>\n");
   fprintf(file, "#include<map>\n");
   fprintf(file, "#include<unordered_map>\n");
+  fprintf(file, "#include<chrono>\n");
   fprintf(file, "#include<random>\n");
   fprintf(file, "#include<numeric>\n");
   fprintf(file, "#include<string>\n");
@@ -548,10 +553,36 @@ void CPPPrinter::print(code::SwitchStmt* term) {
 void CPPPrinter::print(code::Type* term) {
   // assume newline == false;
   assert(newline == false);
+  if (term->getScope() != nullptr) {
+    term->print(this);
+    fprintf(file, "::");
+  }
   fprintf(file, "%s", term->getName().c_str());
   if (term->isRef())
     fprintf(file, "&");
 }
+  
+  void CPPPrinter::print(code::TemplatedType* term) {
+    // assume newline == false;
+    assert(newline == false);
+    if (term->getScope() != nullptr) {
+      term->print(this);
+      fprintf(file, "::");
+    }
+    fprintf(file, "%s", term->getName().c_str());
+    if (term->getTypeArgs().size() > 0) {
+    fprintf(file, "<");
+    auto it = term->getTypeArgs().begin();
+      it->print(this);
+      for (it++; it != term->getTypeArgs().end(); it++) {
+        fprintf(file, ",");
+        it->print(this);
+      }
+    fprintf(file, ">");
+    }
+    if (term->isRef())
+      fprintf(file, "&");
+  }
 
 void CPPPrinter::print(code::VarDecl* term) {
   if (!isforward)
@@ -574,7 +605,7 @@ void CPPPrinter::print(code::VarDecl* term) {
   printLine();
 }
 
-void CPPPrinter::print(code::VarRef* term) {
+void CPPPrinter::print(code::Identifier* term) {
   printIndent();
   fprintf(file, "%s", term->getId().c_str());
 

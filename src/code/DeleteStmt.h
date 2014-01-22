@@ -8,20 +8,20 @@
 #pragma once
 
 #include "Stmt.h"
-#include "VarRef.h"
+#include "Identifier.h"
 
 namespace swift {
 namespace code {
 
 class DeleteStmt: public swift::code::Stmt {
 public:
-  DeleteStmt(VarRef* var, bool arrayDel=false);
+  DeleteStmt(Identifier* var, bool arrayDel=false);
   ~DeleteStmt();
   bool isArray() const;
-  VarRef* getVar();
+  Identifier* getVar();
   void print(printer::Printer* prt);
 private:
-  VarRef* var;
+  Identifier* var;
   bool arrayDel;
 };
 
