@@ -35,7 +35,6 @@
 #include "NullLiteral.h"
 #include "ParamVarDecl.h"
 #include "Type.h"
-#include "TemplatedType.h"
 #include "ReturnStmt.h"
 #include "SpecialMacro.h"
 #include "SwitchStmt.h"

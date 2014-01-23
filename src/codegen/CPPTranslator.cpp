@@ -15,10 +15,10 @@ const code::Type CPPTranslator::INT_REF_TYPE("int", true);
 const code::Type CPPTranslator::INT_POINTER_TYPE("int*");
 const code::Type CPPTranslator::DOUBLE_TYPE("double");
 const code::Type CPPTranslator::DOUBLE_POINTER_TYPE("double*");
-const code::Type CPPTranslator::STRING_TYPE("std::string");
+const code::Type CPPTranslator::STRING_TYPE(new code::Identifier("std"), "string");
 const code::Type CPPTranslator::BOOL_TYPE("bool");
 const code::Type CPPTranslator::VOID_TYPE("void");
-const code::Type CPPTranslator::MAP_BASE_TYPE("std::map");
+const code::Type CPPTranslator::MAP_BASE_TYPE(new code::Identifier("std"), "map");
 const std::string CPPTranslator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
 const std::string CPPTranslator::QUERY_EVALUATE_FUN_NAME = "_evaluate_query";
 const std::string CPPTranslator::DISTINCT_FIELDNAME = "_name";
@@ -100,21 +100,6 @@ std::string getValueVarName(std::string name) {
   return "__value_" + name;
 }
 
-/**
- * get the answer histogram type
- */
-code::Type getTemplatedType(std::string containerType, code::Type elementType) {
-  code::Type ty(containerType + "<" + elementType.getName() + ">");
-  return ty;
-}
-
-code::Type getTemplatedType(std::string containerType, code::Type elementType1,
-    code::Type elementType2) {
-  code::Type ty(
-      containerType + "<" + elementType1.getName() + ","
-          + elementType2.getName() + ">");
-  return ty;
-}
 
 CPPTranslator::CPPTranslator() {
   useTag = false;
@@ -530,8 +515,7 @@ code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   std::vector<code::Expr*> maparg;
   maparg.push_back(list);
   // todo just a hack for the moment, need to support templated type natively
-  code::Type maptype = getTemplatedType(MAP_BASE_TYPE.getName(), fromType,
-      toType);
+  code::Type maptype(MAP_BASE_TYPE, std::vector<code::Type>({fromType, toType}));
   return new code::CallExpr(new code::Identifier(maptype.getName()), maparg);
 }
 
@@ -738,8 +722,8 @@ void CPPTranslator::transQuery(code::FunctionDecl* fun,
     std::shared_ptr<ir::Query> qr, int n) {
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
   code::FieldDecl::createFieldDecl(coreCls, answervarname,
-      getTemplatedType(HISTOGRAM_CLASS_NAME,
-          mapIRTypeToCodeType(qr->getVar()->getTyp())));
+                                   code::Type(HISTOGRAM_CLASS_NAME,
+                                              std::vector<code::Type>({ mapIRTypeToCodeType(qr->getVar()->getTyp())} ) ));
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
   args.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
