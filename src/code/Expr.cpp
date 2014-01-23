@@ -10,10 +10,17 @@
 namespace swift {
 namespace code {
 
-Expr::Expr() {
+Expr::Expr(std::vector<Expr*> args) : args(args) {
 }
 
 Expr::~Expr() {
+  for (auto a : args)
+    delete a;
+  args.clear();
+}
+  
+std::vector<code::Expr*>& Expr::getArgs() {
+  return args;
 }
 
 } /* namespace code */

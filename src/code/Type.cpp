@@ -9,29 +9,33 @@
 
 namespace swift {
 namespace code {
-Type::Type(Expr* scope, std::string name, const std::vector<Type> typeArgs,
+Type::Type(std::vector<std::string> scope, std::string name, std::vector<Type> typeArgs,
     bool refTag) :
     scope(scope), name(name), typeArgs(typeArgs), refTag(refTag) {
 }
 
 Type::Type(const std::string name, bool refTag) :
-    Type(nullptr, name, std::vector<Type>(), refTag) {
+    Type(std::vector<std::string>(), name, std::vector<Type>(), refTag) {
 }
 
-Type::Type(Expr* scope, std::string name, bool refTag) :
+Type::Type(std::vector<std::string> scope, std::string name, bool refTag) :
     Type(scope, name, std::vector<Type>(), refTag) {
 }
 
-Type::Type(std::string name, const std::vector<Type> typeArgs, bool refTag) :
-    Type(nullptr, name, typeArgs, refTag) {
+bool Type::hasScope() const {
+  return scope.size() > 0;
 }
   
-Type::Type(const Type baseType, const std::vector<Type> typeArgs, bool refTag) : Type(baseType.scope, baseType.name, typeArgs, refTag) {    
+  
+Type::Type(std::string name, std::vector<Type> typeArgs, bool refTag) :
+  Type(std::vector<std::string>(), name, typeArgs, refTag) {
+}
+  
+Type::Type(Type baseType, std::vector<Type> typeArgs, bool refTag) : Type(baseType.scope, baseType.name, typeArgs, refTag) {
 }
 
 
 Type::~Type() {
-  delete scope;
 }
 
 const std::string& Type::getName() const {
@@ -46,7 +50,7 @@ std::vector<Type> & Type::getTypeArgs() {
   return typeArgs;
 }
 
-Expr* Type::getScope() {
+std::vector<std::string>&  Type::getScope() {
   return scope;
 }
 

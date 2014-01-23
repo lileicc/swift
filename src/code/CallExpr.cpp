@@ -13,22 +13,15 @@ namespace swift {
 namespace code {
 
 CallExpr::CallExpr(code::Expr* fn, std::vector<code::Expr*> args) :
-    fn(fn), args(args) {
+    Expr(args), fn(fn) {
 }
 
 CallExpr::~CallExpr() {
   delete fn;
-  for (auto a : args)
-    delete a;
-  args.clear();
 }
 
 code::Expr* CallExpr::getFunc() {
   return fn;
-}
-
-std::vector<code::Expr*>& CallExpr::getArgs() {
-  return args;
 }
 
 // For Printer
@@ -42,6 +35,7 @@ CallExpr* CallExpr::createMethodCall(std::string varname,
       new BinaryOperator(new Identifier(varname), new Identifier(methodname),
           OpKind::BO_FIELD), args);
 }
+
 
 } /* namespace code */
 } /* namespace swift */

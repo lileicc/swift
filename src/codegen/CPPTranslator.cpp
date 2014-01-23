@@ -9,16 +9,17 @@
 
 namespace swift {
 namespace codegen {
-
+const std::string CPPTranslator::VECTOR_CLASS_NAME = "vector";
+const std::string CPPTranslator::VECTOR_RESIZE_METHOD_NAME = "resize";
 const code::Type CPPTranslator::INT_TYPE("int");
 const code::Type CPPTranslator::INT_REF_TYPE("int", true);
-const code::Type CPPTranslator::INT_POINTER_TYPE("int*");
+const code::Type CPPTranslator::INT_VECTOR_TYPE(VECTOR_CLASS_NAME, {INT_TYPE});
 const code::Type CPPTranslator::DOUBLE_TYPE("double");
-const code::Type CPPTranslator::DOUBLE_POINTER_TYPE("double*");
-const code::Type CPPTranslator::STRING_TYPE(new code::Identifier("std"), "string");
+const code::Type CPPTranslator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {DOUBLE_TYPE});
+const code::Type CPPTranslator::STRING_TYPE("string");
 const code::Type CPPTranslator::BOOL_TYPE("bool");
 const code::Type CPPTranslator::VOID_TYPE("void");
-const code::Type CPPTranslator::MAP_BASE_TYPE(new code::Identifier("std"), "map");
+const code::Type CPPTranslator::MAP_BASE_TYPE("map");
 const std::string CPPTranslator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
 const std::string CPPTranslator::QUERY_EVALUATE_FUN_NAME = "_evaluate_query";
 const std::string CPPTranslator::DISTINCT_FIELDNAME = "_name";
@@ -100,7 +101,6 @@ std::string getValueVarName(std::string name) {
   return "__value_" + name;
 }
 
-
 CPPTranslator::CPPTranslator() {
   useTag = false;
   prog = new code::Code();
@@ -163,23 +163,16 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   fun->addStmt(
       new code::DeclStmt(
           new code::VarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)));
-  // declaring weight field in the class::: double* weight;
+  // declaring weight field in the class
+  // ::: => vector<double> weight;
   code::FieldDecl::createFieldDecl(coreCls, GLOBAL_WEIGHT_VARNAME,
-      DOUBLE_POINTER_TYPE);
-  // add initialization null value to main class construction method
-  coreClsConstructor->addStmt(
-      new code::BinaryOperator(new code::Identifier(GLOBAL_WEIGHT_VARNAME),
-          new code::NullLiteral(), code::OpKind::BO_ASSIGN));
-  // add deleteion to remove previous values ::: delete[] weight
-  coreClsInit->addStmt(
-      new code::DeleteStmt(new code::Identifier(GLOBAL_WEIGHT_VARNAME), true));
+      DOUBLE_VECTOR_TYPE);
   // add initialization function in init()
+  // :::=> weight.resize(LOCAL_NUM_SAMPLE_ARG_NAME);
   coreClsInit->addStmt(
-      new code::BinaryOperator(new code::Identifier(GLOBAL_WEIGHT_VARNAME),
-          new code::NewExpr(DOUBLE_TYPE,
-              new code::Identifier(LOCAL_NUM_SAMPLE_ARG_NAME)),
-          code::OpKind::BO_ASSIGN));
-  // todo: delete the pointer in the destruction method.
+      code::CallExpr::createMethodCall(GLOBAL_WEIGHT_VARNAME,
+          VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>( {
+              new code::Identifier(LOCAL_NUM_SAMPLE_ARG_NAME) })));
   //call the initialization function
   std::vector<code::Expr*> initArg;
   initArg.push_back(new code::Identifier(LOCAL_NUM_SAMPLE_ARG_NAME));
@@ -223,6 +216,7 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
 
 void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   const std::string& name = td->getName();
+  // create a class for this declared type
   code::ClassDecl* cd = code::ClassDecl::createClassDecl(coreNs, name);
   code::FieldDecl::createFieldDecl(cd, DISTINCT_FIELDNAME, STRING_TYPE);
   size_t len = td->getPreLen();
@@ -515,8 +509,8 @@ code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   std::vector<code::Expr*> maparg;
   maparg.push_back(list);
   // todo just a hack for the moment, need to support templated type natively
-  code::Type maptype(MAP_BASE_TYPE, std::vector<code::Type>({fromType, toType}));
-  return new code::CallExpr(new code::Identifier(maptype.getName()), maparg);
+  code::Type maptype(MAP_BASE_TYPE, { fromType, toType });
+  return new code::CallClassConstructor(maptype, maparg);
 }
 
 code::Expr* CPPTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr) {
@@ -609,28 +603,22 @@ void CPPTranslator::createInit() {
       RANDOM_ENGINE_TYPE);
 }
 
+// add the in the class a field variable for a funcappvar with params
 void CPPTranslator::addFieldForFunVar(std::string varname,
     const std::vector<std::shared_ptr<ir::VarDecl> >& params) {
   code::Type valueType = INT_TYPE;
   if (!params.empty()) {
-    valueType = INT_POINTER_TYPE;
+    valueType = INT_VECTOR_TYPE;
     // NOTE: currently only support single argument
     // todo support more arguments!
     std::string argtypename = params[0]->toSignature();
     std::string numvarname_for_arg = getVarOfNumType(argtypename);
-    // adding in the class constructor function for initial value ::: = null;
-    coreClsConstructor->addStmt(
-        new code::BinaryOperator(new code::Identifier(varname),
-            new code::NullLiteral(), code::OpKind::BO_ASSIGN));
     // adding in the initialization function for value of a random variable
+    // ::: valuevar.resize(number_of_instance);
     coreClsInit->addStmt(
-        new code::DeleteStmt(new code::Identifier(varname), true));
-    // ::: valuevar = new int[number_of_instantce];
-    coreClsInit->addStmt(
-        new code::BinaryOperator(new code::Identifier(varname),
-            new code::NewExpr(INT_TYPE,
-                new code::Identifier(numvarname_for_arg)),
-            code::OpKind::BO_ASSIGN));
+        code::CallExpr::createMethodCall(varname, VECTOR_RESIZE_METHOD_NAME,
+            std::vector<code::Expr*>(
+                { new code::Identifier(numvarname_for_arg) })));
     // adding printing this variable in debug method
     // ::: for (int i = 0; i < length of var; i++) print( );
   }
@@ -722,8 +710,8 @@ void CPPTranslator::transQuery(code::FunctionDecl* fun,
     std::shared_ptr<ir::Query> qr, int n) {
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
   code::FieldDecl::createFieldDecl(coreCls, answervarname,
-                                   code::Type(HISTOGRAM_CLASS_NAME,
-                                              std::vector<code::Type>({ mapIRTypeToCodeType(qr->getVar()->getTyp())} ) ));
+      code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+          mapIRTypeToCodeType(qr->getVar()->getTyp()) })));
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
   args.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
@@ -808,7 +796,7 @@ void CPPTranslator::createMain() {
       INT_TYPE);
   code::Stmt* st = new code::DeclStmt(
       new code::VarDecl(mainFun, SAMPLER_VAR_NAME,
-          code::Type(new code::Identifier(coreNs->getName()),
+          code::Type(std::vector<std::string>( { coreNs->getName() }),
               coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;

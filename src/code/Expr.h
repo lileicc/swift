@@ -6,19 +6,24 @@
  */
 
 #pragma once
-
+#include <vector>
 #include "Stmt.h"
+#include "Expr.h"
 
 namespace swift {
 namespace code {
 
 class Expr: public swift::code::Stmt {
 public:
-  Expr();
+  Expr(std::vector<Expr*> args = std::vector<Expr*>());
   virtual ~Expr();
+  
+  virtual std::vector<code::Expr*>& getArgs();
 
   // For Printer
   virtual void print(printer::Printer* prt) = 0;
+protected:
+  std::vector<Expr*> args;
 };
 
 } /* namespace code */
