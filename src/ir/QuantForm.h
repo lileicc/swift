@@ -18,6 +18,8 @@ public:
   IRConstant getOp() const;
   bool isForall() const;
   bool isExists() const;
+  
+  void print(FILE* file, int indent);
 
 private:
   IRConstant op;

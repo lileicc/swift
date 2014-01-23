@@ -11,6 +11,7 @@ public:
   virtual ~SetExpr();
 
   IRConstant getKind() const ;
+  virtual void print(FILE* file, int indent);
 
 private:
   IRConstant kind;

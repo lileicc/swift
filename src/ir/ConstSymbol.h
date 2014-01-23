@@ -13,6 +13,8 @@ public:
   virtual ~ConstSymbol();
 
   IRConstant getKind() const;
+  
+  virtual void print(FILE* file, int indent);
 
 private:
   IRConstant kind;

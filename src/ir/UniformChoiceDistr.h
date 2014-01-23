@@ -11,6 +11,7 @@ public:
   virtual ~UniformChoiceDistr();
 
   std::shared_ptr<SetExpr> getBody() const ;
+  void print(FILE* file, int indent);
 
 private:
   std::shared_ptr<SetExpr> body;

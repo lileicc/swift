@@ -25,7 +25,16 @@ FuncDefn* FunctionCall::getRefer() const {
 }
 
 void FunctionCall::print(FILE* file, int indent){
-  
+  fprintf(file, "%*s(FunctionCall:\n", indent, "");
+  fprintf(file, "%*s:calling: %s\n", indent+2, "", refer->toSignature().c_str());
+  fprintf(file, "%*s(args:\n", indent+2, "");
+  for(size_t i = 0; i < argSize(); i++){
+    if(get(i) != nullptr){
+      get(i)->print(file, indent+4);
+    }
+  }
+  fprintf(file, "%*s)\n", indent+2, "");
+  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

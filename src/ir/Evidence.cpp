@@ -27,7 +27,8 @@ void Evidence::print(FILE* file, int indent){
     getLeft()->print(file, indent+4);
   }
   if (getRight() != nullptr){
-    fprintf(file, "%*s:right: %d\n", indent+2, "", getRight()->getKind());
+    fprintf(file, "%*s:right:\n", indent+2, "");
+    getRight()->print(file, indent+4);
   }
 
 }

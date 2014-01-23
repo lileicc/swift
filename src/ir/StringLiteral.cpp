@@ -14,5 +14,9 @@ const std::string& StringLiteral::getValue() const {
   return value;
 }
 
+void StringLiteral::print(FILE* file, int indent){
+  fprintf(file, "%*s(StringLitera: %s)\n", indent, "", value.c_str());
+}
+
 }
 }

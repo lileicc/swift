@@ -1,4 +1,5 @@
 #include "CategoricalDistr.h"
+#include "ConstSymbol.h"
 
 #include <string>
 
@@ -40,7 +41,13 @@ const std::vector<std::shared_ptr<ConstSymbol> >& CategoricalDistr::getSymbols()
 }
 
 void CategoricalDistr::print(FILE* file, int indent){
-  
+  fprintf(file, "%*s(CategoricalDistr:\n", indent, "");
+  for(size_t i = 0; i < size(); i++){
+    fprintf(file, "%*s:symbol %d:\n", indent+2, "", i);
+    getSymbol(i)->print(file, indent+4);
+    fprintf(file, "%*s:weight %d: %f\n", indent+2, "", i, getWeight(i));
+  }
+  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

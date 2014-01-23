@@ -10,6 +10,7 @@ public:
   virtual ~DoubleLiteral();
 
   double getValue() const;
+  void print(FILE* file, int indent);
 
 private:
   double value;

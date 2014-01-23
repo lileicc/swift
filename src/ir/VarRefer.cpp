@@ -13,5 +13,8 @@ VarDecl* VarRefer::getRefer() const {
   return refer;
 }
 
+void VarRefer::print(FILE* file, int indent){
+  fprintf(file, "%*s(VarRefer: %s)\n", indent, "", refer->toString().c_str());
+}
 }
 }

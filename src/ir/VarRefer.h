@@ -11,6 +11,7 @@ public:
   virtual ~VarRefer();
 
   VarDecl* getRefer() const;
+  void print(FILE* file, int indent);
 
 private:
   VarDecl* refer;

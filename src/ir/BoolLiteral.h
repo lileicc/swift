@@ -10,6 +10,7 @@ public:
   virtual ~BoolLiteral();
 
   bool getValue() const ;
+  void print(FILE* file, int indent);
 
 private:
   bool value;

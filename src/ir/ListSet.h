@@ -8,6 +8,7 @@ class ListSet :
 public:
   ListSet();
   virtual ~ListSet();
+  void print(FILE* file, int indent);
 };
 
 }

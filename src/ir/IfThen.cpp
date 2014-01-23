@@ -7,6 +7,8 @@
 #include "IfThen.h"
 
 #include "Expr.h"
+#include <iostream>
+using namespace std;
 
 namespace swift {
 namespace ir {

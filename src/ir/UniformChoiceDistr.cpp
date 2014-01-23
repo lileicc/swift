@@ -1,4 +1,5 @@
 #include "UniformChoiceDistr.h"
+#include "SetExpr.h"
 
 #include <string>
 
@@ -13,6 +14,12 @@ UniformChoiceDistr::~UniformChoiceDistr() {
 
 std::shared_ptr<SetExpr> UniformChoiceDistr::getBody() const {
   return body;
+}
+
+void UniformChoiceDistr::print(FILE* file, int indent){
+  fprintf(file, "%*s(UniformChoiceDistr:\n", indent, "");
+  body->print(file, indent+2);
+  fprintf(file, "%*s\n", indent+2, "");
 }
 
 }

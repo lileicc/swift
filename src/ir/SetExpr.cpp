@@ -13,5 +13,9 @@ IRConstant SetExpr::getKind() const {
   return kind;
 }
 
+void SetExpr::print(FILE* file, int indent){
+
+}
+
 }
 }
