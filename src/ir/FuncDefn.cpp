@@ -73,7 +73,6 @@ std::string FuncDefn::toSignature() const {
 
 void FuncDefn::print(FILE* file, int indent){
   fprintf(file, "%*s(FuncDefn:\n", indent, "");
-  cout << toSignature() << endl;
   fprintf(file, "%*s%s\n", indent+2, "", toSignature().c_str());
   fprintf(file, "%*s(body:\n", indent+2, "");
   if(getBody() != nullptr){
