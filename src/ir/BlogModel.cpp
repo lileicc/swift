@@ -78,7 +78,6 @@ void BlogModel::print(FILE* file, int indent){
   fprintf(file, "%*s)\n", indent, "");
   
   fprintf(file, "%*s(RandFuncs:\n", indent, "");
-  cout << randFunc.size() << endl;
   for(size_t i = 0; i < randFunc.size(); i++){
     randFunc[i]->print(file, indent+2);
   }

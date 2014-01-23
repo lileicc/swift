@@ -17,6 +17,7 @@ public:
   const Ty* getToTyp() const;
   void setFromTyp(const Ty* t);
   void setToTyp(const Ty* t);
+  void print(FILE* file, int indent);
 
 private:
   const Ty* fromTyp;

@@ -47,7 +47,8 @@ void Branch::print(FILE* file, int indent){
   fprintf(file, "%*svar:\n", indent+2, "");
   getVar()->print(file, indent+2);
   for(size_t i = 0; i < size(); i++){
-    fprintf(file, "%*scond %d: %d\n", indent+2, "", i, getCond(i)->getKind());
+    fprintf(file, "%*scond %d:\n", indent+2, "", i);
+    getCond(i)->print(file, indent+4);
     fprintf(file, "%*sbranch %d:\n", indent+2, "", i);
     getBranch(i)->print(file, indent+4);
   }
