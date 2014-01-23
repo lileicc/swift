@@ -26,8 +26,6 @@ public:
   int gen(_RD& rd);
   double likeli(int x);
   double loglikeli(int x);
-protected:
-  std::default_random_engine engine;
 private:
   std::discrete_distribution<int> dist;
   std::vector<int> values; // values that this distribution will generation

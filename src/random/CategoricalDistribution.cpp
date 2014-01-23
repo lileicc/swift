@@ -6,12 +6,15 @@
  */
 #include <numeric>
 #include <cmath>
+#include <ctime>
+#include <cstdlib>
 #include "CategoricalDistribution.h"
 
 namespace swift {
 namespace random {
 
 Categorical::Categorical() {
+  srand(time(NULL));
 }
 
 Categorical::~Categorical() {
@@ -50,6 +53,14 @@ int Categorical::gen(_RD& rd) {
   
 int Categorical::gen(){
   return gen(engine);
+//  //custom implementation 
+//  double u = (double)rand() / RAND_MAX;
+//  int x=0;
+//  for (; x < weights.size() && u>=0; x++) {
+//    u -= weights[x];
+//  }
+//  x--;
+//  return values[x];
 }
 
 double Categorical::likeli(int x) {

@@ -21,6 +21,7 @@
 #include <cassert>
 #include <complex>
 #include <random>
+#include <chrono>
 #include <ctime>
 
 #include "lwsampler_hurricane.h"
@@ -296,14 +297,13 @@ void OutputDamage(int * ans, const char* buf) { // for City A or B
 void run() {
 
   srand((unsigned) time(0));
-
-  int t = clock();
+  
+  std::chrono::time_point<std::chrono::system_clock> start;
+  start = std::chrono::system_clock::now();
 
   initDistinct();
   for (cur_loop = 1; cur_loop <= Loops; ++cur_loop)
     LWSample();
-
-  t = clock() - t;
 
   // Compute Answer
   OutputCity(Ans[0], "First: ");
@@ -312,7 +312,8 @@ void run() {
 
   printf("++++++++++++++++++++++++++++++++\n");
   printf(" Sample Number: %d\n", Loops);
-  printf(" Time Elapsed: %d.%03ds\n", t / 1000, t % 1000);
+  std::chrono::duration<double> elapsed = std::chrono::system_clock::now() - start;
+  printf(" Time Elapsed: %fs\n", elapsed.count());
 }
 }
 

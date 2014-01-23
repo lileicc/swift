@@ -35,13 +35,14 @@
 #include "NullLiteral.h"
 #include "ParamVarDecl.h"
 #include "Type.h"
+#include "TemplatedType.h"
 #include "ReturnStmt.h"
 #include "SpecialMacro.h"
 #include "SwitchStmt.h"
 #include "Stmt.h"
 #include "StringLiteral.h"
 #include "VarDecl.h"
-#include "VarRef.h"
+#include "Identifier.h"
 
 namespace swift {
 namespace printer {

@@ -1,5 +1,5 @@
 /*
- * VarRef.h
+ * Identifier.h
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
@@ -13,10 +13,10 @@
 namespace swift {
 namespace code {
 
-class VarRef: public swift::code::Expr {
+class Identifier: public swift::code::Expr {
 public:
-  VarRef(std::string id);
-  ~VarRef();
+  Identifier(std::string id);
+  ~Identifier();
 
   const std::string& getId() const;
 

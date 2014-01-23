@@ -42,7 +42,7 @@ private:
       then this if statment contains a C++11 range expression
     e.g.
     for(auto i : args)
-    init = new BinaryOperator(new VarRef("i"), new VarRef("args"), ':')
+    init = new BinaryOperator(new Identifier("i"), new Identifier("args"), ':')
     cond = step = NULL
     isRange = true
   */

@@ -31,10 +31,22 @@ int main(int argc, char** argv) {
   // parse the input file to get abstract syntax
   swift::absyn::BlogProgram* blog_absyn = parse(inp);
 
+  if (blog_absyn == NULL) {
+    fprintf(stderr, "Error in parsing input %s!", inp);
+    // TODO print the error message!
+    return 1;
+  }
+  
   // semantic checking and translating to ir
   swift::semant::Semant sem;
   sem.process(blog_absyn);
   swift::ir::BlogModel* model = sem.getModel();
+  
+  if (!sem.Okay()) {
+    fprintf(stderr, "Error in semantic checking input %s!", inp);
+    // TODO print the error message!
+    return 1;
+  }
 
   // translate ir to code representation
   swift::codegen::CPPTranslator trans;
@@ -45,6 +57,8 @@ int main(int argc, char** argv) {
   swift::printer::Printer * prt = new swift::printer::CPPPrinter(
       std::string(out));
   program->print(prt);
+  
+  fprintf(stdout, "correctly translated the file!\n");
   
   delete blog_absyn;
   delete model;
