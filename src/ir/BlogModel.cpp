@@ -66,9 +66,33 @@ const std::string& BlogModel::getName() const {
 
 void BlogModel::print(FILE* file, int indent){
   fprintf(file, "%*s(FixFuncs:\n", indent, "");
-  auto fixFuncs = getFixFuncs();
-  for(size_t i = 0; i < fixFuncs.size(); i++){
-    fixFuncs[i]->print(file, indent+2);
+  for(size_t i = 0; i < fixFunc.size(); i++){
+    fixFunc[i]->print(file, indent+2);
+  }
+  fprintf(file, "%*s)\n", indent, "");
+  
+  fprintf(file, "%*s(VoidFuncs:\n", indent, "");
+  for(size_t i = 0; i < voidFunc.size(); i++){
+    voidFunc[i]->print(file, indent+2);
+  }
+  fprintf(file, "%*s)\n", indent, "");
+  
+  fprintf(file, "%*s(RandFuncs:\n", indent, "");
+  cout << randFunc.size() << endl;
+  for(size_t i = 0; i < randFunc.size(); i++){
+    randFunc[i]->print(file, indent+2);
+  }
+  fprintf(file, "%*s)\n", indent, "");
+  
+  fprintf(file, "%*s(Queries:\n", indent, "");
+  for(size_t i = 0; i < query.size(); i++){
+    query[i]->print(file, indent+2);
+  }
+  fprintf(file, "%*s)\n", indent, "");
+  
+  fprintf(file, "%*s(Evidences:\n", indent, "");
+  for(size_t i = 0; i < evidence.size(); i++){
+    evidence[i]->print(file, indent+2);
   }
   fprintf(file, "%*s)\n", indent, "");
 }
