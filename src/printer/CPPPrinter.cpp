@@ -552,37 +552,26 @@ void CPPPrinter::print(code::SwitchStmt* term) {
 
 void CPPPrinter::print(code::Type* term) {
   // assume newline == false;
+  // assume newline == false;
   assert(newline == false);
   if (term->getScope() != nullptr) {
-    term->print(this);
+    term->getScope()->print(this);
     fprintf(file, "::");
   }
   fprintf(file, "%s", term->getName().c_str());
+  if (term->getTypeArgs().size() > 0) {
+    fprintf(file, "<");
+    auto it = term->getTypeArgs().begin();
+    it->print(this);
+    for (it++; it != term->getTypeArgs().end(); it++) {
+      fprintf(file, ",");
+      it->print(this);
+    }
+    fprintf(file, ">");
+  }
   if (term->isRef())
     fprintf(file, "&");
 }
-  
-  void CPPPrinter::print(code::TemplatedType* term) {
-    // assume newline == false;
-    assert(newline == false);
-    if (term->getScope() != nullptr) {
-      term->print(this);
-      fprintf(file, "::");
-    }
-    fprintf(file, "%s", term->getName().c_str());
-    if (term->getTypeArgs().size() > 0) {
-    fprintf(file, "<");
-    auto it = term->getTypeArgs().begin();
-      it->print(this);
-      for (it++; it != term->getTypeArgs().end(); it++) {
-        fprintf(file, ",");
-        it->print(this);
-      }
-    fprintf(file, ">");
-    }
-    if (term->isRef())
-      fprintf(file, "&");
-  }
 
 void CPPPrinter::print(code::VarDecl* term) {
   if (!isforward)
