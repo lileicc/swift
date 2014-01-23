@@ -20,15 +20,13 @@ public:
   ~CallExpr();
 
   Expr* getFunc();
-  std::vector<Expr*>& getArgs();
 
   static CallExpr* createMethodCall(std::string varname, std::string methodname,
       std::vector<Expr*> args = std::vector<Expr *>());
   // For Printer
   void print(printer::Printer* prt);
-private:
+protected:
   Expr* fn;
-  std::vector<Expr*> args;
 };
 
 } /* namespace code */

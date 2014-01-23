@@ -18,8 +18,9 @@ enum class OpKind {
   UO_NEG,       // negate
   UO_INC,       // increment
   UO_DEC,       // decrement
-  UO_NEW,       // new or malloc     // TODO remove duplicate with NewExpr
-  UO_DEL,       // delete or dispose // TODO remove duplicate with DeleteStmt!!
+  UO_NEW,       // new or malloc
+  UO_DEL,       // delete or dispose
+  UO_ARRAY_DEL, // delete[] array
   // Binary Operator
   BO_ASSIGN,    // Assignment
   BO_FIELD,     // reference to a field
@@ -61,10 +62,7 @@ public:
   
   // For Printer
   void print(printer::Printer* prt);
-
 private:
-  Expr* lhs; // left hand side
-  Expr* rhs; // right hand side
   OpKind op;
 };
 

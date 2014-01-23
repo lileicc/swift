@@ -159,11 +159,11 @@ private:
   static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false); // map ir type to code type
 
   static const code::Type INT_TYPE;
-  static const code::Type INT_POINTER_TYPE;
+  static const code::Type INT_VECTOR_TYPE;
   static const code::Type INT_REF_TYPE;
 
   static const code::Type DOUBLE_TYPE;
-  static const code::Type DOUBLE_POINTER_TYPE;
+  static const code::Type DOUBLE_VECTOR_TYPE;
 
   static const code::Type STRING_TYPE;
 
@@ -243,6 +243,14 @@ private:
    */
   static const std::string DISTRIBUTION_LOGLIKELI_FUN_NAME;
 
+  /**
+   * method name for vector.resize()
+   */
+  static const std::string VECTOR_RESIZE_METHOD_NAME;
+  /**
+   * class name for vector
+   */
+  static const std::string VECTOR_CLASS_NAME;
   /**
    * initial value set to mark_var (default 1)
    */

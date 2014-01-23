@@ -31,11 +31,11 @@ public:
   void print(code::CaseStmt* term);
   void print(code::ClassDecl* term);
   void print(code::ClassConstructor* term);
+  void print(code::CallClassConstructor* term);
   void print(code::CompoundStmt* term);
   void print(code::ContinueStmt* term);
   void print(code::DeclContext* term);
   void print(code::DeclStmt* term);
-  void print(code::DeleteStmt* term);
   void print(code::FieldDecl* term);
   void print(code::FloatingLiteral* term);
   void print(code::ForStmt* term);
@@ -45,7 +45,6 @@ public:
   void print(code::IntegerLiteral* term);
   void print(code::ListInitExpr* term);
   void print(code::NamespaceDecl* term);
-  void print(code::NewExpr* term);
   void print(code::NullLiteral* term);
   void print(code::ParamVarDecl* term);
   void print(code::ReturnStmt* term);
@@ -53,10 +52,12 @@ public:
   void print(code::StringLiteral* term);
   void print(code::SwitchStmt* term);
   void print(code::Type* term);
-  void print(code::TemplatedType* term);
   void print(code::VarDecl* term);
   void print(code::Identifier* term);
 
+protected:
+  void print(std::vector<code::Expr*>& exprs);
+  
 private:
   std::vector<std::string> header;
 

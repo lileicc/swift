@@ -7,6 +7,7 @@
 
 #pragma once
 #include <string>
+#include <vector>
 #include "Expr.h"
 #include "../printer/Printer.h"
 
@@ -16,20 +17,26 @@ namespace code {
 class Type {
 public:
   Type(std::string name, bool refTag=false);
-  Type(Expr* scope, std::string name, bool refTag=false);
+  Type(std::vector<std::string> scope, std::string name, bool refTag=false);
+  Type(std::string name, std::vector<Type> typeArgs, bool refTag=false);
+  Type(std::vector<std::string> scope, std::string name, const std::vector<Type> typeArgs, bool refTag=false);
+  Type(Type baseType, std::vector<Type> typeArgs, bool refTag=false);
   ~Type();
 
   const std::string& getName() const;
   bool isRef() const;
+  bool hasScope() const;
+  std::vector<Type> & getTypeArgs();
 
-  Expr* getScope();
+  std::vector<std::string>& getScope();
 
   // For Printer
   virtual void print(printer::Printer* prt);
 private:
+  std::vector<std::string> scope;
   std::string name;
+  std::vector<Type> typeArgs;
   bool refTag;
-  Expr* scope;
 };
 
 } /* namespace code */
