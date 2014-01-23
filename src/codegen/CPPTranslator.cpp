@@ -211,7 +211,8 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
       new code::Identifier(LOCAL_NUM_SAMPLE_ARG_NAME), code::OpKind::BO_LT);
   // ::: =>cur_loop++
   code::Expr* step = new code::BinaryOperator(
-      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME), NULL, code::OpKind::UO_INC);
+      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME), NULL,
+      code::OpKind::UO_INC);
   code::CompoundStmt* body = new code::CompoundStmt();
   // :::=> weight = set_evidence();
   body->addStmt(
@@ -221,11 +222,13 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   std::vector<code::Expr*> weightArg;
   weightArg.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
   body->addStmt(
-      new code::CallExpr(new code::Identifier(QUERY_EVALUATE_FUN_NAME), weightArg));
+      new code::CallExpr(new code::Identifier(QUERY_EVALUATE_FUN_NAME),
+          weightArg));
   // :::==> weight[current_loop] = w;
   body->addStmt(
       new code::BinaryOperator(
-          new code::ArraySubscriptExpr(new code::Identifier(GLOBAL_WEIGHT_VARNAME),
+          new code::ArraySubscriptExpr(
+              new code::Identifier(GLOBAL_WEIGHT_VARNAME),
               new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
           new code::Identifier(WEIGHT_VAR_REF_NAME), code::OpKind::BO_ASSIGN));
   fun->addStmt(new code::ForStmt(init, cond, step, body));
@@ -309,13 +312,15 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   // now translating::: if (markvar == current sample num) then return value;
   code::Stmt* st = new code::IfStmt(
       new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
-          new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_EQU),
+          new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+          code::OpKind::BO_EQU),
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)), NULL);
   getterfun->addStmt(st);
   // now should sample
   // mark the variable first
   st = new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
-      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
+      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+      code::OpKind::BO_ASSIGN);
   getterfun->addStmt(st);
   //now translate actual sampling part
   getterfun->addStmt(transClause(fd->getBody(), VALUE_VAR_REF_NAME));
@@ -380,8 +385,10 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   args_with_value.push_back(
       new code::ParamVarDecl(setterfun, VALUE_ARG_NAME, valuetype));
   setterfun->setParams(args_with_value);
-  code::Stmt* st = new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
-      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME), code::OpKind::BO_ASSIGN);
+  code::Stmt* st = new code::BinaryOperator(
+      new code::Identifier(MARK_VAR_REF_NAME),
+      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+      code::OpKind::BO_ASSIGN);
   setterfun->addStmt(st);
   // :::==> value_var = value_arg
   st = new code::BinaryOperator(new code::Identifier(VALUE_VAR_REF_NAME),
@@ -632,11 +639,13 @@ void CPPTranslator::addFieldForFunVar(std::string varname,
         new code::BinaryOperator(new code::Identifier(varname),
             new code::NullLiteral(), code::OpKind::BO_ASSIGN));
     // adding in the initialization function for value of a random variable
-    coreClsInit->addStmt(new code::DeleteStmt(new code::Identifier(varname), true));
+    coreClsInit->addStmt(
+        new code::DeleteStmt(new code::Identifier(varname), true));
     // ::: valuevar = new int[number_of_instantce];
     coreClsInit->addStmt(
         new code::BinaryOperator(new code::Identifier(varname),
-            new code::NewExpr(INT_TYPE, new code::Identifier(numvarname_for_arg)),
+            new code::NewExpr(INT_TYPE,
+                new code::Identifier(numvarname_for_arg)),
             code::OpKind::BO_ASSIGN));
     // adding printing this variable in debug method
     // ::: for (int i = 0; i < length of var; i++) print( );
@@ -815,8 +824,8 @@ void CPPTranslator::createMain() {
       INT_TYPE);
   code::Stmt* st = new code::DeclStmt(
       new code::VarDecl(mainFun, SAMPLER_VAR_NAME,
-                        code::Type(new code::Identifier(
-              coreNs->getName()), coreCls->getName())));
+          code::Type(new code::Identifier(coreNs->getName()),
+              coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;
   args.push_back(new code::IntegerLiteral(TOTAL_NUM_SAMPLES));

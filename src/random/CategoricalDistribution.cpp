@@ -6,15 +6,13 @@
  */
 #include <numeric>
 #include <cmath>
-#include <ctime>
-#include <cstdlib>
 #include "CategoricalDistribution.h"
 
 namespace swift {
 namespace random {
 
 Categorical::Categorical() {
-  srand(time(NULL));
+//  srand(time(NULL));
 }
 
 Categorical::~Categorical() {
