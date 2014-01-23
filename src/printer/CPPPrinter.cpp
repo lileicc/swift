@@ -28,6 +28,8 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "new "; // new or malloc
   case OpKind::UO_DEL:
     return "delete "; // delete or dispose
+  case OpKind::UO_ARRAY_DEL:
+    return "delete[] "; // delete or dispose
   case OpKind::BO_ASSIGN:
     return "="; // Assignment
   case OpKind::BO_FIELD:
@@ -455,7 +457,7 @@ void CPPPrinter::print(code::IntegerLiteral* term) {
 }
 
 void CPPPrinter::print(code::NullLiteral* term) {
-  fprintf(file, "NULL");
+  fprintf(file, "nullptr");
   if (newline) {
     fprintf(file, ";");
     printLine();
@@ -552,11 +554,11 @@ void CPPPrinter::print(code::SwitchStmt* term) {
 
 void CPPPrinter::print(code::Type* term) {
   // assume newline == false;
-  // assume newline == false;
   assert(newline == false);
-  if (term->getScope() != nullptr) {
-    term->getScope()->print(this);
-    fprintf(file, "::");
+  if (term->hasScope()) {
+    for (auto & nm : term->getScope()) {
+      fprintf(file, "%s::", nm.c_str());
+    }
   }
   fprintf(file, "%s", term->getName().c_str());
   if (term->getTypeArgs().size() > 0) {
@@ -603,32 +605,32 @@ void CPPPrinter::print(code::Identifier* term) {
   printLine();
 }
 
-void CPPPrinter::print(code::DeleteStmt* term) {
-  printIndent();
-  if (term->isArray()) {
-    fprintf(file, "delete[] ");
-  } else {
-    fprintf(file, "delete ");
-  }
-  bool backup = newline;
-  newline = false;
-  term->getVar()->print(this);
-  newline = backup;
-  fprintf(file, ";");
-  printLine();
-}
+//void CPPPrinter::print(code::DeleteStmt* term) {
+//  printIndent();
+//  if (term->isArray()) {
+//    fprintf(file, "delete[] ");
+//  } else {
+//    fprintf(file, "delete ");
+//  }
+//  bool backup = newline;
+//  newline = false;
+//  term->getVar()->print(this);
+//  newline = backup;
+//  fprintf(file, ";");
+//  printLine();
+//}
 
-void CPPPrinter::print(code::NewExpr* term) {
-  fprintf(file, "new ");
-  if (term->isArray()) {
-    term->getType().print(this);
-    fprintf(file, "[");
-    term->getExpr()->print(this);
-    fprintf(file, "]");
-  } else {
-    term->getExpr()->print(this);
-  }
-}
+//void CPPPrinter::print(code::NewExpr* term) {
+//  fprintf(file, "new ");
+//  if (term->isArray()) {
+//    term->getType().print(this);
+//    fprintf(file, "[");
+//    term->getExpr()->print(this);
+//    fprintf(file, "]");
+//  } else {
+//    term->getExpr()->print(this);
+//  }
+//}
 
 void CPPPrinter::print(code::DeclContext* term) {
   // note should not reach here!!
@@ -636,9 +638,14 @@ void CPPPrinter::print(code::DeclContext* term) {
 }
 
 void CPPPrinter::print(code::ListInitExpr* term) {
-  bool first = true;
   fprintf(file, "{");
-  for (auto ex : term->getSubExprs()) {
+  print(term->getArgs());
+  fprintf(file, "}");
+}
+  
+void CPPPrinter::print(std::vector<code::Expr*>& exprs) {
+  bool first = true;
+  for (auto ex : exprs) {
     if (! first) {
       fprintf(file, ", ");
     } else {
@@ -646,11 +653,17 @@ void CPPPrinter::print(code::ListInitExpr* term) {
     }
     ex->print(this);
   }
-  fprintf(file, "}");
 }
 
 void CPPPrinter::print(code::ClassConstructor* term) {
   print(term, false);
+}
+  
+void CPPPrinter::print(code::CallClassConstructor* term) {
+  term->getType().print(this);
+  fprintf(file, "(");
+  print(term->getArgs());
+  fprintf(file, ")");
 }
 
 }

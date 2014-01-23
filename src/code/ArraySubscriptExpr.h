@@ -22,10 +22,6 @@ public:
 
   // For Printer
   void print(printer::Printer* prt);
-
-private:
-  Expr* lhs;
-  Expr* rhs;
 };
 
 } /* namespace code */

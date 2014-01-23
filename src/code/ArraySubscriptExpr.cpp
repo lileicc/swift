@@ -10,20 +10,18 @@
 namespace swift {
 namespace code {
 
-ArraySubscriptExpr::ArraySubscriptExpr(Expr* lhs, Expr* rhs) : lhs(lhs), rhs(rhs) {
+ArraySubscriptExpr::ArraySubscriptExpr(Expr* lhs, Expr* rhs) : Expr(std::vector<Expr*>({lhs, rhs})) {
 }
 
 ArraySubscriptExpr::~ArraySubscriptExpr() {
-  if(lhs != NULL) delete lhs;
-  if(rhs != NULL) delete rhs;
 }
 
 Expr* ArraySubscriptExpr::getLeft() {
-  return lhs;
+  return args[0];
 }
 
 Expr* ArraySubscriptExpr::getRight() {
-  return rhs;
+  return args[1];
 }
 
 // For Printer

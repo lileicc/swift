@@ -17,13 +17,10 @@ namespace code {
 
 class ListInitExpr: public Expr {
 public:
-  ListInitExpr(const std::vector<Expr*>& subExprs);
+  ListInitExpr(std::vector<Expr*> subExprs);
   ~ListInitExpr();
-  std::vector<Expr*>& getSubExprs();
   // For Printer
   void print(printer::Printer* prt);
-private:
-  std::vector<Expr*> subExprs;
 };
 
 } /* namespace code */
