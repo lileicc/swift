@@ -26,7 +26,7 @@ public:
   size_t getPreLen() const;
   void addNumberStmt(std::shared_ptr<NumberStmt> num);
   const std::vector<std::shared_ptr<NumberStmt>>& getAllNumberStmt() const;
-  std::shared_ptr<NumberStmt> getNumberStmt(int k) const;
+  std::shared_ptr<NumberStmt> getNumberStmt(size_t k) const;
   size_t getNumberStmtSize() const;
   void addOrigin(OriginAttr* o);
   const std::vector<OriginAttr*>& getAllOrigin() const;

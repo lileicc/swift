@@ -87,6 +87,14 @@ std::string getSetterFunName(std::string name) {
 
 /**
  * given the name of a variable (can be number var, or random function)
+ * return the function name to set the value
+ */
+std::string getEnsureFunName(std::string name) {
+  return "__ensure_" + name;
+}
+
+/**
+ * given the name of a variable (can be number var, or random function)
  * return the variable name to get the number of samples for the current variable
  */
 std::string getMarkVarName(std::string name) {
@@ -235,21 +243,45 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
       new code::BinaryOperator(new code::Identifier(marknumvar),
           new code::IntegerLiteral(INIT_SAMPLE_NUM - 1),
           code::OpKind::BO_ASSIGN));
-  if (len > 0) {
-    // create the function for getting number of objects in this instance, i.e. numvar
-    code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
-        getGetterFunName(numvar), INT_TYPE, true);
-    fun->addStmt(new code::ReturnStmt(new code::Identifier(numvar)));
-    // TODO please add the corresponding distinct name
 
-  }
+    // create the function for getting number of objects in this instance, i.e. numvar
+  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
+        getGetterFunName(numvar), INT_TYPE, true);
+
+  // TODO please add the corresponding distinct name
+
   // handle number statement
   size_t numstlen = td->getNumberStmtSize();
   if (numstlen > 0) {
+    for (size_t k = 0 ; k < numstlen; k++) {
+      std::shared_ptr<ir::NumberStmt> numst = td->getNumberStmt(k);
+      // for the moment just translate one number statement,
+      fun->addStmt( transClause(numst->getBody(), numvar) );
+      // TODO suppoert multiple number statements
+      code::Stmt* st = new code::IfStmt(
+                                        new code::BinaryOperator(new code::Identifier(marknumvar),
+                                                                 new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+                                                                 code::OpKind::BO_EQU),
+                                        new code::ReturnStmt(new code::Identifier(marknumvar)), nullptr);
+      fun->addStmt(st);
+    }
     // TODO create functions for number statement and their likelihood
-
   }
+  // markt he markvar
+  // ::: => marknumvar = curr_loop
+  fun->addStmt(new code::BinaryOperator(new code::Identifier(marknumvar), new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+                                        code::OpKind::BO_ASSIGN));
+  
+  code::FunctionDecl* ensureFun = code::FunctionDecl::createFunctionDecl(, ,);
+  
+  // TODO create ensure_size function
+  ////////////////////////// LEI Li stops here, to continue
+  
+  fun->addStmt(new code::ReturnStmt(new code::Identifier(numvar)));
 }
+  
+  
+
 
 void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
   if (fd->isRand()) {
@@ -283,7 +315,6 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
       coreCls, getterfunname, valuetype);
   getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
-
   addFunValueRefStmt(getterfun, valuevarname, getterfun->getParams(),
       VALUE_VAR_REF_NAME);
   addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
@@ -296,14 +327,15 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)), NULL);
   getterfun->addStmt(st);
   // now should sample
-  // mark the variable first
-  st = new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
-      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
-      code::OpKind::BO_ASSIGN);
-  getterfun->addStmt(st);
   //now translate actual sampling part
   getterfun->addStmt(transClause(fd->getBody(), VALUE_VAR_REF_NAME));
   // now return the value
+  // mark the variable first
+  // ::: => markvar = cur_loop
+  st = new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
+                                new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+                                code::OpKind::BO_ASSIGN);
+  getterfun->addStmt(st);
   getterfun->addStmt(
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
   return getterfun;

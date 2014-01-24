@@ -46,11 +46,11 @@ void TypeDomain::addNumberStmt(std::shared_ptr<NumberStmt> num) {
   gen.push_back(num);
 }
 
-const std::vector<std::shared_ptr<NumberStmt>>& TypeDomain::getAllNumberStmt() const {
+const std::vector<std::shared_ptr<NumberStmt> >& TypeDomain::getAllNumberStmt() const {
   return gen;
 }
 
-std::shared_ptr<NumberStmt> TypeDomain::getNumberStmt(int k) const {
+std::shared_ptr<NumberStmt> TypeDomain::getNumberStmt(size_t k) const {
   return gen[k];
 }
 
