@@ -18,12 +18,12 @@ public:
   Expr();
   virtual ~Expr();
   void addArg(std::shared_ptr<Expr> expr);
-  void setArgs(std::vector<std::shared_ptr<Expr>> a);
-  const std::vector<std::shared_ptr<Expr>>& getArgs() const ;
+  void setArgs(std::vector<std::shared_ptr<Expr> > a);
+  const std::vector<std::shared_ptr<Expr> >& getArgs() const ;
   std::shared_ptr<Expr> get(size_t k) const ;
   size_t argSize() const ;
 private:
-  std::vector<std::shared_ptr<Expr>> args;
+  std::vector<std::shared_ptr<Expr> > args;
 };
 }
 }
