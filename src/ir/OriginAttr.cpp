@@ -4,7 +4,7 @@
 
 namespace swift { namespace ir {
 
-OriginAttr::OriginAttr(const std::string& name, const Ty* ty, TypeDomain* src, size_t id)
+OriginAttr::OriginAttr(const std::string& name, const Ty* ty, std::shared_ptr<TypeDomain> src, size_t id)
   :name(name), typ(ty), src(src), id(id) {
 }
 
@@ -19,7 +19,7 @@ const Ty* OriginAttr::getTyp() const {
   return typ;
 }
 
-TypeDomain* OriginAttr::getSrc() const {
+std::shared_ptr<TypeDomain> OriginAttr::getSrc() const {
   return src;
 }
 

@@ -167,7 +167,7 @@ private:
   ir::BlogModel* model;
 
   //stack used to store local variable
-  std::map<std::string,std::stack<ir::VarDecl*> > local_var;
+  std::map<std::string,std::stack<std::shared_ptr<ir::VarDecl> > > local_var;
 
   bool isResultUsed;
 };

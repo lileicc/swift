@@ -4,7 +4,7 @@
 #include "IRConst.h"
 
 namespace swift { namespace ir {
-FunctionCall::FunctionCall(FuncDefn* refer)
+FunctionCall::FunctionCall(std::shared_ptr<FuncDefn> refer)
   :refer(refer) {
   if (refer == NULL) kind = IRConstant::NA;
   else {
@@ -14,13 +14,14 @@ FunctionCall::FunctionCall(FuncDefn* refer)
 }
 
 FunctionCall::~FunctionCall() {
+  
 }
 
 IRConstant FunctionCall::getKind() const {
   return kind;
 }
 
-FuncDefn* FunctionCall::getRefer() const {
+std::shared_ptr<FuncDefn> FunctionCall::getRefer() const {
   return refer;
 }
 

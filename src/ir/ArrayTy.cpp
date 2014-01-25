@@ -16,7 +16,7 @@ int ArrayTy::getDim() const {
   return dim;
 }
 
-std::string ArrayTy::toString() {
+std::string ArrayTy::toString() const {
   std::string ret;
   for (int i = 0; i<dim; i++)
     ret.append("std::vector<");

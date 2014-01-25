@@ -14,11 +14,12 @@
 namespace swift {
 namespace ir {
 
-TypeDomain::TypeDomain(const std::string& name)
-  :name(name), refer(NULL), prelen(0) {
+TypeDomain::TypeDomain(const std::string& name) :
+    name(name), refer(NULL), prelen(0) {
 }
 
-TypeDomain::~TypeDomain()  {
+TypeDomain::~TypeDomain() {
+  usedBy.clear();
 }
 
 const std::string& TypeDomain::getName() const {
@@ -46,11 +47,11 @@ void TypeDomain::addNumberStmt(std::shared_ptr<NumberStmt> num) {
   gen.push_back(num);
 }
 
-const std::vector<std::shared_ptr<NumberStmt>>& TypeDomain::getAllNumberStmt() const {
+const std::vector<std::shared_ptr<NumberStmt> >& TypeDomain::getAllNumberStmt() const {
   return gen;
 }
 
-std::shared_ptr<NumberStmt> TypeDomain::getNumberStmt(int k) const {
+std::shared_ptr<NumberStmt> TypeDomain::getNumberStmt(size_t k) const {
   return gen[k];
 }
 
@@ -77,13 +78,15 @@ size_t TypeDomain::getOriginSize() const {
 }
 
 int TypeDomain::getOriginID(const std::string& str) {
-  if (originID.find(str) == originID.end()) return -1;
+  if (originID.find(str) == originID.end())
+    return -1;
   return (int) originID[str];
 }
 
 OriginAttr* TypeDomain::getOrigin(const std::string& str) {
   int id = getOriginID(str);
-  if (id < 0) return NULL;
+  if (id < 0)
+    return NULL;
   return origin[id];
 }
 
@@ -99,5 +102,14 @@ const std::string& TypeDomain::getInstName(size_t k) const {
 const std::vector<std::string>& TypeDomain::getInstNames() const {
   return instName;
 }
+
+void TypeDomain::addReferFun(std::shared_ptr<FuncDefn> fn) {
+  usedBy.push_back(fn);
+}
+
+std::vector<std::shared_ptr<FuncDefn> > & TypeDomain::getReferFuns() {
+  return usedBy;
+}
+
 }
 }

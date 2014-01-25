@@ -87,6 +87,14 @@ std::string getSetterFunName(std::string name) {
 
 /**
  * given the name of a variable (can be number var, or random function)
+ * return the function name to set the value
+ */
+std::string getEnsureFunName(std::string name) {
+  return "__ensure_" + name;
+}
+
+/**
+ * given the name of a variable (can be number var, or random function)
  * return the variable name to get the number of samples for the current variable
  */
 std::string getMarkVarName(std::string name) {
@@ -235,21 +243,45 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
       new code::BinaryOperator(new code::Identifier(marknumvar),
           new code::IntegerLiteral(INIT_SAMPLE_NUM - 1),
           code::OpKind::BO_ASSIGN));
-  if (len > 0) {
-    // create the function for getting number of objects in this instance, i.e. numvar
-    code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
+  // create ensure_num function
+  code::FunctionDecl* ensureFun = code::FunctionDecl::createFunctionDecl(coreCls, getEnsureFunName(numvar), VOID_TYPE, true);
+  declared_funs[ensureFun->getName()] = ensureFun;
+  // add in the init function to call this ensure_fun
+  // :::=> ensure_numvar();
+  coreClsInit->addStmt(
+                       new code::CallExpr(new code::Identifier(ensureFun->getName())));
+  // create the function for getting number of objects in this instance, i.e. numvar
+  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
         getGetterFunName(numvar), INT_TYPE, true);
-    fun->addStmt(new code::ReturnStmt(new code::Identifier(numvar)));
-    // TODO please add the corresponding distinct name
+  declared_funs[fun->getName()] = fun;
+  // TODO please add the corresponding distinct name
 
-  }
   // handle number statement
   size_t numstlen = td->getNumberStmtSize();
   if (numstlen > 0) {
+    for (size_t k = 0 ; k < numstlen; k++) {
+      std::shared_ptr<ir::NumberStmt> numst = td->getNumberStmt(k);
+      // for the moment just translate one number statement,
+      fun->addStmt( transClause(numst->getBody(), numvar) );
+      // TODO suppoert multiple number statements
+      code::Stmt* st = new code::IfStmt(
+                                        new code::BinaryOperator(new code::Identifier(marknumvar),
+                                                                 new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+                                                                 code::OpKind::BO_EQU),
+                                        new code::ReturnStmt(new code::Identifier(marknumvar)), nullptr);
+      fun->addStmt(st);
+    }
     // TODO create functions for number statement and their likelihood
-
   }
+  // markt he markvar
+  // ::: => marknumvar = curr_loop
+  fun->addStmt(new code::BinaryOperator(new code::Identifier(marknumvar), new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+                                        code::OpKind::BO_ASSIGN));
+  fun->addStmt(new code::ReturnStmt(new code::Identifier(numvar)));
 }
+  
+  
+
 
 void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
   if (fd->isRand()) {
@@ -283,7 +315,7 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
       coreCls, getterfunname, valuetype);
   getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
-
+  declared_funs[getterfun->getName()] = getterfun;
   addFunValueRefStmt(getterfun, valuevarname, getterfun->getParams(),
       VALUE_VAR_REF_NAME);
   addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
@@ -296,14 +328,15 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)), NULL);
   getterfun->addStmt(st);
   // now should sample
-  // mark the variable first
-  st = new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
-      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
-      code::OpKind::BO_ASSIGN);
-  getterfun->addStmt(st);
   //now translate actual sampling part
   getterfun->addStmt(transClause(fd->getBody(), VALUE_VAR_REF_NAME));
   // now return the value
+  // mark the variable first
+  // ::: => markvar = cur_loop
+  st = new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
+                                new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+                                code::OpKind::BO_ASSIGN);
+  getterfun->addStmt(st);
   getterfun->addStmt(
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
   return getterfun;
@@ -322,7 +355,7 @@ code::FunctionDecl* CPPTranslator::transLikeliFun(
   code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
       coreCls, likelifunname, DOUBLE_TYPE);
   likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
-
+  declared_funs[likelifun->getName()] = likelifun;
   // now the value of this function app var is in VALUE_VAR_REF_NAME
   addFunValueRefStmt(likelifun, valuevarname, likelifun->getParams(),
       VALUE_VAR_REF_NAME);
@@ -356,6 +389,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
       coreCls, setterfunname, DOUBLE_TYPE);
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
       setterfun, fd->getArgs());
+  declared_funs[setterfun->getName()] = setterfun;
   addFunValueRefStmt(setterfun, valuevarname, args_with_value,
       VALUE_VAR_REF_NAME);
   addFunValueRefStmt(setterfun, markvarname, args_with_value,
@@ -375,7 +409,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   setterfun->addStmt(st);
   std::vector<code::Expr*> args_ref;
   for (auto a : fd->getArgs()) {
-    args_ref.push_back(new code::Identifier(a->getVar()));
+    args_ref.push_back(new code::Identifier(a->getVarName()));
   }
   st = new code::ReturnStmt(
       new code::CallExpr(new code::Identifier(likelifunname), args_ref));
@@ -407,7 +441,7 @@ code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
 
 code::ParamVarDecl* CPPTranslator::transParamVarDecl(code::DeclContext* context,
     const std::shared_ptr<ir::VarDecl> var) {
-  return new code::ParamVarDecl(context, var->getVar(),
+  return new code::ParamVarDecl(context, var->getVarName(),
       mapIRTypeToCodeType(var->getTyp()));
 }
 
@@ -480,7 +514,7 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   std::shared_ptr<ir::VarRefer> vref = std::dynamic_pointer_cast<ir::VarRefer>(
       expr);
   if (vref) {
-    return new code::Identifier(vref->getRefer()->getVar());
+    return new code::Identifier(vref->getRefer()->getVarName());
   }
 
   std::shared_ptr<ir::OprExpr> opexp = std::dynamic_pointer_cast<ir::OprExpr>(
@@ -613,14 +647,15 @@ void CPPTranslator::addFieldForFunVar(std::string varname,
     // todo support more arguments!
     std::string argtypename = params[0]->toSignature();
     std::string numvarname_for_arg = getVarOfNumType(argtypename);
-    // adding in the initialization function for value of a random variable
+    // adding in the ensure_size function for value of a random variable
     // ::: valuevar.resize(number_of_instance);
-    coreClsInit->addStmt(
-        code::CallExpr::createMethodCall(varname, VECTOR_RESIZE_METHOD_NAME,
-            std::vector<code::Expr*>(
-                { new code::Identifier(numvarname_for_arg) })));
-    // adding printing this variable in debug method
-    // ::: for (int i = 0; i < length of var; i++) print( );
+    code::FunctionDecl* ensureFun = declared_funs[getEnsureFunName(numvarname_for_arg)];
+    ensureFun->addStmt(
+                       
+                                            code::CallExpr::createMethodCall(varname, VECTOR_RESIZE_METHOD_NAME,
+                                                                             std::vector<code::Expr*>(
+                                                                                                      { new code::Identifier(numvarname_for_arg) }))
+    );
   }
   // adding in the main class a declaration of field for value of a random variable
   code::FieldDecl::createFieldDecl(coreCls, varname, valueType);

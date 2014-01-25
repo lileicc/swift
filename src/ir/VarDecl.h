@@ -12,7 +12,7 @@ public:
   virtual ~VarDecl();
 
   const Ty* getTyp() const;
-  const std::string& getVar() const;
+  const std::string& getVarName() const;
 
   virtual std::string toString() const;
   virtual std::string toSignature() const;

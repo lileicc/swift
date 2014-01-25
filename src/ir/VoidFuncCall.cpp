@@ -1,7 +1,7 @@
 #include "VoidFuncCall.h"
 
 namespace swift { namespace ir {
-VoidFuncCall::VoidFuncCall(FuncDefn* refer)
+VoidFuncCall::VoidFuncCall(std::shared_ptr<FuncDefn> refer)
   :FunctionCall(refer) {
 }
 
