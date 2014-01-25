@@ -35,15 +35,15 @@ public:
    * look up the table to find the function with the same signature
    * return NULL if not found
    */
-  ir::FuncDefn* getFunc(const std::string& name,
+  std::shared_ptr<ir::FuncDefn> getFunc(const std::string& name,
       const std::vector<std::shared_ptr<ir::VarDecl> > args);
 
   /**
   * get all the FuncDefn*
   */
-  const std::map<std::string, ir::FuncDefn*>& getAllFuncTable() const;
+  const std::map<std::string, std::shared_ptr<ir::FuncDefn> >& getAllFuncTable() const;
 private:
-  std::map<std::string, ir::FuncDefn*> funTable;
+  std::map<std::string, std::shared_ptr<ir::FuncDefn> > funTable;
 };
 
 } /* namespace fabrica */

@@ -409,7 +409,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   setterfun->addStmt(st);
   std::vector<code::Expr*> args_ref;
   for (auto a : fd->getArgs()) {
-    args_ref.push_back(new code::Identifier(a->getVar()));
+    args_ref.push_back(new code::Identifier(a->getVarName()));
   }
   st = new code::ReturnStmt(
       new code::CallExpr(new code::Identifier(likelifunname), args_ref));
@@ -441,7 +441,7 @@ code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
 
 code::ParamVarDecl* CPPTranslator::transParamVarDecl(code::DeclContext* context,
     const std::shared_ptr<ir::VarDecl> var) {
-  return new code::ParamVarDecl(context, var->getVar(),
+  return new code::ParamVarDecl(context, var->getVarName(),
       mapIRTypeToCodeType(var->getTyp()));
 }
 
@@ -514,7 +514,7 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   std::shared_ptr<ir::VarRefer> vref = std::dynamic_pointer_cast<ir::VarRefer>(
       expr);
   if (vref) {
-    return new code::Identifier(vref->getRefer()->getVar());
+    return new code::Identifier(vref->getRefer()->getVarName());
   }
 
   std::shared_ptr<ir::OprExpr> opexp = std::dynamic_pointer_cast<ir::OprExpr>(

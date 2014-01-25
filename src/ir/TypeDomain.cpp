@@ -19,6 +19,7 @@ TypeDomain::TypeDomain(const std::string& name) :
 }
 
 TypeDomain::~TypeDomain() {
+  usedBy.clear();
 }
 
 const std::string& TypeDomain::getName() const {

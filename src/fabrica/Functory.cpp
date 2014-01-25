@@ -20,13 +20,13 @@ Functory::~Functory() {
 bool Functory::addFuncDefn(const std::string& name, const ir::Ty * retTy,
     std::vector<std::shared_ptr<ir::VarDecl> > args, bool isRand) {
   if (getFunc(name, args) != NULL) return false;
-  ir::FuncDefn* fd = new ir::FuncDefn(isRand, std::string(name), retTy);
+  std::shared_ptr<ir::FuncDefn> fd = std::make_shared<ir::FuncDefn>(isRand, std::string(name), retTy);
   fd->setArgs(args);
   funTable[fd->toSignature()] = fd;
   return true;
 }
 
-ir::FuncDefn* Functory::getFunc(const std::string& name,
+std::shared_ptr<ir::FuncDefn> Functory::getFunc(const std::string& name,
     const std::vector<std::shared_ptr<ir::VarDecl> > args) {
   ir::FuncDefn fd = ir::FuncDefn(true, name, NULL);
   fd.setArgs(args);
@@ -37,7 +37,7 @@ ir::FuncDefn* Functory::getFunc(const std::string& name,
   return element->second;
 }
 
-const std::map<std::string, ir::FuncDefn*>& Functory::getAllFuncTable() const {
+const std::map<std::string, std::shared_ptr<ir::FuncDefn> >& Functory::getAllFuncTable() const {
   return funTable;
 }
 

@@ -1,5 +1,5 @@
 #pragma once
-
+#include <memory>
 #include "IRForwardDecl.h"
 #include "Ty.h"
 
@@ -7,15 +7,15 @@ namespace swift { namespace ir {
 
 class NameTy :public Ty {
 public:
-  NameTy(TypeDomain* refer);
+  NameTy(std::shared_ptr<TypeDomain> refer);
   virtual ~NameTy();
 
-  TypeDomain* getRefer() const;
+  std::shared_ptr<TypeDomain> getRefer() const;
 
   virtual std::string toString() const;
 
 private:
-  TypeDomain* refer;
+  std::shared_ptr<TypeDomain> refer;
 };
 
 }

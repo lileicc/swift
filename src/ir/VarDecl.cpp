@@ -16,7 +16,7 @@ const Ty* VarDecl::getTyp() const {
   return typ;
 }
 
-const std::string& VarDecl::getVar() const {
+const std::string& VarDecl::getVarName() const {
   return var;
 }
 

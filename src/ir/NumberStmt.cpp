@@ -3,7 +3,7 @@
 #include "VarDecl.h"
 
 namespace swift { namespace ir {
-NumberStmt::NumberStmt(TypeDomain* refer)
+NumberStmt::NumberStmt(std::shared_ptr<TypeDomain> refer)
   :refer(refer) {
 }
 
@@ -26,7 +26,7 @@ const std::shared_ptr<VarDecl>& NumberStmt::getVar(int k) const {
   return var[k];
 }
 
-TypeDomain* NumberStmt::getRefer() const {
+std::shared_ptr<TypeDomain> NumberStmt::getRefer() const {
   return refer;
 }
 
