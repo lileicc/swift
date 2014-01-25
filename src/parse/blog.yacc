@@ -10,6 +10,7 @@
 #include "../absyn/ArrayExpr.h"
 #include "../absyn/BoolLiteral.h"
 #include "../absyn/BlogProgram.h"
+#include "../absyn/CardinalityExpr.h"
 #include "../absyn/CondSet.h"
 #include "../absyn/Decl.h"
 #include "../absyn/DistinctDecl.h"
@@ -26,7 +27,6 @@
 #include "../absyn/MapExpr.h"
 #include "../absyn/NullLiteral.h"
 #include "../absyn/NumStDecl.h"
-#include "../absyn/NumStRef.h"
 #include "../absyn/OpExpr.h"
 #include "../absyn/OriginDecl.h"
 #include "../absyn/QuantExpr.h"
@@ -87,6 +87,7 @@ BlogProgram* parse(const char* inp) {
   class ArrayExpr* arrayexp;
   class BoolLiteral* boollit;
   class BlogProgram* bprog;
+  class CardinalityExpr* cardexp;
   class CondSet* cset;
   class Decl* dec;
   class DistinctDecl* distdec;
@@ -103,7 +104,6 @@ BlogProgram* parse(const char* inp) {
   class MapExpr* mapexp;
   class NullLiteral* nullit;
   class NumStDecl* numstdec;
-  class NumStRef* numref;
   class OpExpr* opexp;
   class OriginDecl* origdec;
   class QuantExpr* quantexp;
@@ -158,7 +158,7 @@ BlogProgram* parse(const char* inp) {
   quantified_formula, distribution_expr,
   function_call, list_construct_expression, symbol_expr,
   elseif_list;
-%type <numref> number_expr;
+%type <cardexp> number_expr;
 %type <mapexp> map_construct_expression;
 %type <exp> dependency_statement_body;
 %type <setexp> set_expr;
@@ -607,13 +607,12 @@ expression_pair_list:
       //$$->addMap($1, $3);
     }
   ;
-  
-//TODO: NumberExpr  
+
 number_expr:
-    NUMSIGN set_expr {$$ = new NumStRef(curr_line, curr_col, (Expr*)$2); }
+    NUMSIGN set_expr {$$ = new CardinalityExpr(curr_line, curr_col, (Expr*)$2); }
   | NUMSIGN type { 
       VarDecl* var = new VarDecl(curr_line, curr_col, *$2, Symbol("a"));
-      $$ = new NumStRef(curr_line, curr_col, new CondSet(curr_line, curr_col, *var, new BoolLiteral(curr_line, curr_col, true)));
+      $$ = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, *var, new BoolLiteral(curr_line, curr_col, true)));
   }
   
 origin_func_decl:

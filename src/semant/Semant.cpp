@@ -229,8 +229,6 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
     return (ret = transExpr((absyn::Literal*) expr));
   if (dynamic_cast<absyn::ArrayExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::ArrayExpr*) expr));
-  if (dynamic_cast<absyn::NumStRef*>(expr) != nullptr)
-    return transExpr((absyn::NumStRef*) expr);
   error(expr->line, expr->col, "Semant Error! Illegal Expression!");
   return ret;
 }
