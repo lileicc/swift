@@ -3,7 +3,7 @@
 #include "TypeDomain.h"
 
 namespace swift { namespace ir {
-NameTy::NameTy(TypeDomain* refer)
+NameTy::NameTy(std::shared_ptr<TypeDomain> refer)
   :Ty(IRConstant::NAMETY), refer(refer) {
   refer->setRefer(this);
 }
@@ -11,7 +11,7 @@ NameTy::NameTy(TypeDomain* refer)
 NameTy::~NameTy() {
 }
 
-TypeDomain* NameTy::getRefer() const {
+std::shared_ptr<TypeDomain> NameTy::getRefer() const {
   return refer;
 }
 

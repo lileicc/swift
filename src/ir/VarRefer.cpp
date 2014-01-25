@@ -2,14 +2,14 @@
 #include "VarDecl.h"
 
 namespace swift { namespace ir {
-VarRefer::VarRefer(VarDecl* refer)
+VarRefer::VarRefer(std::shared_ptr<VarDecl> refer)
   :refer(refer) {
 }
 
 VarRefer::~VarRefer() {
 }
 
-VarDecl* VarRefer::getRefer() const {
+std::shared_ptr<VarDecl> VarRefer::getRefer() const {
   return refer;
 }
 

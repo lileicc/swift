@@ -45,7 +45,7 @@ TypeFactory::~TypeFactory() {
 bool TypeFactory::addNameTy(const std::string& name) {
   if (tyTable.find(name) != tyTable.end())
     return false;
-  auto ptr = (new ir::TypeDomain(name));
+  auto ptr = std::make_shared<ir::TypeDomain>(name);
   auto ty = new ir::NameTy(ptr);
   ptr->setRefer(ty);
   tyTable[name] = ty;
@@ -63,7 +63,7 @@ bool TypeFactory::addInstSymbol(const ir::NameTy* typ,
     const std::string& name) {
   if (instanceTable.find(name) != instanceTable.end())
     return false;
-  ir::TypeDomain* tydo = typ->getRefer();
+  auto tydo = typ->getRefer();
   size_t sz = tydo->getPreLen();
   instanceTable[name] = new ir::InstSymbol(tydo, sz);
   tydo->setPreLen(sz+1);
@@ -110,8 +110,8 @@ bool TypeFactory::addOriginAttr(const ir::NameTy * srcty,
   if (getOriginAttr(srcty, name) != NULL) {
     return false;
   }
-  ir::TypeDomain* td = srcty->getRefer();
-  ir::OriginAttr* oriattr = new ir::OriginAttr(name, retTy, td, td->getOriginSize());
+  auto td = srcty->getRefer();
+  auto oriattr = new ir::OriginAttr(name, retTy, td, td->getOriginSize());
   td->addOrigin(oriattr);
   attrTable[ constructAttrSign(srcty, name) ] = oriattr;
   return true;

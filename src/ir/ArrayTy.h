@@ -16,7 +16,7 @@ public:
   const Ty* getBase() const;
   int getDim() const ;
   
-  virtual std::string toString();
+  virtual std::string toString() const;
 
 private:
   const Ty* base;

@@ -587,7 +587,7 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
     error(expr->line, expr->col, "Variable <"+expr->getVar().getVar().getValue()+"> in Quant Form cannot be a type name!");
   }
   // Add Local Variable
-  local_var[ptr->getVar()->getVar()].push(ptr->getVar().get());
+  local_var[ptr->getVar()->getVarName()].push(ptr->getVar());
 
   ptr->addArg(transExpr(expr->getCond()));
   if (ptr->get(0)->getTyp() != lookupTy(ir::IRConstString::BOOL)) {
@@ -595,7 +595,7 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   }
 
   // Remove Local Variable
-  auto it = local_var.find(ptr->getVar()->getVar());
+  auto it = local_var.find(ptr->getVar()->getVarName());
   it->second.pop();
   if (it->second.empty()) local_var.erase(it);
   return ptr;
@@ -606,7 +606,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
   std::string var = expr->getVar().getValue();
   if (local_var.count(var) != 0) {
     // Local Variable
-    std::shared_ptr<ir::VarRefer> ret(new ir::VarRefer(local_var[var].top()));
+    std::shared_ptr<ir::VarRefer> ret = std::make_shared<ir::VarRefer>(local_var[var].top());
     ret->setTyp(ret->getRefer()->getTyp());
     return ret;
   }
@@ -615,7 +615,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
     // Void Function Call
     // TODO: To Change to Void Function Call
     //std::shared_ptr<ir::VoidFuncCall> ret(new ir::VoidFuncCall(func));
-    auto ret = std::make_shared<ir::FunctionCall>(ir::FunctionCall(func));
+    auto ret = std::make_shared<ir::FunctionCall>(func);
     ret->setTyp(func->getRetTyp());
     return ret;
   }
@@ -672,12 +672,12 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
   std::shared_ptr<ir::VarDecl> var = transVarDecl(expr->getVar());
 
   // Add Local Variable
-  if (var->getTyp() != NULL && var->getVar().size() > 0 && expr->getCond() != NULL)
-    local_var[var->getVar()].push(var.get());
+  if (var->getTyp() != NULL && var->getVarName().size() > 0 && expr->getCond() != NULL)
+    local_var[var->getVarName()].push(var);
   std::shared_ptr<ir::Expr> e = (expr->getCond() == NULL ? nullptr : transExpr(expr->getCond()));
   // Remove Local Variable
-  if (var->getTyp() != NULL && var->getVar().size() > 0 && expr->getCond() != NULL) {
-    auto it = local_var.find(var->getVar());
+  if (var->getTyp() != NULL && var->getVarName().size() > 0 && expr->getCond() != NULL) {
+    auto it = local_var.find(var->getVarName());
     it->second.pop();
     if (it->second.empty()) local_var.erase(it);
   }
@@ -790,19 +790,28 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
   for (size_t i = 0; i < fd->argSize(); i++) {
     vds.push_back(transVarDecl(fd->getArg(i)));
   }
-  ir::FuncDefn * fun = functory.getFunc(name, vds);
+  std::shared_ptr<ir::FuncDefn> fun = functory.getFunc(name, vds);
   if (fun != NULL) {
     // Add Local Variables
     for (auto v : fun->getArgs())
-      local_var[v->getVar()].push(v.get());
+      local_var[v->getVarName()].push(v);
 
     fun->setBody( transClause(fd->getExpr()) );
     if (fun->getBody()->getTyp() == NULL)
       fun->getBody()->setTyp(rettyp);
+    
+    // if it is random, then need to add the link from arg --> thisfunction
+    if (fun->isRand()) {
+      for (auto arg : fun->getArgs()) {
+        auto nty = dynamic_cast<const ir::NameTy*>(arg->getTyp());
+        if (nty)
+          nty->getRefer()->addReferFun(std::shared_ptr<ir::FuncDefn>(fun));
+      }
+    }
 
     // Remove Local Variables
     for (auto v : fun->getArgs()) {
-      auto it = local_var.find(v->getVar());
+      auto it = local_var.find(v->getVarName());
       it->second.pop();
       if (it->second.empty())
         local_var.erase(it);
@@ -852,11 +861,11 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
 
   // Add Local Variable
   for (auto v : numst->getAllVars())
-    local_var[v->getVar()].push(v.get());
+    local_var[v->getVarName()].push(v);
   numst->setBody(transClause(nd->getExpr()));
 
   for (auto v : numst->getAllVars()) {
-    auto it = local_var.find(v->getVar());
+    auto it = local_var.find(v->getVarName());
     it->second.pop();
     if (it->second.empty()) local_var.erase(it);
   }
