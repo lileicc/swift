@@ -14,11 +14,11 @@
 namespace swift {
 namespace ir {
 
-TypeDomain::TypeDomain(const std::string& name)
-  :name(name), refer(NULL), prelen(0) {
+TypeDomain::TypeDomain(const std::string& name) :
+    name(name), refer(NULL), prelen(0) {
 }
 
-TypeDomain::~TypeDomain()  {
+TypeDomain::~TypeDomain() {
 }
 
 const std::string& TypeDomain::getName() const {
@@ -77,13 +77,15 @@ size_t TypeDomain::getOriginSize() const {
 }
 
 int TypeDomain::getOriginID(const std::string& str) {
-  if (originID.find(str) == originID.end()) return -1;
+  if (originID.find(str) == originID.end())
+    return -1;
   return (int) originID[str];
 }
 
 OriginAttr* TypeDomain::getOrigin(const std::string& str) {
   int id = getOriginID(str);
-  if (id < 0) return NULL;
+  if (id < 0)
+    return NULL;
   return origin[id];
 }
 
@@ -99,5 +101,14 @@ const std::string& TypeDomain::getInstName(size_t k) const {
 const std::vector<std::string>& TypeDomain::getInstNames() const {
   return instName;
 }
+
+void TypeDomain::addReferFun(std::shared_ptr<FuncDefn> fn) {
+  usedBy.push_back(fn);
+}
+
+std::vector<std::shared_ptr<FuncDefn> > & TypeDomain::getReferFuns() {
+  return usedBy;
+}
+
 }
 }

@@ -30,6 +30,8 @@ private:
 
   code::FunctionDecl* coreClsDebug; // debug function for main class
   static const std::string MAIN_DEBUG_METHOD_NAME;
+  // a map from function name (in target code) to FunctionDecl*
+  std::map<std::string, code::FunctionDecl*> declared_funs;
 
   code::FunctionDecl* mainFun; //main function
   code::FunctionDecl* coreClsPrint; // print function for answers

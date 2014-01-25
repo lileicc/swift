@@ -11,12 +11,9 @@ namespace swift {
 namespace fabrica {
 
 Functory::Functory() {
-  // TODO Auto-generated constructor stub
-
 }
 
 Functory::~Functory() {
-  // TODO Auto-generated destructor stub
   // Note: We DO NOT Need to delete all the pointers to FuncDefn here!
 }
 

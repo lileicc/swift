@@ -38,6 +38,8 @@ public:
   // this must be signed int, since it can be -1 (not found)
   int getOriginID(const std::string& str);
   OriginAttr* getOrigin(const std::string& str);
+  void addReferFun(std::shared_ptr<FuncDefn> fn);
+  std::vector<std::shared_ptr<FuncDefn> > & getReferFuns();
 private:
   std::string name;
   std::vector<std::shared_ptr<NumberStmt>> gen;
@@ -45,7 +47,7 @@ private:
   std::vector<OriginAttr*> origin;
   const NameTy* refer;
   std::vector<std::string> instName;
-
+  std::vector<std::shared_ptr<FuncDefn> > usedBy; //all random functions that use this type domain.
   std::map<std::string,size_t> originID;
 };
 

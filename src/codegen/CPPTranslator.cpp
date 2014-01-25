@@ -243,11 +243,17 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
       new code::BinaryOperator(new code::Identifier(marknumvar),
           new code::IntegerLiteral(INIT_SAMPLE_NUM - 1),
           code::OpKind::BO_ASSIGN));
-
-    // create the function for getting number of objects in this instance, i.e. numvar
+  // create ensure_num function
+  code::FunctionDecl* ensureFun = code::FunctionDecl::createFunctionDecl(coreCls, getEnsureFunName(numvar), VOID_TYPE, true);
+  declared_funs[ensureFun->getName()] = ensureFun;
+  // add in the init function to call this ensure_fun
+  // :::=> ensure_numvar();
+  coreClsInit->addStmt(
+                       new code::CallExpr(new code::Identifier(ensureFun->getName())));
+  // create the function for getting number of objects in this instance, i.e. numvar
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
         getGetterFunName(numvar), INT_TYPE, true);
-
+  declared_funs[fun->getName()] = fun;
   // TODO please add the corresponding distinct name
 
   // handle number statement
@@ -271,12 +277,6 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   // ::: => marknumvar = curr_loop
   fun->addStmt(new code::BinaryOperator(new code::Identifier(marknumvar), new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
                                         code::OpKind::BO_ASSIGN));
-  
-  code::FunctionDecl* ensureFun = code::FunctionDecl::createFunctionDecl(, ,);
-  
-  // TODO create ensure_size function
-  ////////////////////////// LEI Li stops here, to continue
-  
   fun->addStmt(new code::ReturnStmt(new code::Identifier(numvar)));
 }
   
@@ -315,6 +315,7 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
       coreCls, getterfunname, valuetype);
   getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
+  declared_funs[getterfun->getName()] = getterfun;
   addFunValueRefStmt(getterfun, valuevarname, getterfun->getParams(),
       VALUE_VAR_REF_NAME);
   addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
@@ -354,7 +355,7 @@ code::FunctionDecl* CPPTranslator::transLikeliFun(
   code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
       coreCls, likelifunname, DOUBLE_TYPE);
   likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
-
+  declared_funs[likelifun->getName()] = likelifun;
   // now the value of this function app var is in VALUE_VAR_REF_NAME
   addFunValueRefStmt(likelifun, valuevarname, likelifun->getParams(),
       VALUE_VAR_REF_NAME);
@@ -388,6 +389,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
       coreCls, setterfunname, DOUBLE_TYPE);
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
       setterfun, fd->getArgs());
+  declared_funs[setterfun->getName()] = setterfun;
   addFunValueRefStmt(setterfun, valuevarname, args_with_value,
       VALUE_VAR_REF_NAME);
   addFunValueRefStmt(setterfun, markvarname, args_with_value,
@@ -645,14 +647,15 @@ void CPPTranslator::addFieldForFunVar(std::string varname,
     // todo support more arguments!
     std::string argtypename = params[0]->toSignature();
     std::string numvarname_for_arg = getVarOfNumType(argtypename);
-    // adding in the initialization function for value of a random variable
+    // adding in the ensure_size function for value of a random variable
     // ::: valuevar.resize(number_of_instance);
-    coreClsInit->addStmt(
-        code::CallExpr::createMethodCall(varname, VECTOR_RESIZE_METHOD_NAME,
-            std::vector<code::Expr*>(
-                { new code::Identifier(numvarname_for_arg) })));
-    // adding printing this variable in debug method
-    // ::: for (int i = 0; i < length of var; i++) print( );
+    code::FunctionDecl* ensureFun = declared_funs[getEnsureFunName(numvarname_for_arg)];
+    ensureFun->addStmt(
+                       
+                                            code::CallExpr::createMethodCall(varname, VECTOR_RESIZE_METHOD_NAME,
+                                                                             std::vector<code::Expr*>(
+                                                                                                      { new code::Identifier(numvarname_for_arg) }))
+    );
   }
   // adding in the main class a declaration of field for value of a random variable
   code::FieldDecl::createFieldDecl(coreCls, varname, valueType);

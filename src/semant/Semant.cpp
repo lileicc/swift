@@ -799,6 +799,15 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
     fun->setBody( transClause(fd->getExpr()) );
     if (fun->getBody()->getTyp() == NULL)
       fun->getBody()->setTyp(rettyp);
+    
+    // if it is random, then need to add the link from arg --> thisfunction
+    if (fun->isRand()) {
+      for (auto arg : fun->getArgs()) {
+        auto nty = dynamic_cast<const ir::NameTy*>(arg->getTyp());
+        if (nty)
+          nty->getRefer()->addReferFun(std::shared_ptr<ir::FuncDefn>(fun));
+      }
+    }
 
     // Remove Local Variables
     for (auto v : fun->getArgs()) {
