@@ -209,26 +209,28 @@ void Semant::transOriginDecl(absyn::OriginDecl* od) {
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
   auto ret = std::make_shared<ir::Expr>();
-  if (dynamic_cast<absyn::OpExpr*>(expr) != NULL)
+  if (dynamic_cast<absyn::OpExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::OpExpr*) expr));
-  if (dynamic_cast<absyn::FuncApp*>(expr) != NULL)
+  if (dynamic_cast<absyn::FuncApp*>(expr) != nullptr)
     return (ret = transExpr((absyn::FuncApp*) expr));
-  if (dynamic_cast<absyn::DistrExpr*>(expr) != NULL)
+  if (dynamic_cast<absyn::DistrExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::DistrExpr*) expr));
-  if (dynamic_cast<absyn::MapExpr*>(expr) != NULL)
+  if (dynamic_cast<absyn::MapExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::MapExpr*) expr));
-  if (dynamic_cast<absyn::CardinalityExpr*>(expr) != NULL)
+  if (dynamic_cast<absyn::CardinalityExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::CardinalityExpr*) expr));
-  if (dynamic_cast<absyn::QuantExpr*>(expr) != NULL)
+  if (dynamic_cast<absyn::QuantExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::QuantExpr*) expr));
-  if (dynamic_cast<absyn::VarRef*>(expr) != NULL)
+  if (dynamic_cast<absyn::VarRef*>(expr) != nullptr)
     return (ret = transExpr((absyn::VarRef*) expr));
-  if (dynamic_cast<absyn::SetExpr*>(expr) != NULL)
+  if (dynamic_cast<absyn::SetExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::SetExpr*) expr));
-  if (dynamic_cast<absyn::Literal*>(expr) != NULL)
+  if (dynamic_cast<absyn::Literal*>(expr) != nullptr)
     return (ret = transExpr((absyn::Literal*) expr));
-  if (dynamic_cast<absyn::ArrayExpr*>(expr) != NULL)
+  if (dynamic_cast<absyn::ArrayExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::ArrayExpr*) expr));
+  if (dynamic_cast<absyn::NumStRef*>(expr) != nullptr)
+    return transExpr((absyn::NumStRef*) expr);
   error(expr->line, expr->col, "Semant Error! Illegal Expression!");
   return ret;
 }

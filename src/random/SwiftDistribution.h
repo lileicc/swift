@@ -17,7 +17,7 @@ class SwiftDistribution {
 public:
   SwiftDistribution() {};
   virtual ~SwiftDistribution() {};
-
+  
   virtual T gen() = 0; // generate a sample from this distribution
   virtual double likeli(T x) = 0; // calculate the likelihood
   virtual double loglikeli(T x) = 0; // calculate the log-likelihood
