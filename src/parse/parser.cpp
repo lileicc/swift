@@ -1557,8 +1557,8 @@ break;
 case 112:
 #line 613 "blog.yacc"
 	{ 
-      VarDecl* var = new VarDecl(curr_line, curr_col, *yystack.l_mark[0].typ, Symbol("a"));
-      yyval.cardexp = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, *var, new BoolLiteral(curr_line, curr_col, true)));
+      VarDecl var(curr_line, curr_col, *yystack.l_mark[0].typ);
+      yyval.cardexp = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, var));
   }
 break;
 case 113:

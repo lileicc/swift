@@ -24,7 +24,6 @@ public:
   void print(FILE *file, int indent);
 private:
   VarDecl var;
-  Expr* cond;
 };
 
 }

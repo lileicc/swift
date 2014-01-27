@@ -48,7 +48,8 @@ enum class OpKind {
   BO_SMUL,      // self multiply
   BO_SDIV,      // self divide
   BO_SMOD,      // self module
-  BO_SCOPE      // scope operator, e.g. std::vector
+  BO_SCOPE,     // scope operator, e.g. std::vector
+  BO_COMMA      // comma operator, i.e. ","
 };
 
 class BinaryOperator: public swift::code::Expr {

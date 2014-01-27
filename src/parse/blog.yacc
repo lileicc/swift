@@ -611,8 +611,8 @@ expression_pair_list:
 number_expr:
     NUMSIGN set_expr {$$ = new CardinalityExpr(curr_line, curr_col, (Expr*)$2); }
   | NUMSIGN type { 
-      VarDecl* var = new VarDecl(curr_line, curr_col, *$2, Symbol("a"));
-      $$ = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, *var, new BoolLiteral(curr_line, curr_col, true)));
+      VarDecl var(curr_line, curr_col, *$2);
+      $$ = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, var));
   }
   
 origin_func_decl:

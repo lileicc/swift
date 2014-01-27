@@ -17,7 +17,7 @@ Poisson::Poisson() {
 Poisson::~Poisson() {
 }
 
-void Poisson::init(double lambda){
+void Poisson::init(double lambda) {
   this->lambda = lambda;
 }
 
@@ -25,5 +25,13 @@ int Poisson::gen() {
   return dist(engine);
 }
 
+double Poisson::likeli(int x) {
+  return std::exp(loglikeli(x));
+}
+
+double Poisson::loglikeli(int x) {
+  //// TODO CHANGE THIS
+  return (x >= 0) ? 1 : - INFINITY;
+}
 } /* namespace random */
 } /* namespace swift */

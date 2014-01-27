@@ -1,5 +1,5 @@
 /*
- * Poisson.h
+ * UniformInt.h
  *
  *  Created on: Jan 24, 2014
  *      Author: leili
@@ -12,17 +12,18 @@
 namespace swift {
 namespace random {
 
-class Poisson: public swift::random::SwiftDistribution<int> {
+class UniformInt: public swift::random::SwiftDistribution<int> {
 public:
-  Poisson();
-  virtual ~Poisson();
-  void init(double lambda);
+  UniformInt();
+  virtual ~UniformInt();
+  void init(int a, int b);
   int gen();
   double likeli(int x);
   double loglikeli(int x);
 private:
-  std::poisson_distribution<int> dist;
-  double lambda;
+  std::uniform_int_distribution<int> dist;
+  int a;
+  int b;
 };
 
 } /* namespace random */

@@ -18,6 +18,7 @@
 namespace swift {
 namespace absyn {
 
+// TODO, VarDecl needs not be Expr
 class VarDecl: public Expr {
   Ty typ;
   Symbol var;

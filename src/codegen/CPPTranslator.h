@@ -103,8 +103,11 @@ private:
   /**
    * translate the operation expression 
    */
-  code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr);
+  code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr, std::vector<code::Expr*> args);
+  
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
+  
+  code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp);
   /**
    * translate the evidence in obs statement, the resulting statement is added
    * to the declaration context
@@ -139,6 +142,7 @@ private:
    */
   code::Expr* transDistribution(std::shared_ptr<ir::Distribution> dist,
       std::vector<code::Expr*> args, std::string valuevar = std::string());
+  
   /**
    * translate the function call expression
    */
@@ -244,6 +248,9 @@ private:
    * function name for the distribution calculating the log-likelihood of a sample
    */
   static const std::string DISTRIBUTION_LOGLIKELI_FUN_NAME;
+  
+  // name of the uniform int distribution, i.e. UniformInt
+  static const std::string UNIFORM_INT_DISTRIBUTION_NAME;
 
   /**
    * method name for vector.resize()
@@ -257,6 +264,9 @@ private:
    * initial value set to mark_var (default 1)
    */
   static const int INIT_SAMPLE_NUM;
+  
+  // value for null
+  static const int NULLSYMBOL_VALUE;
   
   /**
    * how many samples to take in total

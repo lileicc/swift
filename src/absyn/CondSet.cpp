@@ -10,12 +10,12 @@
 namespace swift {
 namespace absyn {
 CondSet::CondSet(int l, int c, VarDecl var, Expr* cond) :
-    SetExpr(l, c), var(var), cond(cond) {
+    SetExpr(l, c), var(var) {
+  if (cond != nullptr)
+    this->add(cond);
 }
 
 CondSet::~CondSet() {
-  if (cond != NULL)
-    delete cond;
 }
 
 VarDecl& CondSet::getVar() {
@@ -23,7 +23,7 @@ VarDecl& CondSet::getVar() {
 }
 
 Expr* CondSet::getCond() {
-  return cond;
+  return size() > 0 ? get(0) : nullptr;
 }
 
 // For Debugging Use
@@ -31,9 +31,9 @@ void CondSet::print(FILE* file, int indent) {
   fprintf(file, "%*s(CondSet:\n", indent, "");
   fprintf(file, "%*s:var\n", indent + 2, "");
   var.print(file, indent + 4);
-  if (cond != NULL) {
+  if (getCond() != NULL) {
     fprintf(file, "%*s:cond\n", indent + 2, "");
-    cond->print(file, indent + 4);
+    getCond()->print(file, indent + 4);
   }
   fprintf(file, "%*s)\n", indent, "");
 }
