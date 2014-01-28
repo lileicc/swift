@@ -18,7 +18,7 @@ private:
   std::map<T, double> table;
   const bool isLogarithm;
 public:
-  Hist(bool isLogarithm=false) : isLogarithm(isLogarithm) {};
+  Hist(bool isLogarithm=true) : isLogarithm(isLogarithm) {};
   virtual ~Hist() {};
   
   void add(T element, double weight) {

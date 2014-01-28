@@ -10,7 +10,7 @@
 
 namespace swift {
 namespace codegen {
-const bool CPPTranslator::COMPUTE_LIKELIHOOD_IN_LOG = false;
+const bool CPPTranslator::COMPUTE_LIKELIHOOD_IN_LOG = true;
 const std::string CPPTranslator::VECTOR_CLASS_NAME = "vector";
 const std::string CPPTranslator::VECTOR_RESIZE_METHOD_NAME = "resize";
 const code::Type CPPTranslator::INT_TYPE("int");
