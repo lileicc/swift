@@ -17,7 +17,7 @@ class SwiftDistribution {
 public:
   SwiftDistribution() {};
   virtual ~SwiftDistribution() {};
-
+  
   virtual T gen() = 0; // generate a sample from this distribution
   virtual double likeli(T x) = 0; // calculate the likelihood
   virtual double loglikeli(T x) = 0; // calculate the log-likelihood
@@ -25,9 +25,10 @@ protected:
   static std::default_random_engine engine;
 };
 
-  
 template <typename T>
-  std::default_random_engine SwiftDistribution<T>::engine = std::default_random_engine((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
+  std::default_random_engine SwiftDistribution<T>::engine(0);
+//template <typename T>
+//std::default_random_engine SwiftDistribution<T>::engine = std::default_random_engine((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
   
   
 } /* namespace random */

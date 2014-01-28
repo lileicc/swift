@@ -5,7 +5,7 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
-#define YYPATCH 20140101
+#define YYPATCH 20130925
 
 #define YYEMPTY        (-1)
 #define yyclearin      (yychar = YYEMPTY)
@@ -28,6 +28,7 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #include "../absyn/ArrayExpr.h"
 #include "../absyn/BoolLiteral.h"
 #include "../absyn/BlogProgram.h"
+#include "../absyn/CardinalityExpr.h"
 #include "../absyn/CondSet.h"
 #include "../absyn/Decl.h"
 #include "../absyn/DistinctDecl.h"
@@ -44,7 +45,6 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #include "../absyn/MapExpr.h"
 #include "../absyn/NullLiteral.h"
 #include "../absyn/NumStDecl.h"
-#include "../absyn/NumStRef.h"
 #include "../absyn/OpExpr.h"
 #include "../absyn/OriginDecl.h"
 #include "../absyn/QuantExpr.h"
@@ -110,6 +110,7 @@ typedef union {
   class ArrayExpr* arrayexp;
   class BoolLiteral* boollit;
   class BlogProgram* bprog;
+  class CardinalityExpr* cardexp;
   class CondSet* cset;
   class Decl* dec;
   class DistinctDecl* distdec;
@@ -126,7 +127,6 @@ typedef union {
   class MapExpr* mapexp;
   class NullLiteral* nullit;
   class NumStDecl* numstdec;
-  class NumStRef* numref;
   class OpExpr* opexp;
   class OriginDecl* origdec;
   class QuantExpr* quantexp;
@@ -603,7 +603,6 @@ static const short yycheck[] = {                          6,
 #define YYDEBUG 0
 #endif
 #define YYMAXTOKEN 316
-#define YYTRANSLATE(a) ((a) > YYMAXTOKEN ? (YYMAXTOKEN + 1) : (a))
 #if YYDEBUG
 static const char *yyname[] = {
 
@@ -621,7 +620,7 @@ static const char *yyname[] = {
 "POWER_","MINUS_","LST","LT_","GT_","LEQ_","GEQ_","EQEQ_","NEQ_","EQ_",
 "DISTRIB","NOT_","AND_","OR_","DOUBLERIGHTARROW","COMMA","SEMI","COLON","DOT",
 "NUMSIGN","RIGHTARROW","LPAREN","RPAREN","LBRACE","RBRACE","LBRACKET",
-"RBRACKET","illegal-symbol",
+"RBRACKET",
 };
 static const char *yyrule[] = {
 "$accept : program",
@@ -789,7 +788,7 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 699 "blog.yacc"
+#line 698 "blog.yacc"
 
 
 
@@ -896,7 +895,9 @@ yyloop:
 #if YYDEBUG
         if (yydebug)
         {
-            yys = yyname[YYTRANSLATE(yychar)];
+            yys = 0;
+            if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
+            if (!yys) yys = "illegal-symbol";
             printf("%sdebug: state %d, reading %d (%s)\n",
                     YYPREFIX, yystate, yychar, yys);
         }
@@ -978,7 +979,9 @@ yyinrecovery:
 #if YYDEBUG
         if (yydebug)
         {
-            yys = yyname[YYTRANSLATE(yychar)];
+            yys = 0;
+            if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
+            if (!yys) yys = "illegal-symbol";
             printf("%sdebug: state %d, error recovery discards token %d (%s)\n",
                     YYPREFIX, yystate, yychar, yys);
         }
@@ -1324,7 +1327,7 @@ case 65:
 break;
 case 66:
 #line 443 "blog.yacc"
-	{ yyval.exp = yystack.l_mark[0].numref; }
+	{ yyval.exp = yystack.l_mark[0].cardexp; }
 break;
 case 67:
 #line 444 "blog.yacc"
@@ -1548,30 +1551,30 @@ case 110:
     }
 break;
 case 111:
-#line 613 "blog.yacc"
-	{yyval.numref = new NumStRef(curr_line, curr_col, (Expr*)yystack.l_mark[0].setexp); }
+#line 612 "blog.yacc"
+	{yyval.cardexp = new CardinalityExpr(curr_line, curr_col, (Expr*)yystack.l_mark[0].setexp); }
 break;
 case 112:
-#line 614 "blog.yacc"
+#line 613 "blog.yacc"
 	{ 
-      VarDecl* var = new VarDecl(curr_line, curr_col, *yystack.l_mark[0].typ, Symbol("a"));
-      yyval.numref = new NumStRef(curr_line, curr_col, new CondSet(curr_line, curr_col, *var, new BoolLiteral(curr_line, curr_col, true)));
+      VarDecl var(curr_line, curr_col, *yystack.l_mark[0].typ);
+      yyval.cardexp = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, var));
   }
 break;
 case 113:
-#line 621 "blog.yacc"
+#line 620 "blog.yacc"
 	{ yyval.origdec = new OriginDecl(curr_line, curr_col, yystack.l_mark[-5].typ->getTyp(), Symbol(yystack.l_mark[-4].sval->getValue()), yystack.l_mark[-2].typ->getTyp());  }
 break;
 case 114:
-#line 625 "blog.yacc"
+#line 624 "blog.yacc"
 	{yyval.setexp = yystack.l_mark[0].setexp; }
 break;
 case 115:
-#line 626 "blog.yacc"
+#line 625 "blog.yacc"
 	{yyval.setexp = yystack.l_mark[0].setexp; }
 break;
 case 116:
-#line 632 "blog.yacc"
+#line 631 "blog.yacc"
 	{
       yyval.setexp = new ListSet(curr_line, curr_col);
       for(size_t i = 0; i < yystack.l_mark[-1].explst->size(); i++){
@@ -1583,7 +1586,7 @@ case 116:
     }
 break;
 case 117:
-#line 646 "blog.yacc"
+#line 645 "blog.yacc"
 	{ 
       yyval.setexp = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *yystack.l_mark[-4].typ, Symbol(yystack.l_mark[-3].sval->getValue())), yystack.l_mark[-1].exp);
       /*$$ = new CondSet(curr_line, curr_col, NULL);*/
@@ -1591,50 +1594,50 @@ case 117:
     }
 break;
 case 118:
-#line 652 "blog.yacc"
+#line 651 "blog.yacc"
 	{ 
       yyval.setexp = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *yystack.l_mark[-2].typ, Symbol(yystack.l_mark[-1].sval->getValue())));
     }
 break;
 case 119:
-#line 661 "blog.yacc"
+#line 660 "blog.yacc"
 	{ }
 break;
 case 120:
-#line 663 "blog.yacc"
+#line 662 "blog.yacc"
 	{ }
 break;
 case 121:
-#line 669 "blog.yacc"
+#line 668 "blog.yacc"
 	{yyval.stmt = yystack.l_mark[-1].stmt; }
 break;
 case 122:
-#line 672 "blog.yacc"
+#line 671 "blog.yacc"
 	{yyval.stmt = yystack.l_mark[0].stmt; }
 break;
 case 123:
-#line 673 "blog.yacc"
+#line 672 "blog.yacc"
 	{yyval.stmt = yystack.l_mark[0].stmt; }
 break;
 case 124:
-#line 679 "blog.yacc"
+#line 678 "blog.yacc"
 	{
     yyval.stmt = new Evidence(curr_line, curr_col, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); 
   }
 break;
 case 125:
-#line 687 "blog.yacc"
+#line 686 "blog.yacc"
 	{ yyval.stmt = new Evidence(curr_line, curr_col, yystack.l_mark[-2].setexp, yystack.l_mark[0].setexp); }
 break;
 case 126:
-#line 691 "blog.yacc"
+#line 690 "blog.yacc"
 	{yyval.stmt = yystack.l_mark[-1].stmt; }
 break;
 case 127:
-#line 695 "blog.yacc"
+#line 694 "blog.yacc"
 	{ yyval.stmt = new Query(curr_line, curr_col, yystack.l_mark[0].exp); }
 break;
-#line 1636 "parser.cpp"
+#line 1640 "parser.cpp"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;
@@ -1656,7 +1659,9 @@ break;
 #if YYDEBUG
             if (yydebug)
             {
-                yys = yyname[YYTRANSLATE(yychar)];
+                yys = 0;
+                if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
+                if (!yys) yys = "illegal-symbol";
                 printf("%sdebug: state %d, reading %d (%s)\n",
                         YYPREFIX, YYFINAL, yychar, yys);
             }

@@ -10,7 +10,7 @@ namespace swift { namespace ir {
 class CondSet :
   public swift::ir::SetExpr {
 public:
-  CondSet(std::shared_ptr<VarDecl> var, std::shared_ptr<Expr> e);
+  CondSet(std::shared_ptr<VarDecl> var, std::shared_ptr<Expr> cond = nullptr);
   virtual ~CondSet();
 
   const std::shared_ptr<VarDecl>& getVar() const;

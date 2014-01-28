@@ -3,19 +3,19 @@
 #include "SetTy.h"
 
 namespace swift { namespace ir {
-CardExpr::CardExpr() : refer(NULL) {
+CardExpr::CardExpr() : referTyp(NULL) {
 }
 
 CardExpr::~CardExpr() {
 }
 
-const Ty* CardExpr::getRefer() const {
-  return refer;
+const Ty* CardExpr::getType() const {
+  return referTyp;
 }
 
 void CardExpr::setBody(std::shared_ptr<SetExpr> b) {
   body = b;
-  refer = ((const SetTy*)b->getTyp())->getRefer();
+  referTyp = ((const SetTy*)b->getTyp())->getRefer();
 }
 
 const std::shared_ptr<SetExpr>& CardExpr::getBody() const {

@@ -28,28 +28,28 @@ void Categorical::init(const std::map<int, double>& ws) {
       values.push_back(it.first);
       weights.push_back(it.second);
       values_to_indic[it.first] = i;
-      log_weights.push_back(log(it.second));
+      log_weights.push_back(std::log(it.second));
       i++;
     }
   }
   /*
-  Note: In VS2013, we have to rewrite the last line with the following code
+   Note: In VS2013, we have to rewrite the last line with the following code
 
-  double* A = new double[weight.size()];
-  for (int i = 0; i<weight.size(); ++i)A[i] = weight[i];
-  auto lis = std::initializer_list<double>(A, A + weight.size());
-  dist = std::discrete_distribution<int>(lis);
-  delete[weight.size()] A;
-  */
+   double* A = new double[weight.size()];
+   for (int i = 0; i<weight.size(); ++i)A[i] = weight[i];
+   auto lis = std::initializer_list<double>(A, A + weight.size());
+   dist = std::discrete_distribution<int>(lis);
+   delete[weight.size()] A;
+   */
   dist = std::discrete_distribution<int>(weights.begin(), weights.end());
 }
 
-template <typename _RD>
+template<typename _RD>
 int Categorical::gen(_RD& rd) {
   return values[dist(rd)];
 }
-  
-int Categorical::gen(){
+
+int Categorical::gen() {
   return gen(engine);
 //  //custom implementation 
 //  double u = (double)rand() / RAND_MAX;
@@ -63,18 +63,20 @@ int Categorical::gen(){
 
 double Categorical::likeli(int x) {
   auto e = values_to_indic.find(x);
-  if (e!=values_to_indic.end())
+  if (e != values_to_indic.end())
     x = e->second;
-  else return 0;
+  else
+    return 0;
   return weights[x];
 }
 
 double Categorical::loglikeli(int x) {
   // todo: check -infinity!!!
   auto e = values_to_indic.find(x);
-  if (e!=values_to_indic.end())
+  if (e != values_to_indic.end())
     x = e->second;
-  else return 0;
+  else
+    return - INFINITY;
   return log_weights[x];
 }
 

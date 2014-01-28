@@ -44,6 +44,10 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "&"; // binary and
   case OpKind::BO_BOR:
     return "|"; // binary or
+  case OpKind::BO_AND:
+    return "&&"; // and
+  case OpKind::BO_OR:
+    return "||"; // or
   case OpKind::BO_XOR:
     return "^"; // binary xor
   case OpKind::BO_EQU:
@@ -82,6 +86,8 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "->"; // pointer to a field
   case OpKind::BO_SCOPE:
     return "::";
+  case OpKind::BO_COMMA:
+    return ",";
   default:
     assert(false);
     return "";
@@ -130,8 +136,10 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include<numeric>\n");
   fprintf(file, "#include<string>\n");
   fprintf(file, "#include \"random/CategoricalDistribution.h\"\n");
+  fprintf(file, "#include \"random/Poisson.h\"\n");
+  fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
-  
+
   // output costumized include
   for (auto h : header)
     fprintf(file, "#include %s\n", h.c_str());
@@ -140,7 +148,7 @@ void CPPPrinter::print(code::Code* prog) {
   for (auto s : prog->getAllMacros())
     s->print(this);
   printLine();
-  
+
   fprintf(file, "using namespace std;\n");
   fprintf(file, "using namespace swift::random;\n");
 
@@ -155,7 +163,7 @@ void CPPPrinter::print(code::Code* prog) {
   isforward = false;
   for (auto p : prog->getAllDecls())
     p->print(this);
-  
+
 }
 
 void CPPPrinter::print(code::ArraySubscriptExpr* term) {
@@ -642,11 +650,11 @@ void CPPPrinter::print(code::ListInitExpr* term) {
   print(term->getArgs());
   fprintf(file, "}");
 }
-  
+
 void CPPPrinter::print(std::vector<code::Expr*>& exprs) {
   bool first = true;
   for (auto ex : exprs) {
-    if (! first) {
+    if (!first) {
       fprintf(file, ", ");
     } else {
       first = false;
@@ -658,7 +666,7 @@ void CPPPrinter::print(std::vector<code::Expr*>& exprs) {
 void CPPPrinter::print(code::ClassConstructor* term) {
   print(term, false);
 }
-  
+
 void CPPPrinter::print(code::CallClassConstructor* term) {
   term->getType().print(this);
   fprintf(file, "(");
@@ -668,5 +676,4 @@ void CPPPrinter::print(code::CallClassConstructor* term) {
 
 }
 }
-
 
