@@ -155,7 +155,7 @@ LWSamplerUrnBall::~LWSamplerUrnBall() {
 
 double LWSamplerUrnBall::likeli_obscolor(int d) {
   int& val = value_obscolor[d];
-  double w = 1;
+  double w = 0;
   int b = get_balldrawn(d);
   if (b != -1) {
     switch (get_truecolor(b)) {

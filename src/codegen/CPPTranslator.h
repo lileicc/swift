@@ -223,6 +223,12 @@ private:
    * function name for processing query answer
    */
   static const std::string HISTOGRAM_PRINT_METHOD_NAME;
+  
+  // function name for compute log(a == b)
+  static const std::string LOG_EQUAL_FUN_NAME;
+  
+  // function name for checking whether a number is finite
+  static const std::string ISFINITE_FUN_NAME;
 
   /**
    * function name for printing query answer
@@ -318,6 +324,8 @@ private:
    * type for the random engine
    */
   static const code::Type RANDOM_ENGINE_TYPE;
+  
+  static const bool COMPUTE_LIKELIHOOD_IN_LOG;
 };
 
 } /* namespace codegen */

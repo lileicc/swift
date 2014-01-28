@@ -19,6 +19,7 @@ Poisson::~Poisson() {
 
 void Poisson::init(double lambda) {
   this->lambda = lambda;
+  dist = std::poisson_distribution<int>(lambda);
 }
 
 int Poisson::gen() {

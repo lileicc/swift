@@ -10,6 +10,7 @@
 
 namespace swift {
 namespace codegen {
+const bool CPPTranslator::COMPUTE_LIKELIHOOD_IN_LOG = false;
 const std::string CPPTranslator::VECTOR_CLASS_NAME = "vector";
 const std::string CPPTranslator::VECTOR_RESIZE_METHOD_NAME = "resize";
 const code::Type CPPTranslator::INT_TYPE("int");
@@ -39,6 +40,8 @@ const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
 const std::string CPPTranslator::HISTOGRAM_CLASS_NAME = "Hist";
 const std::string CPPTranslator::HISTOGRAM_ADD_METHOD_NAME = "add";
 const std::string CPPTranslator::HISTOGRAM_PRINT_METHOD_NAME = "print";
+const std::string CPPTranslator::LOG_EQUAL_FUN_NAME = "logEqual";
+const std::string CPPTranslator::ISFINITE_FUN_NAME = "isfinite";
 const std::string CPPTranslator::ANSWER_VAR_NAME_PREFIX = "_answer_";
 const std::string CPPTranslator::ANSWER_PRINT_METHOD_NAME = "print";
 const std::string CPPTranslator::MAIN_DEBUG_METHOD_NAME = "debug";
@@ -499,8 +502,8 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   std::shared_ptr<ir::Distribution> dist = std::dynamic_pointer_cast<
       ir::Distribution>(expr);
   if (dist) {
-    used = true;
-    res = transDistribution(dist, args, valuevar);
+    // no need to do further process
+    return transDistribution(dist, args, valuevar);
   }
 
   // translate variable reference
@@ -540,6 +543,18 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
       std::dynamic_pointer_cast<ir::CardExpr>(expr);
   if (cardexp) {
     res = transCardExpr(cardexp);
+  }
+  
+  if (! valuevar.empty()) {
+    // everything other than DistributionExpr needs to check the equality to compute the log likelihood
+    std::vector<code::Expr*> cmparg;
+    cmparg.push_back(new code::Identifier(valuevar));
+    cmparg.push_back(res);
+    if (COMPUTE_LIKELIHOOD_IN_LOG){
+      res = new code::CallExpr(new code::Identifier(LOG_EQUAL_FUN_NAME), cmparg);
+    } else {
+      res = new code::BinaryOperator(cmparg[0], cmparg[1], code::OpKind::BO_EQU);
+    }
   }
 
   // TODO translate other expression
@@ -675,7 +690,7 @@ code::Expr* CPPTranslator::transDistribution(
                     new code::IntegerLiteral(1), code::OpKind::BO_MINUS) }));
         // :::=> dist.loglikeli()
         code::Expr* calllikeli = code::CallExpr::createMethodCall(distvarname,
-            DISTRIBUTION_LOGLIKELI_FUN_NAME, std::vector<code::Expr*>( {
+                                                                  COMPUTE_LIKELIHOOD_IN_LOG ? DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME, std::vector<code::Expr*>( {
                 new code::Identifier(valuevar) }));
         // :::=> dist.init(...), dist.loglikeli()
         return new code::BinaryOperator(callinit, calllikeli,
@@ -709,7 +724,7 @@ code::Expr* CPPTranslator::transDistribution(
     std::vector<code::Expr *> args;
     args.push_back(new code::Identifier(valuevar));
     return code::CallExpr::createMethodCall(distvarname,
-        DISTRIBUTION_LOGLIKELI_FUN_NAME, args);
+                                            COMPUTE_LIKELIHOOD_IN_LOG ? DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME, args);
   }
 }
 
@@ -805,10 +820,20 @@ void CPPTranslator::transEvidence(code::FunctionDecl* fun,
     // assign the right side of the evidence to left function application variable
     args.push_back(transExpr(evid->getRight()));
     // call setter function and calculate likelihood
+    // :::=> weight += set_evidence();
     code::Stmt* st = new code::BinaryOperator(
         new code::Identifier(WEIGHT_VAR_REF_NAME),
         new code::CallExpr(new code::Identifier(setterfunname), args),
-        code::OpKind::BO_SPLUS);
+                                              COMPUTE_LIKELIHOOD_IN_LOG ? code::OpKind::BO_SPLUS : code::OpKind::BO_SMUL);
+    // add checking for infinity
+    // :::=> if (isfinite(weight)) weight += ...
+    code::Expr* cond;
+    if (COMPUTE_LIKELIHOOD_IN_LOG) {
+    cond = new code::CallExpr(new code::Identifier(ISFINITE_FUN_NAME), std::vector<code::Expr*>({ new code::Identifier(WEIGHT_VAR_REF_NAME) }));
+    } else {
+      cond = new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), new code::FloatingLiteral(0), code::OpKind::BO_GT);
+    }
+    st = new code::IfStmt(cond, st);
     fun->addStmt(st);
   }
   // TODO adding support for other evidence
@@ -821,7 +846,7 @@ void CPPTranslator::transAllEvidence(
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
       SET_EVIDENCE_FUN_NAME, DOUBLE_TYPE);
   code::VarDecl* weightvar = new code::VarDecl(fun, WEIGHT_VAR_REF_NAME,
-      DOUBLE_TYPE, new code::FloatingLiteral(0));
+                                               DOUBLE_TYPE, new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0));
   fun->addStmt(new code::DeclStmt(weightvar));
   for (auto evid : evids) {
     transEvidence(fun, evid);
