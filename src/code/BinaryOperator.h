@@ -28,9 +28,11 @@ enum class OpKind {
   BO_RANGE,     // Range Operator : i.e. for(auto p: args) in C++
   BO_LSHGT,     // binary left shift
   BO_RSHGT,     // binary right shift
-  BO_BAND,      // binary and
-  BO_BOR,       // binary or
+  BO_BAND,      // bit and
+  BO_BOR,       // bit or
   BO_XOR,       // binary xor
+  BO_AND,       // and
+  BO_OR,        // or
   BO_EQU,       // equal
   BO_NEQ,       // not equal
   BO_LT,        // less than

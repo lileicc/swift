@@ -44,6 +44,10 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "&"; // binary and
   case OpKind::BO_BOR:
     return "|"; // binary or
+  case OpKind::BO_AND:
+    return "&&"; // and
+  case OpKind::BO_OR:
+    return "||"; // or
   case OpKind::BO_XOR:
     return "^"; // binary xor
   case OpKind::BO_EQU:
