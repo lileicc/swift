@@ -9,6 +9,7 @@
 #include <string>
 #include "../ir/IRHeader.h"
 #include "../code/Code.h"
+#include "../util/Configuration.h"
 
 namespace swift {
 namespace codegen {
@@ -325,7 +326,9 @@ private:
    */
   static const code::Type RANDOM_ENGINE_TYPE;
   
-  static const bool COMPUTE_LIKELIHOOD_IN_LOG;
+  static bool COMPUTE_LIKELIHOOD_IN_LOG;
+
+  static swift::Configuration* config;
 };
 
 } /* namespace codegen */
