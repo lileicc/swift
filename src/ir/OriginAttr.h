@@ -16,6 +16,7 @@ public:
   void setID(size_t k);
   size_t getID() const;
   std::shared_ptr<TypeDomain> getSrc() const;
+  void print(FILE* file, int indent);
 
 private:
   std::string name;

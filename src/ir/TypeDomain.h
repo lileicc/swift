@@ -40,6 +40,8 @@ public:
   OriginAttr* getOrigin(const std::string& str);
   void addReferFun(std::shared_ptr<FuncDefn> fn);
   std::vector<std::shared_ptr<FuncDefn> > & getReferFuns();
+  void print(FILE* file, int indent);
+  
 private:
   std::string name;
   std::vector<std::shared_ptr<NumberStmt>> gen;

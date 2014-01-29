@@ -94,6 +94,12 @@ void BlogModel::print(FILE* file, int indent){
     evidence[i]->print(file, indent+2);
   }
   fprintf(file, "%*s)\n", indent, "");
+  
+  fprintf(file, "%*s(Types:\n", indent, "");
+  for(size_t i = 0; i < types.size(); i++){
+    types[i]->print(file, indent+2);
+  }
+  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

@@ -1,6 +1,8 @@
 #include "NumberStmt.h"
 #include "OriginAttr.h"
 #include "VarDecl.h"
+#include "Clause.h"
+#include "TypeDomain.h"
 
 namespace swift { namespace ir {
 NumberStmt::NumberStmt(std::shared_ptr<TypeDomain> refer)
@@ -41,6 +43,30 @@ void NumberStmt::setBody(std::shared_ptr<Clause> c) {
 void NumberStmt::addArg(const OriginAttr* o, std::string v) {
   origin.push_back(o);
   var.push_back(std::shared_ptr<VarDecl>(new VarDecl(o->getTyp(), v)));
+}
+
+void NumberStmt::print(FILE* file, int indent){
+  fprintf(file, "%*s(NumberStmt:\n", indent, "");
+  fprintf(file, "%*s:TypeDomain: %s", indent+2, refer->getName().c_str());
+  
+  fprintf(file, "%*s(origins:\n", indent+2, "");
+  for(size_t i = 0; i < size(); i++){
+    fprintf(file, "%*s %s\n", getOrigin(i)->getName().c_str());
+  }
+  fprintf(file, "%*s)\n", indent+2, "");
+  
+  fprintf(file, "%*s(Variables:\n", indent+2, "");
+  for(size_t i = 0; i < size(); i++){
+    fprintf(file, "%*s%s\n", indent+4, "", getVar(i)->toString().c_str());
+  }
+  fprintf(file, "%*s)\n", indent+2, "");
+  fprintf(file, "%*s(body:\n", indent+2, "");
+  body->print(file, indent+4);
+  fprintf(file, "%*s)\n", indent+2, "");
+  fprintf(file, "%*s)\n", indent, "");
+  
+  
+  
 }
 
 }

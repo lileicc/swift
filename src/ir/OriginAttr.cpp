@@ -1,6 +1,7 @@
 #include "OriginAttr.h"
 
 #include "Ty.h"
+#include "TypeDomain.h"
 
 namespace swift { namespace ir {
 
@@ -29,6 +30,15 @@ void OriginAttr::setID(size_t k) {
 
 size_t OriginAttr::getID() const {
   return id;
+}
+
+void OriginAttr::print(FILE* file, int indent){
+  fprintf(file, "%*s(OriginAttr:\n", indent, "");
+  fprintf(file, "%*s:name %s\n", indent+2, "", getName().c_str());
+  fprintf(file, "%*s:type %s\n", indent+2, "", getTyp()->toString().c_str());
+  fprintf(file, "%*s:TypeDomain %s\n", indent+2, "", src->getName().c_str());
+  fprintf(file, "%*s)\n", indent, "");
+  
 }
 
 }
