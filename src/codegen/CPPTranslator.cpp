@@ -11,7 +11,7 @@
 namespace swift {
 namespace codegen {
 swift::Configuration* config = swift::Configuration::getConfiguration();
-bool CPPTranslator::COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue(
+bool CPPTranslator::COMPUTE_LIKELIHOOD_IN_LOG = swift::Configuration::getConfiguration()->getBoolValue(
     "COMPUTE_LIKELIHOOD_IN_LOG");
 
 const std::string CPPTranslator::VECTOR_CLASS_NAME = "vector";

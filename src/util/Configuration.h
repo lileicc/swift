@@ -27,41 +27,4 @@ private:
   static Configuration* config;
 };
 
-Configuration* Configuration::config = nullptr;
-  
-Configuration::Configuration(){
-  setValue("COMPUTE_LIKELIHOOD_IN_LOG", false);
-}
-
-Configuration* Configuration::getConfiguration(){
-  if (!config)
-    config = new Configuration();
-  return config;
-}
-
-inline bool Configuration::getBoolValue(std::string name) {
-  return getValue(name) == "true";
-}
-
-inline int Configuration::getIntValue(std::string name) {
-  return std::stoi(getValue(name));
-}
-
-inline Configuration::~Configuration() {
-}
-
-template <typename _T>
-inline void Configuration::setValue(std::string name, _T value) {
-  property[name] = std::to_string(value);
-}
-
-
-inline std::string Configuration::getValue(std::string name) {
-  auto x = property.find(name);
-  if (x == property.end())
-    return "";
-  return x->second;
-}
-
-
 }
