@@ -587,9 +587,9 @@ void CPPPrinter::print(code::VarDecl* term) {
   if (!isforward)
     return;
 
+  printIndent();
   bool backup = newline;
   newline = false;
-  printIndent();
 
   term->getType().print(this);
   fprintf(file, " %s", term->getId().c_str());
