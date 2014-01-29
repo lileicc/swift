@@ -83,6 +83,9 @@ private:
 
   // convert an OpKind to the corresponding string in C++
   std::string OpConvert(code::OpKind op);
+
+  // return the Precedence and Associativity(0: left to right, 1: right to left) of an Expr
+  std::pair<int, int> OpPrec(code::Expr* expr);
 };
 
 }
