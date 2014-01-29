@@ -248,8 +248,15 @@ void CPPPrinter::print(code::ArraySubscriptExpr* term) {
   bool backup = newline;
   newline = false;
 
-  if (term->getLeft() != NULL)
+  // Note: [] operator
+  if (term->getLeft() != NULL) {
+    auto l_prec = OpPrec(term->getLeft());
+    if (l_prec.first > 1)
+      fprintf(file, "(");
     term->getLeft()->print(this);
+    if (l_prec.first > 1)
+      fprintf(file, ")");
+  }
   fprintf(file, "[");
   if (term->getRight() != NULL)
     term->getRight()->print(this);
@@ -267,7 +274,7 @@ void CPPPrinter::print(code::BinaryOperator* term) {
   newline = false;
 
   auto l_prec = OpPrec(term->getLeft()).first;
-  auto r_prec = OpPrec(term->getRight()).second;
+  auto r_prec = OpPrec(term->getRight()).first;
 
   if (term->getOp() == code::OpKind::BO_POW) {
     fprintf(file, "std::pow(");
@@ -324,7 +331,14 @@ void CPPPrinter::print(code::CallExpr* term) {
   bool backup = newline;
   newline = false;
 
+  // Note: () operator
+  auto f_prec = OpPrec(term->getFunc());
+  if (f_prec.first > 1)
+    fprintf(file, "(");
   term->getFunc()->print(this);
+  if (f_prec.first > 1)
+    fprintf(file, ")");
+
   fprintf(file, "(");
   bool not_first = false;
   for (auto p : term->getArgs()) {
