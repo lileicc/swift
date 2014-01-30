@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-IfStmt::IfStmt(Expr* cond, Stmt* th, Stmt* el) : cond(cond), th(th), el(el) {
+IfStmt::IfStmt(Expr* cond, Stmt* th, Stmt* el) :
+    cond(cond), th(th), el(el) {
 }
 
 IfStmt::~IfStmt() {

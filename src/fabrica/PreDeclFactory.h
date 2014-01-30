@@ -5,7 +5,8 @@
 
 #include "../predecl/PreDeclDistr.h"
 
-namespace swift { namespace fabrica {
+namespace swift {
+namespace fabrica {
 
 class PreDeclFactory {
 public:
@@ -15,7 +16,7 @@ public:
   const predecl::PreDeclDistr* getDistr(std::string name);
 
 private:
-  std::map<std::string,const predecl::PreDeclDistr*> distr;
+  std::map<std::string, const predecl::PreDeclDistr*> distr;
 };
 
 }

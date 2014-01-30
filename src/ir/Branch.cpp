@@ -2,7 +2,8 @@
 #include "Expr.h"
 #include "ConstSymbol.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 Branch::Branch() {
 }
 
@@ -17,7 +18,8 @@ std::shared_ptr<Expr> Branch::getVar() const {
   return var;
 }
 
-void Branch::addBranch(std::shared_ptr<ConstSymbol> c, std::shared_ptr<Clause> b) {
+void Branch::addBranch(std::shared_ptr<ConstSymbol> c,
+    std::shared_ptr<Clause> b) {
   cond.push_back(c);
   branch.push_back(b);
 }
@@ -42,15 +44,15 @@ const std::vector<std::shared_ptr<Clause>>& Branch::getBranches() const {
   return branch;
 }
 
-void Branch::print(FILE* file, int indent){
+void Branch::print(FILE* file, int indent) const {
   fprintf(file, "%*s(Branch:\n", indent, "");
-  fprintf(file, "%*svar:\n", indent+2, "");
-  getVar()->print(file, indent+2);
-  for(size_t i = 0; i < size(); i++){
-    fprintf(file, "%*scond %d:\n", indent+2, "", i);
-    getCond(i)->print(file, indent+4);
-    fprintf(file, "%*sbranch %d:\n", indent+2, "", i);
-    getBranch(i)->print(file, indent+4);
+  fprintf(file, "%*svar:\n", indent + 2, "");
+  getVar()->print(file, indent + 2);
+  for (size_t i = 0; i < size(); i++) {
+    fprintf(file, "%*scond %lu:\n", indent + 2, "", i);
+    getCond(i)->print(file, indent + 4);
+    fprintf(file, "%*sbranch %lu:\n", indent + 2, "", i);
+    getBranch(i)->print(file, indent + 4);
   }
   fprintf(file, "%*s)\n", indent, "");
 }

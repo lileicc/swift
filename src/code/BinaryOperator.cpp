@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-BinaryOperator::BinaryOperator(Expr* lhs, Expr* rhs, OpKind op) : Expr(std::vector<Expr*>({ lhs, rhs })), op(op) {
+BinaryOperator::BinaryOperator(Expr* lhs, Expr* rhs, OpKind op) :
+    Expr(std::vector<Expr*>( { lhs, rhs })), op(op) {
 }
 
 BinaryOperator::~BinaryOperator() {

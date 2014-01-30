@@ -1,6 +1,7 @@
 #include "IRConst.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
 const std::string IRConstString::BOOL = "bool";
 const std::string IRConstString::INT = "int";

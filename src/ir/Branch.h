@@ -5,23 +5,23 @@
 #include "Clause.h"
 #include "IRForwardDecl.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-class Branch :
-  public swift::ir::Clause {
+class Branch: public swift::ir::Clause {
 public:
   Branch();
   virtual ~Branch();
 
   void setVar(std::shared_ptr<Expr> v);
-  std::shared_ptr<Expr> getVar() const ;
+  std::shared_ptr<Expr> getVar() const;
   void addBranch(std::shared_ptr<ConstSymbol> c, std::shared_ptr<Clause> b);
-  size_t size() const ;
+  size_t size() const;
   std::shared_ptr<ConstSymbol> getCond(size_t k) const;
   const std::vector<std::shared_ptr<ConstSymbol>>& getConds() const;
-  std::shared_ptr<Clause> getBranch(size_t k) const ;
-  const std::vector<std::shared_ptr<Clause>>& getBranches() const ;
-  void print(FILE* file, int indent);
+  std::shared_ptr<Clause> getBranch(size_t k) const;
+  const std::vector<std::shared_ptr<Clause>>& getBranches() const;
+  virtual void print(FILE* file, int indent) const;
 
 private:
   std::shared_ptr<Expr> var;

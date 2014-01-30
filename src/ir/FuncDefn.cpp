@@ -6,10 +6,11 @@
 #include <iostream>
 using namespace std;
 
-namespace swift { namespace ir {
- 
-FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp)
-  :name(name), retTyp(retTyp), isrand(isrand), body(nullptr) {
+namespace swift {
+namespace ir {
+
+FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp) :
+    name(name), retTyp(retTyp), isrand(isrand), body(nullptr) {
 }
 
 FuncDefn::~FuncDefn() {
@@ -63,22 +64,22 @@ std::string FuncDefn::toSignature() const {
   std::string ret;
   ret.append(name);
   ret.push_back('(');
-  for (size_t i = 0; i < args.size(); i++)  {
-    if (i > 0) ret.push_back(',');
+  for (size_t i = 0; i < args.size(); i++) {
+    if (i > 0)
+      ret.push_back(',');
     ret.append(args[i]->toSignature());
   }
   ret.push_back(')');
   return ret;
 }
 
-void FuncDefn::print(FILE* file, int indent){
+void FuncDefn::print(FILE* file, int indent) const {
   fprintf(file, "%*s(FuncDefn:\n", indent, "");
-  fprintf(file, "%*s%s\n", indent+2, "", toSignature().c_str());
-  fprintf(file, "%*s(body:\n", indent+2, "");
-  if(getBody() != nullptr){
-    getBody()->print(file, indent+4);
+  fprintf(file, "%*s%s\n", indent + 2, "", toSignature().c_str());
+  fprintf(file, "%*sbody:\n", indent + 2, "");
+  if (getBody() != nullptr) {
+    getBody()->print(file, indent + 4);
   }
-  fprintf(file, "%*s)\n", indent+2, "");
   fprintf(file, "%*s)\n", indent, "");
 }
 

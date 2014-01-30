@@ -10,12 +10,12 @@
 namespace swift {
 
 Configuration* Configuration::config = NULL;
-  
-Configuration::Configuration(){
+
+Configuration::Configuration() {
   setValue("COMPUTE_LIKELIHOOD_IN_LOG", false);
 }
 
-Configuration* Configuration::getConfiguration(){
+Configuration* Configuration::getConfiguration() {
   if (!config)
     config = new Configuration();
   return config;
@@ -32,11 +32,10 @@ int Configuration::getIntValue(std::string name) {
 Configuration::~Configuration() {
 }
 
-template <typename _T>
+template<typename _T>
 void Configuration::setValue(std::string name, _T value) {
   property[name] = std::to_string(value);
 }
-
 
 std::string Configuration::getValue(std::string name) {
   auto x = property.find(name);
@@ -44,6 +43,5 @@ std::string Configuration::getValue(std::string name) {
     return "";
   return x->second;
 }
-
 
 }

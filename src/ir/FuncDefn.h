@@ -5,7 +5,8 @@
 #include <memory>
 #include "IRForwardDecl.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
 class FuncDefn {
 public:
@@ -24,7 +25,7 @@ public:
   bool isRand() const;
   bool isFixed() const;
   // For Debugging Use
-  void print(FILE* file, int indent);
+  void print(FILE* file, int indent) const;
 
   std::string toSignature() const;
 

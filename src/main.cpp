@@ -15,17 +15,26 @@ extern swift::absyn::BlogProgram* parse(const char* inp);
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
-    std::cout << "\t[main] -i <input filename> -o <output filename>"
+    std::cout
+        << "\t[main] -i <input filename> -o <output filename> --ir <filename for printing ir>"
         << std::endl;
     exit(0);
   }
   const char* inp = "";
   const char* out = "";
+  const char* irfile = nullptr;
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-i") == 0)
       inp = argv[++i];
     if (strcmp(argv[i], "-o") == 0)
       out = argv[++i];
+    if (strcmp(argv[i], "--ir") == 0) {
+      irfile = argv[++i];
+      if (i >= argc || (irfile && irfile[0] == '-')) {
+        irfile = "";
+        i--;
+      }
+    }
   }
 
   // parse the input file to get abstract syntax
@@ -36,16 +45,20 @@ int main(int argc, char** argv) {
     // TODO print the error message!
     return 1;
   }
-  
+
   // semantic checking and translating to ir
   swift::semant::Semant sem;
   sem.process(blog_absyn);
   swift::ir::BlogModel* model = sem.getModel();
-  
+
   if (!sem.Okay()) {
     fprintf(stderr, "Error in semantic checking input %s!", inp);
     // TODO print the error message!
     return 1;
+  }
+
+  if (irfile) {
+    model->print(irfile);
   }
 
   // translate ir to code representation
@@ -57,9 +70,9 @@ int main(int argc, char** argv) {
   swift::printer::Printer * prt = new swift::printer::CPPPrinter(
       std::string(out));
   program->print(prt);
-  
+
   printf("correctly translated %s!\n", inp);
-  
+
   delete blog_absyn;
   delete model;
   delete program;

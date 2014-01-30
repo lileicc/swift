@@ -10,6 +10,7 @@
 #include "Ty.h"
 #include "NameTy.h"
 #include "NumberStmt.h"
+#include "FuncDefn.h"
 
 namespace swift {
 namespace ir {
@@ -109,6 +110,35 @@ void TypeDomain::addReferFun(std::shared_ptr<FuncDefn> fn) {
 
 std::vector<std::shared_ptr<FuncDefn> > & TypeDomain::getReferFuns() {
   return usedBy;
+}
+
+void TypeDomain::print(FILE* file, int indent) {
+  fprintf(file, "%*s(TypeDomain:\n", indent, "");
+  fprintf(file, "%*sname: %s\n", indent + 2, "", getName().c_str());
+  if (origin.size()) {
+    fprintf(file, "%*sorigin:\n", indent + 2, "");
+    for (size_t i = 0; i < origin.size(); i++) {
+      fprintf(file, "%*s:arg %d\n", indent + 4, "", i);
+      origin[i]->print(file, indent + 4);
+    }
+    fprintf(file, "%*s\n", indent + 2, "");
+  }
+  fprintf(file, "%*srefer: %s\n", indent + 2, "",
+      getRefer()->toString().c_str());
+  if (instName.size()) {
+    fprintf(file, "%*sinstName:\n", indent + 2, "");
+    for (size_t i = 0; i < instName.size(); i++) {
+      fprintf(file, "%*s %s\n", indent + 4, "", getInstName(i).c_str());
+    }
+  }
+  if (usedBy.size()) {
+    fprintf(file, "%*susedBy:\n", indent + 2, "");
+    for (size_t i = 0; i < usedBy.size(); i++) {
+      fprintf(file, "%*s %s\n", indent + 4, "",
+          usedBy[i]->toSignature().c_str());
+    }
+  }
+  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

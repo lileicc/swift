@@ -10,12 +10,12 @@
 namespace swift {
 namespace absyn {
 
-Ty::Ty(Symbol typ, int dim)
-  :line(0), col(0), typ(typ), dim(dim) {
+Ty::Ty(Symbol typ, int dim) :
+    line(0), col(0), typ(typ), dim(dim) {
 }
 
-Ty::Ty(int l, int c, Symbol typ, int dim)
-: line(l), col(c), typ(typ), dim(dim) {
+Ty::Ty(int l, int c, Symbol typ, int dim) :
+    line(l), col(c), typ(typ), dim(dim) {
 }
 
 Ty::~Ty() {

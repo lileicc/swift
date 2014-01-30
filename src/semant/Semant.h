@@ -56,7 +56,8 @@ private:
   /*
    * Special Type Checking Function for OprExpr
    */
-  const ir::Ty* OprExpr_checkType(ir::IRConstant op, const std::vector<std::shared_ptr<ir::Expr>>& arg);
+  const ir::Ty* OprExpr_checkType(ir::IRConstant op,
+      const std::vector<std::shared_ptr<ir::Expr>>& arg);
 
   std::shared_ptr<ir::Expr> transExpr(absyn::OpExpr* expr);
 
@@ -121,8 +122,8 @@ private:
   void transEvidence(absyn::Evidence* ne);
 
   /*
-  * process query
-  */
+   * process query
+   */
   void transQuery(absyn::Query* nq);
 
   /**
@@ -143,9 +144,9 @@ private:
   const ir::NameTy* lookupNameTy(const std::string & name);
 
   /**
-  * lookup a general type in tyFactory, if not exist, produce an error
-  * return the found Ty or NULL
-  */
+   * lookup a general type in tyFactory, if not exist, produce an error
+   * return the found Ty or NULL
+   */
 
   const ir::Ty* lookupTy(const std::string & name);
 
@@ -167,7 +168,7 @@ private:
   ir::BlogModel* model;
 
   //stack used to store local variable
-  std::map<std::string,std::stack<std::shared_ptr<ir::VarDecl> > > local_var;
+  std::map<std::string, std::stack<std::shared_ptr<ir::VarDecl> > > local_var;
 
   bool isResultUsed;
 };

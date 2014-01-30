@@ -2,10 +2,11 @@
 
 #include "IRConst.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-IntLiteral::IntLiteral(int v)
-  :ConstSymbol(IRConstant::INTLITERAL), value(v) {
+IntLiteral::IntLiteral(int v) :
+    ConstSymbol(IRConstant::INTLITERAL), value(v) {
 }
 
 IntLiteral::~IntLiteral() {

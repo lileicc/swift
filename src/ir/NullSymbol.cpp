@@ -2,10 +2,11 @@
 
 #include "IRConst.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-NullSymbol::NullSymbol()
-  :ConstSymbol(IRConstant::NULLSYMBOL) {
+NullSymbol::NullSymbol() :
+    ConstSymbol(IRConstant::NULLSYMBOL) {
 }
 
 NullSymbol::~NullSymbol() {

@@ -1,10 +1,11 @@
 #include "QuantForm.h"
 #include "VarDecl.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-QuantForm::QuantForm(IRConstant op)
-  :op(op) {
+QuantForm::QuantForm(IRConstant op) :
+    op(op) {
 }
 
 QuantForm::~QuantForm() {
@@ -30,7 +31,7 @@ bool QuantForm::isExists() const {
   return op == IRConstant::EXISTS;
 }
 
-void QuantForm::print(FILE* file, int indent){
+void QuantForm::print(FILE* file, int indent) const {
   fprintf(file, "%*s(QuantExpr:\n", indent, "");
   fprintf(file, "%*s:typ %d\n", indent + 2, "", op);
   fprintf(file, "%*s:var %s\n", indent + 2, "", var->toString().c_str());

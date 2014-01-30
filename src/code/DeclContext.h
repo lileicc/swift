@@ -27,7 +27,7 @@ public:
   virtual std::vector<Decl*>& getAllDecls();
   virtual void print(printer::Printer* prt) = 0;
 private:
-  std::vector<Decl* > members; // member declaration
+  std::vector<Decl*> members; // member declaration
 };
 
 } /* namespace code */

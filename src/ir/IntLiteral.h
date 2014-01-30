@@ -2,10 +2,10 @@
 
 #include "ConstSymbol.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-class IntLiteral :
-  public swift::ir::ConstSymbol {
+class IntLiteral: public swift::ir::ConstSymbol {
 public:
   IntLiteral(int v = 0);
   virtual ~IntLiteral();

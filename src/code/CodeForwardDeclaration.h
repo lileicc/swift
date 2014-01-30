@@ -7,7 +7,8 @@
 
 #pragma once
 
-namespace swift { namespace code {
+namespace swift {
+namespace code {
 
 class ArraySubscriptExpr;
 class BinaryOperator;

@@ -22,7 +22,7 @@ public:
   ~Categorical();
   void init(const std::map<int, double>& ws);
   int gen();
-  template <typename _RD>
+  template<typename _RD>
   int gen(_RD& rd);
   double likeli(int x);
   double loglikeli(int x);

@@ -32,7 +32,8 @@ ClassConstructor::ClassConstructor(ClassDecl* cls, Type ty) :
 
 void ClassConstructor::addInitExpr(Expr* initExpr) {
   if (this->initExpr) {
-    this->initExpr = new BinaryOperator(this->initExpr, initExpr, OpKind::BO_COMMA);
+    this->initExpr = new BinaryOperator(this->initExpr, initExpr,
+        OpKind::BO_COMMA);
   } else
     this->initExpr = initExpr;
 }

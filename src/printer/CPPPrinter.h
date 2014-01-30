@@ -3,15 +3,17 @@
 #include <vector>
 #include "Printer.h"
 
-namespace swift { namespace code {
-enum class OpKind;
+namespace swift {
+namespace code {
+enum class OpKind
+;
 }
 }
 
 namespace swift {
 namespace printer {
 
-class CPPPrinter:public Printer {
+class CPPPrinter: public Printer {
 public:
   CPPPrinter(std::string);
   virtual ~CPPPrinter();
@@ -57,7 +59,7 @@ public:
 
 protected:
   void print(std::vector<code::Expr*>& exprs);
-  
+
 private:
   std::vector<std::string> header;
 
@@ -67,18 +69,18 @@ private:
 
   std::vector<std::string> prefix; // prefix of functions
   /*
-  Note:
-    eg.
-    class A{
-      int B();
-    };
+   Note:
+   eg.
+   class A{
+   int B();
+   };
 
-    when print the body of B outside A, 
-    prefix = {"A"}; 
-    we print 
-    int A::B(){...}
-  */
-  
+   when print the body of B outside A, 
+   prefix = {"A"}; 
+   we print 
+   int A::B(){...}
+   */
+
   void printPrefix();
 
   // convert an OpKind to the corresponding string in C++
@@ -90,5 +92,4 @@ private:
 
 }
 }
-
 

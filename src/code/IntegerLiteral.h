@@ -17,7 +17,7 @@ public:
   IntegerLiteral(int v);
   ~IntegerLiteral();
 
-  int getVal() const ;
+  int getVal() const;
   // For Printer
   void print(printer::Printer* prt);
 private:

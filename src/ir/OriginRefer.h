@@ -2,10 +2,10 @@
 #include "Expr.h"
 #include "IRForwardDecl.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-class OriginRefer :
-  public swift::ir::Expr {
+class OriginRefer: public swift::ir::Expr {
 public:
   OriginRefer(const OriginAttr* refer, std::shared_ptr<Expr> var);
   virtual ~OriginRefer();

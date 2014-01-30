@@ -19,7 +19,9 @@ public:
   void setTyp(const Ty* typ);
   const Ty* getTyp() const;
   // For Debugging Use
-  virtual void print(FILE* file, int indent);
+  virtual void print(FILE* file, int indent) const {
+  }
+  ;
 private:
   const Ty* typ;
 };

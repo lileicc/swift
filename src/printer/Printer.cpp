@@ -31,6 +31,5 @@ void Printer::printLine() {
     fprintf(file, "\n");
 }
 
-
 }
 }

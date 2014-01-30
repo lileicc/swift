@@ -3,9 +3,10 @@
 #include "IRForwardDecl.h"
 #include "Ty.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-class NameTy :public Ty {
+class NameTy: public Ty {
 public:
   NameTy(std::shared_ptr<TypeDomain> refer);
   virtual ~NameTy();

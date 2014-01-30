@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-Identifier::Identifier(std::string id) : id(id) {
+Identifier::Identifier(std::string id) :
+    id(id) {
 }
 
 Identifier::~Identifier() {

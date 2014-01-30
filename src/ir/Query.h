@@ -3,7 +3,8 @@
 #include <memory>
 #include "FunctionCall.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
 class Query {
 public:

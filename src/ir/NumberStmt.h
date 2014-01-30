@@ -4,7 +4,8 @@
 #include <string>
 #include "IRForwardDecl.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
 class NumberStmt {
 public:
@@ -20,6 +21,7 @@ public:
 
   void addArg(const OriginAttr* o, std::string v);
   void setBody(std::shared_ptr<Clause> c);
+  void print(FILE* file, int indent);
 
 private:
   std::shared_ptr<TypeDomain> refer;

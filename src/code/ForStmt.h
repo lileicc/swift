@@ -15,7 +15,7 @@ namespace code {
 
 class ForStmt: public swift::code::Stmt {
 public:
-  ForStmt(Stmt* init, Expr* cond, Expr* step, Stmt* body=NULL);
+  ForStmt(Stmt* init, Expr* cond, Expr* step, Stmt* body = NULL);
   ~ForStmt();
 
   void setInit(Stmt* it);
@@ -38,14 +38,14 @@ private:
   Stmt* body;
   bool range;
   /*
-    if range == true
-      then this if statment contains a C++11 range expression
-    e.g.
-    for(auto i : args)
-    init = new BinaryOperator(new Identifier("i"), new Identifier("args"), ':')
-    cond = step = NULL
-    isRange = true
-  */
+   if range == true
+   then this if statment contains a C++11 range expression
+   e.g.
+   for(auto i : args)
+   init = new BinaryOperator(new Identifier("i"), new Identifier("args"), ':')
+   cond = step = NULL
+   isRange = true
+   */
 };
 
 } /* namespace code */

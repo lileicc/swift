@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-NamespaceDecl::NamespaceDecl(std::string name): name(name) {
+NamespaceDecl::NamespaceDecl(std::string name) :
+    name(name) {
 }
 
 NamespaceDecl::~NamespaceDecl() {

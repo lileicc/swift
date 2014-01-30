@@ -7,19 +7,25 @@
 #include "IRForwardDecl.h"
 
 // Forward Declaration
-namespace swift { namespace predecl { class PreDeclDistr; } }
+namespace swift {
+namespace predecl {
+class PreDeclDistr;
+}
+}
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-class Distribution :
-  public swift::ir::Expr {
+class Distribution: public swift::ir::Expr {
 public:
-  Distribution(const std::string& name = std::string(""), const predecl::PreDeclDistr* refer = NULL);
+  Distribution(const std::string& name = std::string(""),
+      const predecl::PreDeclDistr* refer = NULL);
   virtual ~Distribution();
 
   const predecl::PreDeclDistr* getRefer() const;
-  
+
   const std::string& getDistrName() const;
+  void print(FILE* file, int indent) const;
 
 private:
   const predecl::PreDeclDistr* refer;

@@ -11,8 +11,9 @@
 namespace swift {
 namespace codegen {
 swift::Configuration* config = swift::Configuration::getConfiguration();
-bool CPPTranslator::COMPUTE_LIKELIHOOD_IN_LOG = swift::Configuration::getConfiguration()->getBoolValue(
-    "COMPUTE_LIKELIHOOD_IN_LOG");
+bool CPPTranslator::COMPUTE_LIKELIHOOD_IN_LOG =
+    swift::Configuration::getConfiguration()->getBoolValue(
+        "COMPUTE_LIKELIHOOD_IN_LOG");
 
 const std::string CPPTranslator::VECTOR_CLASS_NAME = "vector";
 const std::string CPPTranslator::VECTOR_RESIZE_METHOD_NAME = "resize";
@@ -922,10 +923,10 @@ void CPPTranslator::transQuery(code::FunctionDecl* fun,
     std::shared_ptr<ir::Query> qr, int n) {
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
   code::Expr* initvalue = new code::CallClassConstructor(
-                                                         code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-    mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
-                                                         std::vector<code::Expr*>(
-                                                                                  { new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) }));
+      code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+      std::vector<code::Expr*>(
+          { new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) }));
   code::FieldDecl::createFieldDecl(coreCls, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
           mapIRTypeToCodeType(qr->getVar()->getTyp()) })), initvalue);

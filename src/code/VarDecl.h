@@ -18,7 +18,8 @@ namespace code {
 
 class VarDecl: public swift::code::Decl {
 public:
-  VarDecl(DeclContext * context, std::string id, Type ty, Expr* value=nullptr);
+  VarDecl(DeclContext * context, std::string id, Type ty,
+      Expr* value = nullptr);
   virtual ~VarDecl();
 
   const std::string& getId() const;

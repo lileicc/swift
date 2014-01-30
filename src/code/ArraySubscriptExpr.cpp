@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-ArraySubscriptExpr::ArraySubscriptExpr(Expr* lhs, Expr* rhs) : Expr(std::vector<Expr*>({lhs, rhs})) {
+ArraySubscriptExpr::ArraySubscriptExpr(Expr* lhs, Expr* rhs) :
+    Expr(std::vector<Expr*>( { lhs, rhs })) {
 }
 
 ArraySubscriptExpr::~ArraySubscriptExpr() {

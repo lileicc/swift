@@ -39,8 +39,8 @@ public:
       const std::vector<std::shared_ptr<ir::VarDecl> > args);
 
   /**
-  * get all the FuncDefn*
-  */
+   * get all the FuncDefn*
+   */
   const std::map<std::string, std::shared_ptr<ir::FuncDefn> >& getAllFuncTable() const;
 private:
   std::map<std::string, std::shared_ptr<ir::FuncDefn> > funTable;

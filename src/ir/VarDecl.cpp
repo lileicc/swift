@@ -2,15 +2,15 @@
 
 #include "Ty.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-VarDecl::VarDecl(const Ty* typ, const std::string& var)
-  :typ(typ), var(var) {
+VarDecl::VarDecl(const Ty* typ, const std::string& var) :
+    typ(typ), var(var) {
 }
 
 VarDecl::~VarDecl() {
 }
-
 
 const Ty* VarDecl::getTyp() const {
   return typ;

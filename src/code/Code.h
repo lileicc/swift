@@ -58,7 +58,7 @@ class Stmt;
 namespace swift {
 namespace code {
 
-class Code : public code::DeclContext {
+class Code: public code::DeclContext {
 public:
   Code();
   ~Code();

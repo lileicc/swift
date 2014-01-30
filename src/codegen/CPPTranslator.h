@@ -104,10 +104,11 @@ private:
   /**
    * translate the operation expression 
    */
-  code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr, std::vector<code::Expr*> args);
-  
+  code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr,
+      std::vector<code::Expr*> args);
+
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
-  
+
   code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp);
   /**
    * translate the evidence in obs statement, the resulting statement is added
@@ -143,7 +144,7 @@ private:
    */
   code::Expr* transDistribution(std::shared_ptr<ir::Distribution> dist,
       std::vector<code::Expr*> args, std::string valuevar = std::string());
-  
+
   /**
    * translate the function call expression
    */
@@ -206,7 +207,7 @@ private:
    * variable name prefix for holding the answer for a query
    */
   static const std::string ANSWER_VAR_NAME_PREFIX;
-  
+
   //number of samples, argument for init() and sample()
   static const std::string LOCAL_NUM_SAMPLE_ARG_NAME;
 
@@ -224,10 +225,10 @@ private:
    * function name for processing query answer
    */
   static const std::string HISTOGRAM_PRINT_METHOD_NAME;
-  
+
   // function name for compute log(a == b)
   static const std::string LOG_EQUAL_FUN_NAME;
-  
+
   // function name for checking whether a number is finite
   static const std::string ISFINITE_FUN_NAME;
 
@@ -255,7 +256,7 @@ private:
    * function name for the distribution calculating the log-likelihood of a sample
    */
   static const std::string DISTRIBUTION_LOGLIKELI_FUN_NAME;
-  
+
   // name of the uniform int distribution, i.e. UniformInt
   static const std::string UNIFORM_INT_DISTRIBUTION_NAME;
 
@@ -271,10 +272,10 @@ private:
    * initial value set to mark_var (default 1)
    */
   static const int INIT_SAMPLE_NUM;
-  
+
   // value for null
   static const int NULLSYMBOL_VALUE;
-  
+
   /**
    * how many samples to take in total
    */
@@ -325,7 +326,7 @@ private:
    * type for the random engine
    */
   static const code::Type RANDOM_ENGINE_TYPE;
-  
+
   static bool COMPUTE_LIKELIHOOD_IN_LOG;
 
   static swift::Configuration* config;

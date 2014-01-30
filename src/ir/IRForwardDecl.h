@@ -5,7 +5,8 @@
 //For shared_ptr
 #include <memory>
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
 class ArrayExpr;
 class ArrayTy;

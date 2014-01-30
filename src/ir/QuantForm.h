@@ -5,10 +5,10 @@
 
 #include <memory>
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-class QuantForm :
-  public swift::ir::Expr {
+class QuantForm: public swift::ir::Expr {
 public:
   QuantForm(IRConstant op);
   virtual ~QuantForm();
@@ -18,8 +18,8 @@ public:
   IRConstant getOp() const;
   bool isForall() const;
   bool isExists() const;
-  
-  void print(FILE* file, int indent);
+
+  void print(FILE* file, int indent) const;
 
 private:
   IRConstant op;
