@@ -13,24 +13,18 @@ namespace swift {
 
 class Configuration {
 public:
-  static Configuration& getConfiguration();
+  static Configuration* getConfiguration();
   template <typename _T=std::string>
-  void setProperty(std::string name, _T value);
-  template <typename _T=std::string>
-  _T getProperty();
+  void setValue(std::string name, _T value);
+  std::string getValue(std::string name);
+  bool getBoolValue(std::string name);
+  int getIntValue(std::string name);
 
 private:
   Configuration();
   ~Configuration();
   std::map<std::string, std::string> property;
-  static Configuration config;
+  static Configuration* config;
 };
-
-Configuration::Configuration(){
-}
-
-Configuration& Configuration::getConfiguration(){
-  return config;
-}
 
 }

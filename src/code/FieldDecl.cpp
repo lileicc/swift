@@ -12,25 +12,17 @@ namespace swift {
 namespace code {
 
 FieldDecl::FieldDecl(ClassDecl* cd, std::string name,
-   Type ty) : parent(cd), id(name), ty(ty) {
+   Type ty, Expr* value) : VarDecl(cd, name, ty, value) {
 }
 
 FieldDecl::~FieldDecl() {
 }
 
 FieldDecl* FieldDecl::createFieldDecl(ClassDecl* cd, std::string name,
-    Type ty) {
-  FieldDecl* fd = new FieldDecl(cd, name, ty);
+    Type ty, Expr* value) {
+  FieldDecl* fd = new FieldDecl(cd, name, ty, value);
   cd->addDecl(fd);
   return fd;
-}
-
-const std::string& FieldDecl::getId() const {
-  return id;
-}
-
-Type& FieldDecl::getType() {
-  return ty;
 }
 
 // For Printer
