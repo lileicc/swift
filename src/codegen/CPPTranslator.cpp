@@ -921,19 +921,14 @@ void CPPTranslator::transAllQuery(
 void CPPTranslator::transQuery(code::FunctionDecl* fun,
     std::shared_ptr<ir::Query> qr, int n) {
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+  code::Expr* initvalue = new code::CallClassConstructor(
+                                                         code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+    mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+                                                         std::vector<code::Expr*>(
+                                                                                  { new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) }));
   code::FieldDecl::createFieldDecl(coreCls, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })));
-  coreClsConstructor->addStmt(
-      new code::BinaryOperator(new code::Identifier(answervarname),
-          new code::CallClassConstructor(
-              code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-                  mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
-              std::vector<code::Expr*>(
-                  { new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) })),
-          code::OpKind::BO_ASSIGN
-
-          ));
+          mapIRTypeToCodeType(qr->getVar()->getTyp()) })), initvalue);
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
   args.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));

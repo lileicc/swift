@@ -331,7 +331,7 @@ void CPPPrinter::print(code::CallExpr* term) {
   bool backup = newline;
   newline = false;
 
-  // Note: () operator
+  // Note: () operatorƒf
   auto f_prec = OpPrec(term->getFunc());
   if (f_prec.first > 1)
     fprintf(file, "(");
@@ -424,15 +424,7 @@ void CPPPrinter::print(code::DeclStmt* term) {
 }
 
 void CPPPrinter::print(code::FieldDecl* term) {
-  if (!isforward)
-    return;
-  printIndent();
-  bool backup = newline;
-  newline = false;
-  term->getType().print(this);
-  fprintf(file, " %s;", term->getId().c_str());
-  newline = backup;
-  printLine();
+  print((code::VarDecl*) term);
 }
 
 void CPPPrinter::print(code::FloatingLiteral* term) {
