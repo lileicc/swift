@@ -16,7 +16,7 @@ public:
   void addEvidence(std::shared_ptr<Evidence> e);
   void addTypeDomain(std::shared_ptr<TypeDomain> t);
   // For Debugging Use
-  void print(FILE* file, int indent);
+  void print(FILE* file, int indent=0);
 
   const std::vector<std::shared_ptr<FuncDefn>>& getFixFuncs();
   const std::vector<std::shared_ptr<FuncDefn>>& getVoidFuncs();
