@@ -64,11 +64,6 @@
 #endif
 #ifndef YYSTYPE_IS_DECLARED
 #define YYSTYPE_IS_DECLARED 1
-#include "BLOGSymbol.h"
-#include <vector>
-#include <string>
-#include <tuple>
-using namespace std;
 typedef union {
   int i;
   class BLOGSymbol<int>* ival;
@@ -82,6 +77,7 @@ typedef union {
   class ArrayExpr* arrayexp;
   class BoolLiteral* boollit;
   class BlogProgram* bprog;
+  class CardinalityExpr* cardexp;
   class CondSet* cset;
   class Decl* dec;
   class DistinctDecl* distdec;
@@ -98,7 +94,6 @@ typedef union {
   class MapExpr* mapexp;
   class NullLiteral* nullit;
   class NumStDecl* numstdec;
-  class NumStRef* numref;
   class OpExpr* opexp;
   class OriginDecl* origdec;
   class QuantExpr* quantexp;

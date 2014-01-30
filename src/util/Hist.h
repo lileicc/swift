@@ -23,12 +23,22 @@ public:
   
   void add(T element, double weight) {
     if (table.find(element) != table.end()) {
-      if (isLogarithm)
-        weight = logsum(weight, table[element]);
-      else
-        weight += table[element];
+      if (isLogarithm) {
+        if (weight > -INFINITY)
+          table[element] = logsum(weight, table[element]);
+      } else {
+        if (weight > 0)
+          table[element] += weight;
+      }
+    } else {
+      if (isLogarithm) {
+        if (weight > -INFINITY)
+          table[element] = weight;
+      } else {
+        if (weight > 0)
+          table[element] = weight;
+      }
     }
-    table[element] = weight;
   };
 
   std::map<T, double> & getResult(){

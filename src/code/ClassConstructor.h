@@ -18,9 +18,12 @@ public:
   virtual ~ClassConstructor();
   static ClassConstructor* createClassConstructor(ClassDecl * cls,
       std::vector<ParamVarDecl*> params = std::vector<ParamVarDecl*>());
+  void addInitExpr(Expr* initExpr);
   void print(printer::Printer* prt);
 protected:
   ClassConstructor(ClassDecl * cls, Type ty);
+private:
+  Expr* initExpr;
 };
 
 } /* namespace code */

@@ -7,30 +7,22 @@
 
 #pragma once
 #include <memory>
-#include "Decl.h"
+#include "VarDecl.h"
 #include "ClassDecl.h"
 #include "Type.h"
 
 namespace swift {
 namespace code {
 
-class FieldDecl: public swift::code::Decl {
+class FieldDecl: public swift::code::VarDecl {
 public:
-  FieldDecl(ClassDecl* cd, std::string name, Type ty);
+  FieldDecl(ClassDecl* cd, std::string name, Type ty, Expr* value=nullptr);
   ~FieldDecl();
 
-  static FieldDecl* createFieldDecl(ClassDecl* cd, std::string name, Type ty);
-
-  const std::string& getId() const ;
-  Type& getType();
+  static FieldDecl* createFieldDecl(ClassDecl* cd, std::string name, Type ty, Expr* value=nullptr);
 
   // For Printer
-  void print(printer::Printer* prt);
-
-private:
-  ClassDecl* parent;
-  std::string id;
-  Type ty;
+  virtual void print(printer::Printer* prt);
 };
 
 } /* namespace code */

@@ -6,6 +6,7 @@
  */
 
 #include "ClassConstructor.h"
+#include "BinaryOperator.h"
 
 namespace swift {
 namespace code {
@@ -26,7 +27,14 @@ void ClassConstructor::print(printer::Printer* prt) {
 }
 
 ClassConstructor::ClassConstructor(ClassDecl* cls, Type ty) :
-    FunctionDecl(cls, cls->getName(), ty, false) {
+    FunctionDecl(cls, cls->getName(), ty, false), initExpr(nullptr) {
+}
+
+void ClassConstructor::addInitExpr(Expr* initExpr) {
+  if (this->initExpr) {
+    this->initExpr = new BinaryOperator(this->initExpr, initExpr, OpKind::BO_COMMA);
+  } else
+    this->initExpr = initExpr;
 }
 
 } /* namespace code */

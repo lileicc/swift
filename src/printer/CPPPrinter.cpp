@@ -44,6 +44,10 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "&"; // binary and
   case OpKind::BO_BOR:
     return "|"; // binary or
+  case OpKind::BO_AND:
+    return "&&"; // and
+  case OpKind::BO_OR:
+    return "||"; // or
   case OpKind::BO_XOR:
     return "^"; // binary xor
   case OpKind::BO_EQU:
@@ -82,9 +86,88 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "->"; // pointer to a field
   case OpKind::BO_SCOPE:
     return "::";
+  case OpKind::BO_COMMA:
+    return ",";
   default:
     assert(false);
     return "";
+  }
+}
+
+std::pair<int, int> CPPPrinter::OpPrec(code::Expr* expr) {
+  if (expr == NULL) return std::make_pair<int, int>(-1,0);
+  auto b = dynamic_cast<code::BinaryOperator*>(expr);
+  if (b == NULL) return std::make_pair<int,int>(0,0);
+  using code::OpKind;
+  auto op = b->getOp();
+  switch (op) {
+  case OpKind::BO_POW:
+    return std::make_pair<int, int>(0,0);
+  case OpKind::BO_FIELD:
+  case OpKind::BO_POINTER:
+  case OpKind::BO_SCOPE:
+    return std::make_pair<int, int>(1,0);
+  case OpKind::UO_INC:
+  case OpKind::UO_DEC:
+    if (b->getLeft() != NULL)
+      return std::make_pair<int, int>(1,0);
+  case OpKind::UO_CMPT:
+  case OpKind::UO_NEG:
+    return std::make_pair<int, int>(2,1);
+  case OpKind::UO_NEW:
+  case OpKind::UO_DEL:
+  case OpKind::UO_ARRAY_DEL:
+    return std::make_pair<int, int>(3,1);
+  case OpKind::BO_MUL:
+    if (b->getLeft() == NULL)
+      return std::make_pair<int, int>(2,1);
+  case OpKind::BO_DIV:
+  case OpKind::BO_MOD:
+    return std::make_pair<int, int>(4,0);
+  case OpKind::BO_PLUS:
+  case OpKind::BO_MINUS:
+    if (b->getLeft() == NULL)
+      return std::make_pair<int, int>(2,1);
+    else
+      return std::make_pair<int, int>(5,0);
+  case OpKind::BO_LSHGT:
+  case OpKind::BO_RSHGT:
+    return std::make_pair<int, int>(6,0);
+  case OpKind::BO_LT:
+  case OpKind::BO_GT:
+  case OpKind::BO_LEQ:
+  case OpKind::BO_GEQ:
+    return std::make_pair<int, int>(7,0);
+  case OpKind::BO_EQU:
+  case OpKind::BO_NEQ:
+    return std::make_pair<int, int>(8,0);
+  case OpKind::BO_BAND:
+    if (b->getLeft() == NULL)
+      return std::make_pair<int, int>(2,1);
+    else
+      return std::make_pair<int, int>(9,0);
+  case OpKind::BO_XOR:
+    return std::make_pair<int, int>(10,0);
+  case OpKind::BO_BOR:
+    return std::make_pair<int, int>(11,0);
+  case OpKind::BO_AND:
+    return std::make_pair<int, int>(12,0);
+  case OpKind::BO_OR:
+    return std::make_pair<int, int>(13,0);
+  case OpKind::BO_ASSIGN:
+  case OpKind::BO_SPLUS:
+  case OpKind::BO_SMINUS:
+  case OpKind::BO_SMUL:
+  case OpKind::BO_SDIV:
+  case OpKind::BO_SMOD:
+    return std::make_pair<int, int>(15,1);
+  case OpKind::BO_COMMA:
+    return std::make_pair<int, int>(16,0);
+  case OpKind::BO_RANGE:
+    return std::make_pair<int, int>(17,0);
+  default:
+    assert(false);
+    return std::make_pair<int,int>(18,0);
   }
 }
 
@@ -130,8 +213,10 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include<numeric>\n");
   fprintf(file, "#include<string>\n");
   fprintf(file, "#include \"random/CategoricalDistribution.h\"\n");
+  fprintf(file, "#include \"random/Poisson.h\"\n");
+  fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
-  
+
   // output costumized include
   for (auto h : header)
     fprintf(file, "#include %s\n", h.c_str());
@@ -140,7 +225,7 @@ void CPPPrinter::print(code::Code* prog) {
   for (auto s : prog->getAllMacros())
     s->print(this);
   printLine();
-  
+
   fprintf(file, "using namespace std;\n");
   fprintf(file, "using namespace swift::random;\n");
 
@@ -155,7 +240,7 @@ void CPPPrinter::print(code::Code* prog) {
   isforward = false;
   for (auto p : prog->getAllDecls())
     p->print(this);
-  
+
 }
 
 void CPPPrinter::print(code::ArraySubscriptExpr* term) {
@@ -163,8 +248,15 @@ void CPPPrinter::print(code::ArraySubscriptExpr* term) {
   bool backup = newline;
   newline = false;
 
-  if (term->getLeft() != NULL)
+  // Note: [] operator
+  if (term->getLeft() != NULL) {
+    auto l_prec = OpPrec(term->getLeft());
+    if (l_prec.first > 1)
+      fprintf(file, "(");
     term->getLeft()->print(this);
+    if (l_prec.first > 1)
+      fprintf(file, ")");
+  }
   fprintf(file, "[");
   if (term->getRight() != NULL)
     term->getRight()->print(this);
@@ -181,6 +273,9 @@ void CPPPrinter::print(code::BinaryOperator* term) {
   bool backup = newline;
   newline = false;
 
+  auto l_prec = OpPrec(term->getLeft()).first;
+  auto r_prec = OpPrec(term->getRight()).first;
+
   if (term->getOp() == code::OpKind::BO_POW) {
     fprintf(file, "std::pow(");
     term->getLeft()->print(this);
@@ -188,16 +283,24 @@ void CPPPrinter::print(code::BinaryOperator* term) {
     term->getRight()->print(this);
     fprintf(file, ")");
   } else {
-    if (!newline)
-      fprintf(file, "(");
     std::string op = OpConvert(term->getOp());
-    if (term->getLeft() != NULL)
+    auto op_prec = OpPrec(term);
+
+    if (term->getLeft() != NULL) {
+      if (l_prec > op_prec.first || (l_prec == op_prec.first && op_prec.second == 1))
+        fprintf(file, "(");
       term->getLeft()->print(this);
+      if (l_prec > op_prec.first || (l_prec == op_prec.first && op_prec.second == 1))
+        fprintf(file, ")");
+    }
     fprintf(file, "%s", op.c_str());
-    if (term->getRight() != NULL)
+    if (term->getRight() != NULL) {
+      if (r_prec > op_prec.first || (r_prec == op_prec.first && op_prec.second == 0))
+        fprintf(file, "(");
       term->getRight()->print(this);
-    if (!newline)
-      fprintf(file, ")");
+      if (r_prec > op_prec.first || (r_prec == op_prec.first && op_prec.second == 0))
+        fprintf(file, ")");
+    }
   }
 
   newline = backup;
@@ -228,7 +331,14 @@ void CPPPrinter::print(code::CallExpr* term) {
   bool backup = newline;
   newline = false;
 
+  // Note: () operatorƒf
+  auto f_prec = OpPrec(term->getFunc());
+  if (f_prec.first > 1)
+    fprintf(file, "(");
   term->getFunc()->print(this);
+  if (f_prec.first > 1)
+    fprintf(file, ")");
+
   fprintf(file, "(");
   bool not_first = false;
   for (auto p : term->getArgs()) {
@@ -314,15 +424,7 @@ void CPPPrinter::print(code::DeclStmt* term) {
 }
 
 void CPPPrinter::print(code::FieldDecl* term) {
-  if (!isforward)
-    return;
-  printIndent();
-  bool backup = newline;
-  newline = false;
-  term->getType().print(this);
-  fprintf(file, " %s;", term->getId().c_str());
-  newline = backup;
-  printLine();
+  print((code::VarDecl*) term);
 }
 
 void CPPPrinter::print(code::FloatingLiteral* term) {
@@ -579,9 +681,9 @@ void CPPPrinter::print(code::VarDecl* term) {
   if (!isforward)
     return;
 
+  printIndent();
   bool backup = newline;
   newline = false;
-  printIndent();
 
   term->getType().print(this);
   fprintf(file, " %s", term->getId().c_str());
@@ -642,11 +744,11 @@ void CPPPrinter::print(code::ListInitExpr* term) {
   print(term->getArgs());
   fprintf(file, "}");
 }
-  
+
 void CPPPrinter::print(std::vector<code::Expr*>& exprs) {
   bool first = true;
   for (auto ex : exprs) {
-    if (! first) {
+    if (!first) {
       fprintf(file, ", ");
     } else {
       first = false;
@@ -658,7 +760,7 @@ void CPPPrinter::print(std::vector<code::Expr*>& exprs) {
 void CPPPrinter::print(code::ClassConstructor* term) {
   print(term, false);
 }
-  
+
 void CPPPrinter::print(code::CallClassConstructor* term) {
   term->getType().print(this);
   fprintf(file, "(");
@@ -668,5 +770,4 @@ void CPPPrinter::print(code::CallClassConstructor* term) {
 
 }
 }
-
 

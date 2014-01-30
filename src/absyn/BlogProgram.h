@@ -33,7 +33,6 @@
 #include "MapExpr.h"
 #include "NullLiteral.h"
 #include "NumStDecl.h"
-#include "NumStRef.h"
 #include "OpExpr.h"
 #include "OriginDecl.h"
 #include "QuantExpr.h"

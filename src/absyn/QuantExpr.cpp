@@ -12,7 +12,7 @@ namespace absyn {
 
 QuantExpr::QuantExpr(int l, int c, AbsynConstant typ, VarDecl var, Expr* cond) :
     Expr(l, c), typ(typ), var(var) {
-  args.push_back(cond);
+  add(cond);
 }
 
 QuantExpr::~QuantExpr() {

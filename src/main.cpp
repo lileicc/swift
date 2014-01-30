@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
       std::string(out));
   program->print(prt);
   
-  fprintf(stdout, "correctly translated the file!\n");
+  printf("correctly translated %s!\n", inp);
   
   delete blog_absyn;
   delete model;
