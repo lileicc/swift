@@ -17,7 +17,7 @@ class Expr: public swift::code::Stmt {
 public:
   Expr(std::vector<Expr*> args = std::vector<Expr*>());
   virtual ~Expr();
-  
+
   virtual std::vector<code::Expr*>& getArgs();
 
   // For Printer

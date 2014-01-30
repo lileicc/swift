@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-SwitchStmt::SwitchStmt(Expr * cond) : cond(cond) {
+SwitchStmt::SwitchStmt(Expr * cond) :
+    cond(cond) {
 }
 
 SwitchStmt::~SwitchStmt() {

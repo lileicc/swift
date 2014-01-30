@@ -12,8 +12,8 @@
 
 namespace swift {
 namespace ir {
-Clause::Clause(const Ty* typ)
-  :typ(typ) {
+Clause::Clause(const Ty* typ) :
+    typ(typ) {
 }
 
 Clause::~Clause() {
@@ -25,10 +25,6 @@ void Clause::setTyp(const Ty* ty) {
 
 const Ty* Clause::getTyp() const {
   return typ;
-}
-
-void Clause::print(FILE* file, int indent){
-
 }
 
 }

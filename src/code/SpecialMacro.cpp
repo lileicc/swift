@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-SpecialMacro::SpecialMacro(std::string stmt): stmt(stmt) {
+SpecialMacro::SpecialMacro(std::string stmt) :
+    stmt(stmt) {
 }
 
 SpecialMacro::~SpecialMacro() {

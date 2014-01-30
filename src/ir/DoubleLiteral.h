@@ -1,16 +1,16 @@
 #pragma once
 #include "ConstSymbol.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-class DoubleLiteral :
-  public swift::ir::ConstSymbol {
+class DoubleLiteral: public swift::ir::ConstSymbol {
 public:
-  DoubleLiteral(double v=0);
+  DoubleLiteral(double v = 0);
   virtual ~DoubleLiteral();
 
   double getValue() const;
-  void print(FILE* file, int indent);
+  void print(FILE* file, int indent) const;
 
 private:
   double value;

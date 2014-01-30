@@ -1,15 +1,16 @@
 #include "ListSet.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-ListSet::ListSet()
-  :SetExpr(IRConstant::LISTSET) {
+ListSet::ListSet() :
+    SetExpr(IRConstant::LISTSET) {
 }
 
 ListSet::~ListSet() {
 }
 
-void ListSet::print(FILE* file, int indent) {
+void ListSet::print(FILE* file, int indent) const {
   fprintf(file, "%*s(ListSet: (:\n", indent, "");
   for (size_t i = 0; i < argSize(); i++)
     if (get(i) != NULL)

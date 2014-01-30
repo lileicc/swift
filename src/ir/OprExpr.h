@@ -3,10 +3,10 @@
 #include "Expr.h"
 #include "IRConst.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-class OprExpr :
-  public swift::ir::Expr {
+class OprExpr: public swift::ir::Expr {
 public:
   OprExpr(IRConstant op);
   virtual ~OprExpr();

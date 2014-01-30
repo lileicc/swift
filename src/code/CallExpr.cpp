@@ -36,7 +36,6 @@ CallExpr* CallExpr::createMethodCall(std::string varname,
           OpKind::BO_FIELD), args);
 }
 
-
 } /* namespace code */
 } /* namespace swift */
 

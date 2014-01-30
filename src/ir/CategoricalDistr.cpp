@@ -3,10 +3,11 @@
 
 #include <string>
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-CategoricalDistr::CategoricalDistr(const predecl::PreDeclDistr* refer)
-  :Distribution(std::string("Categorical"), refer) {
+CategoricalDistr::CategoricalDistr(const predecl::PreDeclDistr* refer) :
+    Distribution(std::string("Categorical"), refer) {
 }
 
 CategoricalDistr::~CategoricalDistr() {
@@ -40,12 +41,12 @@ const std::vector<std::shared_ptr<ConstSymbol> >& CategoricalDistr::getSymbols()
   return symbols;
 }
 
-void CategoricalDistr::print(FILE* file, int indent){
+void CategoricalDistr::print(FILE* file, int indent) const {
   fprintf(file, "%*s(CategoricalDistr:\n", indent, "");
-  for(size_t i = 0; i < size(); i++){
-    fprintf(file, "%*s:symbol %d:\n", indent+2, "", i);
-    getSymbol(i)->print(file, indent+4);
-    fprintf(file, "%*s:weight %d: %f\n", indent+2, "", i, getWeight(i));
+  for (size_t i = 0; i < size(); i++) {
+    fprintf(file, "%*ssymbol %lu:\n", indent + 2, "", i);
+    getSymbol(i)->print(file, indent + 4);
+    fprintf(file, "%*sweight %lu: %f\n", indent + 2, "", i, getWeight(i));
   }
   fprintf(file, "%*s)\n", indent, "");
 }

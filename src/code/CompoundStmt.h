@@ -26,7 +26,7 @@ public:
   void print(printer::Printer* prt);
 
 private:
-  std::vector<Stmt* > body;
+  std::vector<Stmt*> body;
 };
 
 } /* namespace code */

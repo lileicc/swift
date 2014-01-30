@@ -17,7 +17,7 @@ public:
   BooleanLiteral(bool v);
   ~BooleanLiteral();
 
-  bool getVal() const ;
+  bool getVal() const;
   // For Printer
   void print(printer::Printer* prt);
 private:

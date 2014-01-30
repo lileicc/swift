@@ -10,12 +10,14 @@
 namespace swift {
 namespace code {
 
-CaseStmt::CaseStmt(Expr* val, Stmt* stmt) : val(val), sub(stmt) {
+CaseStmt::CaseStmt(Expr* val, Stmt* stmt) :
+    val(val), sub(stmt) {
 }
 
 CaseStmt::~CaseStmt() {
   delete val;
-  if (sub != NULL) delete sub;
+  if (sub != NULL)
+    delete sub;
 }
 
 Expr* CaseStmt::getVal() const {

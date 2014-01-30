@@ -17,8 +17,9 @@ CompoundStmt::CompoundStmt() {
 
 CompoundStmt::~CompoundStmt() {
   // TODO Auto-generated destructor stub
-  for (auto p: body)
-    if (p != NULL) delete p;
+  for (auto p : body)
+    if (p != NULL)
+      delete p;
 }
 
 void CompoundStmt::addStmt(Stmt* st) {

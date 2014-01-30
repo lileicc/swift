@@ -14,9 +14,8 @@ namespace ir {
 
 class IfThen: public Clause {
 public:
-  IfThen(std::shared_ptr<Expr> cond = nullptr,
-        std::shared_ptr<Clause> thcl = nullptr,
-        std::shared_ptr<Clause> elcl = nullptr);
+  IfThen(std::shared_ptr<Expr> cond = nullptr, std::shared_ptr<Clause> thcl =
+      nullptr, std::shared_ptr<Clause> elcl = nullptr);
   ~IfThen();
 
   void setCond(std::shared_ptr<Expr> e);
@@ -25,7 +24,7 @@ public:
   std::shared_ptr<Expr> getCond() const;
   std::shared_ptr<Clause> getThen() const;
   std::shared_ptr<Clause> getElse() const;
-  void print(FILE* file, int indent);
+  void print(FILE* file, int indent) const;
 
 private:
   std::shared_ptr<Expr> cond;

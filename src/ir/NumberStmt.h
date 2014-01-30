@@ -4,7 +4,8 @@
 #include <string>
 #include "IRForwardDecl.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
 class NumberStmt {
 public:

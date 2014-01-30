@@ -10,11 +10,13 @@
 namespace swift {
 namespace code {
 
-ReturnStmt::ReturnStmt(Expr* expr) : expr(expr) {
+ReturnStmt::ReturnStmt(Expr* expr) :
+    expr(expr) {
 }
 
 ReturnStmt::~ReturnStmt() {
-  if(expr != NULL) delete expr;
+  if (expr != NULL)
+    delete expr;
 }
 
 Expr* ReturnStmt::getExpr() const {

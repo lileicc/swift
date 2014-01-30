@@ -10,10 +10,9 @@
 #include <cmath>
 #pragma once
 
-
 // computing log( exp(a) + exp(b) )
 // NOTE this function cannot handle infinity
-template <typename T>
+template<typename T>
 T logsum(T a, T b) {
   if (a == b) {
     return a + log(2);
@@ -25,7 +24,7 @@ T logsum(T a, T b) {
 }
 
 // calculating log(a == b)
-template <typename T>
+template<typename T>
 double logEqual(T a, T b) {
   return (a == b) ? 0 : - INFINITY;
 }

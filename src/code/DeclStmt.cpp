@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-DeclStmt::DeclStmt(Decl* dec) : dec(dec) {
+DeclStmt::DeclStmt(Decl* dec) :
+    dec(dec) {
 }
 
 DeclStmt::~DeclStmt() {

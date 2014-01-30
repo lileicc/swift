@@ -19,7 +19,7 @@ public:
   StringLiteral(std::string v);
   ~StringLiteral();
 
-  const std::string& getVal() const ;
+  const std::string& getVal() const;
   // For Printer
   void print(printer::Printer* prt);
 private:

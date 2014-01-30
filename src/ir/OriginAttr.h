@@ -4,11 +4,13 @@
 #include <memory>
 #include "IRForwardDecl.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
 class OriginAttr {
 public:
-  OriginAttr(const std::string& name, const Ty* ty, std::shared_ptr<TypeDomain> src, size_t id);
+  OriginAttr(const std::string& name, const Ty* ty,
+      std::shared_ptr<TypeDomain> src, size_t id);
   virtual ~OriginAttr();
 
   const std::string& getName() const;

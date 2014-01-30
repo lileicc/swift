@@ -2,9 +2,9 @@
 #include "Expr.h"
 #include "IRForwardDecl.h"
 
-namespace swift { namespace ir {
-class MapExpr :
-  public swift::ir::Expr {
+namespace swift {
+namespace ir {
+class MapExpr: public swift::ir::Expr {
 public:
   MapExpr();
   virtual ~MapExpr();
@@ -17,7 +17,7 @@ public:
   const Ty* getToTyp() const;
   void setFromTyp(const Ty* t);
   void setToTyp(const Ty* t);
-  void print(FILE* file, int indent);
+  void print(FILE* file, int indent) const;
 
 private:
   const Ty* fromTyp;

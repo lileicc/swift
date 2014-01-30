@@ -8,18 +8,17 @@
 #pragma once
 
 /*
-Special Statement can be any single statement in the source code.
+ Special Statement can be any single statement in the source code.
 
-Note that: ';' (if applicable) must be included!
+ Note that: ';' (if applicable) must be included!
 
-For example:
-   using namespace std;
-   #include <iostream>
-   #define LL long long
-etc.
+ For example:
+ using namespace std;
+ #include <iostream>
+ #define LL long long
+ etc.
  -- Yi Wu
-*/
-
+ */
 
 #include <string>
 #include "../printer/Printer.h"

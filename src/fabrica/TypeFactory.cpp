@@ -18,28 +18,38 @@ const ir::Ty TypeFactory::NA_TY = ir::Ty(ir::IRConstant::NA);
 
 TypeFactory::TypeFactory() {
   // TODO Auto-generated constructor stub
-  tyTable[ir::IRConstString::INT] = tyTable[ir::IRConstString::BLOG_INT] = &INT_TY;
-  tyTable[ir::IRConstString::BOOL] = tyTable[ir::IRConstString::BLOG_BOOL] = &BOOL_TY;
-  tyTable[ir::IRConstString::DOUBLE] = tyTable[ir::IRConstString::BLOG_DOUBLE] = &DOUBLE_TY;
-  tyTable[ir::IRConstString::STRING] = tyTable[ir::IRConstString::BLOG_STRING] = &STRING_TY;
+  tyTable[ir::IRConstString::INT] = tyTable[ir::IRConstString::BLOG_INT] =
+      &INT_TY;
+  tyTable[ir::IRConstString::BOOL] = tyTable[ir::IRConstString::BLOG_BOOL] =
+      &BOOL_TY;
+  tyTable[ir::IRConstString::DOUBLE] = tyTable[ir::IRConstString::BLOG_DOUBLE] =
+      &DOUBLE_TY;
+  tyTable[ir::IRConstString::STRING] = tyTable[ir::IRConstString::BLOG_STRING] =
+      &STRING_TY;
   tyTable[ir::IRConstString::NA] = &NA_TY;
 }
 
 TypeFactory::~TypeFactory() {
   // TODO Auto-generated destructor stub
   // Note: Static Element should be removed from tyTable
-  tyTable.erase(ir::IRConstString::BLOG_BOOL); tyTable.erase(ir::IRConstString::BOOL);
-  tyTable.erase(ir::IRConstString::BLOG_INT); tyTable.erase(ir::IRConstString::INT);
-  tyTable.erase(ir::IRConstString::BLOG_DOUBLE); tyTable.erase(ir::IRConstString::DOUBLE);
-  tyTable.erase(ir::IRConstString::BLOG_STRING); tyTable.erase(ir::IRConstString::STRING);
+  tyTable.erase(ir::IRConstString::BLOG_BOOL);
+  tyTable.erase(ir::IRConstString::BOOL);
+  tyTable.erase(ir::IRConstString::BLOG_INT);
+  tyTable.erase(ir::IRConstString::INT);
+  tyTable.erase(ir::IRConstString::BLOG_DOUBLE);
+  tyTable.erase(ir::IRConstString::DOUBLE);
+  tyTable.erase(ir::IRConstString::BLOG_STRING);
+  tyTable.erase(ir::IRConstString::STRING);
   tyTable.erase(ir::IRConstString::NA);
   // IMPORTANT:
   //   tyTable should NOT be deleted!
   //   it will be deleted by shared_ptr in blog_model!
   for (auto p : instanceTable)
-    if (p.second != NULL) delete p.second;
+    if (p.second != NULL)
+      delete p.second;
   for (auto p : attrTable)
-    if (p.second != NULL) delete p.second;
+    if (p.second != NULL)
+      delete p.second;
 }
 
 bool TypeFactory::addNameTy(const std::string& name) {
@@ -66,7 +76,7 @@ bool TypeFactory::addInstSymbol(const ir::NameTy* typ,
   auto tydo = typ->getRefer();
   size_t sz = tydo->getPreLen();
   instanceTable[name] = new ir::InstSymbol(tydo, sz);
-  tydo->setPreLen(sz+1);
+  tydo->setPreLen(sz + 1);
   tydo->setInstName(sz, name);
   return true;
 }
@@ -113,7 +123,7 @@ bool TypeFactory::addOriginAttr(const ir::NameTy * srcty,
   auto td = srcty->getRefer();
   auto oriattr = new ir::OriginAttr(name, retTy, td, td->getOriginSize());
   td->addOrigin(oriattr);
-  attrTable[ constructAttrSign(srcty, name) ] = oriattr;
+  attrTable[constructAttrSign(srcty, name)] = oriattr;
   return true;
 }
 
@@ -125,7 +135,8 @@ bool TypeFactory::addNumberStmt(std::shared_ptr<ir::NumberStmt> numst) {
     return false;
 }
 
-std::string TypeFactory::constructAttrSign(const ir::NameTy* srcty, const std::string & name) {
+std::string TypeFactory::constructAttrSign(const ir::NameTy* srcty,
+    const std::string & name) {
   return srcty->toString() + "@" + name;
 }
 

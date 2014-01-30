@@ -10,10 +10,12 @@
 namespace swift {
 namespace code {
 
-StringLiteral::StringLiteral(std::string v) : val(v) {
+StringLiteral::StringLiteral(std::string v) :
+    val(v) {
 }
 
-StringLiteral::~StringLiteral() {}
+StringLiteral::~StringLiteral() {
+}
 
 const std::string& StringLiteral::getVal() const {
   return val;

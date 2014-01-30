@@ -41,7 +41,7 @@ public:
   void addReferFun(std::shared_ptr<FuncDefn> fn);
   std::vector<std::shared_ptr<FuncDefn> > & getReferFuns();
   void print(FILE* file, int indent);
-  
+
 private:
   std::string name;
   std::vector<std::shared_ptr<NumberStmt>> gen;
@@ -50,7 +50,7 @@ private:
   const NameTy* refer;
   std::vector<std::string> instName;
   std::vector<std::shared_ptr<FuncDefn> > usedBy; //all random functions that use this type domain.
-  std::map<std::string,size_t> originID;
+  std::map<std::string, size_t> originID;
 };
 
 }

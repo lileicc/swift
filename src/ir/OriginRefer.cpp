@@ -1,9 +1,10 @@
 #include "OriginRefer.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-OriginRefer::OriginRefer(const OriginAttr* refer, std::shared_ptr<Expr> var)
-  :refer(refer), var(var) {
+OriginRefer::OriginRefer(const OriginAttr* refer, std::shared_ptr<Expr> var) :
+    refer(refer), var(var) {
 }
 
 OriginRefer::~OriginRefer() {

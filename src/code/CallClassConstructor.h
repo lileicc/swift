@@ -16,7 +16,8 @@ namespace code {
 
 class CallClassConstructor: public swift::code::Expr {
 public:
-  CallClassConstructor(Type type, std::vector<Expr*> args = std::vector<Expr *>());
+  CallClassConstructor(Type type, std::vector<Expr*> args =
+      std::vector<Expr *>());
   virtual ~CallClassConstructor();
   Type& getType();
   void print(printer::Printer* prt);

@@ -2,9 +2,10 @@
 
 #include "IRConst.h"
 
-namespace swift { namespace ir {
-SetTy::SetTy(const Ty* refer)
-  :Ty(IRConstant::SET), refer(refer) {
+namespace swift {
+namespace ir {
+SetTy::SetTy(const Ty* refer) :
+    Ty(IRConstant::SET), refer(refer) {
 }
 
 SetTy::~SetTy() {
@@ -15,7 +16,8 @@ const Ty* SetTy::getRefer() const {
 }
 
 std::string SetTy::toString() const {
-  return std::string("set<") + (refer == NULL ? "NULL" : refer->toString()) + ">";
+  return std::string("set<") + (refer == NULL ? "NULL" : refer->toString())
+      + ">";
 }
 
 }

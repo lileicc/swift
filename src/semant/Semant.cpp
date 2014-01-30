@@ -556,7 +556,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
   // Special Case: 
   //         Replace OprExpr with a InstSymbolRef
   if (ret->getOp()
-      == ir::IRConstant::SUB && (dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL
+      == ir::IRConstant::SUB&& (dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL
       && (dynamic_cast<absyn::IntLiteral*>(expr->getRight())) != NULL) {
     std::string var = ((absyn::VarRef*) (expr->getLeft()))->getVar().getValue();
     int k = ((absyn::IntLiteral*) (expr->getRight()))->getValue();

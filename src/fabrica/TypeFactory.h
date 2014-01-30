@@ -42,9 +42,9 @@ public:
   const ir::Ty* getTy(const std::string& name) const;
 
   /**
-  * get the Ty associated with the name
-  *   if not exists, update it
-  */
+   * get the Ty associated with the name
+   *   if not exists, update it
+   */
 
   const ir::Ty* getUpdateTy(ir::Ty* ty);
 
@@ -85,7 +85,8 @@ public:
    */
   const std::map<std::string, const ir::Ty*>& getAllTyTable() const;
 private:
-  static std::string constructAttrSign(const ir::NameTy* srcty, const std::string & name);
+  static std::string constructAttrSign(const ir::NameTy* srcty,
+      const std::string & name);
   std::map<std::string, const ir::Ty*> tyTable; //mapping from name to a declared type
   std::map<std::string, const ir::InstSymbol*> instanceTable; //mapping from name to distinct instance symbol
   std::map<std::string, const ir::OriginAttr*> attrTable; // mapping from origin name(signature) to attribute of type

@@ -10,10 +10,12 @@
 namespace swift {
 namespace code {
 
-BooleanLiteral::BooleanLiteral(bool v) : val(v) {
+BooleanLiteral::BooleanLiteral(bool v) :
+    val(v) {
 }
 
-BooleanLiteral::~BooleanLiteral() {}
+BooleanLiteral::~BooleanLiteral() {
+}
 
 bool BooleanLiteral::getVal() const {
   return val;

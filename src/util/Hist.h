@@ -12,15 +12,20 @@
 /**
  * histogram for storing answer
  */
-template <class T>
+template<class T>
 class Hist {
 private:
   std::map<T, double> table;
   const bool isLogarithm;
 public:
-  Hist(bool isLogarithm=true) : isLogarithm(isLogarithm) {};
-  virtual ~Hist() {};
-  
+  Hist(bool isLogarithm = true) :
+      isLogarithm(isLogarithm) {
+  }
+  ;
+  virtual ~Hist() {
+  }
+  ;
+
   void add(T element, double weight) {
     if (table.find(element) != table.end()) {
       if (isLogarithm) {
@@ -39,12 +44,14 @@ public:
           table[element] = weight;
       }
     }
-  };
+  }
+  ;
 
-  std::map<T, double> & getResult(){
+  std::map<T, double> & getResult() {
     return table;
-  };
-  
+  }
+  ;
+
   double getTotalWeight() {
     double w = 0;
     auto it = table.begin();
@@ -52,8 +59,8 @@ public:
       return 0;
     }
     w = it->second;
-    it ++;
-    for (; it != table.end(); it ++) {
+    it++;
+    for (; it != table.end(); it++) {
       if (isLogarithm) {
         w = logsum(w, it->second);
       } else {
@@ -62,8 +69,8 @@ public:
     }
     return w;
   }
-  
-  std::map<T, double> getNormalizedResult(){
+
+  std::map<T, double> getNormalizedResult() {
     std::map<T, double> normmap;
     double w = getTotalWeight();
     for (auto & it : table) {
@@ -73,19 +80,21 @@ public:
         normmap[it.first] = it.second / w;
     }
     return normmap;
-  };
-  
+  }
+  ;
+
   void print() {
     for (auto& it : getNormalizedResult()) {
-      printf("%s -> %s\n", std::to_string(it.first).c_str(), std::to_string(it.second).c_str());
+      printf("%s -> %s\n", std::to_string(it.first).c_str(),
+          std::to_string(it.second).c_str());
     }
   }
-  
+
   void debug() {
     for (auto& it : getResult()) {
-      fprintf(stderr, "%s -> %s\n", std::to_string(it.first).c_str(), std::to_string(isLogarithm?exp(it.second):it.second).c_str());
+      fprintf(stderr, "%s -> %s\n", std::to_string(it.first).c_str(),
+          std::to_string(isLogarithm ? exp(it.second) : it.second).c_str());
     }
   }
 };
-
 

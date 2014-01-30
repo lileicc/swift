@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-Expr::Expr(std::vector<Expr*> args) : args(args) {
+Expr::Expr(std::vector<Expr*> args) :
+    args(args) {
 }
 
 Expr::~Expr() {
@@ -18,7 +19,7 @@ Expr::~Expr() {
     delete a;
   args.clear();
 }
-  
+
 std::vector<code::Expr*>& Expr::getArgs() {
   return args;
 }

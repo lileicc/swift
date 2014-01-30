@@ -17,7 +17,7 @@ public:
   FloatingLiteral(double val);
   ~FloatingLiteral();
 
-  double getVal() const ;
+  double getVal() const;
 
   // For Printer
   void print(printer::Printer* prt);

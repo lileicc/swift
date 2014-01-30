@@ -10,10 +10,12 @@
 namespace swift {
 namespace code {
 
-IntegerLiteral::IntegerLiteral(int v) : val(v) {
+IntegerLiteral::IntegerLiteral(int v) :
+    val(v) {
 }
 
-IntegerLiteral::~IntegerLiteral() {}
+IntegerLiteral::~IntegerLiteral() {
+}
 
 int IntegerLiteral::getVal() const {
   return val;

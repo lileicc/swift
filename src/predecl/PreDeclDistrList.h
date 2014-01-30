@@ -4,7 +4,8 @@
 #include "PoissonDistrDecl.h"
 #include "UniformChoiceDistrDecl.h"
 
-namespace swift { namespace predecl {
+namespace swift {
+namespace predecl {
 
 class PreDeclDistrList {
 public:

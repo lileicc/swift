@@ -14,7 +14,7 @@ namespace swift {
 class Configuration {
 public:
   static Configuration* getConfiguration();
-  template <typename _T=std::string>
+  template<typename _T = std::string>
   void setValue(std::string name, _T value);
   std::string getValue(std::string name);
   bool getBoolValue(std::string name);

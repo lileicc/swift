@@ -1,9 +1,11 @@
 #include "MapExpr.h"
 #include "Ty.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-MapExpr::MapExpr() : fromTyp(NULL), toTyp(NULL) {
+MapExpr::MapExpr() :
+    fromTyp(NULL), toTyp(NULL) {
 }
 
 MapExpr::~MapExpr() {
@@ -42,10 +44,12 @@ void MapExpr::setToTyp(const Ty * t) {
   toTyp = t;
 }
 
-void MapExpr::print(FILE* file, int indent){
+void MapExpr::print(FILE* file, int indent) const {
   fprintf(file, "%*s(MapExpr:\n", indent, "");
-  fprintf(file, "%*s:fromTyp: %s", indent+2, "", getFromTyp()->toString().c_str());
-  fprintf(file, "%*s:toTyp: %s", indent+2, "", getToTyp()->toString().c_str());
+  fprintf(file, "%*s:fromTyp: %s", indent + 2, "",
+      getFromTyp()->toString().c_str());
+  fprintf(file, "%*s:toTyp: %s", indent + 2, "",
+      getToTyp()->toString().c_str());
   for (size_t i = 0; i < mapSize(); i++) {
     fprintf(file, "%*s:from#%d\n", indent + 2, "", i);
     getFrom(i)->print(file, indent + 4);

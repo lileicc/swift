@@ -15,7 +15,8 @@ VarDecl::VarDecl(DeclContext * context, std::string id, Type ty, Expr* value) :
 }
 
 VarDecl::~VarDecl() {
-  if (value != NULL) delete value;
+  if (value != NULL)
+    delete value;
 }
 
 const std::string& VarDecl::getId() const {

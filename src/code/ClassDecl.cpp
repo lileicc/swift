@@ -7,17 +7,18 @@
 
 #include "ClassDecl.h"
 
-
 namespace swift {
 namespace code {
 
-ClassDecl::ClassDecl(DeclContext* ns, std::string name) : parent(ns), name(name) {
+ClassDecl::ClassDecl(DeclContext* ns, std::string name) :
+    parent(ns), name(name) {
 }
 
 ClassDecl::~ClassDecl() {
 }
 
-ClassDecl* ClassDecl::createClassDecl(DeclContext* ns, const std::string& name) {
+ClassDecl* ClassDecl::createClassDecl(DeclContext* ns,
+    const std::string& name) {
   ClassDecl* cd = new ClassDecl(ns, name);
   ns->addDecl(cd);
   return cd;

@@ -16,12 +16,14 @@ namespace code {
 
 class Type {
 public:
-  Type(std::string name, bool refTag=false);
-  Type(std::vector<std::string> scope, std::string name, bool refTag=false);
-  Type(std::string name, std::vector<Type> typeArgs, bool refTag=false);
-  Type(std::vector<std::string> scope, std::string name, std::vector<Type> typeArgs, bool refTag=false);
-  Type(std::vector<std::string> scope, std::string name, Type typeArg, bool refTag=false);
-  Type(Type baseType, std::vector<Type> typeArgs, bool refTag=false);
+  Type(std::string name, bool refTag = false);
+  Type(std::vector<std::string> scope, std::string name, bool refTag = false);
+  Type(std::string name, std::vector<Type> typeArgs, bool refTag = false);
+  Type(std::vector<std::string> scope, std::string name,
+      std::vector<Type> typeArgs, bool refTag = false);
+  Type(std::vector<std::string> scope, std::string name, Type typeArg,
+      bool refTag = false);
+  Type(Type baseType, std::vector<Type> typeArgs, bool refTag = false);
   ~Type();
 
   const std::string& getName() const;

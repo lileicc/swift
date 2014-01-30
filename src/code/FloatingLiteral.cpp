@@ -10,7 +10,8 @@
 namespace swift {
 namespace code {
 
-FloatingLiteral::FloatingLiteral(double val): val(val) {
+FloatingLiteral::FloatingLiteral(double val) :
+    val(val) {
   // TODO Auto-generated constructor stub
 
 }

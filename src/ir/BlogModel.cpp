@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "BlogModel.h"
 
 #include "Evidence.h"
@@ -5,19 +6,21 @@
 #include "Query.h"
 #include "TypeDomain.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
 BlogModel::~BlogModel() {
 }
 
 void BlogModel::addFunction(std::shared_ptr<FuncDefn> func) {
-  if (func->isFixed()) fixFunc.push_back(func);
+  if (func->isFixed())
+    fixFunc.push_back(func);
   else
-  /* TODO : To Add VoidFuncCall
-  if (func->argSize() == 0)
-    voidFunc.push_back(func);
-  else
-  */
+    /* TODO : To Add VoidFuncCall
+     if (func->argSize() == 0)
+     voidFunc.push_back(func);
+     else
+     */
     randFunc.push_back(func);
 }
 
@@ -37,10 +40,6 @@ const std::vector<std::shared_ptr<FuncDefn>>& BlogModel::getFixFuncs() {
   return fixFunc;
 }
 
-const std::vector<std::shared_ptr<FuncDefn>>& BlogModel::getVoidFuncs() {
-  return voidFunc;
-}
-
 const std::vector<std::shared_ptr<FuncDefn>>& BlogModel::getRandFuncs() {
   return randFunc;
 }
@@ -53,7 +52,8 @@ const std::vector<std::shared_ptr<Evidence>>& BlogModel::getEvidences() {
   return evidence;
 }
 
-BlogModel::BlogModel(const std::string name): name(name) {
+BlogModel::BlogModel(const std::string name) :
+    name(name) {
 }
 
 const std::vector<std::shared_ptr<TypeDomain>>& BlogModel::getTypes() {
@@ -64,43 +64,33 @@ const std::string& BlogModel::getName() const {
   return name;
 }
 
-void BlogModel::print(FILE* file, int indent){
-  fprintf(file, "%*s(FixFuncs:\n", indent, "");
-  for(size_t i = 0; i < fixFunc.size(); i++){
-    fixFunc[i]->print(file, indent+2);
+void BlogModel::print(FILE* file, int indent) const {
+  for (size_t i = 0; i < types.size(); i++) {
+    types[i]->print(file, indent);
   }
-  fprintf(file, "%*s)\n", indent, "");
-  
-  fprintf(file, "%*s(VoidFuncs:\n", indent, "");
-  for(size_t i = 0; i < voidFunc.size(); i++){
-    voidFunc[i]->print(file, indent+2);
+  for (size_t i = 0; i < fixFunc.size(); i++) {
+    fixFunc[i]->print(file, indent);
   }
-  fprintf(file, "%*s)\n", indent, "");
-  
-  fprintf(file, "%*s(RandFuncs:\n", indent, "");
-  for(size_t i = 0; i < randFunc.size(); i++){
-    randFunc[i]->print(file, indent+2);
+  for (size_t i = 0; i < randFunc.size(); i++) {
+    randFunc[i]->print(file, indent);
   }
-  fprintf(file, "%*s)\n", indent, "");
-  
-  fprintf(file, "%*s(Queries:\n", indent, "");
-  for(size_t i = 0; i < query.size(); i++){
-    query[i]->print(file, indent+2);
+  for (size_t i = 0; i < evidence.size(); i++) {
+    evidence[i]->print(file, indent);
   }
-  fprintf(file, "%*s)\n", indent, "");
-  
-  fprintf(file, "%*s(Evidences:\n", indent, "");
-  for(size_t i = 0; i < evidence.size(); i++){
-    evidence[i]->print(file, indent+2);
+  for (size_t i = 0; i < query.size(); i++) {
+    query[i]->print(file, indent);
   }
-  fprintf(file, "%*s)\n", indent, "");
-  
-  fprintf(file, "%*s(Types:\n", indent, "");
-  for(size_t i = 0; i < types.size(); i++){
-    types[i]->print(file, indent+2);
-  }
-  fprintf(file, "%*s)\n", indent, "");
+}
+
+void BlogModel::print(const char* filename) const {
+  FILE* irf = stdout;
+  if (filename && filename[0] != '\0')
+    irf = fopen(filename, "w");
+  this->print(irf);
+  if (irf != stdout)
+    fclose(irf);
 }
 
 }
 }
+

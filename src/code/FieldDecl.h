@@ -16,10 +16,11 @@ namespace code {
 
 class FieldDecl: public swift::code::VarDecl {
 public:
-  FieldDecl(ClassDecl* cd, std::string name, Type ty, Expr* value=nullptr);
+  FieldDecl(ClassDecl* cd, std::string name, Type ty, Expr* value = nullptr);
   ~FieldDecl();
 
-  static FieldDecl* createFieldDecl(ClassDecl* cd, std::string name, Type ty, Expr* value=nullptr);
+  static FieldDecl* createFieldDecl(ClassDecl* cd, std::string name, Type ty,
+      Expr* value = nullptr);
 
   // For Printer
   virtual void print(printer::Printer* prt);

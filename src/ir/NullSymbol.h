@@ -1,10 +1,10 @@
 #pragma once
 #include "ConstSymbol.h"
 
-namespace swift { namespace ir {
+namespace swift {
+namespace ir {
 
-class NullSymbol :
-  public swift::ir::ConstSymbol {
+class NullSymbol: public swift::ir::ConstSymbol {
 public:
   NullSymbol();
   virtual ~NullSymbol();
