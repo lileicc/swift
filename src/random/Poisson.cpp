@@ -4,7 +4,7 @@
  *  Created on: Jan 24, 2014
  *      Author: leili
  */
-
+#include <cmath>
 #include "Poisson.h"
 
 namespace swift {
@@ -19,6 +19,7 @@ Poisson::~Poisson() {
 
 void Poisson::init(double lambda) {
   this->lambda = lambda;
+  loglambda = std::log(lambda);
   dist = std::poisson_distribution<int>(lambda);
 }
 
@@ -31,8 +32,12 @@ double Poisson::likeli(int x) {
 }
 
 double Poisson::loglikeli(int x) {
-  //// TODO CHANGE THIS
-  return (x >= 0) ? 1 : - INFINITY;
+  if (x < 0)
+    return - INFINITY;
+  double p = - lambda + x * loglambda;
+  for (; x > 1; --x)
+    p -= std::log(x);
+  return p;
 }
 } /* namespace random */
 } /* namespace swift */

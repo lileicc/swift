@@ -23,6 +23,7 @@ public:
 private:
   std::poisson_distribution<int> dist;
   double lambda;
+  double loglambda;
 };
 
 } /* namespace random */
