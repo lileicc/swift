@@ -159,7 +159,6 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
 
   transSampleAlg();
 
-  // TODO translate query
   transAllQuery(model->getQueries());
 
   createMain();
