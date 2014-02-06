@@ -27,6 +27,7 @@ public:
   virtual double loglikeli(T x) = 0; // calculate the log-likelihood
 protected:
   static std::default_random_engine engine;
+  const long double PI = 3.141592653589793238L;
 };
 
 template<typename T>
