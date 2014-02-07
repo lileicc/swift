@@ -257,7 +257,7 @@ std::shared_ptr<ir::IfThen> Semant::transIfThen(absyn::IfExpr* expr) {
   }
   auto ptr = std::make_shared<ir::IfThen>(transExpr(expr->getCond()),
       transClause(expr->getThen()));
-  if (ptr->getThen()->getTyp() == NULL) {
+  if (ptr->getThen() == NULL) {
     // TODO: to allow null expression in then clause
     error(expr->line, expr->col, "Then Clause cannot be NULL!");
     return ptr;
@@ -328,8 +328,7 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
     return ptr;
   }
   if (toTy == NULL) {
-    error(expr->line, expr->col, "Type of To terms cannot be confirmed!");
-    return ptr;
+    warning(expr->line, expr->col, "Type of To terms cannot be confirmed!");
   }
   // Fill the type field of NullExpr
   for (auto c : ptr->getConds())
