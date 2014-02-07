@@ -807,24 +807,25 @@ void CPPTranslator::createInit() {
 
 // add the in the class a field variable for a funcappvar with params
 void CPPTranslator::addFieldForFunVar(std::string varname,
-    const std::vector<std::shared_ptr<ir::VarDecl> >& params, code::Type valueType) {
+    const std::vector<std::shared_ptr<ir::VarDecl> >& params,
+    code::Type valueType) {
   if (!params.empty()) {
     // the underlying library only support two dimensions at most
     for (int id = 0; id < params.size(); id++) {
-      valueType = code::Type(VECTOR_CLASS_NAME, std::vector<code::Type>({valueType}));
-      // NOTE: currently only support single argument
-      // todo support more arguments!
+      valueType = code::Type(VECTOR_CLASS_NAME, std::vector<code::Type>( {
+          valueType }));
       // the type of a random function could only be nametype
       std::string argtypename = params[id]->toSignature();
       std::string numvarname_for_arg = getVarOfNumType(argtypename);
       // adding in the ensure_size function for value of a random variable
-      // ::: valuevar.resize(number_of_instance);
+      // :::=> resize(valuevar, id, number_of_instance);
       code::FunctionDecl* ensureFun = declared_funs[getEnsureFunName(
           numvarname_for_arg)];
       ensureFun->addStmt(
-                        new code::CallExpr(new code::Identifier(VECTOR_RESIZE_METHOD_NAME), std::vector<code::Expr*>({
-        new code::Identifier(varname), new code::IntegerLiteral(id), new code::Identifier(numvarname_for_arg)
-      })));
+          new code::CallExpr(new code::Identifier(VECTOR_RESIZE_METHOD_NAME),
+              std::vector<code::Expr*>(
+                  { new code::Identifier(varname), new code::IntegerLiteral(id),
+                      new code::Identifier(numvarname_for_arg) })));
     }
   }
   // adding in the main class a declaration of field for value of a random variable
