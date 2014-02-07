@@ -770,19 +770,21 @@ std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
   // TODO: add type checking for predecl distribution
   std::string name = expr->getDistrName().getValue();
   const predecl::PreDeclDistr* distr = predeclFactory.getDistr(name);
-
-  if (distr == NULL) {
-    // TODO: to allow costumized distribution
-    //warning(expr->line, expr->col, "<" + name + "> costumized distribution assumed! No type checking will be performed!");
-    error(expr->line, expr->col, "distribution < " + name + " > not defined");
-    return std::make_shared<ir::Distribution>(name);
-  }
-
+  // parse arguments of distribution
   std::vector<std::shared_ptr<ir::Expr>> args;
   for (size_t i = 0; i < expr->size(); ++i) {
     auto ag = transExpr(expr->get(i));
     if (ag)
       args.push_back(ag);
+  }
+  
+  if (distr == NULL) {
+    // not predeclared distribution
+    warning(expr->line, expr->col, "<" + name + "> customized distribution assumed! No type checking will be performed!");
+    
+    auto dist = std::make_shared<ir::Distribution>(name);
+    dist->setArgs(args);
+    return dist;
   }
 
   std::shared_ptr<ir::Distribution> ret = distr->getNew(args, &tyFactory);

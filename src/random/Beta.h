@@ -1,5 +1,5 @@
 /*
- * Gaussian.h
+ * Beta.h
  *
  *  Created on: Feb 6, 2014
  *      Author: yiwu
@@ -12,10 +12,10 @@
 namespace swift {
 namespace random {
 
-class BetaDistribution: public swift::random::SwiftDistribution<double> {
+class Beta: public swift::random::SwiftDistribution<double> {
 public:
-  BetaDistribution();
-  virtual ~BetaDistribution();
+  Beta();
+  virtual ~Beta();
   void init(double alpha = 2.0, double beta = 2.0);
   double gen();
   double likeli(double x);
