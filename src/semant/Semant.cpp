@@ -1001,12 +1001,12 @@ void Semant::transQuery(absyn::Query* nq) {
   auto ptr = transExpr(nq->getExpr());
   if (!isCardAll(ptr)
       && (std::dynamic_pointer_cast<ir::FunctionCall>(ptr) == nullptr)) {
-    //TODO: build a internal Void Function Call to represent this expr
-    error(nq->line, nq->col,
-        "Currently we only accept [ Function Call | #TypeName ] in the query statement!");
-    return;
-  }
-  model->addQuery(std::make_shared<ir::Query>(ptr));
+    /* General Case: Arbitrary Expr
+    TODO: check if we need to build a internal Void Function Call to represent this expr
+      */
+    model->addQuery(std::make_shared<ir::Query>(ptr, true));
+  } else // Special Case: function call
+    model->addQuery(std::make_shared<ir::Query>(ptr));
 }
 
 const ir::Ty* Semant::transTy(const absyn::Ty& typ) {

@@ -8,7 +8,7 @@ namespace ir {
 
 class Query {
 public:
-  Query(std::shared_ptr<Expr> var);
+  Query(std::shared_ptr<Expr> var, bool general = false);
   virtual ~Query();
 
   // TODO refactor name
@@ -16,9 +16,15 @@ public:
   // For Debugging Use
   void print(FILE* file, int indent);
 
+  // whether var is special or general
+  bool isGeneral() const;
+  bool isSpecial() const;
 private:
-  // Note: var can be [ FunctionCall | #TypeName ]
+  // Note: var can be
+  //   >> Special: [ FunctionCall | #TypeName ]
+  //   >> General: Any Other Expr
   std::shared_ptr<Expr> var;
+  bool general;
 };
 
 }
