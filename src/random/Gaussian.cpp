@@ -24,6 +24,9 @@ Gaussian::~Gaussian() {
 void Gaussian::init(double mean, double stddev) {
   this->mean = mean;
   this->stddev = stddev;
+  coef = 1.0 / (stddev * std::sqrt(PI * 2));
+  log_coef = - std::log(stddev * std::sqrt(PI * 2));
+  scale = - 1.0 / (2 * stddev * stddev);
   dist = std::normal_distribution<double>(mean, stddev);
 }
 
@@ -32,7 +35,7 @@ double Gaussian::gen() {
 }
 
 double Gaussian::likeli(double x) {
-  return coef * exp(scale * (x - mean) * (x - mean));
+  return coef * std::exp(scale * (x - mean) * (x - mean));
 }
 
 double Gaussian::loglikeli(double x) {

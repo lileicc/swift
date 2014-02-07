@@ -1,5 +1,5 @@
 /*
- * BoolDistribution.h
+ * BooleanDistrib.h
  *
  *  Created on: Feb 6, 2014
  *      Author: yiwu
@@ -12,10 +12,10 @@
 namespace swift {
 namespace random {
 
-class BoolDistribution: public swift::random::SwiftDistribution<bool> {
+class BooleanDistrib: public swift::random::SwiftDistribution<bool> {
 public:
-  BoolDistribution();
-  virtual ~BoolDistribution();
+  BooleanDistrib();
+  virtual ~BooleanDistrib();
   void init(double p);
   bool gen();
   double likeli(bool x);
@@ -23,6 +23,8 @@ public:
 private:
   std::bernoulli_distribution dist;
   double p;
+  double logp;
+  double log1_p;
 };
 
 } /* namespace random */

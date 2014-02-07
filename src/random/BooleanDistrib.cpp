@@ -1,24 +1,24 @@
 /*
- * Bernoulli.h
+ * BooleanDistrib.cpp
  *
  *  Created on: Feb 6, 2014
  *      Author: yiwu
  */
  
 #include <cmath>
-#include "Bernoulli.h"
+#include "BooleanDistrib.h"
 
 namespace swift {
 namespace random {
 
-Bernoulli::Bernoulli() :
-    p(0) {
+BooleanDistrib::BooleanDistrib() :
+    p(0), logp(0), log1_p(0) {
 }
 
-Bernoulli::~Bernoulli() {
+BooleanDistrib::~BooleanDistrib() {
 }
 
-void Bernoulli::init(double p) {
+void BooleanDistrib::init(double p) {
   if(p < 0) p = 0;
   if(p > 1) p = 1;
   this->p = p;
@@ -27,15 +27,15 @@ void Bernoulli::init(double p) {
   dist = std::bernoulli_distribution(p);
 }
 
-int Bernoulli::gen() {
+bool BooleanDistrib::gen() {
   return dist(engine);
 }
 
-double Bernoulli::likeli(int x) {
-  return x ? p : (1 - p);
+double BooleanDistrib::likeli(bool x) {
+  return x ? p : 1 - p;
 }
 
-double Bernoulli::loglikeli(int x) {
+double BooleanDistrib::loglikeli(bool x) {
   return x ? logp : log1_p;
 }
 

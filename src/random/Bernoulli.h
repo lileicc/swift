@@ -23,6 +23,8 @@ public:
 private:
   std::bernoulli_distribution dist;
   double p;
+  double logp;
+  double log1_p;
 };
 
 } /* namespace random */
