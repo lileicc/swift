@@ -308,8 +308,11 @@ void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
 
     // add setter function::: double set_fun(int, ,,,);
     transSetterFun(fd);
+  } else {
+    // TODO handle fixed function
+    // fixed function not supported yet
+    assert(false);
   }
-  // TODO handle fixed function
 }
 
 code::FunctionDecl* CPPTranslator::transGetterFun(
