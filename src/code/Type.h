@@ -27,6 +27,7 @@ public:
   ~Type();
 
   const std::string& getName() const;
+  void setRef(bool refTag = false);
   bool isRef() const;
   bool hasScope() const;
   std::vector<Type> & getTypeArgs();

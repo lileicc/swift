@@ -159,7 +159,6 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
 
   transSampleAlg();
 
-  // TODO translate query
   transAllQuery(model->getQueries());
 
   createMain();
@@ -321,7 +320,7 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   // __value__name for recording the value of the function application variable
   std::string valuevarname = getValueVarName(name);
   // adding in the main class a declaration of field for value of a random variable
-  addFieldForFunVar(valuevarname, fd->getArgs());
+  addFieldForFunVar(valuevarname, fd->getArgs(), valuetype);
   // __mark__name
   std::string markvarname = getMarkVarName(name);
   // adding in the main class a declaration of field for mark of a random variable
@@ -331,8 +330,10 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
       coreCls, getterfunname, valuetype);
   getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
   declared_funs[getterfun->getName()] = getterfun;
+  code::Type valueRefType = valuetype;
+  valueRefType.setRef(true);
   addFunValueRefStmt(getterfun, valuevarname, getterfun->getParams(),
-      VALUE_VAR_REF_NAME);
+      VALUE_VAR_REF_NAME, valueRefType);
   addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
       MARK_VAR_REF_NAME);
   // now translating::: if (markvar == current sample num) then return value;
@@ -372,8 +373,10 @@ code::FunctionDecl* CPPTranslator::transLikeliFun(
   likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
   declared_funs[likelifun->getName()] = likelifun;
   // now the value of this function app var is in VALUE_VAR_REF_NAME
+  code::Type valueRefType = valuetype;
+  valueRefType.setRef(true);
   addFunValueRefStmt(likelifun, valuevarname, likelifun->getParams(),
-      VALUE_VAR_REF_NAME);
+      VALUE_VAR_REF_NAME, valueRefType);
   // declare the weight variable and setting its init value
   // it is recording the log likelihood
   // ::: __weight = 0
@@ -405,8 +408,10 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
       setterfun, fd->getArgs());
   declared_funs[setterfun->getName()] = setterfun;
+  code::Type valueRefType = valuetype;
+  valueRefType.setRef(true);
   addFunValueRefStmt(setterfun, valuevarname, args_with_value,
-      VALUE_VAR_REF_NAME);
+      VALUE_VAR_REF_NAME, valueRefType);
   addFunValueRefStmt(setterfun, markvarname, args_with_value,
       MARK_VAR_REF_NAME);
   // set the argument of setter function
@@ -802,23 +807,26 @@ void CPPTranslator::createInit() {
 
 // add the in the class a field variable for a funcappvar with params
 void CPPTranslator::addFieldForFunVar(std::string varname,
-    const std::vector<std::shared_ptr<ir::VarDecl> >& params) {
-  code::Type valueType = INT_TYPE;
+    const std::vector<std::shared_ptr<ir::VarDecl> >& params,
+    code::Type valueType) {
   if (!params.empty()) {
-    valueType = INT_VECTOR_TYPE;
-    // NOTE: currently only support single argument
-    // todo support more arguments!
-    std::string argtypename = params[0]->toSignature();
-    std::string numvarname_for_arg = getVarOfNumType(argtypename);
-    // adding in the ensure_size function for value of a random variable
-    // ::: valuevar.resize(number_of_instance);
-    code::FunctionDecl* ensureFun = declared_funs[getEnsureFunName(
-        numvarname_for_arg)];
-    ensureFun->addStmt(
-
-        code::CallExpr::createMethodCall(varname, VECTOR_RESIZE_METHOD_NAME,
-            std::vector<code::Expr*>(
-                { new code::Identifier(numvarname_for_arg) })));
+    // the underlying library only support two dimensions at most
+    for (int id = 0; id < params.size(); id++) {
+      valueType = code::Type(VECTOR_CLASS_NAME, std::vector<code::Type>( {
+          valueType }));
+      // the type of a random function could only be nametype
+      std::string argtypename = params[id]->toSignature();
+      std::string numvarname_for_arg = getVarOfNumType(argtypename);
+      // adding in the ensure_size function for value of a random variable
+      // :::=> resize(valuevar, id, number_of_instance);
+      code::FunctionDecl* ensureFun = declared_funs[getEnsureFunName(
+          numvarname_for_arg)];
+      ensureFun->addStmt(
+          new code::CallExpr(new code::Identifier(VECTOR_RESIZE_METHOD_NAME),
+              std::vector<code::Expr*>(
+                  { new code::Identifier(varname), new code::IntegerLiteral(id),
+                      new code::Identifier(numvarname_for_arg) })));
+    }
   }
   // adding in the main class a declaration of field for value of a random variable
   code::FieldDecl::createFieldDecl(coreCls, varname, valueType);

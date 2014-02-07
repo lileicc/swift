@@ -137,6 +137,13 @@ private:
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
       std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
       code::Type varType = INT_REF_TYPE);
+  
+  /**
+   * create a field for function value
+   */
+  void addFieldForFunVar(std::string varname,
+                         const std::vector<std::shared_ptr<ir::VarDecl> >& params, code::Type valueType = INT_TYPE);
+  
   /**
    * translate the distribution expression
    * given the arguments,
@@ -154,8 +161,6 @@ private:
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
       const std::shared_ptr<ir::VarDecl> var);
 
-  void addFieldForFunVar(std::string varname,
-      const std::vector<std::shared_ptr<ir::VarDecl> >& params);
   /**
    * given a list of Parameter variable declarations in ir, translate into a
    * vector of parameter varible declaration in code
