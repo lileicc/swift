@@ -13,9 +13,6 @@ namespace random {
 
 Beta::Beta() :
     alpha(2.0), beta(2.0) {
-  coef = std::tgamma((long double)(alpha + beta)) * 
-  	(1.0L / std::tgamma((long double)alpha)) * (1.0L / std::tgamma((long double)beta));
-  log_coef = std::lgamma((long double)(alpha+beta)) - std::lgamma((long double)alpha) - std::lgamma((long double)beta);
 }
 
 Beta::~Beta() {

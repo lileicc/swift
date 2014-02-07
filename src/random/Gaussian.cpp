@@ -13,9 +13,6 @@ namespace random {
 
 Gaussian::Gaussian() :
     mean(0.0), stddev(1.0) {
-  coef = 1.0 / (stddev * sqrt(PI * 2));
-  log_coef = - log(stddev * sqrt(PI * 2));
-  scale = - 1.0 / (2 * stddev * stddev);
 }
 
 Gaussian::~Gaussian() {
