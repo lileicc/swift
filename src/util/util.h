@@ -38,10 +38,10 @@ inline void resize(std::vector<T> & x, int id, int sz){
 
 // resize the matrix (vector of vector of int)
 template<typename T>
-inline void resize(std::vector<std::vector<T> >& x, int id, int sz){
+inline void resize(std::vector<std::vector<T> >& x, size_t id, size_t sz){
   if (id == 0) {
     // resize the first dimension
-    int b = 1;
+    size_t b = 1;
     if (x.size() > 0)
       b = x[0].size();
     x.resize(sz, std::vector<T>(b));

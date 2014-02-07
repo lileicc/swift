@@ -375,7 +375,10 @@ void CPPPrinter::print(code::CaseStmt* term) {
 void CPPPrinter::print(code::ClassDecl* term) {
   if (isforward) { // print everything except body of FunctionDecl
     printIndent();
-    fprintf(file, "class %s { public:", term->getName().c_str());
+    fprintf(file, "class %s {", term->getName().c_str());
+    printLine();
+    printIndent();
+    fprintf(file, "public:");
     printLine();
     incIndent();
     for (auto p : term->getAllDecls())

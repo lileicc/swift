@@ -46,6 +46,11 @@ const std::string& Type::getName() const {
   return name;
 }
 
+
+void Type::setRef(bool refTag) {
+  this->refTag = refTag;
+}
+
 bool Type::isRef() const {
   return refTag;
 }
