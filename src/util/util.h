@@ -31,7 +31,7 @@ inline double logEqual(T a, T b) {
 }
 
 // resize the vector or vector of vector
-// only work for dimensionality < 0
+// only work for dimensionality <= 3
 template<typename T>
 inline void resize(std::vector<T> & x, size_t id, size_t sz){
   if (id == 0) {
@@ -41,12 +41,22 @@ inline void resize(std::vector<T> & x, size_t id, size_t sz){
     else
       x.resize(sz);
   } else if (id == 1) {
-    // resize the second dimension
-    for (auto & a : x) {
-      a.resize(sz);
+    if (x.size() > 0 && x[0].size() > 0) {
+      // resize the second dimension
+      for (auto & a : x) {
+        a.resize(sz, x[0][0]);
+      }
+    } else {
+      for (auto & a : x) {
+        a.resize(sz);
+      }
     }
-  } else {
-    // do nothing
+  } else if (id == 2) {
+    for (auto & a : x) {
+      for (auto & b : a) {
+        b.resize(sz);
+      }
+    }
   }
 }
 
