@@ -119,6 +119,14 @@ std::string getMarkVarName(std::string name) {
 std::string getValueVarName(std::string name) {
   return "__value_" + name;
 }
+  
+/**
+ * given the type name,
+ * return the variable name to store all the instances in that type
+ */
+std::string getInstanceArrayName(std::string name) {
+  return "__instance_" + name;
+}
 
 CPPTranslator::CPPTranslator() {
   useTag = false;
@@ -152,7 +160,7 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
   for (auto fun : model->getRandFuncs())
     transFun(fun);
 
-  // translate fixed function
+  // todo translate fixed function
 
   // translate evidence
   transAllEvidence(model->getEvidences());
@@ -238,6 +246,18 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   code::ClassDecl* cd = code::ClassDecl::createClassDecl(coreNs, name);
   code::FieldDecl::createFieldDecl(cd, DISTINCT_FIELDNAME, STRING_TYPE);
   size_t len = td->getPreLen(); // number of predefined distinct symbols
+  // declare a vector to hold all instance in this type
+  std::string inst_var_name = getInstanceArrayName(name);
+  code::FieldDecl::createFieldDecl(coreCls, inst_var_name, code::Type(VECTOR_CLASS_NAME, std::vector<code::Type>({code::Type(name)})));
+  if (len > 0) {
+    //make sure the instance vector contains enough instance
+    coreClsInit->addStmt(code::CallExpr::createMethodCall(inst_var_name, VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>({new code::IntegerLiteral((int)len)})));
+    for (size_t i = 0; i < len; ++i) {
+      // :::=>   inst_var_name[i] = "name of the instance";
+      code::Stmt* assignst = new code::BinaryOperator(new code::ArraySubscriptExpr(new code::Identifier(inst_var_name), new code::IntegerLiteral((int)i)), new code::StringLiteral(td->getInstName(i)), code::OpKind::BO_ASSIGN);
+      coreClsInit->addStmt(assignst);
+    }
+  }
   std::string numvar = getVarOfNumType(name);
   // create a field in the main class:::    int numvar;
   code::FieldDecl::createFieldDecl(coreCls, numvar, INT_TYPE);
@@ -248,6 +268,7 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   coreClsInit->addStmt(
       new code::BinaryOperator(new code::Identifier(numvar),
           new code::IntegerLiteral((int) len), code::OpKind::BO_ASSIGN));
+  
   // add in the init function:::            mark_numvar = -1;
   coreClsInit->addStmt(
       new code::BinaryOperator(new code::Identifier(marknumvar),
@@ -265,8 +286,9 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
       getGetterFunName(numvar), INT_TYPE, true);
   declared_funs[fun->getName()] = fun;
-  // TODO please add the corresponding distinct name
-
+  
+  
+  
   // handle number statement
   size_t numstlen = td->getNumberStmtSize();
   if (numstlen > 0) {
