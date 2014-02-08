@@ -38,7 +38,7 @@ double Beta::likeli(const double& x) {
 }
 
 double Beta::loglikeli(const double& x) {
-  return - (log_coef + (alpha - 1.0) * x + (beta - 1.0) * (1.0 - x));
+  return log_coef + (alpha - 1.0) * x + (beta - 1.0) * (1.0 - x);
 }
 
 } /* namespace random */

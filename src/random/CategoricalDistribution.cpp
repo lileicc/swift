@@ -12,7 +12,6 @@ namespace swift {
 namespace random {
 
 Categorical::Categorical() {
-//  srand(time(NULL));
 }
 
 Categorical::~Categorical() {
@@ -67,7 +66,6 @@ double Categorical::likeli(const int& x) {
     return weights[e->second];
   else
     return 0;
-  return weights[x];
 }
 
 double Categorical::loglikeli(const int& x) {

@@ -55,9 +55,9 @@ double Dirichlet::likeli(const std::vector<double>& x) {
 
 double Dirichlet::loglikeli(const std::vector<double>& x) {
   if(x.size() != alpha.size()) return - INFINITY;
-  double ret = - log_coef;
+  double ret = log_coef;
   for(size_t i = 0; i < alpha.size(); ++ i)
-    ret -= (alpha[i] - 1.0) * x[i];
+    ret += (alpha[i] - 1.0) * x[i];
   return ret;
 }
 

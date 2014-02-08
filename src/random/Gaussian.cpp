@@ -36,7 +36,7 @@ double Gaussian::likeli(const double& x) {
 }
 
 double Gaussian::loglikeli(const double& x) {
-  return - (scale * (x - mean) * (x - mean) + log_coef);
+  return scale * (x - mean) * (x - mean) + log_coef;
 }
 
 } /* namespace random */
