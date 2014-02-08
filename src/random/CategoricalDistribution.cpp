@@ -61,23 +61,22 @@ int Categorical::gen() {
 //  return values[x];
 }
 
-double Categorical::likeli(int x) {
+double Categorical::likeli(const int& x) {
   auto e = values_to_indic.find(x);
   if (e != values_to_indic.end())
-    x = e->second;
+    return weights[e->second];
   else
     return 0;
   return weights[x];
 }
 
-double Categorical::loglikeli(int x) {
+double Categorical::loglikeli(const int& x) {
   // todo: check -infinity!!!
   auto e = values_to_indic.find(x);
   if (e != values_to_indic.end())
-    x = e->second;
+    return log_weights[e->second];
   else
     return - INFINITY;
-  return log_weights[x];
 }
 
 } /* namespace random */

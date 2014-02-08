@@ -31,11 +31,11 @@ int Bernoulli::gen() {
   return dist(engine);
 }
 
-double Bernoulli::likeli(int x) {
+double Bernoulli::likeli(const int& x) {
   return x ? p : (1 - p);
 }
 
-double Bernoulli::loglikeli(int x) {
+double Bernoulli::loglikeli(const int& x) {
   return x ? logp : log1_p;
 }
 

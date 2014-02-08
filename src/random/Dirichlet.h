@@ -19,8 +19,8 @@ public:
   virtual ~Dirichlet();
   void init(std::vector<double> alpha);
   std::vector<double> gen();
-  double likeli(std::vector<double> x);
-  double loglikeli(std::vector<double> x);
+  double likeli(const std::vector<double>& x);
+  double loglikeli(const std::vector<double>& x);
 private:
   std::vector<std::gamma_distribution<double> > dist_alpha;
   std::vector<double> alpha;

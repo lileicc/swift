@@ -45,7 +45,7 @@ std::vector<double> Dirichlet::gen() {
   return x;
 }
 
-double Dirichlet::likeli(std::vector<double> x) {
+double Dirichlet::likeli(const std::vector<double>& x) {
   if(x.size() != alpha.size()) return 0;
   double ret = coef;
   for(size_t i = 0; i < alpha.size(); ++ i)
@@ -53,7 +53,7 @@ double Dirichlet::likeli(std::vector<double> x) {
   return ret;
 }
 
-double Dirichlet::loglikeli(std::vector<double> x) {
+double Dirichlet::loglikeli(const std::vector<double>& x) {
   if(x.size() != alpha.size()) return - INFINITY;
   double ret = - log_coef;
   for(size_t i = 0; i < alpha.size(); ++ i)

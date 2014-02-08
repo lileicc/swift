@@ -27,11 +27,11 @@ int Poisson::gen() {
   return dist(engine);
 }
 
-double Poisson::likeli(int x) {
+double Poisson::likeli(const int& x) {
   return std::exp(loglikeli(x));
 }
 
-double Poisson::loglikeli(int x) {
+double Poisson::loglikeli(const int& x) {
   if (x < 0)
     return - INFINITY;
   double p = - lambda + x * loglambda - std::lgamma(x + 1.0);

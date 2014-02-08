@@ -18,8 +18,8 @@ public:
   virtual ~Gaussian();
   void init(double mean = 0.0, double stddev = 1.0);
   double gen();
-  double likeli(double x);
-  double loglikeli(double x);
+  double likeli(const double& x);
+  double loglikeli(const double& x);
 private:
   std::normal_distribution<double> dist;
   double mean, stddev;

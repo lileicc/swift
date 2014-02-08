@@ -33,11 +33,11 @@ double Beta::gen() {
   return x / (x + dist_beta(engine));
 }
 
-double Beta::likeli(double x) {
+double Beta::likeli(const double& x) {
   return coef * pow(x, alpha - 1.0) * pow(1.0 - x, beta - 1.0);
 }
 
-double Beta::loglikeli(double x) {
+double Beta::loglikeli(const double& x) {
   return - (log_coef + (alpha - 1.0) * x + (beta - 1.0) * (1.0 - x));
 }
 
