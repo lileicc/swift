@@ -1,1 +1,1 @@
-g++ -std=gnu++11 src/absyn/*.cpp src/ir/*.cpp src/fabrica/*.cpp src/msg/*.cpp src/predecl/*.cpp src/code/*.cpp src/codegen/CPPTranslator.cpp src/semant/Semant.cpp src/main.cpp src/parse/parser.cpp src/parse/lexer.cpp -o swift
+g++ -std=gnu++11 -Wall src/absyn/*.cpp src/ir/*.cpp src/fabrica/*.cpp src/msg/*.cpp src/predecl/*.cpp src/code/*.cpp src/codegen/CPPTranslator.cpp src/semant/Semant.cpp src/main.cpp src/parse/parser.cpp src/parse/lexer.cpp -o swift
