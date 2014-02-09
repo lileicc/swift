@@ -27,11 +27,11 @@ const std::string& TypeDomain::getName() const {
   return name;
 }
 
-void TypeDomain::setRefer(const NameTy* ref) {
+void TypeDomain::setType(const NameTy* ref) {
   refer = ref;
 }
 
-const NameTy* TypeDomain::getRefer() const {
+const NameTy* TypeDomain::getType() const {
   return refer;
 }
 
@@ -118,13 +118,13 @@ void TypeDomain::print(FILE* file, int indent) {
   if (origin.size()) {
     fprintf(file, "%*sorigin:\n", indent + 2, "");
     for (size_t i = 0; i < origin.size(); i++) {
-      fprintf(file, "%*s:arg %d\n", indent + 4, "", i);
+      fprintf(file, "%*s:arg %zu\n", indent + 4, "", i);
       origin[i]->print(file, indent + 4);
     }
     fprintf(file, "%*s\n", indent + 2, "");
   }
   fprintf(file, "%*srefer: %s\n", indent + 2, "",
-      getRefer()->toString().c_str());
+      getType()->toString().c_str());
   if (instName.size()) {
     fprintf(file, "%*sinstName:\n", indent + 2, "");
     for (size_t i = 0; i < instName.size(); i++) {

@@ -21,11 +21,11 @@ const std::vector<std::shared_ptr<VarDecl>>& NumberStmt::getAllVars() const {
   return var;
 }
 
-const OriginAttr* NumberStmt::getOrigin(int k) const {
+const OriginAttr* NumberStmt::getOrigin(size_t k) const {
   return origin[k];
 }
 
-const std::shared_ptr<VarDecl>& NumberStmt::getVar(int k) const {
+const std::shared_ptr<VarDecl>& NumberStmt::getVar(size_t k) const {
   return var[k];
 }
 

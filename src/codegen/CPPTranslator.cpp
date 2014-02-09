@@ -119,7 +119,7 @@ std::string getMarkVarName(std::string name) {
 std::string getValueVarName(std::string name) {
   return "__value_" + name;
 }
-  
+
 /**
  * given the type name,
  * return the variable name to store all the instances in that type
@@ -245,16 +245,30 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   // create a class for this declared type
   code::ClassDecl* cd = code::ClassDecl::createClassDecl(coreNs, name);
   code::FieldDecl::createFieldDecl(cd, DISTINCT_FIELDNAME, STRING_TYPE);
+  // declare fields corresponding to origin functions
+  for (auto origin : td->getAllOrigin()) {
+    code::FieldDecl::createFieldDecl(cd, origin->getName(),
+        mapIRTypeToCodeType(origin->getTyp()));
+  }
   size_t len = td->getPreLen(); // number of predefined distinct symbols
   // declare a vector to hold all instance in this type
   std::string inst_var_name = getInstanceArrayName(name);
-  code::FieldDecl::createFieldDecl(coreCls, inst_var_name, code::Type(VECTOR_CLASS_NAME, std::vector<code::Type>({code::Type(name)})));
+  code::FieldDecl::createFieldDecl(coreCls, inst_var_name,
+      code::Type(VECTOR_CLASS_NAME,
+          std::vector<code::Type>( { code::Type(name) })));
   if (len > 0) {
+    // adding distinct symbols
     //make sure the instance vector contains enough instance
-    coreClsInit->addStmt(code::CallExpr::createMethodCall(inst_var_name, VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>({new code::IntegerLiteral((int)len)})));
+    coreClsInit->addStmt(
+        code::CallExpr::createMethodCall(inst_var_name,
+            VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>( {
+                new code::IntegerLiteral((int) len) })));
     for (size_t i = 0; i < len; ++i) {
       // :::=>   inst_var_name[i] = "name of the instance";
-      code::Stmt* assignst = new code::BinaryOperator(new code::ArraySubscriptExpr(new code::Identifier(inst_var_name), new code::IntegerLiteral((int)i)), new code::StringLiteral(td->getInstName(i)), code::OpKind::BO_ASSIGN);
+      code::Stmt* assignst = new code::BinaryOperator(
+          new code::ArraySubscriptExpr(new code::Identifier(inst_var_name),
+              new code::IntegerLiteral((int) i)),
+          new code::StringLiteral(td->getInstName(i)), code::OpKind::BO_ASSIGN);
       coreClsInit->addStmt(assignst);
     }
   }
@@ -268,7 +282,7 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   coreClsInit->addStmt(
       new code::BinaryOperator(new code::Identifier(numvar),
           new code::IntegerLiteral((int) len), code::OpKind::BO_ASSIGN));
-  
+
   // add in the init function:::            mark_numvar = -1;
   coreClsInit->addStmt(
       new code::BinaryOperator(new code::Identifier(marknumvar),
@@ -286,9 +300,7 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(coreCls,
       getGetterFunName(numvar), INT_TYPE, true);
   declared_funs[fun->getName()] = fun;
-  
-  
-  
+
   // handle number statement
   size_t numstlen = td->getNumberStmtSize();
   if (numstlen > 0) {
@@ -300,9 +312,47 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
               code::OpKind::BO_EQU),
           new code::ReturnStmt(new code::Identifier(numvar)), nullptr);
       fun->addStmt(st);
+      
+      std::string localnumvarname = numvar + std::to_string(k);
+      st = new code::DeclStmt(new code::VarDecl(fun, localnumvarname, INT_REF_TYPE));
+      fun->addStmt(st);
       std::shared_ptr<ir::NumberStmt> numst = td->getNumberStmt(k);
+      code::CompoundStmt* insidebody = new code::CompoundStmt();
+      // translate the body clause with origin attributes
+      st = transClause(numst->getBody(), localnumvarname);
+      insidebody->addStmt(st);
+      // adjust the size of the instance vector
+      st = new code::BinaryOperator(new code::Identifier(numvar), new code::Identifier(localnumvarname), code::OpKind::BO_SPLUS);
+      insidebody->addStmt(st);
+      // resize the instance vector to make sure it get enough size
+      code::CallExpr::createMethodCall(inst_var_name, VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>({new code::Identifier(numvar)}));
+      code::Expr* szexp = new code::IntegerLiteral(1);
+      st = insidebody;
+      // LEILI: TODO: need to set the attributes
+      // translate origin attributes
+      for (size_t originid=numst->size(); originid > 0;) {
+        originid--;
+        const ir::OriginAttr* origin = numst->getOrigin(originid);
+        auto originvar = numst->getVar(originid);
+        // origin type must be nametype
+        auto origintypename = origin->getTyp()->toString();
+        std::string origin_num_var = getVarOfNumType(origintypename);
+        std::string getfun_origin_type = getGetterFunName(origin_num_var);
+        // get the number of the origin type
+        // :::=>    __get__num_of_type()
+        fun->addStmt(new code::CallExpr(new code::Identifier(getfun_origin_type)));
+        szexp = new code::BinaryOperator(szexp, new code::Identifier(origin_num_var), code::OpKind::BO_MUL);
+        // set the initial assignment
+        // :::=>        int var=0;
+        code::Stmt* initst = new code::DeclStmt(new code::VarDecl(fun, originvar->getVarName(), mapIRTypeToCodeType(originvar->getTyp()), new code::IntegerLiteral(0)));
+        // :::=>        var < _num_of_type
+        code::Expr* cond = new code::BinaryOperator(new code::Identifier(originvar->getVarName()), new code::Identifier(origin_num_var), code::OpKind::BO_LT);
+        code::Expr* step = new code::BinaryOperator(new code::Identifier(originvar->getVarName()), nullptr, code::OpKind::UO_INC);
+        st = new code::ForStmt(initst, cond, step, st);
+      }
+
       // for the moment just translate one number statement,
-      fun->addStmt(transClause(numst->getBody(), numvar));
+      fun->addStmt(st);
     }
     // call the ensure fun afterwards
     // :::==> ensure_num
