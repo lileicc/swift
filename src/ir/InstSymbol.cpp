@@ -20,7 +20,7 @@ size_t InstSymbol::getID() const {
 }
 
 void InstSymbol::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(InstSymbol: %s[%lu])\n", indent, "",
+  fprintf(file, "%*sInstSymbol: %s[%lu]\n", indent, "",
       refer->getName().c_str(), id);
 }
 

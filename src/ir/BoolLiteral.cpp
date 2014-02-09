@@ -16,7 +16,7 @@ bool BoolLiteral::getValue() const {
 }
 
 void BoolLiteral::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(BoolLiteral: %s)\n", indent, "",
+  fprintf(file, "%*sBoolLiteral: %s\n", indent, "",
       (value ? "true" : "false"));
 }
 

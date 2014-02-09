@@ -14,9 +14,8 @@ const InstSymbol* InstSymbolRef::getInst() const {
 }
 
 void InstSymbolRef::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(InstSymbolRef: \n", indent, "");
+  fprintf(file, "%*sInstSymbolRef: \n", indent, "");
   inst->print(file, indent + 2);
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

@@ -32,14 +32,13 @@ bool QuantForm::isExists() const {
 }
 
 void QuantForm::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(QuantExpr:\n", indent, "");
-  fprintf(file, "%*s:typ %d\n", indent + 2, "", op);
-  fprintf(file, "%*s:var %s\n", indent + 2, "", var->toString().c_str());
+  fprintf(file, "%*sQuantExpr:\n", indent, "");
+  fprintf(file, "%*styp: %d\n", indent + 2, "", op);
+  fprintf(file, "%*svar: %s\n", indent + 2, "", var->toString().c_str());
   if (get(0) != NULL) {
-    fprintf(file, "%*s:cond\n", indent + 2, "");
+    fprintf(file, "%*scond:\n", indent + 2, "");
     get(0)->print(file, indent + 4);
   }
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

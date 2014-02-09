@@ -46,7 +46,7 @@ std::shared_ptr<Clause> IfThen::getElse() const {
 }
 
 void IfThen::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(IfThen:\n", indent, "");
+  fprintf(file, "%*sIfThen:\n", indent, "");
   if (getCond() != nullptr) {
     fprintf(file, "%*scond:\n", indent + 2, "");
     getCond()->print(file, indent + 4);
@@ -59,7 +59,6 @@ void IfThen::print(FILE* file, int indent) const {
     fprintf(file, "%*selse:\n", indent + 2, "");
     getElse()->print(file, indent + 4);
   }
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

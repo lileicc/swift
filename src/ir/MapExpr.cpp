@@ -45,18 +45,17 @@ void MapExpr::setToTyp(const Ty * t) {
 }
 
 void MapExpr::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(MapExpr:\n", indent, "");
-  fprintf(file, "%*s:fromTyp: %s", indent + 2, "",
+  fprintf(file, "%*sMapExpr:\n", indent, "");
+  fprintf(file, "%*sfromTyp: %s", indent + 2, "",
       getFromTyp()->toString().c_str());
-  fprintf(file, "%*s:toTyp: %s", indent + 2, "",
+  fprintf(file, "%*stoTyp: %s", indent + 2, "",
       getToTyp()->toString().c_str());
   for (size_t i = 0; i < mapSize(); i++) {
-    fprintf(file, "%*s:from#%d\n", indent + 2, "", i);
+    fprintf(file, "%*sfrom#%lu: \n", indent + 2, "", i);
     getFrom(i)->print(file, indent + 4);
-    fprintf(file, "%*s:to#%d\n", indent + 2, "", i);
+    fprintf(file, "%*sto#%lu: \n", indent + 2, "", i);
     getTo(i)->print(file, indent + 4);
   }
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

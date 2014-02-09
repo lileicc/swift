@@ -23,7 +23,7 @@ const std::shared_ptr<ConstSymbol>& Evidence::getRight() const {
 }
 
 void Evidence::print(FILE* file, int indent) {
-  fprintf(file, "%*s(Evidence:\n", indent, "");
+  fprintf(file, "%*sEvidence:\n", indent, "");
   if (getLeft() != nullptr) {
     fprintf(file, "%*sleft:\n", indent + 2, "");
     getLeft()->print(file, indent + 4);
@@ -32,7 +32,6 @@ void Evidence::print(FILE* file, int indent) {
     fprintf(file, "%*sright:\n", indent + 2, "");
     getRight()->print(file, indent + 4);
   }
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

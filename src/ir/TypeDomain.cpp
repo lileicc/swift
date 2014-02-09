@@ -113,12 +113,12 @@ std::vector<std::shared_ptr<FuncDefn> > & TypeDomain::getReferFuns() {
 }
 
 void TypeDomain::print(FILE* file, int indent) {
-  fprintf(file, "%*s(TypeDomain:\n", indent, "");
+  fprintf(file, "%*sTypeDomain:\n", indent, "");
   fprintf(file, "%*sname: %s\n", indent + 2, "", getName().c_str());
   if (origin.size()) {
     fprintf(file, "%*sorigin:\n", indent + 2, "");
     for (size_t i = 0; i < origin.size(); i++) {
-      fprintf(file, "%*s:arg %d\n", indent + 4, "", i);
+      fprintf(file, "%*sarg: %lu\n", indent + 4, "", i);
       origin[i]->print(file, indent + 4);
     }
     fprintf(file, "%*s\n", indent + 2, "");
@@ -134,11 +134,10 @@ void TypeDomain::print(FILE* file, int indent) {
   if (usedBy.size()) {
     fprintf(file, "%*susedBy:\n", indent + 2, "");
     for (size_t i = 0; i < usedBy.size(); i++) {
-      fprintf(file, "%*s %s\n", indent + 4, "",
+      fprintf(file, "%*s%s\n", indent + 4, "",
           usedBy[i]->toSignature().c_str());
     }
   }
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

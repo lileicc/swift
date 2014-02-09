@@ -15,7 +15,7 @@ std::shared_ptr<VarDecl> VarRefer::getRefer() const {
 }
 
 void VarRefer::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(VarRefer: %s)\n", indent, "", refer->toString().c_str());
+  fprintf(file, "%*sVarRefer: %s\n", indent, "", refer->toString().c_str());
 }
 }
 }

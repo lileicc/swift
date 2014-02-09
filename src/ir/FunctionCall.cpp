@@ -30,7 +30,7 @@ std::shared_ptr<FuncDefn> FunctionCall::getRefer() const {
 }
 
 void FunctionCall::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(FunctionCall:\n", indent, "");
+  fprintf(file, "%*sFunctionCall:\n", indent, "");
   fprintf(file, "%*sfun: %s\n", indent + 2, "", refer->toSignature().c_str());
   if (argSize()) {
     fprintf(file, "%*sargs:\n", indent + 2, "");
@@ -40,7 +40,6 @@ void FunctionCall::print(FILE* file, int indent) const {
       }
     }
   }
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

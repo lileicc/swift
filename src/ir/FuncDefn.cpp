@@ -74,13 +74,12 @@ std::string FuncDefn::toSignature() const {
 }
 
 void FuncDefn::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(FuncDefn:\n", indent, "");
+  fprintf(file, "%*sFuncDefn:\n", indent, "");
   fprintf(file, "%*s%s\n", indent + 2, "", toSignature().c_str());
   fprintf(file, "%*sbody:\n", indent + 2, "");
   if (getBody() != nullptr) {
     getBody()->print(file, indent + 4);
   }
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }
