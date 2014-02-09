@@ -46,6 +46,7 @@ const std::string CPPTranslator::HISTOGRAM_ADD_METHOD_NAME = "add";
 const std::string CPPTranslator::HISTOGRAM_PRINT_METHOD_NAME = "print";
 const std::string CPPTranslator::LOG_EQUAL_FUN_NAME = "logEqual";
 const std::string CPPTranslator::ISFINITE_FUN_NAME = "isfinite";
+  const std::string CPPTranslator::NEG_INFINITE_NAME = "-INFINITE";
 const std::string CPPTranslator::ANSWER_VAR_NAME_PREFIX = "_answer_";
 const std::string CPPTranslator::ANSWER_PRINT_METHOD_NAME = "print";
 const std::string CPPTranslator::MAIN_DEBUG_METHOD_NAME = "debug";
@@ -965,9 +966,29 @@ void CPPTranslator::transEvidence(code::FunctionDecl* fun,
     }
     st = new code::IfStmt(cond, st);
     fun->addStmt(st);
+    return;
+  }
+  
+  // check whether left is a cardinality expression
+  std::shared_ptr<ir::CardExpr> cardexp = std::dynamic_pointer_cast<ir::CardExpr>(left);
+  if (cardexp) {
+    // translate cardinality evidence
+    // check whether the evidence doesnot hold
+    code::Expr* cond = new code::BinaryOperator(
+                       transCardExpr(cardexp), transExpr(evid->getRight()), code::OpKind::BO_NEQ);
+    code::Expr* res;
+    if (COMPUTE_LIKELIHOOD_IN_LOG) {
+      res = new code::Identifier(NEG_INFINITE_NAME);
+    } else {
+      res = new code::IntegerLiteral(0);
+    }
+    code::Stmt* st = new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), res, code::OpKind::BO_ASSIGN);
+    st = new code::IfStmt(cond, st);
+    fun->addStmt(st);
+    return;
   }
   // TODO adding support for other evidence
-  // 1. Cardinality evidence
+  // 1. better setting evidence for Cardinality evidence
   // 2. Set evidence
 }
 

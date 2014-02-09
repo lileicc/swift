@@ -236,6 +236,9 @@ private:
 
   // function name for checking whether a number is finite
   static const std::string ISFINITE_FUN_NAME;
+  
+  // MACRO name for holding negative INFINITE
+  static const std::string NEG_INFINITE_NAME;
 
   /**
    * function name for printing query answer
