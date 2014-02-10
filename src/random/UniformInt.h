@@ -18,8 +18,8 @@ public:
   virtual ~UniformInt();
   void init(int a, int b);
   int gen();
-  double likeli(int x);
-  double loglikeli(int x);
+  double likeli(const int& x);
+  double loglikeli(const int& x);
 private:
   std::uniform_int_distribution<int> dist;
   int a;

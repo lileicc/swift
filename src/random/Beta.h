@@ -18,8 +18,8 @@ public:
   virtual ~Beta();
   void init(double alpha = 2.0, double beta = 2.0);
   double gen();
-  double likeli(double x);
-  double loglikeli(double x);
+  double likeli(const double& x);
+  double loglikeli(const double& x);
 private:
   std::gamma_distribution<double> dist_alpha, dist_beta;
   double alpha, beta;
