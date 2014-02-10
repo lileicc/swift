@@ -305,17 +305,20 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   // handle number statement
   size_t numstlen = td->getNumberStmtSize();
   if (numstlen > 0) {
+    code::Stmt* st = new code::IfStmt(
+                                      new code::BinaryOperator(new code::Identifier(marknumvar),
+                                                               new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+                                                               code::OpKind::BO_EQU),
+                                      new code::ReturnStmt(new code::Identifier(numvar)), nullptr);
+    fun->addStmt(st);
+    // set initial value for number var
+    st = new code::BinaryOperator(new code::Identifier(numvar),
+                                  new code::IntegerLiteral((int) len), code::OpKind::BO_ASSIGN);
+    fun->addStmt(st);
     for (size_t k = 0; k < numstlen; k++) {
-      // TODO suppoert multiple number statements
-      code::Stmt* st = new code::IfStmt(
-          new code::BinaryOperator(new code::Identifier(marknumvar),
-              new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
-              code::OpKind::BO_EQU),
-          new code::ReturnStmt(new code::Identifier(numvar)), nullptr);
-      fun->addStmt(st);
-      
+      // suppoert multiple number statements
       std::string localnumvarname = numvar + std::to_string(k);
-      st = new code::DeclStmt(new code::VarDecl(fun, localnumvarname, INT_REF_TYPE));
+      st = new code::DeclStmt(new code::VarDecl(fun, localnumvarname, INT_TYPE));
       fun->addStmt(st);
       std::shared_ptr<ir::NumberStmt> numst = td->getNumberStmt(k);
       code::CompoundStmt* insidebody = new code::CompoundStmt();
