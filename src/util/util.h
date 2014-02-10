@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <vector>
+#include <functional>
 #pragma once
 
 // computing log( exp(a) + exp(b) )
@@ -63,3 +64,14 @@ inline void resize(std::vector<T> & x, size_t id, size_t sz){
   }
 }
 
+//////////////////////////////////
+// Internal Functions
+//////////////////////////////////
+
+// function for generating a conditional set
+std::vector<int> _gen_condset(int n, std::function<bool (int)> fun) {
+  std::vector<int> ret;
+  for (int i=0;i<n;++i)
+  if (fun(i)) ret.push_back(i);
+  return ret;
+}
