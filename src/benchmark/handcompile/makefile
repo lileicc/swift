@@ -13,7 +13,11 @@ hurricane:
 burglary:
 	g++ ${FLAGS} LWSamplerBurglary.cpp -o execute_burglary
 
+csi:
+	g++ ${FLAGS} LWSamplerCSI.cpp -o execute_csi
+
 run:
 	./execute_urnball 1000000
 	./execute_hurricane
 	./execute_burglary
+	./execute_csi
