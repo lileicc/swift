@@ -75,3 +75,11 @@ std::vector<int> _gen_condset(int n, std::function<bool (int)> fun) {
   if (fun(i)) ret.push_back(i);
   return ret;
 }
+
+// function for computing cardinality of a conditional set
+int _card_condset(int n, std::function<bool(int)> fun) {
+  int ret=0;
+  for (int i=0;i<n;++i)
+  if (fun(i))++ret;
+  return ret;
+}
