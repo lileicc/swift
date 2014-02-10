@@ -46,8 +46,8 @@ void lwsampler::LWSamplerBurglary::printResult() {
   printf("++++++++++++++++++++++++++++++++++\n");
   printf("Result for Burglary:\n");
   std::map<bool, double> result = getResult();
-  printf("  > true:  %.5lf\n", result[true]);
   printf("  > false: %.5lf\n", result[false]);
+  printf("  > true:  %.5lf\n", result[true]);
 }
 
 std::map<bool, double> lwsampler::LWSamplerBurglary::getResult() {
