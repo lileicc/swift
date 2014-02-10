@@ -814,7 +814,7 @@ void CPPTranslator::addFieldForFunVar(std::string varname,
     code::Type valueType) {
   if (!params.empty()) {
     // the underlying library only support two dimensions at most
-    for (int id = 0; id < params.size(); id++) {
+    for (size_t id = 0; id < params.size(); id++) {
       valueType = code::Type(VECTOR_CLASS_NAME, std::vector<code::Type>( {
           valueType }));
       // the type of a random function could only be nametype
