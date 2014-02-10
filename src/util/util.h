@@ -83,3 +83,17 @@ int _card_condset(int n, std::function<bool(int)> fun) {
   if (fun(i))++ret;
   return ret;
 }
+
+// function for computing forall opr
+bool _forall(int n, std::function<bool(int)> fun) {
+  for (int i=0;i<n;++i)
+  if (!fun(i)) return false;
+  return true;
+}
+
+// function for computing exists opr
+bool _exists(int n, std::function<bool(int)> fun) {
+  for (int i=0;i<n;++i)
+  if (fun(i)) return true;
+  return false;
+}
