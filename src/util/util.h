@@ -31,6 +31,9 @@ inline double logEqual(T a, T b) {
 }
 
 // resize the vector or vector of vector
+// Args:
+//   id, indicating the dimension which needs resizing, (starting from 0)
+//   sz, the size resizing to 
 // only work for dimensionality <= 3
 template<typename T>
 inline void resize(std::vector<T> & x, size_t id, size_t sz){

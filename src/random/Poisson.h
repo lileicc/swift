@@ -18,8 +18,8 @@ public:
   virtual ~Poisson();
   void init(double lambda);
   int gen();
-  double likeli(int x);
-  double loglikeli(int x);
+  double likeli(const int& x);
+  double loglikeli(const int& x);
 private:
   std::poisson_distribution<int> dist;
   double lambda;

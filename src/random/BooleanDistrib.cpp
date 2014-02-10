@@ -31,11 +31,11 @@ bool BooleanDistrib::gen() {
   return dist(engine);
 }
 
-double BooleanDistrib::likeli(bool x) {
+double BooleanDistrib::likeli(const bool& x) {
   return x ? p : 1 - p;
 }
 
-double BooleanDistrib::loglikeli(bool x) {
+double BooleanDistrib::loglikeli(const bool& x) {
   return x ? logp : log1_p;
 }
 

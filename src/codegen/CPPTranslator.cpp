@@ -237,7 +237,7 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   // create a class for this declared type
   code::ClassDecl* cd = code::ClassDecl::createClassDecl(coreNs, name);
   code::FieldDecl::createFieldDecl(cd, DISTINCT_FIELDNAME, STRING_TYPE);
-  size_t len = td->getPreLen();
+  size_t len = td->getPreLen(); // number of predefined distinct symbols
   std::string numvar = getVarOfNumType(name);
   // create a field in the main class:::    int numvar;
   code::FieldDecl::createFieldDecl(coreCls, numvar, INT_TYPE);

@@ -18,8 +18,8 @@ public:
   virtual ~Bernoulli();
   void init(double p);
   int gen();
-  double likeli(int x);
-  double loglikeli(int x);
+  double likeli(const int& x);
+  double loglikeli(const int& x);
 private:
   std::bernoulli_distribution dist;
   double p;
