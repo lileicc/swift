@@ -68,32 +68,61 @@ inline void resize(std::vector<T> & x, size_t id, size_t sz){
 // Internal Functions
 //////////////////////////////////
 
-// function for generating a conditional set
-std::vector<int> _gen_condset(int n, std::function<bool (int)> fun) {
+/*
+ * A filter function
+ *  Input: a size <n>, and a condition function <fun>
+ *  return: a vector containing all the integer k from 0 to n-1, such that fun(k) is true
+ */
+std::vector<int> _filter(int n, std::function<bool (int)> fun) {
   std::vector<int> ret;
   for (int i=0;i<n;++i)
-  if (fun(i)) ret.push_back(i);
+    if (fun(i)) ret.push_back(i);
   return ret;
 }
 
-// function for computing cardinality of a conditional set
-int _card_condset(int n, std::function<bool(int)> fun) {
+/*
+ * filter function for range
+ * Input : two iterators and a condition
+ * Output: copies of filted elements in the range
+ */
+std::vector<int> _filter(std::vector<int>::iterator st, std::vector<int>::iterator en, std::function<bool(int)> fun) {
+  std::vector<int> ret;
+  for (; st != en; ++ st)
+    if (fun(*st)) ret.push_back(*st);
+  return ret;
+}
+
+/*
+ * Count the number of filtered elements
+ * Note: For the Range Version, please refer to std::count()
+ */
+int _count(int n, std::function<bool(int)> fun) {
   int ret=0;
   for (int i=0;i<n;++i)
-  if (fun(i))++ret;
+    if (fun(i))++ret;
   return ret;
 }
 
-// function for computing forall opr
+/*
+ * function for forall operator in BLOG
+ * Input : size <n>, and a condition function <fun>
+ * Output: Whether for all the integer k from 0 to n-1, fun(k) is true
+ *  Note : For range version please refer to std::all_of()
+ */
 bool _forall(int n, std::function<bool(int)> fun) {
   for (int i=0;i<n;++i)
-  if (!fun(i)) return false;
+    if (!fun(i)) return false;
   return true;
 }
 
-// function for computing exists opr
+/*
+* function for exists operator in BLOG
+* Input : size <n>, and a condition function <fun>
+* Output: Whether there exists a integer k from 0 to n-1, such that fun(k) is true
+*  Note : For range version please refer to std::any_of()
+*/
 bool _exists(int n, std::function<bool(int)> fun) {
   for (int i=0;i<n;++i)
-  if (fun(i)) return true;
+    if (fun(i)) return true;
   return false;
 }
