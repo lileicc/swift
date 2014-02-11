@@ -36,6 +36,7 @@ public:
   LambdaExpr(LambdaKind kind = LambdaKind::REF, Type ty = Type(""));
   ~LambdaExpr();
 
+  const LambdaKind& getKind() const;
   void addStmt(Stmt* stmt);
   void setBody(CompoundStmt cpd);
   CompoundStmt& getBody();

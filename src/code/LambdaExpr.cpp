@@ -23,6 +23,10 @@ void LambdaExpr::clear() {
     if (p != NULL) delete p;
 }
 
+const LambdaKind& LambdaExpr::getKind() const {
+  return kind;
+}
+
 void LambdaExpr::addStmt(Stmt* stmt) {
   body.addStmt(stmt);
 }

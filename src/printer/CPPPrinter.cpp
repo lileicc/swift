@@ -403,13 +403,21 @@ void CPPPrinter::print(code::CompoundStmt* term) {
   printIndent();
   fprintf(file, "{");
   printLine();
+
+  auto backup = newline;
+  newline = true;
+
   incIndent();
 
   for (auto p : term->getAll())
     p->print(this);
 
   decIndent();
-  printIndent();
+
+  newline = backup;
+
+  if (term->getAll().size() > 0) // Otherwise it is just an empty block, no indent needed
+    printIndent();
   fprintf(file, "}");
   printLine();
 }
@@ -468,11 +476,12 @@ void CPPPrinter::print(code::ForStmt* term) {
   fprintf(file, ")");
   newline = backup;
 
-  if (term->getBody() != NULL) {
+  if (term->getBody() != NULL) { // at least a pair of brackets will be printed
     printLine();
     term->getBody()->print(this);
   }
-  fprintf(file, ";");
+  else // Body is empty
+    fprintf(file, ";");
   printLine();
 }
 
@@ -752,8 +761,44 @@ void CPPPrinter::print(code::ListInitExpr* term) {
   fprintf(file, "}");
 }
 
+std::string CPPPrinter::getLambdaKindStr(code::LambdaKind kind) {
+  using code::LambdaKind;
+  switch (kind) {
+  case LambdaKind::NA:
+    return "";
+  case LambdaKind::REF:
+    return "&";
+  case LambdaKind::COPY:
+    return "=";
+  case LambdaKind::THIS:
+    return "this";
+  default: return "";
+  }
+}
+
 void CPPPrinter::print(code::LambdaExpr* term) {
-  // TODO: Print LambdaExpr
+  printIndent();
+  bool backup = newline;
+  newline = false;
+
+  fprintf(file, "[%s]",getLambdaKindStr(term->getKind()).c_str());
+  fprintf(file, "(");
+
+  bool isFirst = true;
+  for (auto p : term->getParams()) {
+    if (!isFirst) fprintf(file, ", ");
+    else isFirst = false;
+    p->print(this);
+  }
+
+  fprintf(file, ")");
+
+  term->getBody().print(this);
+
+  newline = backup;
+  if (backup)
+    fprintf(file, ";");
+  printLine();
 }
 
 void CPPPrinter::print(std::vector<code::Expr*>& exprs) {
