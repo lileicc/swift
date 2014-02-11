@@ -45,6 +45,7 @@ public:
   void print(code::FunctionDecl* term, bool hasRetType);
   void print(code::IfStmt* term);
   void print(code::IntegerLiteral* term);
+  void print(code::LambdaExpr* term);
   void print(code::ListInitExpr* term);
   void print(code::NamespaceDecl* term);
   void print(code::NullLiteral* term);

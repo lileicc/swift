@@ -17,9 +17,7 @@ CompoundStmt::CompoundStmt() {
 
 CompoundStmt::~CompoundStmt() {
   // TODO Auto-generated destructor stub
-  for (auto p : body)
-    if (p != NULL)
-      delete p;
+  clear();
 }
 
 void CompoundStmt::addStmt(Stmt* st) {
@@ -36,6 +34,12 @@ Stmt* CompoundStmt::get(int k) const {
 
 const std::vector<Stmt*>& CompoundStmt::getAll() const {
   return body;
+}
+
+void CompoundStmt::clear() {
+  for (auto p : body)
+    if (p != NULL)
+      delete p;
 }
 
 // For Printer

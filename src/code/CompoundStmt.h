@@ -22,6 +22,8 @@ public:
   Stmt* get(int k) const;
   const std::vector<Stmt*>& getAll() const;
 
+  void clear();
+
   // For Printer
   void print(printer::Printer* prt);
 

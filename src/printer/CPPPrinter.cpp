@@ -752,6 +752,10 @@ void CPPPrinter::print(code::ListInitExpr* term) {
   fprintf(file, "}");
 }
 
+void CPPPrinter::print(code::LambdaExpr* term) {
+  // TODO: Print LambdaExpr
+}
+
 void CPPPrinter::print(std::vector<code::Expr*>& exprs) {
   bool first = true;
   for (auto ex : exprs) {
