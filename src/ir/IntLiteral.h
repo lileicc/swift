@@ -11,6 +11,7 @@ public:
   virtual ~IntLiteral();
 
   int getValue() const;
+  void print(FILE* file, int indent);
 private:
   int value;
 };
