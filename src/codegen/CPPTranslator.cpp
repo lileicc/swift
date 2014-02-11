@@ -61,6 +61,7 @@ const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
 const code::Type CPPTranslator::RANDOM_ENGINE_TYPE("default_random_engine");
 const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
 const std::string CPPTranslator::UNIFORM_INT_DISTRIBUTION_NAME = "UniformInt";
+const std::string CPPTranslator::FILL_N_FUN_NAME = "fill_n";
 const int CPPTranslator::INIT_SAMPLE_NUM = 0;
 const int CPPTranslator::NULLSYMBOL_VALUE = -1;
 const int CPPTranslator::TOTAL_NUM_SAMPLES = 1000000;
@@ -329,7 +330,12 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
       st = new code::BinaryOperator(new code::Identifier(numvar), new code::Identifier(localnumvarname), code::OpKind::BO_SPLUS);
       insidebody->addStmt(st);
       // resize the instance vector to make sure it get enough size
-      code::CallExpr::createMethodCall(inst_var_name, VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>({new code::Identifier(numvar)}));
+      st = code::CallExpr::createMethodCall(inst_var_name, VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>({new code::Identifier(numvar)}));
+      insidebody->addStmt(st);
+      // filling the origin attributes
+      st = new code::CallExpr(new code::Identifier(FILL_N_FUN_NAME), std::vector<code::Expr*>({new code::Identifier(inst_var_name)}));
+      insidebody->addStmt(st);
+      //////////// LEI LI stops here
       code::Expr* szexp = new code::IntegerLiteral(1);
       st = insidebody;
       // LEILI: TODO: need to set the attributes

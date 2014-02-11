@@ -329,6 +329,11 @@ private:
    * string name for the random engine, note a random engine need to use random device as an input source of randomness
    */
   static const std::string RANDOM_ENGINE_VAR_NAME;
+  
+  /**
+   * function name for fill_n (="fill_n");
+   */
+  static const std::string FILL_N_FUN_NAME;
 
   /**
    * type for the random engine
