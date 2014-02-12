@@ -21,6 +21,11 @@ public:
   void translate(swift::ir::BlogModel* model);
   code::Code* getResult();
 
+protected:
+  // declare a named type
+  // it will create class definition for this type, and one field "name" (std::string)
+  inline code::ClassDecl* DECLARE_TYPE(std::string name);
+
 private:
   code::Code* prog; // holder for result target code
   bool useTag;

@@ -242,11 +242,11 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   //TODO adding other algorithms
 }
 
+
 void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   const std::string& name = td->getName();
   // create a class for this declared type
-  code::ClassDecl* cd = code::ClassDecl::createClassDecl(coreNs, name);
-  code::FieldDecl::createFieldDecl(cd, DISTINCT_FIELDNAME, STRING_TYPE);
+  code::ClassDecl* cd = DECLARE_TYPE(name);
   // declare fields corresponding to origin functions
   for (auto origin : td->getAllOrigin()) {
     code::FieldDecl::createFieldDecl(cd, origin->getName(),
@@ -1170,6 +1170,14 @@ void CPPTranslator::createMain() {
                   code::CallExpr::createMethodCall("__elapsed_seconds", "count") }));
   mainFun->addStmt(st);
 }
+
+inline code::ClassDecl* CPPTranslator::DECLARE_TYPE(std::string name) {
+  // create a class for this declared type
+  code::ClassDecl* cd = code::ClassDecl::createClassDecl(coreNs, name);
+  code::FieldDecl::createFieldDecl(cd, DISTINCT_FIELDNAME, STRING_TYPE);
+  return cd;
+}
+
 
 } /* namespace codegen */
 } /* namespace swift */
