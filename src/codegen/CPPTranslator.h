@@ -110,6 +110,12 @@ private:
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
   code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp);
+
+  /*
+   * translate the SetExpr. Including both conditonal set and explicit set
+   */
+  code::Expr* transSetExpr(std::shared_ptr<ir::SetExpr> e);
+
   /**
    * translate the evidence in obs statement, the resulting statement is added
    * to the declaration context
@@ -264,6 +270,36 @@ private:
 
   // name of the uniform int distribution, i.e. UniformInt
   static const std::string UNIFORM_INT_DISTRIBUTION_NAME;
+
+  // name of the uniformchoice distribution, i.e. UniformChoice
+  static const std::string UNIFORM_CHOICE_DISTRIBUTION_NAME;
+
+  // function name for generating a full set: _gen_full() in util.h
+  static const std::string GEN_FULL_SET_NAME;
+
+  // function name for internal filter: _filer() in util.h
+  static const std::string FILTER_FUNC_NAME;
+
+  // function name for internal filter with range input: _filer() in util.h
+  static const std::string FILTER_RANGE_FUNC_NAME;
+
+  // function name for internal filter counter: _count() in util.h
+  static const std::string FILTER_COUNT_NAME;
+
+  // function name for internal filter counter with range input: std::count() in <algorithm>
+  static const std::string FILTER_RANGE_COUNT_NAME;
+
+  // function name for internal forall operator: _forall() in util.h
+  static const std::string FORALL_NAME;
+
+  // function name for internal forall operator with range input: std::all_of() in <algorithm>
+  static const std::string FORALL_RANGE_NAME;
+
+  // function name for internal exists operator: _exists() in util.h
+  static const std::string EXISTS_NAME;
+
+  // function name for internal exists operator with range input: std::any_of() in <algorithm>
+  static const std::string EXISTS_RANGE_NAME;
 
   /**
    * method name for vector.resize()

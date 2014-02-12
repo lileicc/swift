@@ -60,9 +60,21 @@ const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
 const code::Type CPPTranslator::RANDOM_ENGINE_TYPE("default_random_engine");
 const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
 const std::string CPPTranslator::UNIFORM_INT_DISTRIBUTION_NAME = "UniformInt";
+const std::string CPPTranslator::UNIFORM_CHOICE_DISTRIBUTION_NAME = "UniformChoice";
 const int CPPTranslator::INIT_SAMPLE_NUM = 0;
 const int CPPTranslator::NULLSYMBOL_VALUE = -1;
 const int CPPTranslator::TOTAL_NUM_SAMPLES = 1000000;
+
+// internal predefined functions
+const std::string CPPTranslator::GEN_FULL_SET_NAME = "_gen_full";
+const std::string CPPTranslator::FILTER_FUNC_NAME = "_filter";
+const std::string CPPTranslator::FILTER_RANGE_FUNC_NAME = "_filter";
+const std::string CPPTranslator::FILTER_COUNT_NAME = "_count";
+const std::string CPPTranslator::FILTER_RANGE_COUNT_NAME = "std::count";
+const std::string CPPTranslator::FORALL_NAME = "_forall";
+const std::string CPPTranslator::FORALL_RANGE_NAME = "std::all_of";
+const std::string CPPTranslator::EXISTS_NAME = "_exists";
+const std::string CPPTranslator::EXISTS_RANGE_NAME = "std::any_of";
 
 /**
  * give the name of the type,
@@ -599,9 +611,48 @@ code::Expr* CPPTranslator::transCardExpr(
     return new code::CallExpr(new code::Identifier(getnumvarfunname));
   }
 
-  ///// LEI LI STOP HERE
-  assert(false);
-  return nullptr;
+  // Count the cardinality of a cond set
+  //  ::: ==> _count(__get_num_var(), func)
+  //  where func is a lambda expression translated from setexp->getCond();
+  auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
+  func->addStmt(new code::ReturnStmt(transExpr(setexp->getCond())));
+  std::vector<code::Expr*> args;
+  args.push_back(new code::CallExpr(new code::Identifier(getnumvarfunname)));
+  args.push_back(func);
+  return new code::CallExpr(new code::Identifier(FILTER_COUNT_NAME), args);
+}
+
+code::Expr* CPPTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
+  auto lst = std::dynamic_pointer_cast<ir::ListSet>(e);
+  if (lst != nullptr) {
+    // TODO: vector<int> initialization
+    //   e.g. vector<int>{1,2,3}
+    return NULL;
+  }
+  auto condset = std::dynamic_pointer_cast<ir::CondSet>(e);
+  if (condset == nullptr) {
+    // Should not reach here!!
+    assert(false);
+  }
+
+  std::shared_ptr<ir::VarDecl> var = condset->getVar();
+  const ir::NameTy* tp = dynamic_cast<const ir::NameTy*>(var->getTyp());
+  assert(tp != NULL);
+  std::string tyname = tp->toString();
+  std::string numvarname = getVarOfNumType(tyname);
+  std::string getnumvarfunname = getGetterFunName(numvarname);
+  std::vector<code::Expr*> args;
+  args.push_back(new code::CallExpr(new code::Identifier(getnumvarfunname)));
+
+  if (condset->getCond() == nullptr) {
+    return new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
+  }
+
+  auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
+  func->addStmt(new code::ReturnStmt(transExpr(condset->getCond())));
+  args.push_back(func);
+
+  return new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
 }
 
 code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
@@ -693,6 +744,8 @@ code::Expr* CPPTranslator::transDistribution(
   std::shared_ptr<ir::UniformChoiceDistr> ucdist = std::dynamic_pointer_cast<
       ir::UniformChoiceDistr>(dist);
   if (ucdist) {
+    // TODO: consider listset
+
     // special treatment for UniformChoice;
     std::shared_ptr<ir::CondSet> setexp =
         std::dynamic_pointer_cast<ir::CondSet>(ucdist->getBody());
@@ -746,11 +799,48 @@ code::Expr* CPPTranslator::transDistribution(
             code::OpKind::BO_COMMA);
       }
     } else {
-      assert(false);
-      // should not reach here for the moment, since it is not implemented yet.
       // TODO
+      //    Note: Actually, it is a general way of dynamic initialization
+      std::string distvarname = UNIFORM_CHOICE_DISTRIBUTION_NAME
+        + std::to_string((size_t)&(dist->getArgs()));
+      if (valuevar.empty()) {
+        // Sample value from the distribution
+        // define a field in the main class corresponding to the distribution
+        code::FieldDecl::createFieldDecl(coreCls, distvarname,
+          code::Type(UNIFORM_INT_DISTRIBUTION_NAME));
+        // put init just before sampling
+        // :::=> dist.init(_filter(...))
+        code::Expr* callinit = code::CallExpr::createMethodCall(distvarname,
+          DISTRIBUTION_INIT_FUN_NAME,
+          std::vector<code::Expr*>({transSetExpr(setexp)}));
+        // :::=> dist.gen()
+        code::Expr* callgen = code::CallExpr::createMethodCall(distvarname,
+          DISTRIBUTION_GEN_FUN_NAME);
+        // :::=> dist.init(...), dist.gen()
+        return new code::BinaryOperator(callinit, callgen,
+          code::OpKind::BO_COMMA);
+      }
+      else {
+        // calculating likelihood
+        // put init just before sampling
+        // :::=> dist.init(_filter(...))
+        code::Expr* callinit = code::CallExpr::createMethodCall(distvarname,
+          DISTRIBUTION_INIT_FUN_NAME,
+          std::vector<code::Expr*>({ transSetExpr(setexp) }));
+        // :::=> dist.loglikeli()
+        code::Expr* calllikeli = code::CallExpr::createMethodCall(distvarname,
+          COMPUTE_LIKELIHOOD_IN_LOG ?
+        DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME,
+                                          std::vector<code::Expr*>({ new code::Identifier(valuevar) }));
+        // :::=> dist.init(...), dist.loglikeli()
+        return new code::BinaryOperator(callinit, calllikeli,
+          code::OpKind::BO_COMMA);
+      }
     }
   }
+  // TODO : in some cases, distributions need dynamic initialization!!
+  //     e.g. X~Poisson(5)
+  //          Y~Poisson(X)
   std::string name = dist->getDistrName();
   std::string distvarname = name + std::to_string((size_t) &(dist->getArgs()));
   if (valuevar.empty()) {

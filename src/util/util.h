@@ -69,6 +69,17 @@ inline void resize(std::vector<T> & x, size_t id, size_t sz){
 //////////////////////////////////
 
 /*
+ * Internal function: given n, generating a vector containing 0 to n-1
+ *  Note: will be used for full set operator: {type a}
+ */
+std::vector<int> _gen_full(int n) {
+  std::vector<int> ret;
+  for (int i = 0; i<n; ++i)
+    ret.push_back(i);
+  return ret;
+}
+
+/*
  * A filter function
  *  Input: a size <n>, and a condition function <fun>
  *  return: a vector containing all the integer k from 0 to n-1, such that fun(k) is true
