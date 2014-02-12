@@ -623,11 +623,15 @@ code::Expr* CPPTranslator::transCardExpr(
 }
 
 code::Expr* CPPTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
-  auto lst = std::dynamic_pointer_cast<ir::ListSet>(e);
-  if (lst != nullptr) {
-    // TODO: vector<int> initialization
+  auto lstset = std::dynamic_pointer_cast<ir::ListSet>(e);
+  if (lstset != nullptr) {
+    // list set: vector<int> initialization
     //   e.g. vector<int>{1,2,3}
-    return NULL;
+    std::vector<code::Expr*> args;
+    for (auto a: lstset->getArgs())
+      args.push_back(transExpr(a));
+    code::ListInitExpr* lst = new code::ListInitExpr(args);
+    return new code::CallClassConstructor(INT_VECTOR_TYPE, std::vector<code::Expr*>({lst}));
   }
   auto condset = std::dynamic_pointer_cast<ir::CondSet>(e);
   if (condset == nullptr) {
