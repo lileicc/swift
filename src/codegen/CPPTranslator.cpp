@@ -46,7 +46,7 @@ const std::string CPPTranslator::HISTOGRAM_ADD_METHOD_NAME = "add";
 const std::string CPPTranslator::HISTOGRAM_PRINT_METHOD_NAME = "print";
 const std::string CPPTranslator::LOG_EQUAL_FUN_NAME = "logEqual";
 const std::string CPPTranslator::ISFINITE_FUN_NAME = "isfinite";
-  const std::string CPPTranslator::NEG_INFINITE_NAME = "-INFINITE";
+const std::string CPPTranslator::NEG_INFINITE_NAME = "-INFINITE";
 const std::string CPPTranslator::ANSWER_VAR_NAME_PREFIX = "_answer_";
 const std::string CPPTranslator::ANSWER_PRINT_METHOD_NAME = "print";
 const std::string CPPTranslator::MAIN_DEBUG_METHOD_NAME = "debug";
@@ -242,22 +242,19 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   //TODO adding other algorithms
 }
 
-
 void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   const std::string& name = td->getName();
   // create a class for this declared type
-  code::ClassDecl* cd = DECLARE_TYPE(name);
+  // and declare a vector to hold all instance in this type
+  TYPEDEFN blogtypedefn = DECLARE_TYPE(name);
+  // this is the holder for the instances
+  std::string inst_var_name = getInstanceArrayName(name);
   // declare fields corresponding to origin functions
   for (auto origin : td->getAllOrigin()) {
-    code::FieldDecl::createFieldDecl(cd, origin->getName(),
+    DECLARE_ORIGIN_FIELD(blogtypedefn, origin->getName(),
         mapIRTypeToCodeType(origin->getTyp()));
   }
   size_t len = td->getPreLen(); // number of predefined distinct symbols
-  // declare a vector to hold all instance in this type
-  std::string inst_var_name = getInstanceArrayName(name);
-  code::FieldDecl::createFieldDecl(coreCls, inst_var_name,
-      code::Type(VECTOR_CLASS_NAME,
-          std::vector<code::Type>( { code::Type(name) })));
   if (len > 0) {
     // adding distinct symbols
     //make sure the instance vector contains enough instance
@@ -307,19 +304,20 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   size_t numstlen = td->getNumberStmtSize();
   if (numstlen > 0) {
     code::Stmt* st = new code::IfStmt(
-                                      new code::BinaryOperator(new code::Identifier(marknumvar),
-                                                               new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
-                                                               code::OpKind::BO_EQU),
-                                      new code::ReturnStmt(new code::Identifier(numvar)), nullptr);
+        new code::BinaryOperator(new code::Identifier(marknumvar),
+            new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+            code::OpKind::BO_EQU),
+        new code::ReturnStmt(new code::Identifier(numvar)), nullptr);
     fun->addStmt(st);
     // set initial value for number var
     st = new code::BinaryOperator(new code::Identifier(numvar),
-                                  new code::IntegerLiteral((int) len), code::OpKind::BO_ASSIGN);
+        new code::IntegerLiteral((int) len), code::OpKind::BO_ASSIGN);
     fun->addStmt(st);
     for (size_t k = 0; k < numstlen; k++) {
       // suppoert multiple number statements
       std::string localnumvarname = numvar + std::to_string(k);
-      st = new code::DeclStmt(new code::VarDecl(fun, localnumvarname, INT_TYPE));
+      st = new code::DeclStmt(
+          new code::VarDecl(fun, localnumvarname, INT_TYPE));
       fun->addStmt(st);
       std::shared_ptr<ir::NumberStmt> numst = td->getNumberStmt(k);
       code::CompoundStmt* insidebody = new code::CompoundStmt();
@@ -327,20 +325,24 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
       st = transClause(numst->getBody(), localnumvarname);
       insidebody->addStmt(st);
       // adjust the size of the instance vector
-      st = new code::BinaryOperator(new code::Identifier(numvar), new code::Identifier(localnumvarname), code::OpKind::BO_SPLUS);
+      st = new code::BinaryOperator(new code::Identifier(numvar),
+          new code::Identifier(localnumvarname), code::OpKind::BO_SPLUS);
       insidebody->addStmt(st);
       // resize the instance vector to make sure it get enough size
-      st = code::CallExpr::createMethodCall(inst_var_name, VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>({new code::Identifier(numvar)}));
+      st = code::CallExpr::createMethodCall(inst_var_name,
+          VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>( {
+              new code::Identifier(numvar) }));
       insidebody->addStmt(st);
       // filling the origin attributes
-      st = new code::CallExpr(new code::Identifier(FILL_N_FUN_NAME), std::vector<code::Expr*>({new code::Identifier(inst_var_name)}));
+      st = new code::CallExpr(new code::Identifier(FILL_N_FUN_NAME),
+          std::vector<code::Expr*>( { new code::Identifier(inst_var_name) }));
       insidebody->addStmt(st);
       //////////// LEI LI stops here
       code::Expr* szexp = new code::IntegerLiteral(1);
       st = insidebody;
       // LEILI: TODO: need to set the attributes
       // translate origin attributes
-      for (size_t originid=numst->size(); originid > 0;) {
+      for (size_t originid = numst->size(); originid > 0;) {
         originid--;
         const ir::OriginAttr* origin = numst->getOrigin(originid);
         auto originvar = numst->getVar(originid);
@@ -350,14 +352,23 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
         std::string getfun_origin_type = getGetterFunName(origin_num_var);
         // get the number of the origin type
         // :::=>    __get__num_of_type()
-        fun->addStmt(new code::CallExpr(new code::Identifier(getfun_origin_type)));
-        szexp = new code::BinaryOperator(szexp, new code::Identifier(origin_num_var), code::OpKind::BO_MUL);
+        fun->addStmt(
+            new code::CallExpr(new code::Identifier(getfun_origin_type)));
+        szexp = new code::BinaryOperator(szexp,
+            new code::Identifier(origin_num_var), code::OpKind::BO_MUL);
         // set the initial assignment
         // :::=>        int var=0;
-        code::Stmt* initst = new code::DeclStmt(new code::VarDecl(fun, originvar->getVarName(), mapIRTypeToCodeType(originvar->getTyp()), new code::IntegerLiteral(0)));
+        code::Stmt* initst = new code::DeclStmt(
+            new code::VarDecl(fun, originvar->getVarName(),
+                mapIRTypeToCodeType(originvar->getTyp()),
+                new code::IntegerLiteral(0)));
         // :::=>        var < _num_of_type
-        code::Expr* cond = new code::BinaryOperator(new code::Identifier(originvar->getVarName()), new code::Identifier(origin_num_var), code::OpKind::BO_LT);
-        code::Expr* step = new code::BinaryOperator(new code::Identifier(originvar->getVarName()), nullptr, code::OpKind::UO_INC);
+        code::Expr* cond = new code::BinaryOperator(
+            new code::Identifier(originvar->getVarName()),
+            new code::Identifier(origin_num_var), code::OpKind::BO_LT);
+        code::Expr* step = new code::BinaryOperator(
+            new code::Identifier(originvar->getVarName()), nullptr,
+            code::OpKind::UO_INC);
         st = new code::ForStmt(initst, cond, step, st);
       }
 
@@ -487,7 +498,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   // __mark__name
   std::string markvarname = getMarkVarName(name);
   std::string setterfunname = getSetterFunName(name);
-  // adding setter method delcaration in the main class
+  // adding setter method declaration in the main class
   code::FunctionDecl* setterfun = code::FunctionDecl::createFunctionDecl(
       coreCls, setterfunname, DOUBLE_TYPE);
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
@@ -977,21 +988,24 @@ void CPPTranslator::transEvidence(code::FunctionDecl* fun,
     fun->addStmt(st);
     return;
   }
-  
+
   // check whether left is a cardinality expression
-  std::shared_ptr<ir::CardExpr> cardexp = std::dynamic_pointer_cast<ir::CardExpr>(left);
+  std::shared_ptr<ir::CardExpr> cardexp =
+      std::dynamic_pointer_cast<ir::CardExpr>(left);
   if (cardexp) {
     // translate cardinality evidence
     // check whether the evidence doesnot hold
-    code::Expr* cond = new code::BinaryOperator(
-                       transCardExpr(cardexp), transExpr(evid->getRight()), code::OpKind::BO_NEQ);
+    code::Expr* cond = new code::BinaryOperator(transCardExpr(cardexp),
+        transExpr(evid->getRight()), code::OpKind::BO_NEQ);
     code::Expr* res;
     if (COMPUTE_LIKELIHOOD_IN_LOG) {
       res = new code::Identifier(NEG_INFINITE_NAME);
     } else {
       res = new code::IntegerLiteral(0);
     }
-    code::Stmt* st = new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), res, code::OpKind::BO_ASSIGN);
+    code::Stmt* st = new code::BinaryOperator(
+        new code::Identifier(WEIGHT_VAR_REF_NAME), res,
+        code::OpKind::BO_ASSIGN);
     st = new code::IfStmt(cond, st);
     fun->addStmt(st);
     return;
@@ -1171,13 +1185,22 @@ void CPPTranslator::createMain() {
   mainFun->addStmt(st);
 }
 
-inline code::ClassDecl* CPPTranslator::DECLARE_TYPE(std::string name) {
+inline TYPEDEFN CPPTranslator::DECLARE_TYPE(std::string name) {
   // create a class for this declared type
-  code::ClassDecl* cd = code::ClassDecl::createClassDecl(coreNs, name);
+  TYPEDEFN cd = code::ClassDecl::createClassDecl(coreNs, name);
   code::FieldDecl::createFieldDecl(cd, DISTINCT_FIELDNAME, STRING_TYPE);
+  // declare a vector to hold all instance in this type
+  std::string inst_var_name = getInstanceArrayName(name);
+  code::FieldDecl::createFieldDecl(coreCls, inst_var_name,
+      code::Type(VECTOR_CLASS_NAME,
+          std::vector<code::Type>( { code::Type(name) })));
   return cd;
 }
 
+inline ORIGINDEFN CPPTranslator::DECLARE_ORIGIN_FIELD(TYPEDEFN typedf,
+    std::string originname, TYPE origintype) {
+  return code::FieldDecl::createFieldDecl(typedf, originname, origintype);
+}
 
 } /* namespace codegen */
 } /* namespace swift */

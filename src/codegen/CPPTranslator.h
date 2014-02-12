@@ -14,6 +14,13 @@
 namespace swift {
 namespace codegen {
 
+/**
+ * the following macro are defining construction of language elements in BLOG
+ */
+typedef code::ClassDecl* TYPEDEFN;
+typedef code::Type TYPE;
+typedef code::FieldDecl* ORIGINDEFN;
+
 class CPPTranslator {
 public:
   CPPTranslator();
@@ -22,9 +29,15 @@ public:
   code::Code* getResult();
 
 protected:
-  // declare a named type
-  // it will create class definition for this type, and one field "name" (std::string)
-  inline code::ClassDecl* DECLARE_TYPE(std::string name);
+
+  /**
+   * declare a named type
+   * it will create class definition for this type, and one field "name" (std::string)
+   */
+  inline TYPEDEFN DECLARE_TYPE(std::string name);
+
+  inline ORIGINDEFN DECLARE_ORIGIN_FIELD(TYPEDEFN typedf, std::string originname,
+      TYPE origintype);
 
 private:
   code::Code* prog; // holder for result target code
@@ -142,13 +155,14 @@ private:
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
       std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
       code::Type varType = INT_REF_TYPE);
-  
+
   /**
    * create a field for function value
    */
   void addFieldForFunVar(std::string varname,
-                         const std::vector<std::shared_ptr<ir::VarDecl> >& params, code::Type valueType = INT_TYPE);
-  
+      const std::vector<std::shared_ptr<ir::VarDecl> >& params,
+      code::Type valueType = INT_TYPE);
+
   /**
    * translate the distribution expression
    * given the arguments,
@@ -241,7 +255,7 @@ private:
 
   // function name for checking whether a number is finite
   static const std::string ISFINITE_FUN_NAME;
-  
+
   // MACRO name for holding negative INFINITE
   static const std::string NEG_INFINITE_NAME;
 
@@ -334,7 +348,7 @@ private:
    * string name for the random engine, note a random engine need to use random device as an input source of randomness
    */
   static const std::string RANDOM_ENGINE_VAR_NAME;
-  
+
   /**
    * function name for fill_n (="fill_n");
    */
