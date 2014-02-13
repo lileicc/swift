@@ -20,6 +20,8 @@ namespace codegen {
 typedef code::ClassDecl* TYPEDEFN;
 typedef code::Type TYPE;
 typedef code::FieldDecl* ORIGINDEFN;
+typedef code::Expr* EXPR;
+typedef code::Stmt* STMT;
 
 class CPPTranslator {
 public:
@@ -38,6 +40,18 @@ protected:
 
   inline ORIGINDEFN DECLARE_ORIGIN_FIELD(TYPEDEFN typedf, std::string originname,
       TYPE origintype);
+  /**
+   *  create BLOG instance, which can be distinct symbols, 
+   *  or instance generated in possible worlds
+   *
+   *  @param tyname         blog type name
+   *  @param instname       instance name
+   *  @param originvalues   a vector of values for origin fields
+   *  @param ncopy          how many copy to create, if null, it will just create 1
+   *
+   *  @return an assignment statement in target code
+   */
+  inline STMT CREATE_INSTANCE(std::string tyname, std::string instname, std::vector<EXPR> originvalues = std::vector<EXPR>(), EXPR ncopy = nullptr);
 
 private:
   code::Code* prog; // holder for result target code
@@ -291,6 +305,14 @@ private:
    * method name for vector.resize()
    */
   static const std::string VECTOR_RESIZE_METHOD_NAME;
+  /**
+   * method name for vector.push_back()
+   */
+  static const std::string VECTOR_ADD_METHOD_NAME;
+  /**
+   * method name for append()
+   */
+  static const std::string APPEND_FUN_NAME;
   /**
    * class name for vector
    */

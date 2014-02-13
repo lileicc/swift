@@ -63,3 +63,7 @@ inline void resize(std::vector<T> & x, size_t id, size_t sz){
   }
 }
 
+template<typename _T>
+inline void append(std::vector<_T> & x, size_t n, const _T & value) {
+  x.insert(x.end(), n, value);
+}
