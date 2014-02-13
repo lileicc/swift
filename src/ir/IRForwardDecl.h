@@ -46,7 +46,6 @@ class TypeDomain;
 class UniformChoiceDistr;
 class VarDecl;
 class VarRefer;
-class VoidFuncCall;
 
 }
 }
