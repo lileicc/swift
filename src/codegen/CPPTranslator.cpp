@@ -811,7 +811,7 @@ code::Expr* CPPTranslator::transDistribution(
         // Sample value from the distribution
         // define a field in the main class corresponding to the distribution
         code::FieldDecl::createFieldDecl(coreCls, distvarname,
-          code::Type(UNIFORM_INT_DISTRIBUTION_NAME));
+          code::Type(UNIFORM_CHOICE_DISTRIBUTION_NAME));
         // put init just before sampling
         // :::=> dist.init(_filter(...))
         code::Expr* callinit = code::CallExpr::createMethodCall(distvarname,
@@ -842,34 +842,69 @@ code::Expr* CPPTranslator::transDistribution(
       }
     }
   }
-  // TODO : in some cases, distributions need dynamic initialization!!
-  //     e.g. X~Poisson(5)
-  //          Y~Poisson(X)
+  // in some cases, distributions need dynamic initialization!!
+  //     e.g. X~Poisson(5) : static
+  //          Y~Poisson(X) : dynamic, since X is not fixed
   std::string name = dist->getDistrName();
   std::string distvarname = name + std::to_string((size_t) &(dist->getArgs()));
-  if (valuevar.empty()) {
-    // now actual sampling a value from the distribution
-    // define a field in the main class corresponding to the distribution
-    code::FieldDecl::createFieldDecl(coreCls, distvarname, code::Type(name));
-    //put initialization in coreClasInit
-    coreClsInit->addStmt(
-        code::CallExpr::createMethodCall(distvarname,
-            DISTRIBUTION_INIT_FUN_NAME, args));
-    // :::==> distribution.gen();
-    // the following two lines of code are not used right now, just use the default engine
-//    std::vector<code::Expr *> rd;
-//    rd.push_back(new code::Identifier(RANDOM_ENGINE_VAR_NAME));
-    return code::CallExpr::createMethodCall(distvarname,
+  if (dist->isRandom()) {
+    if (valuevar.empty()) {
+      // Sample value from the distribution
+      // define a field in the main class corresponding to the distribution
+      code::FieldDecl::createFieldDecl(coreCls, distvarname, code::Type(name));
+      // put init just before sampling
+      // :::=> dist.init(...)
+      code::Expr* callinit = code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_INIT_FUN_NAME, args);
+      // :::=> dist.gen()
+      code::Expr* callgen = code::CallExpr::createMethodCall(distvarname,
         DISTRIBUTION_GEN_FUN_NAME);
-  } else {
-    // calculating likelihood
-    // :::==> distribution.loglikeli
-    std::vector<code::Expr *> args;
-    args.push_back(new code::Identifier(valuevar));
-    return code::CallExpr::createMethodCall(distvarname,
+      // :::=> dist.init(...), dist.gen()
+      return new code::BinaryOperator(callinit, callgen,
+        code::OpKind::BO_COMMA);
+    }
+    else {
+      // calculating likelihood
+      // put init just before sampling
+      // :::=> dist.init(...)
+      code::Expr* callinit = code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_INIT_FUN_NAME, args);
+      // :::=> dist.loglikeli()
+      code::Expr* calllikeli = code::CallExpr::createMethodCall(distvarname,
         COMPUTE_LIKELIHOOD_IN_LOG ?
-            DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME,
-        args);
+      DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME,
+                                        std::vector<code::Expr*>({ new code::Identifier(valuevar) }));
+      // :::=> dist.init(...), dist.loglikeli()
+      return new code::BinaryOperator(callinit, calllikeli,
+        code::OpKind::BO_COMMA);
+    }
+  }
+  else {
+    if (valuevar.empty()) {
+      // now actual sampling a value from the distribution
+      // define a field in the main class corresponding to the distribution
+      code::FieldDecl::createFieldDecl(coreCls, distvarname, code::Type(name));
+      //put initialization in coreClasInit
+      coreClsInit->addStmt(
+        code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_INIT_FUN_NAME, args));
+      // :::==> distribution.gen();
+      // the following two lines of code are not used right now, just use the default engine
+      //    std::vector<code::Expr *> rd;
+      //    rd.push_back(new code::Identifier(RANDOM_ENGINE_VAR_NAME));
+      return code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_GEN_FUN_NAME);
+    }
+    else {
+      // calculating likelihood
+      // :::==> distribution.loglikeli
+      std::vector<code::Expr *> args;
+      args.push_back(new code::Identifier(valuevar));
+      return code::CallExpr::createMethodCall(distvarname,
+        COMPUTE_LIKELIHOOD_IN_LOG ?
+      DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME,
+                                        args);
+    }
   }
 }
 
