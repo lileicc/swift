@@ -31,7 +31,7 @@ enum class LambdaKind {
   NA // Other
 };
 
-class LambdaExpr: public Expr {
+class LambdaExpr : public Expr, public DeclContext {
 public:
   LambdaExpr(LambdaKind kind = LambdaKind::REF, Type ty = Type(""));
   ~LambdaExpr();

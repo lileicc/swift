@@ -653,6 +653,7 @@ code::Expr* CPPTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   }
 
   auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
+  func->addParam(new code::ParamVarDecl(func,condset->getVar()->getVarName(), INT_TYPE));
   func->addStmt(new code::ReturnStmt(transExpr(condset->getCond())));
   args.push_back(func);
 
