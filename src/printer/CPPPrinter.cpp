@@ -402,10 +402,11 @@ void CPPPrinter::print(code::ClassDecl* term) {
 void CPPPrinter::print(code::CompoundStmt* term) {
   printIndent();
   fprintf(file, "{");
-  printLine();
 
   auto backup = newline;
   newline = true;
+  if (term->getAll().size() > 0)
+    printLine();
 
   incIndent();
 
@@ -416,7 +417,7 @@ void CPPPrinter::print(code::CompoundStmt* term) {
 
   newline = backup;
 
-  if (term->getAll().size() > 0) // Otherwise it is just an empty block, no indent needed
+  if (term->getAll().size() > 0) // Otherwise it is just an empty block, no indent/newline needed
     printIndent();
   fprintf(file, "}");
   printLine();
