@@ -24,8 +24,8 @@ public:
   int gen();
   template<typename _RD>
   int gen(_RD& rd);
-  double likeli(int x);
-  double loglikeli(int x);
+  double likeli(const int& x);
+  double loglikeli(const int& x);
 private:
   std::discrete_distribution<int> dist;
   std::vector<int> values; // values that this distribution will generation

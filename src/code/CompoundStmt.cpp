@@ -11,12 +11,9 @@ namespace swift {
 namespace code {
 
 CompoundStmt::CompoundStmt() {
-  // TODO Auto-generated constructor stub
-
 }
 
 CompoundStmt::~CompoundStmt() {
-  // TODO Auto-generated destructor stub
   for (auto p : body)
     if (p != NULL)
       delete p;

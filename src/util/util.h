@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <vector>
+#include <functional>
 #pragma once
 
 // computing log( exp(a) + exp(b) )
@@ -34,9 +35,40 @@ inline double logEqual(T a, T b) {
 // Args:
 //   id, indicating the dimension which needs resizing, (starting from 0)
 //   sz, the size resizing to 
-// only work for dimensionality <= 3
-template<typename T>
-inline void resize(std::vector<T> & x, size_t id, size_t sz){
+// only work for dimensionality <=
+
+inline void resize(std::vector<int> & x, size_t id, size_t sz){
+  if (id == 0) {
+    // resize the first dimension
+    if (x.size() > 0)
+      x.resize(sz, x[0]);
+    else
+      x.resize(sz);
+  }
+}
+
+inline void resize(std::vector<std::vector<int> > & x, size_t id, size_t sz){
+  if (id == 0) {
+    // resize the first dimension
+    if (x.size() > 0)
+      x.resize(sz, x[0]);
+    else
+      x.resize(sz);
+  } else if (id == 1) {
+    if (x.size() > 0 && x[0].size() > 0) {
+      // resize the second dimension
+      for (auto & a : x) {
+        a.resize(sz, x[0][0]);
+      }
+    } else {
+      for (auto & a : x) {
+        a.resize(sz);
+      }
+    }
+  }
+}
+
+inline void resize(std::vector<std::vector<std::vector<int> > > & x, size_t id, size_t sz){
   if (id == 0) {
     // resize the first dimension
     if (x.size() > 0)

@@ -17,9 +17,9 @@ type Match;
 distinct Person James, David,
   Jason, Brian, Mary, Nancy, Susan, Karen;
 distinct Match M[4];
-fixed Real mu = 10;
-fixed Real sigma = 2;
-random Real strength(Person p) ~ Gaussian(mu, sigma);
+//fixed Real mu = 10;
+//fixed Real sigma = 2;
+random Real strength(Person p) ~ Gaussian(10, 2);
 
 random Person team1player1(Match m) 
   ~ UniformChoice({Person p});
@@ -40,7 +40,7 @@ random Boolean lazy(Person p, Match m)
   ~ BooleanDistrib(0.1);
 
 random Real pulling_power(Person p, Match m) 
-	if lazy(p, m) then = strength(p) / 2
+	if lazy(p, m) then = strength(p) / 2.0
 	else = strength(p);
 
 random Boolean team1win(Match m)

@@ -18,12 +18,17 @@ public:
   virtual ~Clause();
   void setTyp(const Ty* typ);
   const Ty* getTyp() const;
+
+  void setRandom(bool r);
+  bool isRandom();
+
   // For Debugging Use
   virtual void print(FILE* file, int indent) const {
   }
   ;
 private:
   const Ty* typ;
+  bool _is_random;
 };
 
 }

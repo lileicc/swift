@@ -5,8 +5,8 @@
 
 namespace swift {
 namespace code {
-enum class OpKind
-;
+enum class OpKind;
+enum class LambdaKind;
 }
 }
 
@@ -45,6 +45,7 @@ public:
   void print(code::FunctionDecl* term, bool hasRetType);
   void print(code::IfStmt* term);
   void print(code::IntegerLiteral* term);
+  void print(code::LambdaExpr* term);
   void print(code::ListInitExpr* term);
   void print(code::NamespaceDecl* term);
   void print(code::NullLiteral* term);
@@ -88,6 +89,11 @@ private:
 
   // return the Precedence and Associativity(0: left to right, 1: right to left) of an Expr
   std::pair<int, int> OpPrec(code::Expr* expr);
+
+  // return the string flag corresponding to the kind of lambda expression
+  //  e.g. LambdaKind::REF  ==>  [&](){...}
+  //       LambdaKind::NONE ==>  [] (){...}
+  std::string getLambdaKindStr(code::LambdaKind kind);
 };
 
 }

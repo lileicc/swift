@@ -31,12 +31,12 @@ double Gaussian::gen() {
   return dist(engine);
 }
 
-double Gaussian::likeli(double x) {
+double Gaussian::likeli(const double& x) {
   return coef * std::exp(scale * (x - mean) * (x - mean));
 }
 
-double Gaussian::loglikeli(double x) {
-  return - (scale * (x - mean) * (x - mean) + log_coef);
+double Gaussian::loglikeli(const double& x) {
+  return scale * (x - mean) * (x - mean) + log_coef;
 }
 
 } /* namespace random */

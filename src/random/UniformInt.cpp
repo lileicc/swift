@@ -28,11 +28,11 @@ int UniformInt::gen() {
   return b >= a ? dist(engine) : b;
 }
 
-double UniformInt::likeli(int x) {
+double UniformInt::likeli(const int& x) {
   return ((x >= a) && (x <= b)) ? 1.0 / (b - a) : 0;
 }
 
-double UniformInt::loglikeli(int x) {
+double UniformInt::loglikeli(const int& x) {
   return ((x >= a) && (x <= b)) ? -std::log(b - a) : - INFINITY;
 }
 

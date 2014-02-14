@@ -32,6 +32,7 @@ class ForStmt;
 class FunctionDecl;
 class IfStmt;
 class IntegerLiteral;
+class LambdaExpr;
 class ListInitExpr;
 class NamespaceDecl;
 class NullLiteral;

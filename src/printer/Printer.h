@@ -36,6 +36,7 @@ public:
   virtual void print(code::FunctionDecl* term)=0;
   virtual void print(code::IfStmt* term)=0;
   virtual void print(code::IntegerLiteral* term)=0;
+  virtual void print(code::LambdaExpr* term)=0;
   virtual void print(code::ListInitExpr* term)=0;
   virtual void print(code::NamespaceDecl* term)=0;
   virtual void print(code::NullLiteral* term)=0;
