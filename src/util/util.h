@@ -187,7 +187,7 @@ inline void resize(std::vector<std::vector<bool> > & x, size_t id, size_t sz){
 // Resize Function
 // TODO: to find a more efficient way to handle resize problem
 template<typename T>
-void resize(vector<T>& A, size_t dim, size_t sz) {
+void resize(std::vector<T>& A, size_t dim, size_t sz) {
   if (dim == 0) {
     A.resize(sz);
   }
@@ -199,7 +199,7 @@ void resize(vector<T>& A, size_t dim, size_t sz) {
 }
 
 template<>
-void resize<int>(vector<int>&A, size_t dim, size_t sz) {
+void resize<int>(std::vector<int>&A, size_t dim, size_t sz) {
   A.resize(sz);
 }
 
