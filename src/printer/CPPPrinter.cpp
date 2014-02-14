@@ -212,12 +212,17 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include <random>\n");
   fprintf(file, "#include <numeric>\n");
   fprintf(file, "#include <string>\n");
+  fprintf(file, "#include <memory>\n");
+  fprintf(file, "#include <functional>\n");
+  fprintf(file, "#include <utility>\n");
   fprintf(file, "#include \"random/Bernoulli.h\"\n");
   fprintf(file, "#include \"random/Beta.h\"\n");
   fprintf(file, "#include \"random/BooleanDistrib.h\"\n");
   fprintf(file, "#include \"random/CategoricalDistribution.h\"\n");
+  fprintf(file, "#include \"random/Dirichlet.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
+  fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
 
