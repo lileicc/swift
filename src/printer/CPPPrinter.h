@@ -65,8 +65,11 @@ private:
   std::vector<std::string> header;
 
   bool isforward; // whether the current phase is to print forward declaration
+  bool isheader; // whether the current phase is to print the header file declarations
   // Note: when process a print method of a Stmt, we assume isforward == false
-  //    for every Decl, it should be processed twice!
+  //    for every Decl, it should be processed THREE Times!
+  //    i.e. ForwardDecl (for classes), HeaderFile Decl (for methods), Function Body Decl
+  //     Attention: isforward only works for class decl!!! isheader works for functiondecl, vardecl, methoddecl, memberdecl
 
   std::vector<std::string> prefix; // prefix of functions
   /*
