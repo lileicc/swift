@@ -346,7 +346,8 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
   declared_funs[getterfun->getName()] = getterfun;
   code::Type valueRefType = valuetype;
-  valueRefType.setRef(true);
+  if (valuetype != BOOL_TYPE) // special treatment for bool
+    valueRefType.setRef(true);
   addFunValueRefStmt(getterfun, valuevarname, getterfun->getParams(),
       VALUE_VAR_REF_NAME, valueRefType);
   addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
@@ -368,6 +369,10 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
       new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
       code::OpKind::BO_ASSIGN);
   getterfun->addStmt(st);
+  // special treatment for bool
+  if (valuetype == BOOL_TYPE) {
+    addFunValueAssignStmt(getterfun, valuevarname, getterfun->getParams(), VALUE_VAR_REF_NAME);
+  }
   getterfun->addStmt(
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
   return getterfun;
@@ -389,7 +394,8 @@ code::FunctionDecl* CPPTranslator::transLikeliFun(
   declared_funs[likelifun->getName()] = likelifun;
   // now the value of this function app var is in VALUE_VAR_REF_NAME
   code::Type valueRefType = valuetype;
-  valueRefType.setRef(true);
+  if (valuetype != BOOL_TYPE) // special treatment for bool
+    valueRefType.setRef(true);
   addFunValueRefStmt(likelifun, valuevarname, likelifun->getParams(),
       VALUE_VAR_REF_NAME, valueRefType);
   // declare the weight variable and setting its init value
@@ -423,10 +429,8 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
       setterfun, fd->getArgs());
   declared_funs[setterfun->getName()] = setterfun;
-  code::Type valueRefType = valuetype;
-  valueRefType.setRef(true);
-  addFunValueRefStmt(setterfun, valuevarname, args_with_value,
-      VALUE_VAR_REF_NAME, valueRefType);
+  addFunValueAssignStmt(setterfun, valuevarname, args_with_value,
+      VALUE_ARG_NAME);
   addFunValueRefStmt(setterfun, markvarname, args_with_value,
       MARK_VAR_REF_NAME);
   // set the argument of setter function
@@ -439,9 +443,6 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
       code::OpKind::BO_ASSIGN);
   setterfun->addStmt(st);
   // :::==> value_var = value_arg
-  st = new code::BinaryOperator(new code::Identifier(VALUE_VAR_REF_NAME),
-      new code::Identifier(VALUE_ARG_NAME), code::OpKind::BO_ASSIGN);
-  setterfun->addStmt(st);
   std::vector<code::Expr*> args_ref;
   for (auto a : fd->getArgs()) {
     args_ref.push_back(new code::Identifier(a->getVarName()));
@@ -961,7 +962,7 @@ void CPPTranslator::addFieldForFunVar(std::string varname,
       ensureFun->addStmt(
           new code::CallExpr(new code::Identifier(VECTOR_RESIZE_METHOD_NAME),
               std::vector<code::Expr*>(
-                  { new code::Identifier(varname), new code::IntegerLiteral(id),
+                  { new code::Identifier(varname), new code::IntegerLiteral((int) id),
                       new code::Identifier(numvarname_for_arg) })));
     }
   }
@@ -987,6 +988,21 @@ void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
   // assign the function application variable value to valuerefname
   code::VarDecl* retvar = new code::VarDecl(fun, valuerefname, varType, exp);
   code::DeclStmt* dst = new code::DeclStmt(retvar);
+  fun->addStmt(dst);
+}
+  
+void CPPTranslator::addFunValueAssignStmt(
+    code::FunctionDecl* fun, std::string valuevarname,
+    std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname) {
+  // the value of this function application variable is stored in
+  // valuevarname[index1][index2]...
+  // where the index are corresponding to the arguments
+  code::Expr* exp = new code::Identifier(valuevarname);
+  for (auto prm : valueindex) {
+    exp = new code::ArraySubscriptExpr(exp, new code::Identifier(prm->getId()));
+  }
+  // assign valuerefname to the function application variable value to
+  code::Stmt* dst = new code::BinaryOperator(exp, new code::Identifier(valuerefname), code::OpKind::BO_ASSIGN);
   fun->addStmt(dst);
 }
 

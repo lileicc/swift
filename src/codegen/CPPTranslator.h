@@ -145,6 +145,14 @@ private:
       code::Type varType = INT_REF_TYPE);
   
   /**
+   * create assignment statement to blog function value
+   */
+  void addFunValueAssignStmt(code::FunctionDecl* fun, std::string valuevarname,
+                             std::vector<code::ParamVarDecl*>& valueindex,
+                             std::string valuerefname);
+  
+  
+  /**
    * create a field for function value
    */
   void addFieldForFunVar(std::string varname,
