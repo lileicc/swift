@@ -6,6 +6,7 @@ namespace ir {
 
 QuantForm::QuantForm(IRConstant op) :
     op(op) {
+  addArg(nullptr);
 }
 
 QuantForm::~QuantForm() {
@@ -29,6 +30,14 @@ bool QuantForm::isForall() const {
 
 bool QuantForm::isExists() const {
   return op == IRConstant::EXISTS;
+}
+
+void QuantForm::setCond(std::shared_ptr<Expr> e) {
+  setArgs(std::vector<std::shared_ptr<Expr> >({e}));
+}
+
+std::shared_ptr<Expr> QuantForm::getCond() const {
+  return get(0);
 }
 
 void QuantForm::print(FILE* file, int indent) const {
