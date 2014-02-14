@@ -738,6 +738,10 @@ code::Expr* CPPTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
     assert(false);
     break;
   }
+  // Unary Operator: Left is nullptr
+  if (kind == code::OpKind::UO_NEG)
+    return new code::BinaryOperator(nullptr, args[0], kind);
+  // Normal Operator
   return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : nullptr,
       kind);
 }
