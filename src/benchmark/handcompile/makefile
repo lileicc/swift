@@ -18,6 +18,6 @@ csi:
 
 run:
 	./execute_urnball 1000000
-	./execute_hurricane
 	./execute_burglary
 	./execute_csi
+	./execute_hurricane

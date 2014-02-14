@@ -64,6 +64,7 @@ const code::Type CPPTranslator::RANDOM_ENGINE_TYPE("default_random_engine");
 const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
 const std::string CPPTranslator::UNIFORM_INT_DISTRIBUTION_NAME = "UniformInt";
 const std::string CPPTranslator::FILL_N_FUN_NAME = "fill_n";
+const std::string CPPTranslator::UNIFORM_CHOICE_DISTRIBUTION_NAME = "UniformChoice";
 const int CPPTranslator::INIT_SAMPLE_NUM = 0;
 const int CPPTranslator::NULLSYMBOL_VALUE = -1;
 const int CPPTranslator::TOTAL_NUM_SAMPLES = 1000000;
