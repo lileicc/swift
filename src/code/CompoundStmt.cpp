@@ -11,13 +11,12 @@ namespace swift {
 namespace code {
 
 CompoundStmt::CompoundStmt() {
-  // TODO Auto-generated constructor stub
-
 }
 
 CompoundStmt::~CompoundStmt() {
-  // TODO Auto-generated destructor stub
-  clear();
+  for (auto p : body)
+    if (p != NULL)
+      delete p;
 }
 
 void CompoundStmt::addStmt(Stmt* st) {
@@ -34,12 +33,6 @@ Stmt* CompoundStmt::get(int k) const {
 
 const std::vector<Stmt*>& CompoundStmt::getAll() const {
   return body;
-}
-
-void CompoundStmt::clear() {
-  for (auto p : body)
-    if (p != NULL)
-      delete p;
 }
 
 // For Printer

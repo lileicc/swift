@@ -38,15 +38,11 @@ public:
 
   const LambdaKind& getKind() const;
   void addStmt(Stmt* stmt);
-  void setBody(CompoundStmt cpd);
   CompoundStmt& getBody();
   void setType(Type ty);
   Type& getType();
   void addParam(ParamVarDecl* param);
-  void setParams(std::vector<ParamVarDecl*> params);
   std::vector<ParamVarDecl*>& getParams();
-
-  void clear();
 
   // For Printer
   void print(printer::Printer* prt);

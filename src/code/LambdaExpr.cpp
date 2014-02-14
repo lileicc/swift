@@ -15,10 +15,6 @@ LambdaExpr::LambdaExpr(LambdaKind kind, Type ty) :
 }
 
 LambdaExpr::~LambdaExpr() {
-  clear();
-}
-
-void LambdaExpr::clear() {
   for (auto p : params)
     if (p != NULL) delete p;
 }
@@ -31,10 +27,6 @@ void LambdaExpr::addStmt(Stmt* stmt) {
   body.addStmt(stmt);
 }
 
-void LambdaExpr::setBody(CompoundStmt cpd) {
-  body.clear();
-  body = cpd;
-}
 
 CompoundStmt& LambdaExpr::getBody() {
   return body;
@@ -50,11 +42,6 @@ Type& LambdaExpr::getType() {
 
 void LambdaExpr::addParam(ParamVarDecl* param) {
   params.push_back(param);
-}
-
-void LambdaExpr::setParams(std::vector<ParamVarDecl*> params) {
-  clear();
-  this->params = params;
 }
 
 std::vector<ParamVarDecl*>& LambdaExpr::getParams() {
