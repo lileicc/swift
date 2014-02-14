@@ -184,31 +184,23 @@ inline void resize(std::vector<std::vector<bool> > & x, size_t id, size_t sz){
   }
 }
 
-inline void resize(std::vector<std::vector<std::vector<bool> > > & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
-  } else if (id == 1) {
-    if (x.size() > 0 && x[0].size() > 0) {
-      // resize the second dimension
-      for (auto & a : x) {
-        a.resize(sz, x[0][0]);
-      }
-    } else {
-      for (auto & a : x) {
-        a.resize(sz);
-      }
-    }
-  } else if (id == 2) {
-    for (auto & a : x) {
-      for (auto & b : a) {
-        b.resize(sz);
-      }
+// Resize Function
+// TODO: to find a more efficient way to handle resize problem
+template<typename T>
+void resize(vector<T>& A, size_t dim, size_t sz) {
+  if (dim == 0) {
+    A.resize(sz);
+  }
+  else {
+    for (auto & a : A) {
+      resize(a, dim - 1, sz);
     }
   }
+}
+
+template<>
+void resize<int>(vector<int>&A, size_t dim, size_t sz) {
+  A.resize(sz);
 }
 
 //////////////////////////////////
