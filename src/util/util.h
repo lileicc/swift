@@ -1,7 +1,7 @@
 //
 //  util.h
 //  swift-project
-//  utility functions used iby the generated c++ code
+//  utility functions used by the generated c++ code
 //
 //  Created by Lei Li on 1/18/14.
 //
@@ -36,179 +36,22 @@ inline double logEqual(T a, T b) {
 //   id, indicating the dimension which needs resizing, (starting from 0)
 //   sz, the size resizing to 
 // only work for dimensionality <=
-
-inline void resize(std::vector<int> & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
+// TODO: to find a more efficient way to handle resize problem
+template<typename T>
+void resize(std::vector<T>& A, size_t dim, size_t sz) {
+  if (dim == 0) {
+    A.resize(sz);
   }
-}
-
-inline void resize(std::vector<std::vector<int> > & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
-  } else if (id == 1) {
-    if (x.size() > 0 && x[0].size() > 0) {
-      // resize the second dimension
-      for (auto & a : x) {
-        a.resize(sz, x[0][0]);
-      }
-    } else {
-      for (auto & a : x) {
-        a.resize(sz);
-      }
+  else {
+    for (auto & a : A) {
+      resize(a, dim - 1, sz);
     }
   }
 }
 
-inline void resize(std::vector<std::vector<std::vector<int> > > & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
-  } else if (id == 1) {
-    if (x.size() > 0 && x[0].size() > 0) {
-      // resize the second dimension
-      for (auto & a : x) {
-        a.resize(sz, x[0][0]);
-      }
-    } else {
-      for (auto & a : x) {
-        a.resize(sz);
-      }
-    }
-  } else if (id == 2) {
-    for (auto & a : x) {
-      for (auto & b : a) {
-        b.resize(sz);
-      }
-    }
-  }
-}
-
-inline void resize(std::vector<double> & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
-  }
-}
-
-inline void resize(std::vector<std::vector<double> > & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
-  } else if (id == 1) {
-    if (x.size() > 0 && x[0].size() > 0) {
-      // resize the second dimension
-      for (auto & a : x) {
-        a.resize(sz, x[0][0]);
-      }
-    } else {
-      for (auto & a : x) {
-        a.resize(sz);
-      }
-    }
-  }
-}
-
-inline void resize(std::vector<std::vector<std::vector<double> > > & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
-  } else if (id == 1) {
-    if (x.size() > 0 && x[0].size() > 0) {
-      // resize the second dimension
-      for (auto & a : x) {
-        a.resize(sz, x[0][0]);
-      }
-    } else {
-      for (auto & a : x) {
-        a.resize(sz);
-      }
-    }
-  } else if (id == 2) {
-    for (auto & a : x) {
-      for (auto & b : a) {
-        b.resize(sz);
-      }
-    }
-  }
-}
-
-inline void resize(std::vector<bool> & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
-  }
-}
-
-inline void resize(std::vector<std::vector<bool> > & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
-  } else if (id == 1) {
-    if (x.size() > 0 && x[0].size() > 0) {
-      // resize the second dimension
-      for (auto & a : x) {
-        a.resize(sz, x[0][0]);
-      }
-    } else {
-      for (auto & a : x) {
-        a.resize(sz);
-      }
-    }
-  }
-}
-
-inline void resize(std::vector<std::vector<std::vector<bool> > > & x, size_t id, size_t sz){
-  if (id == 0) {
-    // resize the first dimension
-    if (x.size() > 0)
-      x.resize(sz, x[0]);
-    else
-      x.resize(sz);
-  } else if (id == 1) {
-    if (x.size() > 0 && x[0].size() > 0) {
-      // resize the second dimension
-      for (auto & a : x) {
-        a.resize(sz, x[0][0]);
-      }
-    } else {
-      for (auto & a : x) {
-        a.resize(sz);
-      }
-    }
-  } else if (id == 2) {
-    for (auto & a : x) {
-      for (auto & b : a) {
-        b.resize(sz);
-      }
-    }
-  }
+template<>
+void resize<int>(std::vector<int>&A, size_t dim, size_t sz) {
+  A.resize(sz);
 }
 
 //////////////////////////////////
