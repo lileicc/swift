@@ -60,9 +60,21 @@ const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
 const code::Type CPPTranslator::RANDOM_ENGINE_TYPE("default_random_engine");
 const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
 const std::string CPPTranslator::UNIFORM_INT_DISTRIBUTION_NAME = "UniformInt";
+const std::string CPPTranslator::UNIFORM_CHOICE_DISTRIBUTION_NAME = "UniformChoice";
 const int CPPTranslator::INIT_SAMPLE_NUM = 0;
 const int CPPTranslator::NULLSYMBOL_VALUE = -1;
 const int CPPTranslator::TOTAL_NUM_SAMPLES = 1000000;
+
+// internal predefined functions
+const std::string CPPTranslator::GEN_FULL_SET_NAME = "_gen_full";
+const std::string CPPTranslator::FILTER_FUNC_NAME = "_filter";
+const std::string CPPTranslator::FILTER_RANGE_FUNC_NAME = "_filter";
+const std::string CPPTranslator::FILTER_COUNT_NAME = "_count";
+const std::string CPPTranslator::FILTER_RANGE_COUNT_NAME = "std::count";
+const std::string CPPTranslator::FORALL_NAME = "_forall";
+const std::string CPPTranslator::FORALL_RANGE_NAME = "std::all_of";
+const std::string CPPTranslator::EXISTS_NAME = "_exists";
+const std::string CPPTranslator::EXISTS_RANGE_NAME = "std::any_of";
 
 /**
  * give the name of the type,
@@ -334,7 +346,8 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
   declared_funs[getterfun->getName()] = getterfun;
   code::Type valueRefType = valuetype;
-  valueRefType.setRef(true);
+  if (valuetype != BOOL_TYPE) // special treatment for bool
+    valueRefType.setRef(true);
   addFunValueRefStmt(getterfun, valuevarname, getterfun->getParams(),
       VALUE_VAR_REF_NAME, valueRefType);
   addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
@@ -356,6 +369,10 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
       new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
       code::OpKind::BO_ASSIGN);
   getterfun->addStmt(st);
+  // special treatment for bool
+  if (valuetype == BOOL_TYPE) {
+    addFunValueAssignStmt(getterfun, valuevarname, getterfun->getParams(), VALUE_VAR_REF_NAME);
+  }
   getterfun->addStmt(
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
   return getterfun;
@@ -377,7 +394,8 @@ code::FunctionDecl* CPPTranslator::transLikeliFun(
   declared_funs[likelifun->getName()] = likelifun;
   // now the value of this function app var is in VALUE_VAR_REF_NAME
   code::Type valueRefType = valuetype;
-  valueRefType.setRef(true);
+  if (valuetype != BOOL_TYPE) // special treatment for bool
+    valueRefType.setRef(true);
   addFunValueRefStmt(likelifun, valuevarname, likelifun->getParams(),
       VALUE_VAR_REF_NAME, valueRefType);
   // declare the weight variable and setting its init value
@@ -411,10 +429,8 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
       setterfun, fd->getArgs());
   declared_funs[setterfun->getName()] = setterfun;
-  code::Type valueRefType = valuetype;
-  valueRefType.setRef(true);
-  addFunValueRefStmt(setterfun, valuevarname, args_with_value,
-      VALUE_VAR_REF_NAME, valueRefType);
+  addFunValueAssignStmt(setterfun, valuevarname, args_with_value,
+      VALUE_ARG_NAME);
   addFunValueRefStmt(setterfun, markvarname, args_with_value,
       MARK_VAR_REF_NAME);
   // set the argument of setter function
@@ -427,9 +443,6 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
       code::OpKind::BO_ASSIGN);
   setterfun->addStmt(st);
   // :::==> value_var = value_arg
-  st = new code::BinaryOperator(new code::Identifier(VALUE_VAR_REF_NAME),
-      new code::Identifier(VALUE_ARG_NAME), code::OpKind::BO_ASSIGN);
-  setterfun->addStmt(st);
   std::vector<code::Expr*> args_ref;
   for (auto a : fd->getArgs()) {
     args_ref.push_back(new code::Identifier(a->getVarName()));
@@ -599,9 +612,53 @@ code::Expr* CPPTranslator::transCardExpr(
     return new code::CallExpr(new code::Identifier(getnumvarfunname));
   }
 
-  ///// LEI LI STOP HERE
-  assert(false);
-  return nullptr;
+  // Count the cardinality of a cond set
+  //  ::: ==> _count(__get_num_var(), func)
+  //  where func is a lambda expression translated from setexp->getCond();
+  auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
+  func->addStmt(new code::ReturnStmt(transExpr(setexp->getCond())));
+  std::vector<code::Expr*> args;
+  args.push_back(new code::CallExpr(new code::Identifier(getnumvarfunname)));
+  args.push_back(func);
+  return new code::CallExpr(new code::Identifier(FILTER_COUNT_NAME), args);
+}
+
+code::Expr* CPPTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
+  auto lstset = std::dynamic_pointer_cast<ir::ListSet>(e);
+  if (lstset != nullptr) {
+    // list set: vector<int> initialization
+    //   e.g. vector<int>{1,2,3}
+    std::vector<code::Expr*> args;
+    for (auto a: lstset->getArgs())
+      args.push_back(transExpr(a));
+    code::ListInitExpr* lst = new code::ListInitExpr(args);
+    return new code::CallClassConstructor(INT_VECTOR_TYPE, std::vector<code::Expr*>({lst}));
+  }
+  auto condset = std::dynamic_pointer_cast<ir::CondSet>(e);
+  if (condset == nullptr) {
+    // Should not reach here!!
+    assert(false);
+  }
+
+  std::shared_ptr<ir::VarDecl> var = condset->getVar();
+  const ir::NameTy* tp = dynamic_cast<const ir::NameTy*>(var->getTyp());
+  assert(tp != NULL);
+  std::string tyname = tp->toString();
+  std::string numvarname = getVarOfNumType(tyname);
+  std::string getnumvarfunname = getGetterFunName(numvarname);
+  std::vector<code::Expr*> args;
+  args.push_back(new code::CallExpr(new code::Identifier(getnumvarfunname)));
+
+  if (condset->getCond() == nullptr) {
+    return new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
+  }
+
+  auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
+  func->addParam(new code::ParamVarDecl(func,condset->getVar()->getVarName(), INT_TYPE));
+  func->addStmt(new code::ReturnStmt(transExpr(condset->getCond())));
+  args.push_back(func);
+
+  return new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
 }
 
 code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
@@ -683,6 +740,10 @@ code::Expr* CPPTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
     assert(false);
     break;
   }
+  // Unary Operator: Left is nullptr
+  if (kind == code::OpKind::UO_NEG)
+    return new code::BinaryOperator(nullptr, args[0], kind);
+  // Normal Operator
   return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : nullptr,
       kind);
 }
@@ -693,6 +754,8 @@ code::Expr* CPPTranslator::transDistribution(
   std::shared_ptr<ir::UniformChoiceDistr> ucdist = std::dynamic_pointer_cast<
       ir::UniformChoiceDistr>(dist);
   if (ucdist) {
+    // TODO: consider listset
+
     // special treatment for UniformChoice;
     std::shared_ptr<ir::CondSet> setexp =
         std::dynamic_pointer_cast<ir::CondSet>(ucdist->getBody());
@@ -746,36 +809,108 @@ code::Expr* CPPTranslator::transDistribution(
             code::OpKind::BO_COMMA);
       }
     } else {
-      assert(false);
-      // should not reach here for the moment, since it is not implemented yet.
       // TODO
+      //    Note: Actually, it is a general way of dynamic initialization
+      std::string distvarname = UNIFORM_CHOICE_DISTRIBUTION_NAME
+        + std::to_string((size_t)&(dist->getArgs()));
+      if (valuevar.empty()) {
+        // Sample value from the distribution
+        // define a field in the main class corresponding to the distribution
+        code::FieldDecl::createFieldDecl(coreCls, distvarname,
+          code::Type(UNIFORM_CHOICE_DISTRIBUTION_NAME));
+        // put init just before sampling
+        // :::=> dist.init(_filter(...))
+        code::Expr* callinit = code::CallExpr::createMethodCall(distvarname,
+          DISTRIBUTION_INIT_FUN_NAME,
+          std::vector<code::Expr*>({transSetExpr(setexp)}));
+        // :::=> dist.gen()
+        code::Expr* callgen = code::CallExpr::createMethodCall(distvarname,
+          DISTRIBUTION_GEN_FUN_NAME);
+        // :::=> dist.init(...), dist.gen()
+        return new code::BinaryOperator(callinit, callgen,
+          code::OpKind::BO_COMMA);
+      }
+      else {
+        // calculating likelihood
+        // put init just before sampling
+        // :::=> dist.init(_filter(...))
+        code::Expr* callinit = code::CallExpr::createMethodCall(distvarname,
+          DISTRIBUTION_INIT_FUN_NAME,
+          std::vector<code::Expr*>({ transSetExpr(setexp) }));
+        // :::=> dist.loglikeli()
+        code::Expr* calllikeli = code::CallExpr::createMethodCall(distvarname,
+          COMPUTE_LIKELIHOOD_IN_LOG ?
+        DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME,
+                                          std::vector<code::Expr*>({ new code::Identifier(valuevar) }));
+        // :::=> dist.init(...), dist.loglikeli()
+        return new code::BinaryOperator(callinit, calllikeli,
+          code::OpKind::BO_COMMA);
+      }
     }
   }
+  // in some cases, distributions need dynamic initialization!!
+  //     e.g. X~Poisson(5) : static
+  //          Y~Poisson(X) : dynamic, since X is not fixed
   std::string name = dist->getDistrName();
   std::string distvarname = name + std::to_string((size_t) &(dist->getArgs()));
-  if (valuevar.empty()) {
-    // now actual sampling a value from the distribution
-    // define a field in the main class corresponding to the distribution
-    code::FieldDecl::createFieldDecl(coreCls, distvarname, code::Type(name));
-    //put initialization in coreClasInit
-    coreClsInit->addStmt(
-        code::CallExpr::createMethodCall(distvarname,
-            DISTRIBUTION_INIT_FUN_NAME, args));
-    // :::==> distribution.gen();
-    // the following two lines of code are not used right now, just use the default engine
-//    std::vector<code::Expr *> rd;
-//    rd.push_back(new code::Identifier(RANDOM_ENGINE_VAR_NAME));
-    return code::CallExpr::createMethodCall(distvarname,
+  if (dist->isRandom()) {
+    if (valuevar.empty()) {
+      // Sample value from the distribution
+      // define a field in the main class corresponding to the distribution
+      code::FieldDecl::createFieldDecl(coreCls, distvarname, code::Type(name));
+      // put init just before sampling
+      // :::=> dist.init(...)
+      code::Expr* callinit = code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_INIT_FUN_NAME, args);
+      // :::=> dist.gen()
+      code::Expr* callgen = code::CallExpr::createMethodCall(distvarname,
         DISTRIBUTION_GEN_FUN_NAME);
-  } else {
-    // calculating likelihood
-    // :::==> distribution.loglikeli
-    std::vector<code::Expr *> args;
-    args.push_back(new code::Identifier(valuevar));
-    return code::CallExpr::createMethodCall(distvarname,
+      // :::=> dist.init(...), dist.gen()
+      return new code::BinaryOperator(callinit, callgen,
+        code::OpKind::BO_COMMA);
+    }
+    else {
+      // calculating likelihood
+      // put init just before sampling
+      // :::=> dist.init(...)
+      code::Expr* callinit = code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_INIT_FUN_NAME, args);
+      // :::=> dist.loglikeli()
+      code::Expr* calllikeli = code::CallExpr::createMethodCall(distvarname,
         COMPUTE_LIKELIHOOD_IN_LOG ?
-            DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME,
-        args);
+      DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME,
+                                        std::vector<code::Expr*>({ new code::Identifier(valuevar) }));
+      // :::=> dist.init(...), dist.loglikeli()
+      return new code::BinaryOperator(callinit, calllikeli,
+        code::OpKind::BO_COMMA);
+    }
+  }
+  else {
+    if (valuevar.empty()) {
+      // now actual sampling a value from the distribution
+      // define a field in the main class corresponding to the distribution
+      code::FieldDecl::createFieldDecl(coreCls, distvarname, code::Type(name));
+      //put initialization in coreClasInit
+      coreClsInit->addStmt(
+        code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_INIT_FUN_NAME, args));
+      // :::==> distribution.gen();
+      // the following two lines of code are not used right now, just use the default engine
+      //    std::vector<code::Expr *> rd;
+      //    rd.push_back(new code::Identifier(RANDOM_ENGINE_VAR_NAME));
+      return code::CallExpr::createMethodCall(distvarname,
+        DISTRIBUTION_GEN_FUN_NAME);
+    }
+    else {
+      // calculating likelihood
+      // :::==> distribution.loglikeli
+      std::vector<code::Expr *> args;
+      args.push_back(new code::Identifier(valuevar));
+      return code::CallExpr::createMethodCall(distvarname,
+        COMPUTE_LIKELIHOOD_IN_LOG ?
+      DISTRIBUTION_LOGLIKELI_FUN_NAME : DISTRIBUTION_LIKELI_FUN_NAME,
+                                        args);
+    }
   }
 }
 
@@ -827,7 +962,7 @@ void CPPTranslator::addFieldForFunVar(std::string varname,
       ensureFun->addStmt(
           new code::CallExpr(new code::Identifier(VECTOR_RESIZE_METHOD_NAME),
               std::vector<code::Expr*>(
-                  { new code::Identifier(varname), new code::IntegerLiteral(id),
+                  { new code::Identifier(varname), new code::IntegerLiteral((int) id),
                       new code::Identifier(numvarname_for_arg) })));
     }
   }
@@ -853,6 +988,21 @@ void CPPTranslator::addFunValueRefStmt(code::FunctionDecl* fun,
   // assign the function application variable value to valuerefname
   code::VarDecl* retvar = new code::VarDecl(fun, valuerefname, varType, exp);
   code::DeclStmt* dst = new code::DeclStmt(retvar);
+  fun->addStmt(dst);
+}
+  
+void CPPTranslator::addFunValueAssignStmt(
+    code::FunctionDecl* fun, std::string valuevarname,
+    std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname) {
+  // the value of this function application variable is stored in
+  // valuevarname[index1][index2]...
+  // where the index are corresponding to the arguments
+  code::Expr* exp = new code::Identifier(valuevarname);
+  for (auto prm : valueindex) {
+    exp = new code::ArraySubscriptExpr(exp, new code::Identifier(prm->getId()));
+  }
+  // assign valuerefname to the function application variable value to
+  code::Stmt* dst = new code::BinaryOperator(exp, new code::Identifier(valuerefname), code::OpKind::BO_ASSIGN);
   fun->addStmt(dst);
 }
 
