@@ -21,7 +21,7 @@ void CategoricalDistr::addWeight(double w) {
   weights.push_back(w);
 }
 
-double CategoricalDistr::getWeight(int k) const {
+double CategoricalDistr::getWeight(size_t k) const {
   return weights[k];
 }
 
@@ -33,7 +33,7 @@ void CategoricalDistr::addSymbol(std::shared_ptr<ConstSymbol> c) {
   symbols.push_back(c);
 }
 
-std::shared_ptr<ConstSymbol> CategoricalDistr::getSymbol(int k) const {
+std::shared_ptr<ConstSymbol> CategoricalDistr::getSymbol(size_t k) const {
   return symbols[k];
 }
 

@@ -57,7 +57,7 @@ bool TypeFactory::addNameTy(const std::string& name) {
     return false;
   auto ptr = std::make_shared<ir::TypeDomain>(name);
   auto ty = new ir::NameTy(ptr);
-  ptr->setRefer(ty);
+  ptr->setType(ty);
   tyTable[name] = ty;
   return true;
 }

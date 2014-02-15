@@ -14,12 +14,46 @@
 namespace swift {
 namespace codegen {
 
+/**
+ * the following macro are defining construction of language elements in BLOG
+ */
+typedef code::ClassDecl* TYPEDEFN;
+typedef code::Type TYPE;
+typedef code::FieldDecl* ORIGINDEFN;
+typedef code::Expr* EXPR;
+typedef code::Stmt* STMT;
+
 class CPPTranslator {
 public:
   CPPTranslator();
   virtual ~CPPTranslator();
   void translate(swift::ir::BlogModel* model);
   code::Code* getResult();
+
+protected:
+
+  /**
+   * declare a named type
+   * it will create class definition for this type, and one field "name" (std::string)
+   */
+  inline TYPEDEFN DECLARE_TYPE(std::string name);
+
+  inline ORIGINDEFN DECLARE_ORIGIN_FIELD(TYPEDEFN typedf, std::string originname,
+      TYPE origintype);
+  /**
+   *  create BLOG instance, which can be distinct symbols, 
+   *  or instance generated in possible worlds
+   *
+   *  @param tyname         blog type name
+   *  @param instname       instance name
+   *  @param originvalues   a vector of values for origin fields
+   *  @param ncopy          how many copy to create, if null, it will just create 1
+   *
+   *  @return an assignment statement in target code
+   */
+  inline STMT CREATE_INSTANCE(std::string tyname, std::string instname, std::vector<EXPR> originvalues = std::vector<EXPR>(), EXPR ncopy = nullptr);
+  
+  inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
 
 private:
   code::Code* prog; // holder for result target code
@@ -109,8 +143,19 @@ private:
 
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
-  code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp);
-
+  code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, std::string valuevar =
+                            std::string());
+  
+  /**
+   *  translate the origin function call (origin reference)
+   *
+   *  @param originref origin function
+   *  @param valuevar variable name to hold the value (the purpose is then to calculate likelihood if non empty)
+   *
+   *  @return translated pointer of code::Expr
+   */
+  code::Expr* transOriginRefer(std::shared_ptr<ir::OriginRefer> originref, std::string valuevar =
+                            std::string());
   /*
    * translate the SetExpr. Including both conditonal set and explicit set
    */
@@ -119,6 +164,9 @@ private:
   /**
    * translate the evidence in obs statement, the resulting statement is added
    * to the declaration context
+   *
+   *  @param context within which the translated statment will reside
+   *  @param evid    ir evidence declaration
    */
   void transEvidence(code::FunctionDecl* context,
       std::shared_ptr<ir::Evidence> evid);
@@ -143,7 +191,7 @@ private:
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
       std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
       code::Type varType = INT_REF_TYPE);
-  
+
   /**
    * create assignment statement to blog function value
    */
@@ -156,8 +204,9 @@ private:
    * create a field for function value
    */
   void addFieldForFunVar(std::string varname,
-                         const std::vector<std::shared_ptr<ir::VarDecl> >& params, code::Type valueType = INT_TYPE);
-  
+      const std::vector<std::shared_ptr<ir::VarDecl> >& params,
+      code::Type valueType = INT_TYPE);
+
   /**
    * translate the distribution expression
    * given the arguments,
@@ -251,6 +300,9 @@ private:
   // function name for checking whether a number is finite
   static const std::string ISFINITE_FUN_NAME;
 
+  // MACRO name for holding negative INFINITE
+  static const std::string NEG_INFINITE_NAME;
+
   /**
    * function name for printing query answer
    */
@@ -314,6 +366,14 @@ private:
    */
   static const std::string VECTOR_RESIZE_METHOD_NAME;
   /**
+   * method name for vector.push_back()
+   */
+  static const std::string VECTOR_ADD_METHOD_NAME;
+  /**
+   * method name for append()
+   */
+  static const std::string APPEND_FUN_NAME;
+  /**
    * class name for vector
    */
   static const std::string VECTOR_CLASS_NAME;
@@ -370,6 +430,11 @@ private:
    * string name for the random engine, note a random engine need to use random device as an input source of randomness
    */
   static const std::string RANDOM_ENGINE_VAR_NAME;
+
+  /**
+   * function name for fill_n (="fill_n");
+   */
+  static const std::string FILL_N_FUN_NAME;
 
   /**
    * type for the random engine

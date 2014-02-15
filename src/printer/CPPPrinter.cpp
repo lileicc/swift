@@ -226,6 +226,7 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
+  fprintf(file, "#include \"util/util.h\"\n");
 
   // output costumized include
   for (auto h : header)

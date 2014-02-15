@@ -211,6 +211,11 @@ inline void resize(std::vector<std::vector<std::vector<bool> > > & x, size_t id,
   }
 }
 
+template<typename _T>
+inline void append(std::vector<_T> & x, size_t n, const _T & value) {
+  x.insert(x.end(), n, value);
+}
+
 //////////////////////////////////
 // Internal Functions
 //////////////////////////////////
