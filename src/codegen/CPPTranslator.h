@@ -52,6 +52,8 @@ protected:
    *  @return an assignment statement in target code
    */
   inline STMT CREATE_INSTANCE(std::string tyname, std::string instname, std::vector<EXPR> originvalues = std::vector<EXPR>(), EXPR ncopy = nullptr);
+  
+  inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
 
 private:
   code::Code* prog; // holder for result target code
@@ -141,8 +143,19 @@ private:
 
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
-  code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp);
-
+  code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, std::string valuevar =
+                            std::string());
+  
+  /**
+   *  translate the origin function call (origin reference)
+   *
+   *  @param originref origin function
+   *  @param valuevar variable name to hold the value (the purpose is then to calculate likelihood if non empty)
+   *
+   *  @return translated pointer of code::Expr
+   */
+  code::Expr* transOriginRefer(std::shared_ptr<ir::OriginRefer> originref, std::string valuevar =
+                            std::string());
   /*
    * translate the SetExpr. Including both conditonal set and explicit set
    */
@@ -151,6 +164,9 @@ private:
   /**
    * translate the evidence in obs statement, the resulting statement is added
    * to the declaration context
+   *
+   *  @param context within which the translated statment will reside
+   *  @param evid    ir evidence declaration
    */
   void transEvidence(code::FunctionDecl* context,
       std::shared_ptr<ir::Evidence> evid);

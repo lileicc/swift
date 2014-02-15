@@ -172,7 +172,7 @@ bool Analyzer::processRandom(std::shared_ptr<ir::OprExpr> term) {
 }
 
 bool Analyzer::processRandom(std::shared_ptr<ir::OriginRefer> term) {
-  processRandom(term->getVar());
+  processRandom(term->getOriginArg());
   term->setRandom(true);
   return true;
 }
