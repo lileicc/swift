@@ -7,7 +7,7 @@ namespace swift {
 namespace printer {
 
 CPPPrinter::CPPPrinter(std::string str) :
-    Printer(str), isforward(false) {
+    Printer(str), isforward(false), isheader(false) {
 }
 
 CPPPrinter::~CPPPrinter() {
@@ -193,6 +193,7 @@ void CPPPrinter::print(code::Code* prog) {
   newline = true;
   prefix.clear();
   isforward = false;
+  isheader = false;
 
   // output include
   fprintf(file, "#include <iostream>\n");
@@ -240,13 +241,19 @@ void CPPPrinter::print(code::Code* prog) {
 
   printLine();
   // print forward declaration
-  isforward = true;
+  isforward = true; isheader = false;
+  for (auto p : prog->getAllDecls())
+    p->print(this);
+  printLine();
+
+  // print header declaration
+  isforward = false; isheader = true;
   for (auto p : prog->getAllDecls())
     p->print(this);
   printLine();
 
   // print main body
-  isforward = false;
+  isforward = false; isheader = false;
   for (auto p : prog->getAllDecls())
     p->print(this);
 
@@ -382,7 +389,12 @@ void CPPPrinter::print(code::CaseStmt* term) {
 }
 
 void CPPPrinter::print(code::ClassDecl* term) {
-  if (isforward) { // print everything except body of FunctionDecl
+  if (isforward) { // print forward decl of the class
+    printIndent();
+    fprintf(file, "class %s;", term->getName().c_str());
+    printLine();
+  } else
+  if (isheader) { // print everything except body of FunctionDecl
     printIndent();
     fprintf(file, "class %s {", term->getName().c_str());
     printLine();
@@ -420,11 +432,11 @@ void CPPPrinter::print(code::CompoundStmt* term) {
 
   decIndent();
 
-  newline = backup;
-
   if (term->getAll().size() > 0) // Otherwise it is just an empty block, no indent/newline needed
     printIndent();
   fprintf(file, "}");
+
+  newline = backup;
   printLine();
 }
 
@@ -435,12 +447,14 @@ void CPPPrinter::print(code::ContinueStmt* term) {
 }
 
 void CPPPrinter::print(code::DeclStmt* term) {
-  // We assume now isforward == false
-  assert(isforward == false);
+  // We assume now isforward == false && isheader == false
+  assert(isforward == false && isheader == false);
 
-  isforward = true;
+  isforward = true; isheader = false;
   term->getDecl()->print(this);
-  isforward = false;
+  isforward = false; isheader = true;
+  term->getDecl()->print(this);
+  isforward = false; isheader = false;
   term->getDecl()->print(this);
 }
 
@@ -496,8 +510,9 @@ void CPPPrinter::print(code::FunctionDecl* term) {
 }
 
 void CPPPrinter::print(code::FunctionDecl* term, bool hasRetType) {
+  if (isforward) return ;
   bool backup;
-  if (isforward) {
+  if (isheader) {
     printIndent();
     backup = newline;
     newline = false;
@@ -589,7 +604,7 @@ void CPPPrinter::print(code::NullLiteral* term) {
 }
 
 void CPPPrinter::print(code::NamespaceDecl* term) {
-  if (isforward)
+  if (isforward || isheader)
     return;
 
   printIndent();
@@ -598,13 +613,19 @@ void CPPPrinter::print(code::NamespaceDecl* term) {
   printLine();
 
   // print forward declaration
-  isforward = true;
+  isforward = true; isheader = false;
+  for (auto p : term->getAllDecls())
+    p->print(this);
+  printLine();
+
+  // print header declaration
+  isforward = false; isheader = true;
   for (auto p : term->getAllDecls())
     p->print(this);
   printLine();
 
   // print body
-  isforward = false;
+  isforward = false; isheader = false;
   for (auto p : term->getAllDecls())
     p->print(this);
   printLine();
@@ -615,12 +636,13 @@ void CPPPrinter::print(code::NamespaceDecl* term) {
 }
 
 void CPPPrinter::print(code::ParamVarDecl* term) {
+  if (isforward) return ;
   // assume newline == false
   assert(newline == false);
 
   bool backup = newline;
   newline = false;
-  if (isforward) {
+  if (isheader) {
     term->getType().print(this);
     if (term->getValue() != NULL) {
       fprintf(file, "=");
@@ -700,7 +722,7 @@ void CPPPrinter::print(code::Type* term) {
 }
 
 void CPPPrinter::print(code::VarDecl* term) {
-  if (!isforward)
+  if (!isheader)
     return;
 
   printIndent();
