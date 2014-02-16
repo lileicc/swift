@@ -10,15 +10,20 @@ origin Aircraft Source(Blip);
 #Blip(Source = a) ~ Poisson(1.0);
 
 random Real Location(Aircraft a) ~ Gaussian(100.0, 200.0);
+  
 
 random Real BlipLocation(Blip b) {
-  if Source(b) != null then 
+  if (b != null & Source(b) != null) then 
     ~ Gaussian(102, 1.0)
   else ~ Gaussian(90.0, 210.0)
 };
 
 random Blip b1 ~ UniformChoice({Blip b});
 random Blip b2 ~ UniformChoice({Blip b : b != b1});
+random Blip b3 ~ UniformChoice({Blip b : b != b1 & b != b2});
+random Blip b4 ~ UniformChoice({Blip b : b != b1 & b != b2 & b != b3});
+
+obs #{Blip b} = 4;
 
 //obs {Blip b} = {b1, b2, b3, b4};
 

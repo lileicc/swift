@@ -243,11 +243,21 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
           new code::Identifier(WEIGHT_VAR_REF_NAME),
           new code::CallExpr(new code::Identifier(SET_EVIDENCE_FUN_NAME)),
           code::OpKind::BO_ASSIGN));
+  // evaluate query
+  // :::=> 
   std::vector<code::Expr*> weightArg;
   weightArg.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
+  code::Expr* threshold;
+  if (COMPUTE_LIKELIHOOD_IN_LOG) {
+    threshold = new code::Identifier(NEG_INFINITE_NAME);
+  } else {
+    threshold = new code::IntegerLiteral(0);
+  }
+  // only evaluate the query when likelihood greater than threshold
   body->addStmt(
+                new code::IfStmt(new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), threshold, code::OpKind::BO_LT),
       new code::CallExpr(new code::Identifier(QUERY_EVALUATE_FUN_NAME),
-                         weightArg));
+                         weightArg)));
   // :::==> weight[current_loop] = w;
   body->addStmt(
       new code::BinaryOperator(
