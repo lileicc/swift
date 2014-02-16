@@ -14,5 +14,9 @@ IRConstant OprExpr::getOp() const {
   return op;
 }
 
+void OprExpr::print(FILE* file, int indent){
+  fprintf(file, "%*sOprExpr: %d\n", indent, "", op);
+}
+
 }
 }

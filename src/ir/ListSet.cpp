@@ -11,11 +11,10 @@ ListSet::~ListSet() {
 }
 
 void ListSet::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(ListSet: (:\n", indent, "");
+  fprintf(file, "%*sListSet: \n", indent, "");
   for (size_t i = 0; i < argSize(); i++)
     if (get(i) != NULL)
       get(i)->print(file, indent + 2);
-  fprintf(file, "%*s) )\n", indent, "");
 }
 
 }

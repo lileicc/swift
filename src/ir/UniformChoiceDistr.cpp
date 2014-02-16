@@ -18,9 +18,8 @@ std::shared_ptr<SetExpr> UniformChoiceDistr::getBody() const {
 }
 
 void UniformChoiceDistr::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(UniformChoiceDistr:\n", indent, "");
+  fprintf(file, "%*sUniformChoiceDistr:\n", indent, "");
   body->print(file, indent + 2);
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

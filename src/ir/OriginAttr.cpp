@@ -35,11 +35,10 @@ size_t OriginAttr::getID() const {
 }
 
 void OriginAttr::print(FILE* file, int indent) {
-  fprintf(file, "%*s(OriginAttr:\n", indent, "");
-  fprintf(file, "%*s:name %s\n", indent + 2, "", getName().c_str());
-  fprintf(file, "%*s:type %s\n", indent + 2, "", getTyp()->toString().c_str());
-  fprintf(file, "%*s:TypeDomain %s\n", indent + 2, "", src->getName().c_str());
-  fprintf(file, "%*s)\n", indent, "");
+  fprintf(file, "%*sOriginAttr:\n", indent, "");
+  fprintf(file, "%*sname: %s\n", indent + 2, "", getName().c_str());
+  fprintf(file, "%*stype: %s\n", indent + 2, "", getTyp()->toString().c_str());
+  fprintf(file, "%*ssrc: %s\n", indent + 2, "", src->getName().c_str());
 
 }
 

@@ -17,7 +17,7 @@ double DoubleLiteral::getValue() const {
 }
 
 void DoubleLiteral::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(DoubleLiteral: %f )\n", indent, "", value);
+  fprintf(file, "%*sDoubleLiteral: %f \n", indent, "", value);
 }
 
 }

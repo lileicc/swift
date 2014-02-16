@@ -8,6 +8,7 @@ class NullSymbol: public swift::ir::ConstSymbol {
 public:
   NullSymbol();
   virtual ~NullSymbol();
+  void print(FILE* file, int indent);
 };
 
 }

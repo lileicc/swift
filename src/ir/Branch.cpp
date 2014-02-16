@@ -45,7 +45,7 @@ const std::vector<std::shared_ptr<Clause>>& Branch::getBranches() const {
 }
 
 void Branch::print(FILE* file, int indent) const {
-  fprintf(file, "%*s(Branch:\n", indent, "");
+  fprintf(file, "%*sBranch:\n", indent, "");
   fprintf(file, "%*svar:\n", indent + 2, "");
   getVar()->print(file, indent + 2);
   for (size_t i = 0; i < size(); i++) {
@@ -54,7 +54,6 @@ void Branch::print(FILE* file, int indent) const {
     fprintf(file, "%*sbranch %lu:\n", indent + 2, "", i);
     getBranch(i)->print(file, indent + 4);
   }
-  fprintf(file, "%*s)\n", indent, "");
 }
 
 }

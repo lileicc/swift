@@ -11,5 +11,10 @@ NullSymbol::NullSymbol() :
 
 NullSymbol::~NullSymbol() {
 }
+
+void NullSymbol::print(FILE* file, int indent){
+  fprintf(file, "%*sNullSymbol\n", indent, "");
+}
+
 }
 }
