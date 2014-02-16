@@ -60,6 +60,7 @@ public:
   void add(Stmt* decl);
   Stmt* get(int k);
   const std::vector<Stmt*>& getAll();
+  std::vector<Stmt*>& getAllRef();
 
   // For Debugging Use
   void print(FILE* file, int indent);

@@ -56,11 +56,17 @@ void AircraftSimple::build(){
     blog->add(num);
   }
   /*
-  obs #Blip = 3;
+  obs {Blip b} = {b1, b2, b3};
   */
   {
-    CardinalityExpr* num = new CardinalityExpr(0, 0, new CondSet(0, 0, VarDecl(0, 0, Symbol("Blip"))));
-    Evidence* e = new Evidence(0, 0, num, new IntLiteral(0,0,3));
+    CondSet* st = new CondSet(0, 0, VarDecl(0,0,Symbol("Blip"),Symbol("b")));
+    ListSet* lst = new ListSet(0,0);
+    lst->add(new VarRef(0, 0, Symbol("b1")));
+    lst->add(new VarRef(0, 0, Symbol("b2")));
+    lst->add(new VarRef(0, 0, Symbol("b3")));
+//    CardinalityExpr* num = new CardinalityExpr(0, 0, new CondSet(0, 0, VarDecl(0, 0, Symbol("Blip"))));
+//    Evidence* e = new Evidence(0, 0, num, new IntLiteral(0,0,3));
+    Evidence* e = new Evidence(0,0,st,lst); // Set Evidence Here!
     blog->add(e);
   }
 

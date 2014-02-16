@@ -20,6 +20,8 @@ public:
   Expr* getCond();
   VarDecl& getVar();
 
+  void setCond(Expr* c);
+
   // For Debugging Use
   void print(FILE *file, int indent);
 private:

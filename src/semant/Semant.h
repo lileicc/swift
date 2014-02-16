@@ -29,6 +29,16 @@ public:
   bool Okay();
 private:
   /**
+   * process set evidence
+   *    i.e.  obs {T t} = {t1,t2}
+   * :::=>
+   *      obs #{T t} = 2;
+   *      random t1 ~ UniformChoice({T t});
+   *      random t2 ~ UniformChoice({T t: t1 != t2})
+   */
+  void processSetEvidence(absyn::BlogProgram* prog);
+
+  /**
    * process all declarations, including
    *   - type declaration
    *   - distinct symbols

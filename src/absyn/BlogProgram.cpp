@@ -36,6 +36,10 @@ const std::vector<Stmt*>& BlogProgram::getAll() {
   return args;
 }
 
+std::vector<Stmt*>& BlogProgram::getAllRef() {
+  return args;
+}
+
 // For Debugging Use
 void BlogProgram::print(FILE* file, int indent) {
   fprintf(file, "%*s(BlogProgram:\n", indent, "");
