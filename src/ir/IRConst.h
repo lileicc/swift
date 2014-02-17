@@ -13,6 +13,7 @@ enum class IRConstant {
   INT,
   DOUBLE,
   STRING,
+  TIMESTEP,
   NAMETY,
   ARRAY,
   MAP,
@@ -60,12 +61,14 @@ public:
   static const std::string INT;
   static const std::string DOUBLE;
   static const std::string STRING;
+  static const std::string TIMESTEP;
   static const std::string NA;
 
   static const std::string BLOG_BOOL;
   static const std::string BLOG_INT;
   static const std::string BLOG_DOUBLE;
   static const std::string BLOG_STRING;
+  static const std::string BLOG_TIMESTEP;
 };
 
 }

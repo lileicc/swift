@@ -10,7 +10,7 @@ namespace swift {
 namespace ir {
 
 FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp) :
-    name(name), retTyp(retTyp), isrand(isrand), body(nullptr) {
+    name(name), retTyp(retTyp), isrand(isrand), body(nullptr), tmpvar(nullptr), istmp(false) {
 }
 
 FuncDefn::~FuncDefn() {
@@ -58,6 +58,25 @@ bool FuncDefn::isRand() const {
 
 bool FuncDefn::isFixed() const {
   return !isrand;
+}
+
+bool FuncDefn::isTemporal() const {
+  return istmp;
+}
+
+std::shared_ptr<VarDecl> FuncDefn::getTempVar() {
+  return tmpvar;
+}
+
+void FuncDefn::processTemporal(const Ty* timety) {
+  for (size_t i = 0; i < args.size(); ++i) {
+    if (args[i]->getTyp() == timety) {
+      istmp = true;
+      tmpvar = args[i];
+      args.erase(args.begin() + i);
+      break;
+    }
+  }
 }
 
 std::string FuncDefn::toSignature() const {

@@ -24,6 +24,9 @@ public:
   const std::vector<std::shared_ptr<VarDecl> >& getArgs() const;
   bool isRand() const;
   bool isFixed() const;
+  bool isTemporal() const;
+  std::shared_ptr<VarDecl> getTempVar();
+  void processTemporal(const Ty* timety);
   // For Debugging Use
   void print(FILE* file, int indent) const;
 
@@ -35,6 +38,8 @@ private:
   const Ty* retTyp;
   bool isrand;
   std::shared_ptr<Clause> body;
+  std::shared_ptr<VarDecl> tmpvar;
+  bool istmp;
 };
 
 }

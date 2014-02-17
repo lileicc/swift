@@ -195,10 +195,24 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
   for (size_t i = 0; i < fd->argSize(); i++) {
     vds.push_back(transVarDecl(fd->getArg(i)));
   }
+  // Function can contain at most one Timestep argument
+  int timestep_count = 0;
+  for (auto v : vds) {
+    if (v->getTyp() == tyFactory.getTimestepTy())
+      ++ timestep_count;
+  }
+  if (timestep_count > 1) {
+    error(fd->line, fd->col, "function < " + name + " > contains more than 1 timestep arguments!");
+  }
+
   if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom())) {
     error(fd->line, fd->col,
         "function < " + name
             + " > with the same argument type already defined");
+  }
+  else {
+    // Process Timestep
+    functory.getFunc(name, vds)->processTemporal(tyFactory.getTimestepTy());
   }
 }
 
@@ -594,6 +608,17 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
     decl.push_back(std::make_shared<ir::VarDecl>(args.back()->getTyp(), ""));
   }
 
+  // TODO: To fix this hacking implementation of Builtin Function Prev()!!!!
+  // Check whether this function is Prev
+  if (args.size() == 1 && args.back()->getTyp() == tyFactory.getTimestepTy()
+    && expr->getFuncName().getValue() == "Prev") {
+    auto ptr = std::make_shared<ir::FunctionCall>(expr->getFuncName().getValue());
+    ptr->setArgs(args);
+    ptr->setTyp(tyFactory.getTimestepTy());
+    ptr->processTemporal(tyFactory.getTimestepTy());
+    return ptr;
+  }
+
   // Special Case for Origin Function
   if (decl.size() == 1
       && (dynamic_cast<const ir::NameTy*>(decl[0]->getTyp()) != NULL)) {
@@ -618,6 +643,11 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   // Type Checking
   ptr->setTyp(ptr->getRefer()->getRetTyp());
   ptr->setArgs(args);
+
+  // Special Check for Temporal FunctionCall
+  if (ptr->getRefer()->isTemporal())
+    ptr->processTemporal(tyFactory.getTimestepTy());
+
   return ptr;
 }
 
