@@ -22,6 +22,8 @@ public:
 
   Expr* getLeft();
   Expr* getRight();
+  void setLeft(Expr* e);
+  void setRight(Expr *);
 
   // For Debugging Use
   void print(FILE* file, int indent);

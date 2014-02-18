@@ -29,6 +29,14 @@ Expr* Evidence::getRight() {
   return right;
 }
 
+void Evidence::setLeft(Expr* e) {
+  left = e;
+}
+
+void Evidence::setRight(Expr* e) {
+  right = e;
+}
+
 // For Debugging Use
 void Evidence::print(FILE* file, int indent) {
   fprintf(file, "%*s(Evidence:\n", indent, "");
