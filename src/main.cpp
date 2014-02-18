@@ -6,6 +6,7 @@
 #include <vector>
 #include <tuple>
 #include "absyn/BlogProgram.h"
+#include "preprocess/Preprocessor.h"
 #include "semant/Semant.h"
 #include "codegen/CPPTranslator.h"
 #include "ir/BlogModel.h"
@@ -45,6 +46,16 @@ int main(int argc, char** argv) {
     // TODO print the error message!
     return 1;
   }
+  
+  // preprocess of input blog program
+  swift::preprocess::Preprocessor preproc;
+  preproc.process(blog_absyn);
+  if (!preproc.Okay()) {
+    fprintf(stderr, "Error in Preprocessing Phase! Please remove unsupported hacks in the program!");
+    // TODO print the error message!
+    return 1;
+  }
+  blog_absyn = preproc.getProg();
 
   // semantic checking and translating to ir
   swift::semant::Semant sem;
