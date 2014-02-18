@@ -1,35 +1,27 @@
 /*
- * CategoricalDistribution.cpp
+ * Discrete.cpp
  *
- *  Created on: Nov 23, 2013
- *      Author: leili
+ *  Created on: Feb 17, 2014
+ *      Author: yiwu
  */
 #include <numeric>
 #include <cmath>
-#include "CategoricalDistribution.h"
+#include "Discrete.h"
 
 namespace swift {
 namespace random {
 
-Categorical::Categorical() {
+Discrete::Discrete() {
 }
 
-Categorical::~Categorical() {
+Discrete::~Discrete() {
 }
 
-void Categorical::init(const std::map<int, double>& ws) {
-  values.clear();
-  weights.clear();
-  values_to_indic.clear();
-  int i = 0;
-  for (auto it : ws) {
-    if (it.second > 0 && it.second <= 1) {
-      values.push_back(it.first);
-      weights.push_back(it.second);
-      values_to_indic[it.first] = i;
-      log_weights.push_back(std::log(it.second));
-      i++;
-    }
+void Discrete::init(std::vector<double> wei) {
+  weights = wei;
+  log_weights.clear();
+  for (auto w : weights) {
+    log_weights.push_back(std::log(w));
   }
   /*
    Note: In VS2013, we have to rewrite the last line with the following code
@@ -44,11 +36,11 @@ void Categorical::init(const std::map<int, double>& ws) {
 }
 
 template<typename _RD>
-int Categorical::gen(_RD& rd) {
+int Discrete::gen(_RD& rd) {
   return values[dist(rd)];
 }
 
-int Categorical::gen() {
+int Discrete::gen() {
   return gen(engine);
 //  //custom implementation 
 //  double u = (double)rand() / RAND_MAX;
@@ -60,19 +52,17 @@ int Categorical::gen() {
 //  return values[x];
 }
 
-double Categorical::likeli(const int& x) {
-  auto e = values_to_indic.find(x);
-  if (e != values_to_indic.end())
-    return weights[e->second];
+double Discrete::likeli(const int& x) {
+  if (x >= 0 && x < weights.size())
+    return weights[x];
   else
     return 0;
 }
 
-double Categorical::loglikeli(const int& x) {
+double Discrete::loglikeli(const int& x) {
   // todo: check -infinity!!!
-  auto e = values_to_indic.find(x);
-  if (e != values_to_indic.end())
-    return log_weights[e->second];
+  if (x >= 0 && x < weights.size())
+    return log_weights[x];
   else
     return - INFINITY;
 }

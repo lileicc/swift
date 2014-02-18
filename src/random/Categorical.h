@@ -1,5 +1,5 @@
 /*
- * CategoricalDistribution.h
+ * Categorical.h
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
@@ -21,6 +21,7 @@ public:
   Categorical();
   ~Categorical();
   void init(const std::map<int, double>& ws);
+  void init(std::vector<int> val, std::vector<double> wei);
   int gen();
   template<typename _RD>
   int gen(_RD& rd);
