@@ -37,7 +37,7 @@ void Discrete::init(std::vector<double> wei) {
 
 template<typename _RD>
 int Discrete::gen(_RD& rd) {
-  return values[dist(rd)];
+  return dist(rd);
 }
 
 int Discrete::gen() {
