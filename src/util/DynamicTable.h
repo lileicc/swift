@@ -29,7 +29,7 @@ struct _mdvector {
       data.resize(sz);
     else {
       for (auto & a : data) {
-        typename _mdvector<_T, _dim-1>::_resize(a, dim - 1, sz);
+        _mdvector<_T, _dim-1>::_resize(a, dim - 1, sz);
       }
     }
   };
