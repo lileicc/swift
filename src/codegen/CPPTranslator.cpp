@@ -19,6 +19,8 @@ const std::string CPPTranslator::VECTOR_CLASS_NAME = "vector";
 const std::string CPPTranslator::VECTOR_RESIZE_METHOD_NAME = "resize";
 const std::string CPPTranslator::VECTOR_ADD_METHOD_NAME = "push_back";
 const std::string CPPTranslator::APPEND_FUN_NAME = "append";
+const std::string CPPTranslator::DYNAMICTABLE_CLASS_NAME = "DynamicTable";
+const std::string CPPTranslator::DYNAMICTABLE_RESIZE_METHOD_NAME = "resize";
 const code::Type CPPTranslator::INT_TYPE("int");
 const code::Type CPPTranslator::INT_REF_TYPE("int", true);
 const code::Type CPPTranslator::INT_VECTOR_TYPE(VECTOR_CLASS_NAME,
@@ -1129,26 +1131,30 @@ void CPPTranslator::addFieldForFunVar(
     const std::vector<std::shared_ptr<ir::VarDecl> >& params,
     code::Type valueType) {
   if (!params.empty()) {
-    // the underlying library only support two dimensions at most
+    // currently a hack, since code do not support expression as template
+    // argument
+    // TODO, change code and make it general
+    valueType =
+        code::Type(DYNAMICTABLE_CLASS_NAME,
+                   std::vector<code::Type>(
+                       {valueType, code::Type(std::to_string(params.size()))}));
     for (size_t id = 0; id < params.size(); id++) {
-      valueType = code::Type(VECTOR_CLASS_NAME, std::vector<code::Type>( {
-          valueType }));
       // the type of a random function could only be nametype
       std::string argtypename = params[id]->toSignature();
       std::string numvarname_for_arg = getVarOfNumType(argtypename);
       // adding in the ensure_size function for value of a random variable
       // :::=> resize(valuevar, id, number_of_instance);
-      code::FunctionDecl* ensureFun = declared_funs[getEnsureFunName(
-          numvarname_for_arg)];
-      ensureFun->addStmt(
-          new code::CallExpr(
-              new code::Identifier(VECTOR_RESIZE_METHOD_NAME),
-              std::vector<code::Expr*>(
-                  { new code::Identifier(varname), new code::IntegerLiteral(
-                      (int) id), new code::Identifier(numvarname_for_arg) })));
+      code::FunctionDecl* ensureFun =
+          declared_funs[getEnsureFunName(numvarname_for_arg)];
+      ensureFun->addStmt(code::CallExpr::createMethodCall(
+          varname, DYNAMICTABLE_RESIZE_METHOD_NAME,
+          std::vector<code::Expr*>(
+              {new code::IntegerLiteral((int)id),
+               new code::Identifier(numvarname_for_arg)})));
     }
   }
-  // adding in the main class a declaration of field for value of a random variable
+  // adding in the main class a declaration of field for value of a random
+  // variable
   code::FieldDecl::createFieldDecl(coreCls, varname, valueType);
 }
 
