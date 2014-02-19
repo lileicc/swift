@@ -15,16 +15,6 @@
 template <typename _T, size_t _dim>
 struct _mdvector {
   typedef std::vector<typename _mdvector<_T, _dim-1>::type> type;
-};
-
-template <typename _T>
-struct _mdvector<_T, 0> {
-  typedef _T type;
-};
-
-template <typename _T, size_t _dim>
-class DynamicTable {
-private:
   /**
    * resize the underlying multi-dimensional vector in the specified dimension
    *
@@ -34,20 +24,47 @@ private:
    * @param dim       the dimension on which it needs resizing (starts at 0)
    * @param sz        the new sz of the dimension
    */
-  template <size_t _D>
-  void _resize(_mdvector<_T, _D>::type & data, size_t dim, size_t sz) {
+  static void _resize(typename _mdvector<_T, _dim>::type & data, size_t dim, size_t sz) {
     if (dim == 0)
       data.resize(sz);
     else {
       for (auto & a : data) {
-        _resize(a, dim - 1, sz);
+        typename _mdvector<_T, _dim - 1>::resize(a, dim - 1, sz);
       }
     }
   };
+};
 
+template <typename _T>
+struct _mdvector<_T, 1> {
+  typedef std::vector<_T> type;
+  static void _resize(type & data, size_t dim, size_t sz) {
+    if (dim == 0)
+      data.resize(sz);
+  };
+};
+
+
+
+template <bool Condition, typename TrueResult, typename FalseResult>
+struct if_;
+
+template <typename TrueResult, typename FalseResult>
+struct if_<true, TrueResult, FalseResult> {
+  typedef TrueResult result;
+};
+
+
+template <typename TrueResult, typename FalseResult>
+struct if_<false, TrueResult, FalseResult> {
+  typedef FalseResult result;
+};
+
+
+template <typename _T, size_t _dim>
+class DynamicTable {
 public:
-  DynamicTable() {
-    maxsize(_dim, 0);
+  DynamicTable() : maxsize(_dim, 0) {
   };
   ~DynamicTable();
 
@@ -62,10 +79,10 @@ public:
   void resize(size_t dim, size_t sz) {
     if (dim >= maxsize.size() || sz <= maxsize[dim])
       return;
-    _resize(data, dim, sz);
+    typename _mdvector<_T, _dim>::_resize(data, dim, sz);
     if ((_dim > dim + 1) && (maxsize[dim] == 0)) {
       for (size_t i = dim+1; (i < _dim) && (maxsize[i] > 0); i++) {
-        _resize(data, i, maxsize[i]);
+        typename _mdvector<_T, _dim>::_resize(data, i, maxsize[i]);
       }
     }
     maxsize[dim] = sz;
@@ -77,12 +94,12 @@ public:
    *  @param i the value indicated by i
    *  @return
    */
-  inline _mdvector<_T, _dim-1>::type& operator [](size_t i) {
+  inline typename _mdvector<_T, _dim-1>::type& operator [](size_t i) {
     return data[i];
   }
   
 private:
-  _mdvector<_T, _dim>::type data;
+  typename _mdvector<_T, _dim>::type data;
   std::vector<size_t> maxsize;
 };
 
