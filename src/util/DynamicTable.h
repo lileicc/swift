@@ -9,22 +9,7 @@
 #include <iostream>
 #pragma once
 
-template <bool Condition, typename TrueResult, typename FalseResult>
-struct if_;
 
-template <typename TrueResult, typename FalseResult>
-struct if_<true, TrueResult, FalseResult> {
-  typedef TrueResult result;
-};
-
-template <typename TrueResult, typename FalseResult>
-struct if_<false, TrueResult, FalseResult> {
-  typedef FalseResult result;
-};
-
-/**
- * Multi-dimensional dynamic table.
- */
 template <typename _T, size_t _dim>
 struct _mdvector {
 //  static_assert(_dim > 1, "entering general _mdvector with _dim ");
@@ -66,11 +51,9 @@ struct _mdvector<_T, 0> {
   };
 };
 
-
-
-
-
-
+/**
+ * Multi-dimensional dynamic table.
+ */
 template <typename _T, size_t _dim>
 class DynamicTable {
 public:
