@@ -47,8 +47,8 @@ struct _mdvector<_T, 1> {
 template <typename _T>
 struct _mdvector<_T, 0> {
   typedef _T type;
-  static void _resize(type & data, size_t dim, size_t sz) {
-  };
+  //static void _resize(type & data, size_t dim, size_t sz) {
+  //};
 };
 
 /**
