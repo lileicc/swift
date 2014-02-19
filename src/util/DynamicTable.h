@@ -6,15 +6,29 @@
  */
 
 #include <vector>
+#include <iostream>
 #pragma once
+
+template <bool Condition, typename TrueResult, typename FalseResult>
+struct if_;
+
+template <typename TrueResult, typename FalseResult>
+struct if_<true, TrueResult, FalseResult> {
+  typedef TrueResult result;
+};
+
+template <typename TrueResult, typename FalseResult>
+struct if_<false, TrueResult, FalseResult> {
+  typedef FalseResult result;
+};
 
 /**
  * Multi-dimensional dynamic table.
  */
-
 template <typename _T, size_t _dim>
 struct _mdvector {
-  typedef std::vector<typename _mdvector<_T, _dim-1>::type> type;
+//  static_assert(_dim > 1, "entering general _mdvector with _dim ");
+  typedef std::vector<typename _mdvector<_T, _dim - 1>::type> type;
   /**
    * resize the underlying multi-dimensional vector in the specified dimension
    *
@@ -24,12 +38,13 @@ struct _mdvector {
    * @param dim       the dimension on which it needs resizing (starts at 0)
    * @param sz        the new sz of the dimension
    */
+  //template <typename _T, int _dim>
   static void _resize(typename _mdvector<_T, _dim>::type & data, size_t dim, size_t sz) {
     if (dim == 0)
       data.resize(sz);
     else {
       for (auto & a : data) {
-        typename _mdvector<_T, _dim - 1>::resize(a, dim - 1, sz);
+        typename _mdvector<_T, _dim-1>::_resize(a, dim - 1, sz);
       }
     }
   };
@@ -44,21 +59,16 @@ struct _mdvector<_T, 1> {
   };
 };
 
-
-
-template <bool Condition, typename TrueResult, typename FalseResult>
-struct if_;
-
-template <typename TrueResult, typename FalseResult>
-struct if_<true, TrueResult, FalseResult> {
-  typedef TrueResult result;
+template <typename _T>
+struct _mdvector<_T, 0> {
+  typedef _T type;
+  static void _resize(type & data, size_t dim, size_t sz) {
+  };
 };
 
 
-template <typename TrueResult, typename FalseResult>
-struct if_<false, TrueResult, FalseResult> {
-  typedef FalseResult result;
-};
+
+
 
 
 template <typename _T, size_t _dim>
@@ -66,7 +76,7 @@ class DynamicTable {
 public:
   DynamicTable() : maxsize(_dim, 0) {
   };
-  ~DynamicTable();
+  ~DynamicTable() {};
 
   /**
    * resize this multi-dimensional table in the specified dimension
@@ -79,10 +89,10 @@ public:
   void resize(size_t dim, size_t sz) {
     if (dim >= maxsize.size() || sz <= maxsize[dim])
       return;
-    typename _mdvector<_T, _dim>::_resize(data, dim, sz);
+    _mdvector<_T, _dim>::_resize(data, dim, sz);
     if ((_dim > dim + 1) && (maxsize[dim] == 0)) {
       for (size_t i = dim+1; (i < _dim) && (maxsize[i] > 0); i++) {
-        typename _mdvector<_T, _dim>::_resize(data, i, maxsize[i]);
+        _mdvector<_T, _dim>::_resize(data, i, maxsize[i]);
       }
     }
     maxsize[dim] = sz;
