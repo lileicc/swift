@@ -14,12 +14,11 @@ namespace swift {
 namespace preprocess {
 
 Preprocessor::Preprocessor() :
-    errorMsg(stderr), blogProg(NULL) {
+    errorMsg(stderr), blogProg(NULL), isResultUsed(false) {
 }
 
 Preprocessor::~Preprocessor() {
-  // TODO: Do We Need to Delete BlogProgram here??
-  if (blogProg != NULL) delete blogProg;
+  if (!isResultUsed) delete blogProg;
 }
 
 void Preprocessor::process(absyn::BlogProgram* prog) {
@@ -99,6 +98,7 @@ bool Preprocessor::Okay() {
 }
 
 absyn::BlogProgram* Preprocessor::getProg() {
+  isResultUsed = true;
   return blogProg;
 }
 

@@ -378,6 +378,14 @@ private:
    */
   static const std::string VECTOR_CLASS_NAME;
   /**
+   * class name for DynamicTable
+   */
+  static const std::string DYNAMICTABLE_CLASS_NAME;
+  /**
+   * method name for DynamicTable.resize()
+   */
+  static const std::string DYNAMICTABLE_RESIZE_METHOD_NAME;
+  /**
    * initial value set to mark_var (default 1)
    */
   static const int INIT_SAMPLE_NUM;
