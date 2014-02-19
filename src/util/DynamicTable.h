@@ -6,9 +6,7 @@
  */
 
 #include <vector>
-#include <iostream>
 #pragma once
-
 
 template <typename _T, size_t _dim>
 struct _mdvector {
@@ -23,7 +21,6 @@ struct _mdvector {
    * @param dim       the dimension on which it needs resizing (starts at 0)
    * @param sz        the new sz of the dimension
    */
-  //template <typename _T, int _dim>
   static void _resize(typename _mdvector<_T, _dim>::type & data, size_t dim, size_t sz) {
     if (dim == 0)
       data.resize(sz);
@@ -47,12 +44,11 @@ struct _mdvector<_T, 1> {
 template <typename _T>
 struct _mdvector<_T, 0> {
   typedef _T type;
-  //static void _resize(type & data, size_t dim, size_t sz) {
-  //};
 };
 
 /**
  * Multi-dimensional dynamic table.
+ * It will adaptively grow the size of each dimension.
  */
 template <typename _T, size_t _dim>
 class DynamicTable {
