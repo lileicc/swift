@@ -257,7 +257,7 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   }
   // only evaluate the query when likelihood greater than threshold
   body->addStmt(
-                new code::IfStmt(new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), threshold, code::OpKind::BO_LT),
+                new code::IfStmt(new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), threshold, code::OpKind::BO_GT),
       new code::CallExpr(new code::Identifier(QUERY_EVALUATE_FUN_NAME),
                          weightArg)));
   // :::==> weight[current_loop] = w;
