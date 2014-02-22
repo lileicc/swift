@@ -1,21 +1,13 @@
 #ifndef lint
-static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
+static char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #endif
-
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
-#define YYPATCH 20130925
-
-#define YYEMPTY        (-1)
-#define yyclearin      (yychar = YYEMPTY)
-#define yyerrok        (yyerrflag = 0)
-#define YYRECOVERING() (yyerrflag != 0)
-
+#define yyclearin (yychar=(-1))
+#define yyerrok (yyerrflag=0)
+#define YYRECOVERING (yyerrflag!=0)
 #define YYPREFIX "yy"
-
-#define YYPURE 0
-
 #line 2 "blog.yacc"
 #include <cstdio>
 #include <cstdlib>
@@ -91,12 +83,6 @@ BlogProgram* parse(const char* inp) {
   return blog;  
 }
 #line 77 "blog.yacc"
-#ifdef YYSTYPE
-#undef  YYSTYPE_IS_DECLARED
-#define YYSTYPE_IS_DECLARED 1
-#endif
-#ifndef YYSTYPE_IS_DECLARED
-#define YYSTYPE_IS_DECLARED 1
 typedef union {
   int i;
   class BLOGSymbol<int>* ival;
@@ -144,40 +130,7 @@ typedef union {
   vector<Expr*>* explst;
   vector<tuple<Symbol, Symbol>>* varlst;
 } YYSTYPE;
-#endif /* !YYSTYPE_IS_DECLARED */
-#line 148 "parser.cpp"
-
-/* compatibility with bison */
-#ifdef YYPARSE_PARAM
-/* compatibility with FreeBSD */
-# ifdef YYPARSE_PARAM_TYPE
-#  define YYPARSE_DECL() yyparse(YYPARSE_PARAM_TYPE YYPARSE_PARAM)
-# else
-#  define YYPARSE_DECL() yyparse(void *YYPARSE_PARAM)
-# endif
-#else
-# define YYPARSE_DECL() yyparse(void)
-#endif
-
-/* Parameters sent to lex. */
-#ifdef YYLEX_PARAM
-# define YYLEX_DECL() yylex(void *YYLEX_PARAM)
-# define YYLEX yylex(YYLEX_PARAM)
-#else
-# define YYLEX_DECL() yylex(void)
-# define YYLEX yylex()
-#endif
-
-/* Parameters sent to yyerror. */
-#ifndef YYERROR_DECL
-#define YYERROR_DECL() yyerror(const char *s)
-#endif
-#ifndef YYERROR_CALL
-#define YYERROR_CALL(msg) yyerror(msg)
-#endif
-
-extern int YYPARSE_DECL();
-
+#line 134 "y.tab.c"
 #define ELSE 257
 #define IF 258
 #define THEN 259
@@ -239,7 +192,7 @@ extern int YYPARSE_DECL();
 #define LBRACKET 315
 #define RBRACKET 316
 #define YYERRCODE 256
-static const short yylhs[] = {                           -1,
+short yylhs[] = {                                        -1,
     0,   52,   52,   53,   53,    1,    1,    1,    2,    2,
     2,    2,    2,    2,    2,    2,    3,   38,   38,   38,
    42,   40,   39,   51,   51,   41,   44,   44,   44,   49,
@@ -254,7 +207,7 @@ static const short yylhs[] = {                           -1,
    27,   27,    9,   30,   30,   31,   32,   32,   33,   33,
     6,   13,   13,   14,   15,    7,   16,
 };
-static const short yylen[] = {                            2,
+short yylen[] = {                                         2,
     1,    0,    1,    2,    1,    1,    1,    1,    1,    1,
     1,    1,    1,    1,    1,    1,    3,    1,    1,    1,
     1,    4,    2,    2,    3,    6,    0,    2,    3,    2,
@@ -269,7 +222,7 @@ static const short yylen[] = {                            2,
     2,    2,    7,    1,    1,    3,    6,    4,    7,    5,
     3,    1,    1,    3,    3,    3,    1,
 };
-static const short yydefred[] = {                         0,
+short yydefred[] = {                                      0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    5,    6,    9,   16,   15,    7,    8,   13,   12,
    10,   11,   14,    1,    0,    0,    0,    0,   21,    0,
@@ -297,7 +250,7 @@ static const short yydefred[] = {                         0,
   113,   45,    0,  117,    0,    0,    0,   40,   38,    0,
    52,   54,
 };
-static const short yydgoto[] = {                         11,
+short yydgoto[] = {                                      11,
    12,   13,   14,   15,   16,   17,   18,   19,   20,   21,
    22,   23,   71,   72,   73,   55,  107,   57,   58,   59,
    60,   61,   62,   63,   64,  251,   65,   66,  187,   67,
@@ -305,7 +258,7 @@ static const short yydgoto[] = {                         11,
    32,   33,  192,  139,  135,  182,    0,   37,  193,   70,
     0,   24,   25,
 };
-static const short yysindex[] = {                       400,
+short yysindex[] = {                                    400,
  -263, -264, -264, -264, -241,  448,  448, -264, -222, -241,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,  400, -233, -202, -196,    0, -203,
@@ -333,7 +286,7 @@ static const short yysindex[] = {                       400,
     0,    0,  728,    0,    1,   26,   51,    0,    0, -230,
     0,    0,
 };
-static const short yyrindex[] = {                       309,
+short yyrindex[] = {                                    309,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,  310,    0,    0,    0,    0,    0,
@@ -361,7 +314,7 @@ static const short yyrindex[] = {                       309,
     0,    0, -248,    0,    0,    0, -246,    0,    0,    0,
     0,    0,
 };
-static const short yygindex[] = {                         0,
+short yygindex[] = {                                      0,
   327,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,   -6,    0,    0,    0,
     0, -114,    0,    0,    0,    0,    0,    0, -113,  305,
@@ -370,7 +323,7 @@ static const short yygindex[] = {                         0,
     0,    0,    0,
 };
 #define YYTABLESIZE 1112
-static const short yytable[] = {                         56,
+short yytable[] = {                                      56,
    74,  109,   95,   27,   28,   92,   50,   92,  113,  114,
   115,  116,   30,   34,   35,   29,   26,  152,   76,  103,
   186,  110,  103,  103,  186,  194,  153,  183,  103,  103,
@@ -484,7 +437,7 @@ static const short yytable[] = {                         56,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,  127,
 };
-static const short yycheck[] = {                          6,
+short yycheck[] = {                                       6,
     7,   54,   49,  268,  269,  257,  257,  259,  287,  288,
   289,  290,    2,    3,    4,  280,  280,  305,    8,  305,
   135,   54,  305,  306,  139,  139,  314,  258,  314,  312,
@@ -604,8 +557,7 @@ static const short yycheck[] = {                          6,
 #endif
 #define YYMAXTOKEN 316
 #if YYDEBUG
-static const char *yyname[] = {
-
+char *yyname[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -622,7 +574,7 @@ static const char *yyname[] = {
 "NUMSIGN","RIGHTARROW","LPAREN","RPAREN","LBRACE","RBRACE","LBRACKET",
 "RBRACKET",
 };
-static const char *yyrule[] = {
+char *yyrule[] = {
 "$accept : program",
 "program : opt_statement_lst",
 "opt_statement_lst :",
@@ -751,120 +703,53 @@ static const char *yyrule[] = {
 "symbol_evidence : implicit_set EQ_ explicit_set",
 "query_stmt : QUERY query SEMI",
 "query : expression",
-
 };
 #endif
-
-int      yydebug;
-int      yynerrs;
-
-int      yyerrflag;
-int      yychar;
-YYSTYPE  yyval;
-YYSTYPE  yylval;
-
-/* define the initial stack-sizes */
 #ifdef YYSTACKSIZE
 #undef YYMAXDEPTH
-#define YYMAXDEPTH  YYSTACKSIZE
+#define YYMAXDEPTH YYSTACKSIZE
 #else
 #ifdef YYMAXDEPTH
 #define YYSTACKSIZE YYMAXDEPTH
 #else
-#define YYSTACKSIZE 10000
-#define YYMAXDEPTH  10000
+#define YYSTACKSIZE 500
+#define YYMAXDEPTH 500
 #endif
 #endif
-
-#define YYINITSTACKSIZE 200
-
-typedef struct {
-    unsigned stacksize;
-    short    *s_base;
-    short    *s_mark;
-    short    *s_last;
-    YYSTYPE  *l_base;
-    YYSTYPE  *l_mark;
-} YYSTACKDATA;
-/* variables for the parser stack */
-static YYSTACKDATA yystack;
+int yydebug;
+int yynerrs;
+int yyerrflag;
+int yychar;
+short *yyssp;
+YYSTYPE *yyvsp;
+YYSTYPE yyval;
+YYSTYPE yylval;
+short yyss[YYSTACKSIZE];
+YYSTYPE yyvs[YYSTACKSIZE];
+#define yystacksize YYSTACKSIZE
 #line 698 "blog.yacc"
 
 
 
 void yyerror(const char *s) {
-  cout << "Parse error!  Message: " << s << endl;
+  cout << "Parse error at line number: " << curr_line << " and column number: " << curr_col << "!  Message: " << s << endl;
   // might as well halt now:
   exit(-1);
 }
-#line 800 "parser.cpp"
-
-#if YYDEBUG
-#include <stdio.h>		/* needed for printf */
-#endif
-
-#include <stdlib.h>	/* needed for malloc, etc */
-#include <string.h>	/* needed for memset */
-
-/* allocate initial stack or double stack size, up to YYMAXDEPTH */
-static int yygrowstack(YYSTACKDATA *data)
-{
-    int i;
-    unsigned newsize;
-    short *newss;
-    YYSTYPE *newvs;
-
-    if ((newsize = data->stacksize) == 0)
-        newsize = YYINITSTACKSIZE;
-    else if (newsize >= YYMAXDEPTH)
-        return -1;
-    else if ((newsize *= 2) > YYMAXDEPTH)
-        newsize = YYMAXDEPTH;
-
-    i = (int) (data->s_mark - data->s_base);
-    newss = (short *)realloc(data->s_base, newsize * sizeof(*newss));
-    if (newss == 0)
-        return -1;
-
-    data->s_base = newss;
-    data->s_mark = newss + i;
-
-    newvs = (YYSTYPE *)realloc(data->l_base, newsize * sizeof(*newvs));
-    if (newvs == 0)
-        return -1;
-
-    data->l_base = newvs;
-    data->l_mark = newvs + i;
-
-    data->stacksize = newsize;
-    data->s_last = data->s_base + newsize - 1;
-    return 0;
-}
-
-#if YYPURE || defined(YY_NO_LEAKS)
-static void yyfreestack(YYSTACKDATA *data)
-{
-    free(data->s_base);
-    free(data->l_base);
-    memset(data, 0, sizeof(*data));
-}
-#else
-#define yyfreestack(data) /* nothing */
-#endif
-
-#define YYABORT  goto yyabort
+#line 740 "y.tab.c"
+#define YYABORT goto yyabort
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
-#define YYERROR  goto yyerrlab
-
+#define YYERROR goto yyerrlab
 int
-YYPARSE_DECL()
+yyparse()
 {
-    int yym, yyn, yystate;
+    register int yym, yyn, yystate;
 #if YYDEBUG
-    const char *yys;
+    register char *yys;
+    extern char *getenv();
 
-    if ((yys = getenv("YYDEBUG")) != 0)
+    if (yys = getenv("YYDEBUG"))
     {
         yyn = *yys;
         if (yyn >= '0' && yyn <= '9')
@@ -874,24 +759,17 @@ YYPARSE_DECL()
 
     yynerrs = 0;
     yyerrflag = 0;
-    yychar = YYEMPTY;
-    yystate = 0;
+    yychar = (-1);
 
-#if YYPURE
-    memset(&yystack, 0, sizeof(yystack));
-#endif
-
-    if (yystack.s_base == NULL && yygrowstack(&yystack)) goto yyoverflow;
-    yystack.s_mark = yystack.s_base;
-    yystack.l_mark = yystack.l_base;
-    yystate = 0;
-    *yystack.s_mark = 0;
+    yyssp = yyss;
+    yyvsp = yyvs;
+    *yyssp = yystate = 0;
 
 yyloop:
-    if ((yyn = yydefred[yystate]) != 0) goto yyreduce;
+    if (yyn = yydefred[yystate]) goto yyreduce;
     if (yychar < 0)
     {
-        if ((yychar = YYLEX) < 0) yychar = 0;
+        if ((yychar = yylex()) < 0) yychar = 0;
 #if YYDEBUG
         if (yydebug)
         {
@@ -911,14 +789,13 @@ yyloop:
             printf("%sdebug: state %d, shifting to state %d\n",
                     YYPREFIX, yystate, yytable[yyn]);
 #endif
-        if (yystack.s_mark >= yystack.s_last && yygrowstack(&yystack))
+        if (yyssp >= yyss + yystacksize - 1)
         {
             goto yyoverflow;
         }
-        yystate = yytable[yyn];
-        *++yystack.s_mark = yytable[yyn];
-        *++yystack.l_mark = yylval;
-        yychar = YYEMPTY;
+        *++yyssp = yystate = yytable[yyn];
+        *++yyvsp = yylval;
+        yychar = (-1);
         if (yyerrflag > 0)  --yyerrflag;
         goto yyloop;
     }
@@ -929,35 +806,36 @@ yyloop:
         goto yyreduce;
     }
     if (yyerrflag) goto yyinrecovery;
-
+#ifdef lint
+    goto yynewerror;
+#endif
+yynewerror:
     yyerror("syntax error");
-
+#ifdef lint
     goto yyerrlab;
-
+#endif
 yyerrlab:
     ++yynerrs;
-
 yyinrecovery:
     if (yyerrflag < 3)
     {
         yyerrflag = 3;
         for (;;)
         {
-            if ((yyn = yysindex[*yystack.s_mark]) && (yyn += YYERRCODE) >= 0 &&
+            if ((yyn = yysindex[*yyssp]) && (yyn += YYERRCODE) >= 0 &&
                     yyn <= YYTABLESIZE && yycheck[yyn] == YYERRCODE)
             {
 #if YYDEBUG
                 if (yydebug)
                     printf("%sdebug: state %d, error recovery shifting\
- to state %d\n", YYPREFIX, *yystack.s_mark, yytable[yyn]);
+ to state %d\n", YYPREFIX, *yyssp, yytable[yyn]);
 #endif
-                if (yystack.s_mark >= yystack.s_last && yygrowstack(&yystack))
+                if (yyssp >= yyss + yystacksize - 1)
                 {
                     goto yyoverflow;
                 }
-                yystate = yytable[yyn];
-                *++yystack.s_mark = yytable[yyn];
-                *++yystack.l_mark = yylval;
+                *++yyssp = yystate = yytable[yyn];
+                *++yyvsp = yylval;
                 goto yyloop;
             }
             else
@@ -965,11 +843,11 @@ yyinrecovery:
 #if YYDEBUG
                 if (yydebug)
                     printf("%sdebug: error recovery discarding state %d\n",
-                            YYPREFIX, *yystack.s_mark);
+                            YYPREFIX, *yyssp);
 #endif
-                if (yystack.s_mark <= yystack.s_base) goto yyabort;
-                --yystack.s_mark;
-                --yystack.l_mark;
+                if (yyssp <= yyss) goto yyabort;
+                --yyssp;
+                --yyvsp;
             }
         }
     }
@@ -986,10 +864,9 @@ yyinrecovery:
                     YYPREFIX, yystate, yychar, yys);
         }
 #endif
-        yychar = YYEMPTY;
+        yychar = (-1);
         goto yyloop;
     }
-
 yyreduce:
 #if YYDEBUG
     if (yydebug)
@@ -997,485 +874,482 @@ yyreduce:
                 YYPREFIX, yystate, yyn, yyrule[yyn]);
 #endif
     yym = yylen[yyn];
-    if (yym)
-        yyval = yystack.l_mark[1-yym];
-    else
-        memset(&yyval, 0, sizeof yyval);
+    yyval = yyvsp[1-yym];
     switch (yyn)
     {
 case 4:
 #line 206 "blog.yacc"
-	{
-    if(yystack.l_mark[0].stmt != NULL){
-      blog->add(yystack.l_mark[0].stmt);
+{
+    if(yyvsp[0].stmt != NULL){
+      blog->add(yyvsp[0].stmt);
     }
   }
 break;
 case 5:
 #line 211 "blog.yacc"
-	{ blog->add(yystack.l_mark[0].stmt); }
+{ blog->add(yyvsp[0].stmt); }
 break;
 case 6:
 #line 215 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].stmt; }
+{ yyval.stmt = yyvsp[0].stmt; }
 break;
 case 7:
 #line 216 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].stmt; }
+{ yyval.stmt = yyvsp[0].stmt; }
 break;
 case 8:
 #line 217 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].stmt; }
+{ yyval.stmt = yyvsp[0].stmt; }
 break;
 case 9:
 #line 222 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].stmt; }
+{ yyval.stmt = yyvsp[0].stmt; }
 break;
 case 10:
 #line 223 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].funcdec; }
+{ yyval.stmt = yyvsp[0].funcdec; }
 break;
 case 11:
 #line 224 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].funcdec; }
+{ yyval.stmt = yyvsp[0].funcdec; }
 break;
 case 12:
 #line 225 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].origdec; }
+{ yyval.stmt = yyvsp[0].origdec; }
 break;
 case 13:
 #line 226 "blog.yacc"
-	{yyval.stmt = yystack.l_mark[0].numstdec; }
+{yyval.stmt = yyvsp[0].numstdec; }
 break;
 case 14:
 #line 227 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].distdec; }
+{ yyval.stmt = yyvsp[0].distdec; }
 break;
 case 15:
 #line 228 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].stmt; }
+{ yyval.stmt = yyvsp[0].stmt; }
 break;
 case 16:
 #line 229 "blog.yacc"
-	{ yyval.stmt = yystack.l_mark[0].stmt; }
+{ yyval.stmt = yyvsp[0].stmt; }
 break;
 case 17:
 #line 234 "blog.yacc"
-	{ yyval.stmt = new TypDecl(curr_line, curr_col, Symbol(yystack.l_mark[-1].sval->getValue())); }
+{ yyval.stmt = new TypDecl(curr_line, curr_col, Symbol(yyvsp[-1].sval->getValue())); }
 break;
 case 18:
 #line 238 "blog.yacc"
-	{ yyval.typ = yystack.l_mark[0].typ; }
+{ yyval.typ = yyvsp[0].typ; }
 break;
 case 19:
 #line 239 "blog.yacc"
-	{ yyval.typ = yystack.l_mark[0].typ; }
+{ yyval.typ = yyvsp[0].typ; }
 break;
 case 20:
 #line 240 "blog.yacc"
-	{ yyval.typ = yystack.l_mark[0].typ; }
+{ yyval.typ = yyvsp[0].typ; }
 break;
 case 21:
 #line 244 "blog.yacc"
-	{ yyval.typ = new Ty(curr_line, curr_col, Symbol(yystack.l_mark[0].sval->getValue())); }
+{ yyval.typ = new Ty(curr_line, curr_col, Symbol(yyvsp[0].sval->getValue())); }
 break;
 case 22:
 #line 249 "blog.yacc"
-	{ yyval.typ = new Ty(curr_line, curr_col, Symbol(yystack.l_mark[-1].sval->getValue())); }
+{ yyval.typ = new Ty(curr_line, curr_col, Symbol(yyvsp[-1].sval->getValue())); }
 break;
 case 23:
 #line 254 "blog.yacc"
-	{ yyval.typ = new Ty(curr_line, curr_col, Symbol(yystack.l_mark[-1].sval->getValue())); }
+{ yyval.typ = new Ty(curr_line, curr_col, Symbol(yyvsp[-1].sval->getValue())); }
 break;
 case 24:
 #line 258 "blog.yacc"
-	{ yyval.i = 1; }
+{ yyval.i = 1; }
 break;
 case 25:
 #line 259 "blog.yacc"
-	{ yyval.i = yystack.l_mark[0].i + 1; }
+{ yyval.i = yyvsp[0].i + 1; }
 break;
 case 26:
 #line 264 "blog.yacc"
-	{ yyval.typ = yystack.l_mark[-3].typ; }
+{ yyval.typ = yyvsp[-3].typ; }
 break;
 case 27:
 #line 268 "blog.yacc"
-	{ yyval.varlist = NULL; }
+{ yyval.varlist = NULL; }
 break;
 case 28:
 #line 269 "blog.yacc"
-	{yyval.varlist = NULL; }
+{yyval.varlist = NULL; }
 break;
 case 29:
 #line 270 "blog.yacc"
-	{ yyval.varlist = yystack.l_mark[-1].varlist; }
+{ yyval.varlist = yyvsp[-1].varlist; }
 break;
 case 30:
 #line 274 "blog.yacc"
-	{ 
-    yyval.vardec = new VarDecl(curr_line, curr_col, *yystack.l_mark[-1].typ, Symbol(yystack.l_mark[0].sval->getValue())); 
+{ 
+    yyval.vardec = new VarDecl(curr_line, curr_col, *yyvsp[-1].typ, Symbol(yyvsp[0].sval->getValue())); 
   }
 break;
 case 31:
 #line 280 "blog.yacc"
-	{ 
-      yyval.varlist = yystack.l_mark[-2].varlist; 
-      yyval.varlist->push_back(*yystack.l_mark[0].vardec);
-      delete(yystack.l_mark[0].vardec);
+{ 
+      yyval.varlist = yyvsp[-2].varlist; 
+      yyval.varlist->push_back(*yyvsp[0].vardec);
+      delete(yyvsp[0].vardec);
       /*$$ = $1; */
       /*$$->add((Expr*)(new VarDecl(curr_line, curr_col, *$3, Symbol($4->getValue())))); */
     }
 break;
 case 32:
 #line 287 "blog.yacc"
-	{ 
+{ 
       yyval.varlist = new vector<VarDecl>();
-      yyval.varlist->push_back(*yystack.l_mark[0].vardec);
-      delete(yystack.l_mark[0].vardec);
+      yyval.varlist->push_back(*yyvsp[0].vardec);
+      delete(yyvsp[0].vardec);
       /*$$ = new VarDecl(curr_line, curr_col, *$1, Symbol($2->getValue())); */
     }
 break;
 case 33:
 #line 297 "blog.yacc"
-	{ 
-      yyval.funcdec = new FuncDecl(curr_line, curr_col, false, *(yystack.l_mark[-5].typ), Symbol(yystack.l_mark[-4].sval->getValue()), yystack.l_mark[-1].exp);
-      if(yystack.l_mark[-3].varlist != NULL){
-        for(size_t i = 0; i < yystack.l_mark[-3].varlist->size(); i++){
-          yyval.funcdec->addArg((*yystack.l_mark[-3].varlist)[i]);
+{ 
+      yyval.funcdec = new FuncDecl(curr_line, curr_col, false, *(yyvsp[-5].typ), Symbol(yyvsp[-4].sval->getValue()), yyvsp[-1].exp);
+      if(yyvsp[-3].varlist != NULL){
+        for(size_t i = 0; i < yyvsp[-3].varlist->size(); i++){
+          yyval.funcdec->addArg((*yyvsp[-3].varlist)[i]);
         }
-        delete(yystack.l_mark[-3].varlist);
+        delete(yyvsp[-3].varlist);
       }
       /*if ($4 != NULL) $$->addArg(*$4);*/
     }
 break;
 case 34:
 #line 311 "blog.yacc"
-	{ 
-      yyval.funcdec = new FuncDecl(curr_line, curr_col, true, *(yystack.l_mark[-4].typ), Symbol(yystack.l_mark[-3].sval->getValue()), yystack.l_mark[-1].exp);
-      if(yystack.l_mark[-2].varlist != NULL){
-        for(size_t i = 0; i < yystack.l_mark[-2].varlist->size(); i++){
-          yyval.funcdec->addArg((*yystack.l_mark[-2].varlist)[i]);
+{ 
+      yyval.funcdec = new FuncDecl(curr_line, curr_col, true, *(yyvsp[-4].typ), Symbol(yyvsp[-3].sval->getValue()), yyvsp[-1].exp);
+      if(yyvsp[-2].varlist != NULL){
+        for(size_t i = 0; i < yyvsp[-2].varlist->size(); i++){
+          yyval.funcdec->addArg((*yyvsp[-2].varlist)[i]);
         }
-        delete(yystack.l_mark[-2].varlist);
+        delete(yyvsp[-2].varlist);
       }
       /*if ($4 != NULL) $$->addArg(*$4);*/
     }
 break;
 case 35:
 #line 325 "blog.yacc"
-	{
-      yyval.numstdec = new NumStDecl(curr_line, curr_col, yystack.l_mark[-3].typ->getTyp(), yystack.l_mark[-1].exp);
-      if(yystack.l_mark[-2].varlst != NULL){
-        for(size_t i = 0; i < yystack.l_mark[-2].varlst->size(); i++){
-          yyval.numstdec->add(get<0>((*yystack.l_mark[-2].varlst)[i]), get<1>((*yystack.l_mark[-2].varlst)[i]));
+{
+      yyval.numstdec = new NumStDecl(curr_line, curr_col, yyvsp[-3].typ->getTyp(), yyvsp[-1].exp);
+      if(yyvsp[-2].varlst != NULL){
+        for(size_t i = 0; i < yyvsp[-2].varlst->size(); i++){
+          yyval.numstdec->add(get<0>((*yyvsp[-2].varlst)[i]), get<1>((*yyvsp[-2].varlst)[i]));
         }
-        delete(yystack.l_mark[-2].varlst);
+        delete(yyvsp[-2].varlst);
       }
       /*$$->add(Symbol($4->getValue()), Symbol($6->getValue()));*/
     }
 break;
 case 36:
 #line 338 "blog.yacc"
-	{yyval.varlst = yystack.l_mark[-1].varlst; }
+{yyval.varlst = yyvsp[-1].varlst; }
 break;
 case 37:
 #line 339 "blog.yacc"
-	{yyval.varlst = NULL; }
+{yyval.varlst = NULL; }
 break;
 case 38:
 #line 345 "blog.yacc"
-	{
-    yyval.varlst = yystack.l_mark[-4].varlst;
-    yyval.varlst->push_back(make_tuple(Symbol(yystack.l_mark[-2].sval->getValue()), Symbol(yystack.l_mark[0].sval->getValue())));
+{
+    yyval.varlst = yyvsp[-4].varlst;
+    yyval.varlst->push_back(make_tuple(Symbol(yyvsp[-2].sval->getValue()), Symbol(yyvsp[0].sval->getValue())));
   }
 break;
 case 39:
 #line 350 "blog.yacc"
-	{ 
+{ 
     yyval.varlst = new vector<tuple<Symbol, Symbol>>();
-    yyval.varlst->push_back(make_tuple(Symbol(yystack.l_mark[-2].sval->getValue()), Symbol(yystack.l_mark[0].sval->getValue())));
+    yyval.varlst->push_back(make_tuple(Symbol(yyvsp[-2].sval->getValue()), Symbol(yyvsp[0].sval->getValue())));
   }
 break;
 case 40:
 #line 359 "blog.yacc"
-	{ }
+{ }
 break;
 case 41:
 #line 364 "blog.yacc"
-	{
-      yyval.distdec = yystack.l_mark[-1].distdec;
+{
+      yyval.distdec = yyvsp[-1].distdec;
     }
 break;
 case 42:
 #line 371 "blog.yacc"
-	{
-        yyval.distdec = new DistinctDecl(curr_line, curr_col, yystack.l_mark[-1].typ->getTyp());
-        yyval.distdec->add(Symbol(yystack.l_mark[0].sval->getValue()), 1);
+{
+        yyval.distdec = new DistinctDecl(curr_line, curr_col, yyvsp[-1].typ->getTyp());
+        yyval.distdec->add(Symbol(yyvsp[0].sval->getValue()), 1);
       }
 break;
 case 43:
 #line 376 "blog.yacc"
-	{
-        yyval.distdec = new DistinctDecl(curr_line, curr_col, yystack.l_mark[-4].typ->getTyp());
-        yyval.distdec->add(Symbol(yystack.l_mark[-3].sval->getValue()), yystack.l_mark[-1].ival->getValue());
+{
+        yyval.distdec = new DistinctDecl(curr_line, curr_col, yyvsp[-4].typ->getTyp());
+        yyval.distdec->add(Symbol(yyvsp[-3].sval->getValue()), yyvsp[-1].ival->getValue());
       }
 break;
 case 44:
 #line 381 "blog.yacc"
-	{ 
-        yyval.distdec = yystack.l_mark[-2].distdec;
-        yyval.distdec->add(Symbol(yystack.l_mark[0].sval->getValue()), 1);
+{ 
+        yyval.distdec = yyvsp[-2].distdec;
+        yyval.distdec->add(Symbol(yyvsp[0].sval->getValue()), 1);
       }
 break;
 case 45:
 #line 386 "blog.yacc"
-	{ 
-        yyval.distdec = yystack.l_mark[-5].distdec;
-        yyval.distdec->add(Symbol(yystack.l_mark[-3].sval->getValue()), yystack.l_mark[-1].ival->getValue());
+{ 
+        yyval.distdec = yyvsp[-5].distdec;
+        yyval.distdec->add(Symbol(yyvsp[-3].sval->getValue()), yyvsp[-1].ival->getValue());
       }
 break;
 case 46:
 #line 394 "blog.yacc"
-	{ 
-        auto idint = make_tuple(yystack.l_mark[0].sval->getValue(), 1);
+{ 
+        auto idint = make_tuple(yyvsp[0].sval->getValue(), 1);
         yyval.symbintpair = &(idint); 
        }
 break;
 case 47:
 #line 399 "blog.yacc"
-	{ 
-      auto idint = make_tuple(yystack.l_mark[-3].sval->getValue(), yystack.l_mark[-1].ival->getValue());
+{ 
+      auto idint = make_tuple(yyvsp[-3].sval->getValue(), yyvsp[-1].ival->getValue());
       yyval.symbintpair = &(idint); 
     }
 break;
 case 48:
 #line 406 "blog.yacc"
-	{ 
-      yyval.sval = new BLOGSymbol<string>(curr_line, curr_col, yystack.l_mark[0].sval->getValue());
+{ 
+      yyval.sval = new BLOGSymbol<string>(curr_line, curr_col, yyvsp[0].sval->getValue());
     }
 break;
 case 49:
 #line 409 "blog.yacc"
-	{
-      yyval.sval = new BLOGSymbol<string>(curr_line, curr_col, yystack.l_mark[-2].sval->getValue() + "." + yystack.l_mark[0].sval->getValue());
+{
+      yyval.sval = new BLOGSymbol<string>(curr_line, curr_col, yyvsp[-2].sval->getValue() + "." + yyvsp[0].sval->getValue());
     }
 break;
 case 50:
 #line 415 "blog.yacc"
-	{ yyval.exp = yystack.l_mark[0].exp; }
+{ yyval.exp = yyvsp[0].exp; }
 break;
 case 51:
 #line 416 "blog.yacc"
-	{ yyval.exp = yystack.l_mark[0].exp; }
+{ yyval.exp = yyvsp[0].exp; }
 break;
 case 52:
 #line 418 "blog.yacc"
-	{ yyval.exp = new IfExpr(curr_line, curr_col, yystack.l_mark[-3].exp, yystack.l_mark[-1].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new IfExpr(curr_line, curr_col, yyvsp[-3].exp, yyvsp[-1].exp, yyvsp[0].exp); }
 break;
 case 53:
 #line 420 "blog.yacc"
-	{ yyval.exp = yystack.l_mark[-1].exp; }
+{ yyval.exp = yyvsp[-1].exp; }
 break;
 case 54:
 #line 424 "blog.yacc"
-	{yyval.exp = yystack.l_mark[0].exp; }
+{yyval.exp = yyvsp[0].exp; }
 break;
 case 55:
 #line 425 "blog.yacc"
-	{yyval.exp = NULL; }
+{yyval.exp = NULL; }
 break;
 case 56:
 #line 430 "blog.yacc"
-	{ }
+{ }
 break;
 case 57:
 #line 431 "blog.yacc"
-	{ }
+{ }
 break;
 case 58:
 #line 435 "blog.yacc"
-	{yyval.exp = yystack.l_mark[0].exp;}
+{yyval.exp = yyvsp[0].exp;}
 break;
 case 59:
 #line 436 "blog.yacc"
-	{yyval.exp = yystack.l_mark[0].exp;}
+{yyval.exp = yyvsp[0].exp;}
 break;
 case 60:
 #line 437 "blog.yacc"
-	{yyval.exp = yystack.l_mark[0].exp;}
+{yyval.exp = yyvsp[0].exp;}
 break;
 case 61:
 #line 438 "blog.yacc"
-	{yyval.exp = yystack.l_mark[0].exp;}
+{yyval.exp = yyvsp[0].exp;}
 break;
 case 62:
 #line 439 "blog.yacc"
-	{yyval.exp = yystack.l_mark[0].exp;}
+{yyval.exp = yyvsp[0].exp;}
 break;
 case 63:
 #line 440 "blog.yacc"
-	{yyval.exp = yystack.l_mark[0].mapexp;}
+{yyval.exp = yyvsp[0].mapexp;}
 break;
 case 64:
 #line 441 "blog.yacc"
-	{ yyval.exp = yystack.l_mark[0].exp; }
+{ yyval.exp = yyvsp[0].exp; }
 break;
 case 65:
 #line 442 "blog.yacc"
-	{ yyval.exp = yystack.l_mark[0].setexp; }
+{ yyval.exp = yyvsp[0].setexp; }
 break;
 case 66:
 #line 443 "blog.yacc"
-	{ yyval.exp = yystack.l_mark[0].cardexp; }
+{ yyval.exp = yyvsp[0].cardexp; }
 break;
 case 67:
 #line 444 "blog.yacc"
-	{ yyval.exp = yystack.l_mark[0].exp; }
+{ yyval.exp = yyvsp[0].exp; }
 break;
 case 68:
 #line 449 "blog.yacc"
-	{yyval.exp = new StringLiteral(curr_line, curr_col, yystack.l_mark[0].sval->getValue()); }
+{yyval.exp = new StringLiteral(curr_line, curr_col, yyvsp[0].sval->getValue()); }
 break;
 case 69:
 #line 451 "blog.yacc"
-	{string charstr(1, yystack.l_mark[0].chrval->getValue()); yyval.exp = new StringLiteral(curr_line, curr_col, charstr); }
+{string charstr(1, yyvsp[0].chrval->getValue()); yyval.exp = new StringLiteral(curr_line, curr_col, charstr); }
 break;
 case 70:
 #line 453 "blog.yacc"
-	{yyval.exp = new IntLiteral(curr_line, curr_col, yystack.l_mark[0].ival->getValue()); }
+{yyval.exp = new IntLiteral(curr_line, curr_col, yyvsp[0].ival->getValue()); }
 break;
 case 71:
 #line 455 "blog.yacc"
-	{yyval.exp = new DoubleLiteral(curr_line, curr_col, yystack.l_mark[0].dblval->getValue()); }
+{yyval.exp = new DoubleLiteral(curr_line, curr_col, yyvsp[0].dblval->getValue()); }
 break;
 case 72:
 #line 457 "blog.yacc"
-	{yyval.exp = new BoolLiteral(curr_line, curr_col, yystack.l_mark[0].boolval->getValue()); }
+{yyval.exp = new BoolLiteral(curr_line, curr_col, yyvsp[0].boolval->getValue()); }
 break;
 case 73:
 #line 459 "blog.yacc"
-	{yyval.exp = new NullLiteral(curr_line, curr_col); }
+{yyval.exp = new NullLiteral(curr_line, curr_col); }
 break;
 case 74:
 #line 464 "blog.yacc"
-	{ 
-      yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::PLUS, yystack.l_mark[-2].exp, yystack.l_mark[0].exp);   
+{ 
+      yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::PLUS, yyvsp[-2].exp, yyvsp[0].exp);   
     }
 break;
 case 75:
 #line 468 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 76:
 #line 470 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MUL, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MUL, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 77:
 #line 472 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::DIV, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::DIV, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 78:
 #line 474 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MOD, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MOD, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 79:
 #line 476 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::POWER, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::POWER, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 80:
 #line 478 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::LT, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::LT, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 81:
 #line 480 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::GT, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::GT, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 82:
 #line 482 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::LE, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::LE, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 83:
 #line 484 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::GE, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::GE, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 84:
 #line 486 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::EQ, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::EQ, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 85:
 #line 488 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::NEQ, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::NEQ, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 86:
 #line 490 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::AND, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::AND, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 87:
 #line 492 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::OR, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::OR, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 88:
 #line 494 "blog.yacc"
-	{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::IMPLY, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); }
+{ yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::IMPLY, yyvsp[-2].exp, yyvsp[0].exp); }
 break;
 case 89:
 #line 496 "blog.yacc"
-	{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, yystack.l_mark[-3].exp, yystack.l_mark[-1].exp); }
+{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, yyvsp[-3].exp, yyvsp[-1].exp); }
 break;
 case 90:
 #line 497 "blog.yacc"
-	{ yyval.exp = yystack.l_mark[0].exp; }
+{ yyval.exp = yyvsp[0].exp; }
 break;
 case 91:
 #line 502 "blog.yacc"
-	{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, new IntLiteral(curr_line, curr_col, 0), yystack.l_mark[0].exp); }
+{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, new IntLiteral(curr_line, curr_col, 0), yyvsp[0].exp); }
 break;
 case 92:
 #line 504 "blog.yacc"
-	{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::NOT, NULL, yystack.l_mark[0].exp); }
+{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::NOT, NULL, yyvsp[0].exp); }
 break;
 case 93:
 #line 506 "blog.yacc"
-	{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::AT, NULL, yystack.l_mark[0].exp); }
+{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::AT, NULL, yyvsp[0].exp); }
 break;
 case 94:
 #line 507 "blog.yacc"
-	{yyval.exp = yystack.l_mark[-1].exp; }
+{yyval.exp = yyvsp[-1].exp; }
 break;
 case 95:
 #line 512 "blog.yacc"
-	{yyval.exp = new QuantExpr(curr_line, curr_col, AbsynConstant::FORALL, *(new VarDecl(curr_line, curr_col, *yystack.l_mark[-2].typ, Symbol(yystack.l_mark[-1].sval->getValue()))), yystack.l_mark[0].exp); }
+{yyval.exp = new QuantExpr(curr_line, curr_col, AbsynConstant::FORALL, *(new VarDecl(curr_line, curr_col, *yyvsp[-2].typ, Symbol(yyvsp[-1].sval->getValue()))), yyvsp[0].exp); }
 break;
 case 96:
 #line 514 "blog.yacc"
-	{yyval.exp = new QuantExpr(curr_line, curr_col, AbsynConstant::EXISTS, *(new VarDecl(curr_line, curr_col, *yystack.l_mark[-2].typ, Symbol(yystack.l_mark[-1].sval->getValue()))), yystack.l_mark[0].exp); }
+{yyval.exp = new QuantExpr(curr_line, curr_col, AbsynConstant::EXISTS, *(new VarDecl(curr_line, curr_col, *yyvsp[-2].typ, Symbol(yyvsp[-1].sval->getValue()))), yyvsp[0].exp); }
 break;
 case 97:
 #line 519 "blog.yacc"
-	{ 
-    yyval.exp = new FuncApp(curr_line, curr_col, Symbol(yystack.l_mark[-3].sval->getValue())); 
-    if (yystack.l_mark[-1].explst != NULL){
-      for(size_t i = 0; i < yystack.l_mark[-1].explst->size(); i++){
-        yyval.exp->add((*yystack.l_mark[-1].explst)[i]);
+{ 
+    yyval.exp = new FuncApp(curr_line, curr_col, Symbol(yyvsp[-3].sval->getValue())); 
+    if (yyvsp[-1].explst != NULL){
+      for(size_t i = 0; i < yyvsp[-1].explst->size(); i++){
+        yyval.exp->add((*yyvsp[-1].explst)[i]);
       }
-      delete(yystack.l_mark[-1].explst);
+      delete(yyvsp[-1].explst);
     }
   }
 break;
 case 98:
 #line 532 "blog.yacc"
-	{ yyval.exp = new VarRef(curr_line, curr_col, Symbol(yystack.l_mark[0].sval->getValue())); }
+{ yyval.exp = new VarRef(curr_line, curr_col, Symbol(yyvsp[0].sval->getValue())); }
 break;
 case 99:
 #line 537 "blog.yacc"
-	{
-      yyval.exp = new DistrExpr(curr_line, curr_col, Symbol(yystack.l_mark[-3].sval->getValue()));
-      if(yystack.l_mark[-1].explst != NULL){
-        for(size_t i = 0; i < yystack.l_mark[-1].explst->size(); i++){
-          yyval.exp->add((*yystack.l_mark[-1].explst)[i]);
+{
+      yyval.exp = new DistrExpr(curr_line, curr_col, Symbol(yyvsp[-3].sval->getValue()));
+      if(yyvsp[-1].explst != NULL){
+        for(size_t i = 0; i < yyvsp[-1].explst->size(); i++){
+          yyval.exp->add((*yyvsp[-1].explst)[i]);
         }
-        delete(yystack.l_mark[-1].explst);
+        delete(yyvsp[-1].explst);
       }
       /*$$->add($4);*/
       /*for(size_t i = 0; i < $4->size(); i++){*/
@@ -1485,163 +1359,163 @@ case 99:
 break;
 case 100:
 #line 553 "blog.yacc"
-	{yyval.explst = yystack.l_mark[0].explst;}
+{yyval.explst = yyvsp[0].explst;}
 break;
 case 101:
 #line 554 "blog.yacc"
-	{yyval.explst = NULL; }
+{yyval.explst = NULL; }
 break;
 case 102:
 #line 559 "blog.yacc"
-	{ yyval.explst = yystack.l_mark[-2].explst;
-      yyval.explst->push_back(yystack.l_mark[0].exp);
+{ yyval.explst = yyvsp[-2].explst;
+      yyval.explst->push_back(yyvsp[0].exp);
     }
 break;
 case 103:
 #line 563 "blog.yacc"
-	{ 
+{ 
       yyval.explst = new vector<Expr*>();
-      yyval.explst->push_back(yystack.l_mark[0].exp);
+      yyval.explst->push_back(yyvsp[0].exp);
     }
 break;
 case 104:
 #line 571 "blog.yacc"
-	{ }
+{ }
 break;
 case 105:
 #line 572 "blog.yacc"
-	{ }
+{ }
 break;
 case 106:
 #line 577 "blog.yacc"
-	{ }
+{ }
 break;
 case 107:
 #line 578 "blog.yacc"
-	{ }
+{ }
 break;
 case 108:
 #line 582 "blog.yacc"
-	{ 
+{ 
     /*$$ = $2; */
     yyval.mapexp = new MapExpr(curr_line, curr_col);
-    for (size_t i = 0; i < yystack.l_mark[-1].exptuplst->size(); i++){
-      yyval.mapexp->addMap(get<0>((*yystack.l_mark[-1].exptuplst)[i]), get<1>((*yystack.l_mark[-1].exptuplst)[i]));
+    for (size_t i = 0; i < yyvsp[-1].exptuplst->size(); i++){
+      yyval.mapexp->addMap(get<0>((*yyvsp[-1].exptuplst)[i]), get<1>((*yyvsp[-1].exptuplst)[i]));
     }
-    delete(yystack.l_mark[-1].exptuplst);
+    delete(yyvsp[-1].exptuplst);
     
   }
 break;
 case 109:
 #line 596 "blog.yacc"
-	{ 
-      yyval.exptuplst = yystack.l_mark[-4].exptuplst;
-      yyval.exptuplst->push_back(make_tuple(yystack.l_mark[-2].exp, yystack.l_mark[0].exp));
+{ 
+      yyval.exptuplst = yyvsp[-4].exptuplst;
+      yyval.exptuplst->push_back(make_tuple(yyvsp[-2].exp, yyvsp[0].exp));
       /*$$ = $1;*/
       /*$$->addMap($3, $5);*/
     }
 break;
 case 110:
 #line 603 "blog.yacc"
-	{ 
+{ 
       yyval.exptuplst = new vector<tuple<Expr*, Expr*>>();
-      yyval.exptuplst->push_back(make_tuple(yystack.l_mark[-2].exp, yystack.l_mark[0].exp));
+      yyval.exptuplst->push_back(make_tuple(yyvsp[-2].exp, yyvsp[0].exp));
       /*$$ = new MapExpr(curr_line, curr_col);*/
       /*$$->addMap($1, $3);*/
     }
 break;
 case 111:
 #line 612 "blog.yacc"
-	{yyval.cardexp = new CardinalityExpr(curr_line, curr_col, (Expr*)yystack.l_mark[0].setexp); }
+{yyval.cardexp = new CardinalityExpr(curr_line, curr_col, (Expr*)yyvsp[0].setexp); }
 break;
 case 112:
 #line 613 "blog.yacc"
-	{ 
-      VarDecl var(curr_line, curr_col, *yystack.l_mark[0].typ);
+{ 
+      VarDecl var(curr_line, curr_col, *yyvsp[0].typ);
       yyval.cardexp = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, var));
   }
 break;
 case 113:
 #line 620 "blog.yacc"
-	{ yyval.origdec = new OriginDecl(curr_line, curr_col, yystack.l_mark[-5].typ->getTyp(), Symbol(yystack.l_mark[-4].sval->getValue()), yystack.l_mark[-2].typ->getTyp());  }
+{ yyval.origdec = new OriginDecl(curr_line, curr_col, yyvsp[-5].typ->getTyp(), Symbol(yyvsp[-4].sval->getValue()), yyvsp[-2].typ->getTyp());  }
 break;
 case 114:
 #line 624 "blog.yacc"
-	{yyval.setexp = yystack.l_mark[0].setexp; }
+{yyval.setexp = yyvsp[0].setexp; }
 break;
 case 115:
 #line 625 "blog.yacc"
-	{yyval.setexp = yystack.l_mark[0].setexp; }
+{yyval.setexp = yyvsp[0].setexp; }
 break;
 case 116:
 #line 631 "blog.yacc"
-	{
+{
       yyval.setexp = new ListSet(curr_line, curr_col);
-      for(size_t i = 0; i < yystack.l_mark[-1].explst->size(); i++){
-        yyval.setexp->add((*yystack.l_mark[-1].explst)[i]);
+      for(size_t i = 0; i < yyvsp[-1].explst->size(); i++){
+        yyval.setexp->add((*yyvsp[-1].explst)[i]);
       }
-      delete(yystack.l_mark[-1].explst);
+      delete(yyvsp[-1].explst);
       /*$$ = new SetExpr(curr_line, curr_col); */
       /*$$->add($2);*/
     }
 break;
 case 117:
 #line 645 "blog.yacc"
-	{ 
-      yyval.setexp = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *yystack.l_mark[-4].typ, Symbol(yystack.l_mark[-3].sval->getValue())), yystack.l_mark[-1].exp);
+{ 
+      yyval.setexp = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *yyvsp[-4].typ, Symbol(yyvsp[-3].sval->getValue())), yyvsp[-1].exp);
       /*$$ = new CondSet(curr_line, curr_col, NULL);*/
       /*$$->add($5);*/
     }
 break;
 case 118:
 #line 651 "blog.yacc"
-	{ 
-      yyval.setexp = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *yystack.l_mark[-2].typ, Symbol(yystack.l_mark[-1].sval->getValue())));
+{ 
+      yyval.setexp = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *yyvsp[-2].typ, Symbol(yyvsp[-1].sval->getValue())));
     }
 break;
 case 119:
 #line 660 "blog.yacc"
-	{ }
+{ }
 break;
 case 120:
 #line 662 "blog.yacc"
-	{ }
+{ }
 break;
 case 121:
 #line 668 "blog.yacc"
-	{yyval.stmt = yystack.l_mark[-1].stmt; }
+{yyval.stmt = yyvsp[-1].stmt; }
 break;
 case 122:
 #line 671 "blog.yacc"
-	{yyval.stmt = yystack.l_mark[0].stmt; }
+{yyval.stmt = yyvsp[0].stmt; }
 break;
 case 123:
 #line 672 "blog.yacc"
-	{yyval.stmt = yystack.l_mark[0].stmt; }
+{yyval.stmt = yyvsp[0].stmt; }
 break;
 case 124:
 #line 678 "blog.yacc"
-	{
-    yyval.stmt = new Evidence(curr_line, curr_col, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); 
+{
+    yyval.stmt = new Evidence(curr_line, curr_col, yyvsp[-2].exp, yyvsp[0].exp); 
   }
 break;
 case 125:
 #line 686 "blog.yacc"
-	{ yyval.stmt = new Evidence(curr_line, curr_col, yystack.l_mark[-2].setexp, yystack.l_mark[0].setexp); }
+{ yyval.stmt = new Evidence(curr_line, curr_col, yyvsp[-2].setexp, yyvsp[0].setexp); }
 break;
 case 126:
 #line 690 "blog.yacc"
-	{yyval.stmt = yystack.l_mark[-1].stmt; }
+{yyval.stmt = yyvsp[-1].stmt; }
 break;
 case 127:
 #line 694 "blog.yacc"
-	{ yyval.stmt = new Query(curr_line, curr_col, yystack.l_mark[0].exp); }
+{ yyval.stmt = new Query(curr_line, curr_col, yyvsp[0].exp); }
 break;
-#line 1640 "parser.cpp"
+#line 1515 "y.tab.c"
     }
-    yystack.s_mark -= yym;
-    yystate = *yystack.s_mark;
-    yystack.l_mark -= yym;
+    yyssp -= yym;
+    yystate = *yyssp;
+    yyvsp -= yym;
     yym = yylhs[yyn];
     if (yystate == 0 && yym == 0)
     {
@@ -1651,11 +1525,11 @@ break;
  state %d\n", YYPREFIX, YYFINAL);
 #endif
         yystate = YYFINAL;
-        *++yystack.s_mark = YYFINAL;
-        *++yystack.l_mark = yyval;
+        *++yyssp = YYFINAL;
+        *++yyvsp = yyval;
         if (yychar < 0)
         {
-            if ((yychar = YYLEX) < 0) yychar = 0;
+            if ((yychar = yylex()) < 0) yychar = 0;
 #if YYDEBUG
             if (yydebug)
             {
@@ -1678,24 +1552,19 @@ break;
 #if YYDEBUG
     if (yydebug)
         printf("%sdebug: after reduction, shifting from state %d \
-to state %d\n", YYPREFIX, *yystack.s_mark, yystate);
+to state %d\n", YYPREFIX, *yyssp, yystate);
 #endif
-    if (yystack.s_mark >= yystack.s_last && yygrowstack(&yystack))
+    if (yyssp >= yyss + yystacksize - 1)
     {
         goto yyoverflow;
     }
-    *++yystack.s_mark = (short) yystate;
-    *++yystack.l_mark = yyval;
+    *++yyssp = yystate;
+    *++yyvsp = yyval;
     goto yyloop;
-
 yyoverflow:
     yyerror("yacc stack overflow");
-
 yyabort:
-    yyfreestack(&yystack);
     return (1);
-
 yyaccept:
-    yyfreestack(&yystack);
     return (0);
 }

@@ -699,7 +699,7 @@ query:
 
 
 void yyerror(const char *s) {
-  cout << "Parse error!  Message: " << s << endl;
+  cout << "Parse error at line number: " << curr_line << " and column number: " << curr_col << "!  Message: " << s << endl;
   // might as well halt now:
   exit(-1);
 }
