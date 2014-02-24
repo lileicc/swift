@@ -6,8 +6,14 @@ namespace swift {
 namespace fabrica {
 
 PreDeclFactory::PreDeclFactory() {
+  distr[predecl::PreDeclDistrList::bernoulliDistr.getName()] =
+    &predecl::PreDeclDistrList::bernoulliDistr;
+  distr[predecl::PreDeclDistrList::booleanDistr.getName()] =
+    &predecl::PreDeclDistrList::booleanDistr;
   distr[predecl::PreDeclDistrList::categoricalDistr.getName()] =
       &predecl::PreDeclDistrList::categoricalDistr;
+  distr[predecl::PreDeclDistrList::gaussianDistr.getName()] =
+    &predecl::PreDeclDistrList::gaussianDistr;
   distr[predecl::PreDeclDistrList::poissonDistr.getName()] =
       &predecl::PreDeclDistrList::poissonDistr;
   distr[predecl::PreDeclDistrList::uniformChoiceDistr.getName()] =
