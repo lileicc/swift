@@ -6,13 +6,13 @@
 namespace swift {
 namespace predecl {
 BernoulliDistrDecl::BernoulliDistrDecl() :
-    PreDeclDistr(std::string("Bernoulli")) {
+    PreDecl(std::string("Bernoulli")) {
 }
 
 BernoulliDistrDecl::~BernoulliDistrDecl() {
 }
 
-std::shared_ptr<ir::Distribution> BernoulliDistrDecl::getNew(
+std::shared_ptr<ir::Expr> BernoulliDistrDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking

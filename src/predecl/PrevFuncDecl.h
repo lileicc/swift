@@ -4,10 +4,10 @@
 namespace swift {
 namespace predecl {
 
-class PoissonDistrDecl: public swift::predecl::PreDecl {
+class PrevFuncDecl: public swift::predecl::PreDecl {
 public:
-  PoissonDistrDecl();
-  virtual ~PoissonDistrDecl();
+  PrevFuncDecl();
+  virtual ~PrevFuncDecl();
 
   virtual std::shared_ptr<ir::Expr>
   getNew(std::vector<std::shared_ptr<ir::Expr>>& args,

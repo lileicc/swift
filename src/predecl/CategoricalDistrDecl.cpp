@@ -8,13 +8,13 @@
 namespace swift {
 namespace predecl {
 CategoricalDistrDecl::CategoricalDistrDecl() :
-    PreDeclDistr(std::string("Categorical")) {
+    PreDecl(std::string("Categorical")) {
 }
 
 CategoricalDistrDecl::~CategoricalDistrDecl() {
 }
 
-std::shared_ptr<ir::Distribution> CategoricalDistrDecl::getNew(
+std::shared_ptr<ir::Expr> CategoricalDistrDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking

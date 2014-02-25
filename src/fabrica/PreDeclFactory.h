@@ -3,7 +3,7 @@
 #include <string>
 #include <map>
 
-#include "../predecl/PreDeclDistr.h"
+#include "../predecl/PreDecl.h"
 
 namespace swift {
 namespace fabrica {
@@ -13,10 +13,10 @@ public:
   PreDeclFactory();
   ~PreDeclFactory();
 
-  const predecl::PreDeclDistr* getDistr(std::string name);
+  const predecl::PreDecl* getDecl(std::string name);
 
 private:
-  std::map<std::string, const predecl::PreDeclDistr*> distr;
+  std::map<std::string, const predecl::PreDecl*> decls;
 };
 
 }

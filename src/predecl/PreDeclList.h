@@ -1,5 +1,6 @@
 #pragma once
 
+// PreDecl Distributions
 #include "BernoulliDistrDecl.h"
 #include "BetaDistrDecl.h"
 #include "BooleanDistrDecl.h"
@@ -8,15 +9,18 @@
 #include "GaussianDistrDecl.h"
 #include "PoissonDistrDecl.h"
 #include "UniformChoiceDistrDecl.h"
+// PreDecl Functions
+#include "PrevFuncDecl.h"
 
 namespace swift {
 namespace predecl {
 
-class PreDeclDistrList {
+class PreDeclList {
 public:
-  PreDeclDistrList();
-  ~PreDeclDistrList();
+  PreDeclList();
+  ~PreDeclList();
 
+  // PreDecl Distrbutions
   static const BernoulliDistrDecl bernoulliDistr;
   static const BetaDistrDecl betaDistr;
   static const BooleanDistrDecl booleanDistr;
@@ -25,6 +29,8 @@ public:
   static const GaussianDistrDecl gaussianDistr;
   static const PoissonDistrDecl poissonDistr;
   static const UniformChoiceDistrDecl uniformChoiceDistr;
+  // PreDecl Functions
+  static const PrevFuncDecl prevFuncDecl;
 };
 
 }

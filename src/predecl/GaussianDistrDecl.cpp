@@ -6,13 +6,13 @@
 namespace swift {
 namespace predecl {
 GaussianDistrDecl::GaussianDistrDecl() :
-    PreDeclDistr(std::string("Gaussian")) {
+    PreDecl(std::string("Gaussian")) {
 }
 
 GaussianDistrDecl::~GaussianDistrDecl() {
 }
 
-std::shared_ptr<ir::Distribution> GaussianDistrDecl::getNew(
+std::shared_ptr<ir::Expr> GaussianDistrDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking

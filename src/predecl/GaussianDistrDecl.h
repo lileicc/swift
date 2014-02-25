@@ -1,15 +1,15 @@
 #pragma once
-#include "PreDeclDistr.h"
+#include "PreDecl.h"
 
 namespace swift {
 namespace predecl {
 
-class GaussianDistrDecl: public swift::predecl::PreDeclDistr {
+class GaussianDistrDecl: public swift::predecl::PreDecl {
 public:
   GaussianDistrDecl();
   virtual ~GaussianDistrDecl();
 
-  virtual std::shared_ptr<ir::Distribution>
+  virtual std::shared_ptr<ir::Expr>
   getNew(std::vector<std::shared_ptr<ir::Expr>>& args,
       fabrica::TypeFactory* fact) const;
 };

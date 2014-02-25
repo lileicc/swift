@@ -6,13 +6,13 @@
 namespace swift {
 namespace predecl {
 BooleanDistrDecl::BooleanDistrDecl() :
-    PreDeclDistr(std::string("BooleanDistrib")) {
+    PreDecl(std::string("BooleanDistrib")) {
 }
 
 BooleanDistrDecl::~BooleanDistrDecl() {
 }
 
-std::shared_ptr<ir::Distribution> BooleanDistrDecl::getNew(
+std::shared_ptr<ir::Expr> BooleanDistrDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking

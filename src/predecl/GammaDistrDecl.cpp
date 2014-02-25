@@ -6,13 +6,13 @@
 namespace swift {
 namespace predecl {
 GammaDistrDecl::GammaDistrDecl() :
-    PreDeclDistr(std::string("Gamma")) {
+    PreDecl(std::string("Gamma")) {
 }
 
 GammaDistrDecl::~GammaDistrDecl() {
 }
 
-std::shared_ptr<ir::Distribution> GammaDistrDecl::getNew(
+std::shared_ptr<ir::Expr> GammaDistrDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking

@@ -9,7 +9,7 @@
 // Forward Declaration
 namespace swift {
 namespace predecl {
-class PreDeclDistr;
+class PreDecl;
 }
 }
 
@@ -19,16 +19,16 @@ namespace ir {
 class Distribution: public swift::ir::Expr {
 public:
   Distribution(const std::string& name = std::string(""),
-      const predecl::PreDeclDistr* refer = NULL);
+      const predecl::PreDecl* refer = NULL);
   virtual ~Distribution();
 
-  const predecl::PreDeclDistr* getRefer() const;
+  const predecl::PreDecl* getRefer() const;
 
   const std::string& getDistrName() const;
   void print(FILE* file, int indent) const;
 
 private:
-  const predecl::PreDeclDistr* refer;
+  const predecl::PreDecl* refer;
   std::string name;
 };
 

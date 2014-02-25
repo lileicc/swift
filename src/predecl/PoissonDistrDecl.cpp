@@ -6,13 +6,13 @@
 namespace swift {
 namespace predecl {
 PoissonDistrDecl::PoissonDistrDecl() :
-    PreDeclDistr(std::string("Poisson")) {
+    PreDecl(std::string("Poisson")) {
 }
 
 PoissonDistrDecl::~PoissonDistrDecl() {
 }
 
-std::shared_ptr<ir::Distribution> PoissonDistrDecl::getNew(
+std::shared_ptr<ir::Expr> PoissonDistrDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking
