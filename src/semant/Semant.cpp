@@ -631,15 +631,17 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
     decl.push_back(std::make_shared<ir::VarDecl>(args.back()->getTyp(), ""));
   }
 
-  // TODO: To fix this hacking implementation of Builtin Function Prev()!!!!
-  // Check whether this function is Prev
-  if (args.size() == 1 && args.back()->getTyp() == tyFactory.getTimestepTy()
-    && expr->getFuncName().getValue() == "Prev") {
-    auto ptr = std::make_shared<ir::FunctionCall>(expr->getFuncName().getValue());
-    ptr->setArgs(args);
-    ptr->setTyp(tyFactory.getTimestepTy());
-    ptr->processTemporal(tyFactory.getTimestepTy());
-    return ptr;
+  // Check Builtin Functions
+  //   Note: Especially for Prev()!!!!
+  auto fc = predeclFactory.getDecl(func);
+  if (fc != nullptr) {
+    auto ptr = fc->getNew(args, &tyFactory);
+    if (ptr == nullptr) {
+      warning(expr->line, expr->col, "Function < " + func + " > is Built-in! Type Checking Error for Built-in Function!");
+    }
+    else {
+      return ptr;
+    }
   }
 
   // Special Case for Origin Function
@@ -844,10 +846,10 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::DistrExpr* expr) {
   // TODO: add type checking for predecl distribution
   std::string name = expr->getDistrName().getValue();
-  const predecl::PreDeclDistr* distr = predeclFactory.getDistr(name);
+  const predecl::PreDecl* distr = predeclFactory.getDecl(name);
   // parse arguments of distribution
   std::vector<std::shared_ptr<ir::Expr>> args;
   for (size_t i = 0; i < expr->size(); ++i) {
@@ -866,7 +868,7 @@ std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
     return dist;
   }
 
-  std::shared_ptr<ir::Distribution> ret = distr->getNew(args, &tyFactory);
+  auto ret = distr->getNew(args, &tyFactory);
   if (ret == nullptr) {
     error(expr->line, expr->col,
         "Type Checking failed for <" + name + "> distribution!");
@@ -958,6 +960,9 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
     // Add Local Variables
     for (auto v : fun->getArgs())
       local_var[v->getVarName()].push(v);
+    // Add Temporal Variables
+    if (fun->isTemporal())
+      local_var[fun->getTempVar()->getVarName()].push(fun->getTempVar());
 
     fun->setBody(transClause(fd->getExpr()));
     if (fun->getBody()->getTyp() == NULL)
@@ -977,6 +982,13 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
       }
     }
 
+    // Remove Temporal Variables
+    if(fun->isTemporal()) {
+      auto it = local_var.find(fun->getTempVar()->getVarName());
+      it->second.pop();
+      if (it->second.empty())
+        local_var.erase(it);
+    }
     // Remove Local Variables
     for (auto v : fun->getArgs()) {
       auto it = local_var.find(v->getVarName());
