@@ -219,14 +219,16 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Bernoulli.h\"\n");
   fprintf(file, "#include \"random/Beta.h\"\n");
   fprintf(file, "#include \"random/BooleanDistrib.h\"\n");
-  fprintf(file, "#include \"random/CategoricalDistribution.h\"\n");
+  fprintf(file, "#include \"random/Categorical.h\"\n");
   fprintf(file, "#include \"random/Dirichlet.h\"\n");
+  fprintf(file, "#include \"random/Discrete.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
   fprintf(file, "#include \"util/util.h\"\n");
+  fprintf(file, "#include \"util/DynamicTable.h\"\n");
 
   // output costumized include
   for (auto h : header)

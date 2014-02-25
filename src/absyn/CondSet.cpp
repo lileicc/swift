@@ -26,6 +26,11 @@ Expr* CondSet::getCond() {
   return size() > 0 ? get(0) : nullptr;
 }
 
+void CondSet::setCond(Expr* c) {
+  if (args.size() < 1) args.push_back(c);
+  else args[0] = c;
+}
+
 // For Debugging Use
 void CondSet::print(FILE* file, int indent) {
   fprintf(file, "%*s(CondSet:\n", indent, "");

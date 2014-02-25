@@ -1,12 +1,12 @@
 /*
- * CategoricalDistribution.cpp
+ * Categorical.cpp
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
  */
 #include <numeric>
 #include <cmath>
-#include "CategoricalDistribution.h"
+#include "Categorical.h"
 
 namespace swift {
 namespace random {
@@ -21,6 +21,7 @@ void Categorical::init(const std::map<int, double>& ws) {
   values.clear();
   weights.clear();
   values_to_indic.clear();
+  log_weights.clear();
   int i = 0;
   for (auto it : ws) {
     if (it.second > 0 && it.second <= 1) {
@@ -40,6 +41,29 @@ void Categorical::init(const std::map<int, double>& ws) {
    dist = std::discrete_distribution<int>(lis);
    delete[weights.size()] A;
    */
+  dist = std::discrete_distribution<int>(weights.begin(), weights.end());
+}
+
+void Categorical::init(std::vector<int> val, std::vector<double> wei) {
+  values.clear();
+  weights.clear();
+  values_to_indic.clear();
+  log_weights.clear();
+  for (size_t i = 0; i < val.size() && i < wei.size(); ++ i) {
+    values.push_back(val[i]);
+    weights.push_back(wei[i]);
+    values_to_indic[val[i]] = i;
+    log_weights.push_back(std::log(wei[i]));
+  }
+  /*
+  Note: In VS2013, we have to rewrite the last line with the following code
+
+  double* A = new double[weights.size()];
+  for (int i = 0; i<weights.size(); ++i)A[i] = weights[i];
+  auto lis = std::initializer_list<double>(A, A + weights.size());
+  dist = std::discrete_distribution<int>(lis);
+  delete[weights.size()] A;
+  */
   dist = std::discrete_distribution<int>(weights.begin(), weights.end());
 }
 

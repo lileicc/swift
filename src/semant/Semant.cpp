@@ -286,6 +286,9 @@ std::shared_ptr<ir::IfThen> Semant::transIfThen(absyn::IfExpr* expr) {
   if (ptr->getElse()->getTyp() == NULL)
     ptr->getElse()->setTyp(ptr->getTyp());
 
+  // Randomness Checking
+  ptr->setRandom(ptr->getCond()->isRandom() || ptr->getThen()->isRandom() || ptr->getElse()->isRandom());
+
   return ptr;
 }
 
@@ -357,6 +360,13 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
     error(expr->line, expr->col, "Argument types do not match!");
     return ptr;
   }
+
+  // Randomness Checking
+  for (auto b : ptr->getBranches())
+    if (b->isRandom()) {
+      ptr->setRandom(true);
+      break;
+    }
   return ptr;
 }
 
@@ -419,6 +429,12 @@ std::shared_ptr<ir::MapExpr> Semant::transExpr(absyn::MapExpr* expr) {
   ptr->setToTyp(toTy);
   ptr->setTyp(tyFactory.getUpdateTy(new ir::MapTy(fromTy, toTy)));
 
+  // Randomness Checking
+  for (size_t i = 0; i < ptr->mapSize(); ++ i)
+    if (ptr->getFrom(i)->isRandom() || ptr->getTo(i)->isRandom()) {
+      ptr->setRandom(true);
+      break;
+    }
   return ptr;
 }
 
@@ -568,6 +584,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
 
   // Special Case: 
   //         Replace OprExpr with a InstSymbolRef
+  // Note: isRandom() == false
   if (ret->getOp()
       == ir::IRConstant::SUB&& (dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL
       && (dynamic_cast<absyn::IntLiteral*>(expr->getRight())) != NULL) {
@@ -595,6 +612,12 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
   if (ret->getTyp() == NULL) {
     error(expr->line, expr->col, "Error Type Matching for OprExpr!");
   }
+  // Randomness Checking
+  for (auto a : ret->getArgs())
+    if (a->isRandom()) {
+      ret->setRandom(true);
+      break;
+    }
   return ret;
 }
 
@@ -628,6 +651,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
       auto ptr = std::make_shared<ir::OriginRefer>(att, args[0]);
       // type checking
       ptr->setTyp(att->getTyp());
+      // Randomness checking
+      ptr->setRandom(true);
       return ptr;
     }
   }
@@ -648,6 +673,13 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   if (ptr->getRefer()->isTemporal())
     ptr->processTemporal(tyFactory.getTimestepTy());
 
+  // Random Checking
+  ptr->setRandom(ptr->getRefer()->isRand());
+  for (auto a: args)
+    if (a->isRandom()) {
+      ptr->setRandom(true);
+      break;
+    }
   return ptr;
 }
 
@@ -666,6 +698,8 @@ std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
     return cd;
   }
   cd->setBody(st);
+  // randomness checking
+  cd->setRandom(st->isRandom());
   return cd;
 }
 
@@ -694,6 +728,9 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   it->second.pop();
   if (it->second.empty())
     local_var.erase(it);
+  // randomness
+  // TODO: to check randomness in some special cases
+  ptr->setRandom(true);
   return ptr;
 }
 
@@ -705,7 +742,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
     std::shared_ptr<ir::VarRefer> ret = std::make_shared<ir::VarRefer>(
         local_var[var].top());
     ret->setTyp(ret->getRefer()->getTyp());
-    return ret;
+    return ret; // randomness is false
   }
   auto func = functory.getFunc(var,
       std::vector<std::shared_ptr<ir::VarDecl> >());
@@ -715,6 +752,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
     //std::shared_ptr<ir::VoidFuncCall> ret(new ir::VoidFuncCall(func));
     auto ret = std::make_shared<ir::FunctionCall>(func);
     ret->setTyp(func->getRetTyp());
+    // randomness
+    ret->setRandom(func->isRand());
     return ret;
   }
   auto sym = tyFactory.getInstSymbol(var);
@@ -722,7 +761,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
     // Const Symbol
     std::shared_ptr<ir::InstSymbolRef> ret(new ir::InstSymbolRef(sym));
     ret->setTyp(lookupNameTy(sym->getRefer()->getName()));
-    return ret;
+    return ret; // randomness = false;
   }
   error(expr->line, expr->col, "Illegal Symbol Reference of < " + var + " >!");
   return std::make_shared<ir::Expr>();
@@ -764,6 +803,12 @@ std::shared_ptr<ir::ListSet> Semant::transExpr(absyn::ListSet* expr) {
   }
   // Note: when base == NULL, this is an empty set
   ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(base)));
+  // randomness checking
+  for (auto a : ptr->getArgs())
+    if (a->isRandom()) {
+      ptr->setRandom(true);
+      break;
+    }
   return ptr;
 }
 
@@ -792,6 +837,10 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
   }
 
   ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(var->getTyp())));
+
+  // randomness checking
+  // TODO: to check randomness in special cases
+  ptr->setRandom(true);
   return ptr;
 }
 
@@ -813,6 +862,7 @@ std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
     
     auto dist = std::make_shared<ir::Distribution>(name);
     dist->setArgs(args);
+    dist->setRandom(true);
     return dist;
   }
 
@@ -822,6 +872,7 @@ std::shared_ptr<ir::Distribution> Semant::transExpr(absyn::DistrExpr* expr) {
         "Type Checking failed for <" + name + "> distribution!");
     return std::make_shared<ir::Distribution>(name, distr);
   }
+  ret->setRandom(true);
   return ret;
 }
 
@@ -886,7 +937,12 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
     }
     ret->setTyp(tyFactory.getUpdateTy(new ir::ArrayTy(base, expr->getDim())));
   }
-
+  // randomness
+  for (auto a: ret->getArgs())
+    if (a->isRandom()) {
+      ret->setRandom(true);
+      break;
+    }
   return ret;
 }
 
@@ -906,6 +962,11 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
     fun->setBody(transClause(fd->getExpr()));
     if (fun->getBody()->getTyp() == NULL)
       fun->getBody()->setTyp(rettyp);
+
+    // Check Randomness
+    if (fun->getBody()->isRandom() != fun->isRand()) {
+      error(fd->line, fd->col, "Incorrect Randomness Declaration!");
+    }
 
     // if it is random, then need to add the link from arg --> thisfunction
     if (fun->isRand()) {
