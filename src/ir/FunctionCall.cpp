@@ -49,6 +49,7 @@ std::shared_ptr<Expr> FunctionCall::getTemporalArg() {
   return tmparg;
 }
 
+// Note that we only process the first timestep ty
 void FunctionCall::processTemporal(const Ty* timety) {
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i]->getTyp() == timety) {

@@ -29,6 +29,11 @@ public:
   const std::vector<std::shared_ptr<TypeDomain>>& getTypes();
   const std::string & getName() const;
 
+  // For Temporal Features
+  int getMarkovOrder() const;
+  void setMarkovOrder(int k = 0);
+  bool isTemporal();
+
 private:
   std::vector<std::shared_ptr<FuncDefn>> fixFunc;
   std::vector<std::shared_ptr<FuncDefn>> randFunc;
@@ -36,6 +41,9 @@ private:
   std::vector<std::shared_ptr<Evidence>> evidence;
   std::vector<std::shared_ptr<TypeDomain>> types;
   std::string name;
+
+  // Temporal Features
+  int markov_order;
 };
 
 }

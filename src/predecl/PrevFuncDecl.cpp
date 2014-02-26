@@ -2,8 +2,9 @@
 
 #include <vector>
 
-#include "../ir/OprExpr.h"
+#include "../ir/FunctionCall.h"
 #include "../ir/TimestepLiteral.h"
+#include "../ir/IntLiteral.h"
 
 namespace swift {
 namespace predecl {
@@ -27,33 +28,28 @@ std::shared_ptr<ir::Expr> PrevFuncDecl::getNew(
   if (args[0]->getTyp() != ts_ty)
     return nullptr;
 
+  auto func = std::make_shared<ir::FunctionCall>(this);
+
   //Special Check for Multiple Prev()
-  //  i.e. Prev(Prev(t)) :::==> Prev(t - @1) :::==> t - @2
-  auto sub = std::dynamic_pointer_cast<ir::OprExpr>(args[0]);
-  if (sub != nullptr && sub->getOp() == ir::IRConstant::MINUS && sub->argSize() == 2
-    && std::dynamic_pointer_cast<ir::TimestepLiteral>(sub->get(1)) != nullptr) {
-    auto val = std::dynamic_pointer_cast<ir::TimestepLiteral>(sub->get(1));
-    auto opr = std::make_shared<ir::OprExpr>(ir::IRConstant::MINUS);
-    opr->addArg(sub->get(0));
-    auto shft = std::make_shared<ir::TimestepLiteral>(val->getValue() + 1);
-    shft->setTyp(ts_ty);
-    opr->addArg(shft);
-    opr->setTyp(ts_ty);
-    // check randomness
-    opr->setRandom(sub->get(0)->isRandom());
-    return opr;
+  //  i.e. Prev(Prev(t, 1), 1) :::==> Prev(t, 2)
+  auto sub = std::dynamic_pointer_cast<ir::FunctionCall>(args[0]);
+  if (sub->isBuiltin() && sub->getBuiltinRefer() == this && sub->argSize() == 1
+      && std::dynamic_pointer_cast<ir::IntLiteral>(sub->get(0)) != nullptr) {
+    auto val = std::dynamic_pointer_cast<ir::IntLiteral>(sub->get(0));
+    func->addArg(sub->getTemporalArg());
+    func->addArg(std::make_shared<ir::IntLiteral>(val->getValue() + 1));
+  }
+  else {
+    func->addArg(args[0]);
+    func->addArg(std::make_shared<ir::IntLiteral>(1));
   }
 
-  //  Current Version: Prev(t) :::==> t - @1
-  auto opr = std::make_shared<ir::OprExpr>(ir::IRConstant::MINUS);
-  opr->addArg(args[0]);
-  auto shft = std::make_shared<ir::TimestepLiteral>(1);
-  shft->setTyp(ts_ty);
-  opr->addArg(shft);
-  opr->setTyp(ts_ty);
+  func->processTemporal(ts_ty);
+  func->setTyp(ts_ty);
   // check randomness
-  opr->setRandom(args[0]->isRandom());
-  return opr;
+  func->setRandom(func->get(0)->isRandom());
+
+  return func;
 }
 
 }
