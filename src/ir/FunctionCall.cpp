@@ -3,17 +3,18 @@
 #include "FuncDefn.h"
 #include "IRConst.h"
 
+#include "../predecl/PreDecl.h"
+
 namespace swift {
 namespace ir {
 
-// TODO: To fix this hacking implementation for builtin functions
-FunctionCall::FunctionCall(std::string name) :
-    refer(nullptr), kind(IRConstant::FIXED), isbuiltin(true), builtinName(name),
-    istmp(false), tmpvar(nullptr) {
+// init for builtin functions
+FunctionCall::FunctionCall(const predecl::PreDecl* refer) :
+    refer(nullptr), builtin(refer), kind(IRConstant::FIXED), istmp(false), tmpvar(nullptr) {
 }
 
 FunctionCall::FunctionCall(std::shared_ptr<FuncDefn> refer) :
-    refer(refer), istmp(false), tmpvar(nullptr) {
+    refer(refer), istmp(false), tmpvar(nullptr), builtin(NULL) {
   if (refer == nullptr)
     kind = IRConstant::NA;
   else {
@@ -22,13 +23,14 @@ FunctionCall::FunctionCall(std::shared_ptr<FuncDefn> refer) :
     if (refer->isFixed())
       kind = IRConstant::FIXED;
   }
-
-  isbuiltin = false;
-  builtinName.clear();
 }
 
 FunctionCall::~FunctionCall() {
 
+}
+
+bool FunctionCall::isBuiltin() const {
+  return builtin != NULL;
 }
 
 IRConstant FunctionCall::getKind() const {
@@ -37,18 +39,6 @@ IRConstant FunctionCall::getKind() const {
 
 std::shared_ptr<FuncDefn> FunctionCall::getRefer() const {
   return refer;
-}
-
-bool FunctionCall::isPrev() {
-  return isbuiltin && (builtinName == "Prev");
-}
-
-bool FunctionCall::isBuiltin() {
-  return isbuiltin;
-}
-
-const std::string& FunctionCall::getBuiltinName() const {
-  return builtinName;
 }
 
 bool FunctionCall::isTemporal() const {
@@ -72,7 +62,7 @@ void FunctionCall::processTemporal(const Ty* timety) {
 
 void FunctionCall::print(FILE* file, int indent) const {
   fprintf(file, "%*sFunctionCall:\n", indent, "");
-  fprintf(file, "%*sfun: %s\n", indent + 2, "", refer->toSignature().c_str());
+  fprintf(file, "%*sfun: %s\n", indent + 2, "", (refer != nullptr ? refer->toSignature().c_str() : ("[built-in] " + builtin->getName()).c_str()));
   if (argSize()) {
     fprintf(file, "%*sargs:\n", indent + 2, "");
     for (size_t i = 0; i < argSize(); i++) {

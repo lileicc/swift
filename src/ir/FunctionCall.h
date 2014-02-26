@@ -4,12 +4,20 @@
 #include "IRConst.h"
 #include "IRForwardDecl.h"
 
+// Forward Declaration
+namespace swift {
+namespace predecl {
+  class PreDecl;
+}
+}
+
 namespace swift {
 namespace ir {
 
 class FunctionCall: public swift::ir::Expr {
 public:
   FunctionCall(std::shared_ptr<FuncDefn> refer);
+  FunctionCall(const predecl::PreDecl* refer);
   virtual ~FunctionCall();
 
   IRConstant getKind() const;
@@ -21,12 +29,9 @@ public:
   std::shared_ptr<Expr> getTempVar();
   void processTemporal(const Ty* timety);
 
-  // TODO: Fix this!!!
-  // Hacking Implementation of Prev() --> built-in function
-  bool isPrev();
-  bool isBuiltin();
-  const std::string& getBuiltinName() const;
-  FunctionCall(std::string name);
+  // Builtin Function
+  const predecl::PreDecl* getBuiltinRefer() const;
+  bool isBuiltin() const;
 
 private:
   IRConstant kind;
@@ -35,10 +40,9 @@ private:
   // TimeStep Features
   bool istmp;
   std::shared_ptr<Expr> tmpvar;
-  // TODO: Fix this!
-  // Hacking Implementation of BuiltinFunction
-  bool isbuiltin;
-  std::string builtinName;
+
+  // Builtin Function Refer
+  const predecl::PreDecl* builtin;
 };
 
 }
