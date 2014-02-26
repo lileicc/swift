@@ -21,7 +21,9 @@ public:
   void process(ir::BlogModel* model);
 
 private:
-
+  // Process Temporal Information
+  //   i.e. Markov Order
+  void processTemporal(ir::BlogModel* model);
 };
 
 }

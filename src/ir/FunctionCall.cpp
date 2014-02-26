@@ -29,6 +29,10 @@ FunctionCall::~FunctionCall() {
 
 }
 
+const predecl::PreDecl* FunctionCall::getBuiltinRefer() const {
+  return builtin;
+}
+
 bool FunctionCall::isBuiltin() const {
   return builtin != NULL;
 }

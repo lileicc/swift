@@ -31,7 +31,7 @@ public:
 
   // For Temporal Features
   int getMarkovOrder() const;
-  void setMarkovOrder(int k = 0);
+  void setMarkovOrder(int k = -1);
   bool isTemporal();
 
 private:
