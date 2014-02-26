@@ -10,11 +10,11 @@ namespace ir {
 
 // init for builtin functions
 FunctionCall::FunctionCall(const predecl::PreDecl* refer) :
-    refer(nullptr), builtin(refer), kind(IRConstant::FIXED), istmp(false), tmpvar(nullptr) {
+    refer(nullptr), builtin(refer), kind(IRConstant::FIXED), istmp(false), tmparg(nullptr) {
 }
 
 FunctionCall::FunctionCall(std::shared_ptr<FuncDefn> refer) :
-    refer(refer), istmp(false), tmpvar(nullptr), builtin(NULL) {
+    refer(refer), istmp(false), tmparg(nullptr), builtin(NULL) {
   if (refer == nullptr)
     kind = IRConstant::NA;
   else {
@@ -45,15 +45,15 @@ bool FunctionCall::isTemporal() const {
   return istmp;
 }
 
-std::shared_ptr<Expr> FunctionCall::getTempVar() {
-  return tmpvar;
+std::shared_ptr<Expr> FunctionCall::getTemporalArg() {
+  return tmparg;
 }
 
 void FunctionCall::processTemporal(const Ty* timety) {
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i]->getTyp() == timety) {
       istmp = true;
-      tmpvar = args[i];
+      tmparg = args[i];
       args.erase(args.begin() + i);
       break;
     }

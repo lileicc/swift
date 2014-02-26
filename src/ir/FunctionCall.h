@@ -25,8 +25,17 @@ public:
   void print(FILE* file, int indent) const;
 
   // TimeStep Features
+  /**
+   * is this FunctionCall has temporal argument
+   * Note the underlying function should be temporal as well
+   * @return
+   */
   bool isTemporal() const;
-  std::shared_ptr<Expr> getTempVar();
+  /**
+   * get the argument for the temporal part
+   * @return
+   */
+  std::shared_ptr<Expr> getTemporalArg();
   void processTemporal(const Ty* timety);
 
   // Builtin Function
@@ -39,7 +48,7 @@ private:
 
   // TimeStep Features
   bool istmp;
-  std::shared_ptr<Expr> tmpvar;
+  std::shared_ptr<Expr> tmparg;
 
   // Builtin Function Refer
   const predecl::PreDecl* builtin;
