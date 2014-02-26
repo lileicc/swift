@@ -9,11 +9,11 @@ namespace ir {
 // TODO: To fix this hacking implementation for builtin functions
 FunctionCall::FunctionCall(std::string name) :
     refer(nullptr), kind(IRConstant::FIXED), isbuiltin(true), builtinName(name),
-    istmp(false), tmpvar(nullptr) {
+    istmp(false), tmparg(nullptr) {
 }
 
 FunctionCall::FunctionCall(std::shared_ptr<FuncDefn> refer) :
-    refer(refer), istmp(false), tmpvar(nullptr) {
+    refer(refer), istmp(false), tmparg(nullptr) {
   if (refer == nullptr)
     kind = IRConstant::NA;
   else {
@@ -55,15 +55,15 @@ bool FunctionCall::isTemporal() const {
   return istmp;
 }
 
-std::shared_ptr<Expr> FunctionCall::getTempVar() {
-  return tmpvar;
+std::shared_ptr<Expr> FunctionCall::getTemporalArg() {
+  return tmparg;
 }
 
 void FunctionCall::processTemporal(const Ty* timety) {
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i]->getTyp() == timety) {
       istmp = true;
-      tmpvar = args[i];
+      tmparg = args[i];
       args.erase(args.begin() + i);
       break;
     }
