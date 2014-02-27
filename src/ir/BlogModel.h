@@ -33,6 +33,8 @@ public:
   int getMarkovOrder() const;
   void setMarkovOrder(int k = -1);
   bool isTemporal();
+  int getTempLimit() const ;
+  void setTempLimit(int k);
 
 private:
   std::vector<std::shared_ptr<FuncDefn>> fixFunc;
@@ -44,6 +46,7 @@ private:
 
   // Temporal Features
   int markov_order;
+  int time_limit;
 };
 
 }
