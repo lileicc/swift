@@ -879,7 +879,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::DistrExpr* expr) {
 }
 
 std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
-  // int, double, string, boolean, null
+  // int, double, string, boolean, timestep, null
   if (dynamic_cast<absyn::NullLiteral*>(expr) != NULL) {
     // TODO: type of NULL Symbol should be assigned later!
     //       NULL will appear in MAP, OpExpr, If, Branch, FunctionDefn
@@ -907,6 +907,16 @@ std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
     std::shared_ptr<ir::StringLiteral> ret(
         new ir::StringLiteral(((absyn::StringLiteral*) expr)->getValue()));
     ret->setTyp(lookupTy(ir::IRConstString::STRING));
+    return ret;
+  }
+  if (dynamic_cast<absyn::TimeStampLiteral*>(expr) != NULL) {
+    auto ret = std::make_shared<ir::TimestepLiteral>((dynamic_cast<absyn::TimeStampLiteral*>(expr))->getValue());
+    ret->setTyp(lookupNameTy(ir::IRConstString::TIMESTEP));
+    
+    // TODO: Currently is a Hacking Implementation
+    //     Should Move to Analyser Finally!!!!
+    if (ret->getValue() > model->getTempLimit())
+      model->setTempLimit(ret->getValue());
     return ret;
   }
   error(expr->line, expr->col, "Illegal Literal!");
@@ -962,7 +972,7 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
       local_var[v->getVarName()].push(v);
     // Add Temporal Variables
     if (fun->isTemporal())
-      local_var[fun->getTempVar()->getVarName()].push(fun->getTempVar());
+      local_var[fun->getTemporalArg()->getVarName()].push(fun->getTemporalArg());
 
     fun->setBody(transClause(fd->getExpr()));
     if (fun->getBody()->getTyp() == NULL)
@@ -984,7 +994,7 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
 
     // Remove Temporal Variables
     if(fun->isTemporal()) {
-      auto it = local_var.find(fun->getTempVar()->getVarName());
+      auto it = local_var.find(fun->getTemporalArg()->getVarName());
       it->second.pop();
       if (it->second.empty())
         local_var.erase(it);

@@ -10,7 +10,7 @@ namespace swift {
 namespace ir {
 
 FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp) :
-    name(name), retTyp(retTyp), isrand(isrand), body(nullptr), tmpvar(nullptr), istmp(false) {
+    name(name), retTyp(retTyp), isrand(isrand), body(nullptr), tmparg(nullptr), istmp(false) {
 }
 
 FuncDefn::~FuncDefn() {
@@ -64,15 +64,15 @@ bool FuncDefn::isTemporal() const {
   return istmp;
 }
 
-std::shared_ptr<VarDecl> FuncDefn::getTempVar() {
-  return tmpvar;
+std::shared_ptr<VarDecl> FuncDefn::getTemporalArg() {
+  return tmparg;
 }
 
 void FuncDefn::processTemporal(const Ty* timety) {
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i]->getTyp() == timety) {
       istmp = true;
-      tmpvar = args[i];
+      tmparg = args[i];
       args.erase(args.begin() + i);
       break;
     }

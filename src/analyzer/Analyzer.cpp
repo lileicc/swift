@@ -5,7 +5,7 @@
  *      Author: leili
  */
 
-#include "Analyser.h"
+#include "Analyzer.h"
 
 #include <vector>
 #include <string>
