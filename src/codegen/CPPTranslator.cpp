@@ -29,9 +29,13 @@ const code::Type CPPTranslator::DOUBLE_TYPE("double");
 const code::Type CPPTranslator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {
                                                        DOUBLE_TYPE });
 const code::Type CPPTranslator::STRING_TYPE("string");
+const code::Type CPPTranslator::TIMESTEP_TYPE("unsigned");
 const code::Type CPPTranslator::BOOL_TYPE("bool");
 const code::Type CPPTranslator::VOID_TYPE("void");
+// TODO: This could be potentially replaced by array
+const code::Type CPPTranslator::ARRAY_BASE_TYPE("vector");
 const code::Type CPPTranslator::MAP_BASE_TYPE("map");
+const code::Type CPPTranslator::SET_BASE_TYPE("set");
 const std::string CPPTranslator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
 const std::string CPPTranslator::QUERY_EVALUATE_FUN_NAME = "_evaluate_query";
 const std::string CPPTranslator::DISTINCT_FIELDNAME = "_name";
@@ -1324,15 +1328,34 @@ void CPPTranslator::transQuery(code::FunctionDecl* fun,
 
 code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef) {
   // TODO add support for more ref type
+  // TODO: To Make the type more general for other language, i.e. Java!
+  ///    Note: in IR, the type->toString() will return the corresponding C++ translation of that type
   switch (ty->getTyp()) {
     case ir::IRConstant::BOOL:
-      return BOOL_TYPE;
     case ir::IRConstant::INT:
-      return INT_TYPE;
     case ir::IRConstant::DOUBLE:
-      return DOUBLE_TYPE;
     case ir::IRConstant::STRING:
-      return STRING_TYPE;
+    case ir::IRConstant::TIMESTEP:
+      return code::Type(ty->toString(), isRef);
+    case ir::IRConstant::ARRAY: {
+      auto arr = dynamic_cast<const ir::ArrayTy*>(ty);
+      std::vector<code::Type> args;
+      args.push_back(mapIRTypeToCodeType(arr->getBase(), false));
+      return code::Type(ARRAY_BASE_TYPE.getName(), args, isRef);
+    }
+    case ir::IRConstant::SET: {
+      auto st = dynamic_cast<const ir::SetTy*>(ty);
+      std::vector<code::Type> args;
+      args.push_back(mapIRTypeToCodeType(st->getRefer(), false));
+      return code::Type(SET_BASE_TYPE.getName(), args, isRef);
+    }
+    case ir::IRConstant::MAP: {
+      auto mp = dynamic_cast<const ir::MapTy*>(ty);
+      std::vector<code::Type> args;
+      args.push_back(mapIRTypeToCodeType(mp->getFrom(), false));
+      args.push_back(mapIRTypeToCodeType(mp->getTo(), false));
+      return code::Type(MAP_BASE_TYPE.getName(), args, isRef);
+    }
     default:
       return isRef ? INT_REF_TYPE : INT_TYPE;  // all declared type return int type
   }

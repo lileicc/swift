@@ -243,11 +243,17 @@ private:
 
   static const code::Type STRING_TYPE;
 
+  static const code::Type TIMESTEP_TYPE;
+
   static const code::Type BOOL_TYPE;
 
   static const code::Type VOID_TYPE;
 
+  static const code::Type ARRAY_BASE_TYPE;
+
   static const code::Type MAP_BASE_TYPE;
+
+  static const code::Type SET_BASE_TYPE;
 
   static const std::string SAMPLER_VAR_NAME;
 

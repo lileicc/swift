@@ -6,7 +6,7 @@ namespace ir {
 const std::string IRConstString::BOOL = "bool";
 const std::string IRConstString::INT = "int";
 const std::string IRConstString::DOUBLE = "double";
-const std::string IRConstString::STRING = "std::string";
+const std::string IRConstString::STRING = "string";
 const std::string IRConstString::TIMESTEP = "unsigned";
 const std::string IRConstString::NA = "void";
 

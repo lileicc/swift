@@ -17,7 +17,7 @@ const Ty* SetTy::getRefer() const {
 
 std::string SetTy::toString() const {
   return std::string("set<") + (refer == NULL ? "NULL" : refer->toString())
-      + ">";
+      + std::string(">");
 }
 
 }
