@@ -456,6 +456,13 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   const std::string & name = fd->getName();
   std::string getterfunname = getGetterFunName(name);
   code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+
+  // Optimization for Vector/Map/Set Return
+  if (valuetype.getName() == ARRAY_BASE_TYPE.getName() 
+    || valuetype.getName() == MAP_BASE_TYPE.getName()
+    || valuetype.getName() == SET_BASE_TYPE.getName())
+    valuetype.setRef(true);
+
   // __value__name for recording the value of the function application variable
   std::string valuevarname = getValueVarName(name);
   // adding in the main class a declaration of field for value of a random variable
