@@ -738,6 +738,14 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
     res = transSetExpr(setexp);
   }
 
+  // translate array expression
+  std::shared_ptr<ir::ArrayExpr> arrexp = std::dynamic_pointer_cast<ir::ArrayExpr>(
+    expr);
+  if (arrexp != nullptr) {
+    used = true;
+    res = transArrayExpr(arrexp, args);
+  }
+
   // TODO translate other expression
   // if valuevar is provided it should be
   if (!used)
@@ -938,6 +946,12 @@ code::Expr* CPPTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
   // Normal Operator
   return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : nullptr,
                                   kind);
+}
+
+code::Expr* CPPTranslator::transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
+  std::vector<code::Expr*> args) {
+  std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
+  return new code::CallClassConstructor(mapIRTypeToCodeType(opr->getTyp()),sub);
 }
 
 code::Expr* CPPTranslator::transDistribution(

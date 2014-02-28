@@ -141,6 +141,12 @@ private:
   code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       std::vector<code::Expr*> args);
 
+  /**
+   * translate the array expression
+   */
+  code::Expr* transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
+    std::vector<code::Expr*> args);
+
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
   code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, std::string valuevar =
