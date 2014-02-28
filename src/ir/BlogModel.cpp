@@ -53,7 +53,7 @@ const std::vector<std::shared_ptr<Evidence>>& BlogModel::getEvidences() {
 }
 
 BlogModel::BlogModel(const std::string name) :
-    name(name), markov_order(-1), time_limit(-1) {
+    name(name), markov_order(-1), time_limit(0) {
 }
 
 const std::vector<std::shared_ptr<TypeDomain>>& BlogModel::getTypes() {
@@ -79,11 +79,11 @@ bool BlogModel::isTemporal() {
   return markov_order >= 0;
 }
 
-void BlogModel::setTempLimit(int k) {
+void BlogModel::setTempLimit(unsigned k) {
   time_limit = k;
 }
 
-int BlogModel::getTempLimit() const {
+unsigned BlogModel::getTempLimit() const {
   return time_limit;
 }
 
