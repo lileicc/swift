@@ -39,8 +39,8 @@ void DirichletSimpleTest::build(){
   */
   {
     DistrExpr *dis = new DistrExpr(0, 0, Symbol("Discrete"));
-    dis->add(new VarRef(0, 0, Symbol("w")));
-    FuncDecl *fd = new FuncDecl(0, 0, true, Ty(Symbol("Integer"), 1), Symbol("w"), dis);
+    dis->add(new VarRef(0, 0, Symbol("x")));
+    FuncDecl *fd = new FuncDecl(0, 0, true, Symbol("Integer"), Symbol("w"), dis);
     blog->add(fd);
   }
   /*
