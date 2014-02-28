@@ -1,7 +1,8 @@
 #include "DiscreteDistrDecl.h"
 
+#include "../ir/ArrayTy.h"
+#include "../ir/DoubleLiteral.h"
 #include "../ir/IntLiteral.h"
-#include "../absyn/Ty.h"
 
 namespace swift {
 namespace predecl {
@@ -20,7 +21,8 @@ std::shared_ptr<ir::Expr> DiscreteDistrDecl::getNew(
     return nullptr;
 
   // Note: We only accept array<double>
-  auto ary_dbl = fact->getTy((absyn::Ty(ir::IRConstString::BLOG_DOUBLE,1)).toString());
+  auto dbl = fact->getTy(ir::IRConstString::DOUBLE);
+  auto ary_dbl = fact->getUpdateTy(new ir::ArrayTy(dbl, 1));
   if (args[0]->getTyp() != ary_dbl)
     return nullptr;
 
