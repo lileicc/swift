@@ -53,6 +53,7 @@ extern "C" int curr_col;
 
 void yyerror(const char *s);
 BlogProgram *blog;
+bool error_found = false;
 
 BlogProgram* parse(const char* inp) {
   blog = new BlogProgram(0, 0);
@@ -191,9 +192,17 @@ BlogProgram* parse(const char* inp) {
 %left MULT_ DIV_ MOD_ POWER_
 %left LBRACKET
 
+%nonassoc RPAREN
+%nonassoc NORPAREN
+
 %%
 program:
-  opt_statement_lst
+    opt_statement_lst 
+    {
+      if(error_found){
+        blog = NULL;
+      }
+    }
   ;
   
 opt_statement_lst:
@@ -209,12 +218,17 @@ statement_lst:
     }
   }
   | statement { blog->add($1); }
+  | error { yyerror("Possible missing semicolon here");}
   ;
 
 statement:
     declaration_stmt { $$ = $1; }
   | evidence_stmt { $$ = $1; }
   | query_stmt { $$ = $1; }
+  | error SEMI {
+      yyerror("Possible missing semicolon after a statement!"); 
+      $$ = NULL; 
+    }
   ;
 
 
@@ -232,13 +246,15 @@ declaration_stmt:
 type_decl:
   TYPE ID SEMI
   { $$ = new TypDecl(curr_line, curr_col, Symbol($2->getValue())); }
+  | TYPE SEMI
+  { yyerror("Missing ID in type declaration"); $$ = NULL;}
   ;
 
 type:
     name_type { $$ = $1; }
   | list_type { $$ = $1; }
   | map_type { $$ = $1; }
-  ;
+  ;g
 
 name_type:
   ID { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
@@ -274,23 +290,57 @@ var_decl:
   type ID{ 
     $$ = new VarDecl(curr_line, curr_col, *$1, Symbol($2->getValue())); 
   }
+  | type
+  {
+    yyerror("Missing ID in variable declaration.");
+    $$ = NULL;
+  }
+  | type ID IDS
+  {
+    yyerror("Extra ID in variable declaration");
+    $$ = NULL;
+  }
+  ;
+
+IDS:
+  ID
+  | IDS ID
   ;
   
 type_var_lst:
     type_var_lst COMMA var_decl{ 
-      $$ = $1; 
-      $$->push_back(*$3);
-      delete($3);
+      $$ = NULL;
+      if($3 != NULL && $1 != NULL){
+        $$ = $1; 
+        $$->push_back(*$3);
+        delete($3);
+      }
       //$$ = $1; 
       //$$->add((Expr*)(new VarDecl(curr_line, curr_col, *$3, Symbol($4->getValue())))); 
     }
   | var_decl { 
-      $$ = new vector<VarDecl>();
-      $$->push_back(*$1);
-      delete($1);
-      //$$ = new VarDecl(curr_line, curr_col, *$1, Symbol($2->getValue())); 
+      $$ = NULL;
+      if ($1 != NULL){
+        $$ = new vector<VarDecl>();
+        $$->push_back(*$1);
+        delete($1);
+        //$$ = new VarDecl(curr_line, curr_col, *$1, Symbol($2->getValue())); 
+      }
     }
+  | type_var_lst var_decl{
+    yyerror("Possible missing comma in type variable list");
+    $$ = NULL;
+  }
+  | type_var_lst COMMA COMMAS var_decl{
+    yyerror("Possible extra comma in type variable list");
+    $$ = NULL;
+  }
   ;
+
+COMMAS:
+  COMMA
+| COMMAS COMMA
+;
 
 fixed_func_decl:
     FIXED type ID opt_parenthesized_type_var_lst EQ_ expression SEMI
@@ -303,6 +353,16 @@ fixed_func_decl:
         delete($4);
       }
       //if ($4 != NULL) $$->addArg(*$4);
+    }
+    | FIXED type ID error EQ_ expression SEMI
+    {
+      yyerror("Malformed type variable list in fixed function declaration.");
+      $$ = NULL;
+    }
+    | FIXED type ID opt_parenthesized_type_var_lst EQ_ error
+    {
+      yyerror("Malformed expression body of fixed function declaration");
+      $$ = NULL;
     }
     ;
 
@@ -318,6 +378,16 @@ rand_func_decl:
       }
       //if ($4 != NULL) $$->addArg(*$4);
     }
+    | RANDOM type ID error dependency_statement_body SEMI
+    {
+      yyerror("Malformed type variable list in random function declaration.");
+      $$ = NULL;
+    }
+    | RANDOM type ID opt_parenthesized_type_var_lst error
+    {
+      yyerror("Malformed dependency body in random function declaration");
+      $$ = NULL;
+    }   
     ;
     
 number_stmt:
@@ -331,6 +401,21 @@ number_stmt:
         delete($3);
       }
       //$$->add(Symbol($4->getValue()), Symbol($6->getValue()));
+    }
+    | NUMSIGN error opt_parenthesized_origin_var_list dependency_statement_body SEMI
+    {
+      yyerror("Malformed or missing type in number statement.");
+      $$ = NULL;
+    }
+    | NUMSIGN name_type error dependency_statement_body SEMI
+    {
+      yyerror("Possible malformed variable list in number statement");
+      $$ = NULL;
+    }
+    | NUMSIGN name_type opt_parenthesized_origin_var_list error SEMI
+    {
+      yyerror("Missing or malformed body of number statement");
+      $$ = NULL;
     }
     ;
     
@@ -351,7 +436,34 @@ origin_var_list:
     $$ = new vector<tuple<Symbol, Symbol>>();
     $$->push_back(make_tuple(Symbol($1->getValue()), Symbol($3->getValue())));
   }
+  | origin_var_list ID EQ_ ID
+  {
+    yyerror("Missing comma in origin variable list");
+    $$ = NULL;
+  }
+  | origin_var_list COMMAS COMMA ID EQ_ ID
+  {
+    yyerror("Extra commas in origin variable list");
+    $$ = NULL;
+  }
+  | origin_var_list COMMA ID EQS EQ_ ID
+  {
+    yyerror("Extra equal signs in origin variable list");
+    $$ = NULL;
+  }
+  | origin_var_list COMMA ID ID
+  {
+    yyerror("Missing equal sign in origin variable list");
+    $$ = NULL;
+  }
+
   ;
+
+EQS:
+    EQ_
+  | EQS EQ_
+  ; 
+
 
 //TODO: DistributionDec/ClassName
 distribution_decl:
@@ -387,7 +499,34 @@ id_or_subid_list:
         $$ = $1;
         $$->add(Symbol($3->getValue()), $5->getValue());
       }
+
+  | id_or_subid_list COMMA COMMAS ID
+      { 
+        yyerror("Extra commas in distinct declaration");
+        $$ = NULL;
+      }
+  | id_or_subid_list COMMA COMMAS ID LBRACKET INT_LITERAL RBRACKET
+      { 
+        yyerror("Extra commas in distinct declaration");
+        $$ = NULL;
+      }
+  | id_or_subid_list COMMA ID LBRACKET RBRACKET
+      { 
+        yyerror("Missing integer literal in between brackets in distinct declaration");
+        $$ = NULL;
+      }
+  | id_or_subid_list COMMA ID LBRACKET INT_LITERAL
+      { 
+        yyerror("Unmatched left bracket in distinct declaration");
+        $$ = NULL;
+      }
+  | id_or_subid_list COMMA ID INT_LITERAL RBRACKET
+      { 
+        yyerror("Unmatched right bracket in distinct declaration");
+        $$ = NULL;
+      }
   ;
+
 
     
 id_or_subid:
@@ -413,9 +552,20 @@ class_name:
   
 dependency_statement_body:
     EQ_ expression { $$ = $2; }
+  | EQ_ error {yyerror("Clause may not be an expression in dependency statement body"); $$ = NULL;}
   | distribution_expr { $$ = $1; }
   | IF expression THEN dependency_statement_body elseif_list
   { $$ = new IfExpr(curr_line, curr_col, $2, $4, $5); }
+  | error expression THEN dependency_statement_body elseif_list
+  {
+    yyerror("Possible missing 'if' in dependency statement");
+    $$ = NULL;
+  }
+  | IF expression error dependency_statement_body elseif_list
+  {
+    yyerror("Possible missing 'then' in dependency statement");
+    $$ = NULL;
+  }
   | LBRACE dependency_statement_body RBRACE
   { $$ = $2; }
   ;
@@ -494,7 +644,28 @@ operation_expr:
     { $$ = new OpExpr(curr_line, curr_col, AbsynConstant::IMPLY, $1, $3); }
   | expression LBRACKET expression RBRACKET
     {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, $1, $3); }
+  | expression infix_operator
+  {yyerror("No right-hand expression for infix operator"); $$ = NULL;}
+  | infix_operator expression
+  {yyerror("No left-hand expression for infix operator"); $$ = NULL;}
   | unary_operation_expr { $$ = $1; }
+  ;
+
+infix_operator:
+    PLUS_
+  | MULT_
+  | DIV_
+  | MOD_
+  | POWER_
+  | LT_
+  | GT_
+  | LEQ_
+  | GEQ_
+  | EQEQ_
+  | NEQ_
+  | AND_
+  | OR_
+  | DOUBLERIGHTARROW
   ;
   
 unary_operation_expr:
@@ -512,10 +683,14 @@ quantified_formula:
     {$$ = new QuantExpr(curr_line, curr_col, AbsynConstant::FORALL, *(new VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue()))), $4); }
   | EXISTS_ type ID expression
     {$$ = new QuantExpr(curr_line, curr_col, AbsynConstant::EXISTS, *(new VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue()))), $4); }
+  | FORALL_ error expression {yyerror("Possible missing/incorrect type/ID in quantified formula");}
+  | EXISTS_ error expression {yyerror("Possible missing/incorrect type/ID in quantified formula");}
+  | FORALL_ type ID error {yyerror("Possible missing/incorrect expression in quantified formula");}
+  | EXISTS_ type ID error {yyerror("Possible missing/incorrect expression in quantified formula");}
   ;
   
 function_call:
-  class_name LPAREN opt_expression_list RPAREN 
+  class_name LPAREN opt_expression_list RPAREN
   { 
     $$ = new FuncApp(curr_line, curr_col, Symbol($1->getValue())); 
     if ($3 != NULL){
@@ -614,10 +789,31 @@ number_expr:
       VarDecl var(curr_line, curr_col, *$2);
       $$ = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, var));
   }
+  | NUMSIGN error {
+      yyerror("Malformed type or set expression as argument of number expression");
+      $$ = NULL;
+  }
   
 origin_func_decl:
   ORIGIN type ID LPAREN type RPAREN SEMI
   { $$ = new OriginDecl(curr_line, curr_col, $2->getTyp(), Symbol($3->getValue()), $5->getTyp());  }
+  | ORIGIN type ID LPARENS type SEMI
+  { yyerror("Missing right parenthesis around type in origin function declaration"); $$ = NULL;}
+  | ORIGIN type ID type RPARENS SEMI
+  { yyerror("Missing left parenthesis around type in origin function declaration"); $$ = NULL;}
+  | ORIGIN type ID LPAREN LPARENS type RPAREN RPARENS SEMI
+  { yyerror("Missing right parenthesis around type in origin function declaration"); $$ = NULL;}
+  | ORIGIN type ID type SEMI
+  { yyerror("Missing left parenthesis around type in origin function declaration"); $$ = NULL;}
+  ;
+
+LPARENS:
+    LPAREN
+  | LPARENS LPAREN
+  ;
+RPARENS:
+    RPAREN
+  | RPARENS RPAREN
   ;
 
 set_expr:
@@ -630,10 +826,12 @@ explicit_set:
     LBRACE opt_expression_list RBRACE
     {
       $$ = new ListSet(curr_line, curr_col);
-      for(size_t i = 0; i < $2->size(); i++){
-        $$->add((*$2)[i]);
+      if($2 != NULL){
+        for(size_t i = 0; i < $2->size(); i++){
+          $$->add((*$2)[i]);
+        }
+        delete($2);
       }
-      delete($2);
       //$$ = new SetExpr(curr_line, curr_col); 
       //$$->add($2);
     }
@@ -678,6 +876,16 @@ value_evidence:
   {
     $$ = new Evidence(curr_line, curr_col, $1, $3); 
   }
+  | error EQ_ expression
+  {
+    yyerror("Value is possibly not an expression");
+    $$ = NULL;
+  }
+  | expression EQ_ error
+  {
+    yyerror("Evidence is possibly not an expression");
+    $$ = NULL;
+  }
   ;
 
 //TODO: No SymbolEvidence?  
@@ -688,6 +896,7 @@ symbol_evidence:
 
 query_stmt:
   QUERY query SEMI {$$ = $2; }
+  | QUERY error SEMI {yyerror("Query might not be an expression.");}
   ; 
   
 query:
@@ -696,10 +905,9 @@ query:
   
 %%
 
-
-
 void yyerror(const char *s) {
   cout << "Parse error at line number: " << curr_line << " and column number: " << curr_col << "!  Message: " << s << endl;
+  error_found = true;
   // might as well halt now:
-  exit(-1);
+  //exit(-1);
 }
