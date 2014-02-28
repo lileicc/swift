@@ -17,6 +17,9 @@ const BooleanDistrDecl PreDeclList::booleanDistr =
 const CategoricalDistrDecl PreDeclList::categoricalDistr =
     CategoricalDistrDecl();
 
+const DiscreteDistrDecl PreDeclList::discreteDistr = 
+    DiscreteDistrDecl();
+
 const PoissonDistrDecl PreDeclList::poissonDistr = PoissonDistrDecl();
 
 const GammaDistrDecl PreDeclList::gammaDistr =
