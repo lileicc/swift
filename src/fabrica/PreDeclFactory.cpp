@@ -15,6 +15,10 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::booleanDistr;
   decls[predecl::PreDeclList::categoricalDistr.getName()] =
     &predecl::PreDeclList::categoricalDistr;
+  decls[predecl::PreDeclList::dirichletDistr.getName()] =
+    &predecl::PreDeclList::dirichletDistr;
+  decls[predecl::PreDeclList::discreteDistr.getName()] =
+    &predecl::PreDeclList::discreteDistr;
   decls[predecl::PreDeclList::gammaDistr.getName()] =
     &predecl::PreDeclList::gammaDistr;
   decls[predecl::PreDeclList::gaussianDistr.getName()] =

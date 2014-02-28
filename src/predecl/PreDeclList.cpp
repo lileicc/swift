@@ -17,6 +17,9 @@ const BooleanDistrDecl PreDeclList::booleanDistr =
 const CategoricalDistrDecl PreDeclList::categoricalDistr =
     CategoricalDistrDecl();
 
+const DirichletDistrDecl PreDeclList::dirichletDistr =
+    DirichletDistrDecl();
+
 const DiscreteDistrDecl PreDeclList::discreteDistr = 
     DiscreteDistrDecl();
 

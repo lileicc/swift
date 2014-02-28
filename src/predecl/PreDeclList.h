@@ -5,6 +5,7 @@
 #include "BetaDistrDecl.h"
 #include "BooleanDistrDecl.h"
 #include "CategoricalDistrDecl.h"
+#include "DirichletDistrDecl.h"
 #include "DiscreteDistrDecl.h"
 #include "GammaDistrDecl.h"
 #include "GaussianDistrDecl.h"
@@ -26,6 +27,7 @@ public:
   static const BetaDistrDecl betaDistr;
   static const BooleanDistrDecl booleanDistr;
   static const CategoricalDistrDecl categoricalDistr;
+  static const DirichletDistrDecl dirichletDistr;
   static const DiscreteDistrDecl discreteDistr;
   static const GammaDistrDecl gammaDistr;
   static const GaussianDistrDecl gaussianDistr;
