@@ -27,9 +27,13 @@ public:
   const std::string& getDistrName() const;
   void print(FILE* file, int indent) const;
 
-private:
+  // Special Check for Randomness
+  bool isArgRandom() const;
+  virtual void processArgRandomness();
+protected:
   const predecl::PreDecl* refer;
   std::string name;
+  bool arg_rand;
 };
 
 }

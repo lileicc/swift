@@ -47,6 +47,7 @@ std::shared_ptr<ir::Expr> CategoricalDistrDecl::getNew(
   }
   ret->addArg(m);
   ret->setTyp(ty->getTo());
+  ret->processArgRandomness();
   return ret;
 }
 

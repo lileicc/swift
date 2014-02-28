@@ -27,6 +27,7 @@ std::shared_ptr<ir::Expr> PoissonDistrDecl::getNew(
   auto ret = std::make_shared<ir::Distribution>(this->getName(), this);
   ret->setArgs(args);
   ret->setTyp(fact->getTy(ir::IRConstString::INT));
+  ret->processArgRandomness();
   return ret;
 }
 

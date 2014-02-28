@@ -865,6 +865,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::DistrExpr* expr) {
     auto dist = std::make_shared<ir::Distribution>(name);
     dist->setArgs(args);
     dist->setRandom(true);
+    dist->processArgRandomness();
     return dist;
   }
 

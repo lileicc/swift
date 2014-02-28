@@ -5,10 +5,21 @@ namespace ir {
 
 Distribution::Distribution(const std::string& name,
     const predecl::PreDecl* refer) :
-    refer(refer), name(name) {
+    refer(refer), name(name), arg_rand(false) {
 }
 
 Distribution::~Distribution() {
+}
+
+bool Distribution::isArgRandom() const {
+  return arg_rand;
+}
+
+void Distribution::processArgRandomness() {
+  for (auto a : args) {
+    if (a->isRandom())
+      arg_rand = true;
+  }
 }
 
 const std::string& Distribution::getDistrName() const {

@@ -1048,7 +1048,7 @@ code::Expr* CPPTranslator::transDistribution(
   //          Y~Poisson(X) : dynamic, since X is not fixed
   std::string name = dist->getDistrName();
   std::string distvarname = name + std::to_string((size_t) &(dist->getArgs()));
-  if (dist->isRandom()) {
+  if (dist->isArgRandom()) {
     if (valuevar.empty()) {
       // Sample value from the distribution
       // define a field in the main class corresponding to the distribution
