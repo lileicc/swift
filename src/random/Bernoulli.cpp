@@ -1,5 +1,5 @@
 /*
- * Bernoulli.h
+ * Bernoulli.cpp
  *
  *  Created on: Feb 6, 2014
  *      Author: yiwu

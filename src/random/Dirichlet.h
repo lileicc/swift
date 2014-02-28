@@ -1,5 +1,5 @@
 /*
- * Beta.h
+ * Dirichlet.h
  *
  *  Created on: Feb 6, 2014
  *      Author: yiwu
