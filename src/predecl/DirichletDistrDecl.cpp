@@ -26,7 +26,7 @@ std::shared_ptr<ir::Expr> DirichletDistrDecl::getNew(
   // check vector<double>
   auto dbl = fact->getTy(ir::IRConstString::DOUBLE);
   auto ary_dbl = fact->getUpdateTy(new ir::ArrayTy(dbl, 1));
-  if (args.size() == 1 && args[0]->getTyp() != ary_dbl) {
+  if (args.size() == 1 && args[0]->getTyp() == ary_dbl) {
     auto ret = std::make_shared<ir::Distribution>(this->getName(), this);
     ret->setArgs(args);
     ret->setTyp(ary_dbl);
