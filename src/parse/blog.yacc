@@ -195,6 +195,9 @@ BlogProgram* parse(const char* inp) {
 %nonassoc RPAREN
 %nonassoc NORPAREN
 
+%left ID;
+%left SEMI, error;
+
 %%
 program:
     opt_statement_lst 
@@ -801,7 +804,9 @@ origin_func_decl:
   { yyerror("Missing right parenthesis around type in origin function declaration"); $$ = NULL;}
   | ORIGIN type ID type RPARENS SEMI
   { yyerror("Missing left parenthesis around type in origin function declaration"); $$ = NULL;}
-  | ORIGIN type ID LPAREN LPARENS type RPAREN RPARENS SEMI
+  | ORIGIN type ID LPAREN LPARENS type RPARENS SEMI
+  { yyerror("Missing right parenthesis around type in origin function declaration"); $$ = NULL;}
+  | ORIGIN type ID LPAREN type RPARENS RPAREN SEMI
   { yyerror("Missing right parenthesis around type in origin function declaration"); $$ = NULL;}
   | ORIGIN type ID type SEMI
   { yyerror("Missing left parenthesis around type in origin function declaration"); $$ = NULL;}
