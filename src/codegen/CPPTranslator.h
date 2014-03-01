@@ -141,6 +141,12 @@ private:
   code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       std::vector<code::Expr*> args);
 
+  /**
+   * translate the array expression
+   */
+  code::Expr* transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
+    std::vector<code::Expr*> args);
+
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
   code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, std::string valuevar =
@@ -243,11 +249,17 @@ private:
 
   static const code::Type STRING_TYPE;
 
+  static const code::Type TIMESTEP_TYPE;
+
   static const code::Type BOOL_TYPE;
 
   static const code::Type VOID_TYPE;
 
+  static const code::Type ARRAY_BASE_TYPE;
+
   static const code::Type MAP_BASE_TYPE;
+
+  static const code::Type SET_BASE_TYPE;
 
   static const std::string SAMPLER_VAR_NAME;
 

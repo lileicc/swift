@@ -20,7 +20,7 @@ const Ty* MapTy::getTo() const {
 
 std::string MapTy::toString() const {
   return std::string("map<") + (from == NULL ? "NULL" : from->toString()) + ","
-      + (to == NULL ? "NULL" : to->toString());
+      + (to == NULL ? "NULL" : to->toString()) + std::string(">");
 }
 
 }

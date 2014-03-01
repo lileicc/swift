@@ -11,7 +11,7 @@ namespace ir {
 
 class CategoricalDistr: public swift::ir::Distribution {
 public:
-  CategoricalDistr(const predecl::PreDeclDistr* refer);
+  CategoricalDistr(const predecl::PreDecl* refer);
   virtual ~CategoricalDistr();
 
   size_t size() const;

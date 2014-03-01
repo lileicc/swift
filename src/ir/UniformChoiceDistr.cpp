@@ -13,6 +13,10 @@ UniformChoiceDistr::UniformChoiceDistr(std::shared_ptr<SetExpr> b) :
 UniformChoiceDistr::~UniformChoiceDistr() {
 }
 
+void UniformChoiceDistr::processArgRandomness() {
+  arg_rand = body->isRandom();
+}
+
 std::shared_ptr<SetExpr> UniformChoiceDistr::getBody() const {
   return body;
 }

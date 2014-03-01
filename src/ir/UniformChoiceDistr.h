@@ -13,6 +13,8 @@ public:
   std::shared_ptr<SetExpr> getBody() const;
   void print(FILE* file, int indent) const;
 
+  // Special Randomness checking for Arguments
+  virtual void processArgRandomness();
 private:
   std::shared_ptr<SetExpr> body;
 };

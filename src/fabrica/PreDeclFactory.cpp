@@ -1,26 +1,45 @@
 #include "PreDeclFactory.h"
 
-#include "../predecl/PreDeclDistrList.h"
+#include "../predecl/PreDeclList.h"
 
 namespace swift {
 namespace fabrica {
 
 PreDeclFactory::PreDeclFactory() {
-  distr[predecl::PreDeclDistrList::categoricalDistr.getName()] =
-      &predecl::PreDeclDistrList::categoricalDistr;
-  distr[predecl::PreDeclDistrList::poissonDistr.getName()] =
-      &predecl::PreDeclDistrList::poissonDistr;
-  distr[predecl::PreDeclDistrList::uniformChoiceDistr.getName()] =
-      &predecl::PreDeclDistrList::uniformChoiceDistr;
+  // Predeclared Distributions
+  decls[predecl::PreDeclList::bernoulliDistr.getName()] =
+    &predecl::PreDeclList::bernoulliDistr;
+  decls[predecl::PreDeclList::betaDistr.getName()] =
+    &predecl::PreDeclList::betaDistr;
+  decls[predecl::PreDeclList::booleanDistr.getName()] =
+    &predecl::PreDeclList::booleanDistr;
+  decls[predecl::PreDeclList::categoricalDistr.getName()] =
+    &predecl::PreDeclList::categoricalDistr;
+  decls[predecl::PreDeclList::dirichletDistr.getName()] =
+    &predecl::PreDeclList::dirichletDistr;
+  decls[predecl::PreDeclList::discreteDistr.getName()] =
+    &predecl::PreDeclList::discreteDistr;
+  decls[predecl::PreDeclList::gammaDistr.getName()] =
+    &predecl::PreDeclList::gammaDistr;
+  decls[predecl::PreDeclList::gaussianDistr.getName()] =
+    &predecl::PreDeclList::gaussianDistr;
+  decls[predecl::PreDeclList::poissonDistr.getName()] =
+      &predecl::PreDeclList::poissonDistr;
+  decls[predecl::PreDeclList::uniformChoiceDistr.getName()] =
+      &predecl::PreDeclList::uniformChoiceDistr;
+  
+  // Predecl Functions
+  decls[predecl::PreDeclList::prevFuncDecl.getName()] =
+    &predecl::PreDeclList::prevFuncDecl;
 }
 
 PreDeclFactory::~PreDeclFactory() {
 }
 
-const predecl::PreDeclDistr* PreDeclFactory::getDistr(std::string name) {
-  if (distr.count(name) == 0)
+const predecl::PreDecl* PreDeclFactory::getDecl(std::string name) {
+  if (decls.count(name) == 0)
     return NULL;
-  return distr[name];
+  return decls[name];
 }
 
 }

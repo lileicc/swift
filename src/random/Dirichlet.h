@@ -1,11 +1,12 @@
 /*
- * Beta.h
+ * Dirichlet.h
  *
  *  Created on: Feb 6, 2014
  *      Author: yiwu
  */
 
 #pragma once
+#include <cstdarg>
 #include <random>
 #include <vector>
 #include "SwiftDistribution.h"
@@ -18,6 +19,7 @@ public:
   Dirichlet();
   virtual ~Dirichlet();
   void init(std::vector<double> alpha);
+  void init(int n_param, ...);
   std::vector<double> gen();
   double likeli(const std::vector<double>& x);
   double loglikeli(const std::vector<double>& x);

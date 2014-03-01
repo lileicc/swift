@@ -20,7 +20,7 @@ int ArrayTy::getDim() const {
 std::string ArrayTy::toString() const {
   std::string ret;
   for (int i = 0; i < dim; i++)
-    ret.append("std::vector<");
+    ret.append("vector<");
   ret.append(base->toString());
   for (int i = 0; i < dim; i++)
     ret.push_back('>');

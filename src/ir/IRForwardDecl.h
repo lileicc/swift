@@ -41,6 +41,7 @@ class Query;
 class SetTy;
 class SetExpr;
 class StringLiteral;
+class TimestepLiteral;
 class Ty;
 class TypeDomain;
 class UniformChoiceDistr;

@@ -84,6 +84,12 @@ public:
    * get all the Ty*
    */
   const std::map<std::string, const ir::Ty*>& getAllTyTable() const;
+
+  /**
+   * Special Function for Timestep Checking
+   */
+  const ir::Ty* getTimestepTy() const;
+
 private:
   static std::string constructAttrSign(const ir::NameTy* srcty,
       const std::string & name);
@@ -94,6 +100,7 @@ private:
   static const ir::Ty BOOL_TY;
   static const ir::Ty DOUBLE_TY;
   static const ir::Ty STRING_TY;
+  static const ir::Ty TIMESTEP_TY;
   static const ir::Ty NA_TY;
 };
 

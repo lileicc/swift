@@ -22,7 +22,7 @@ public:
   const std::vector<std::shared_ptr<Expr> >& getArgs() const;
   std::shared_ptr<Expr> get(size_t k) const;
   size_t argSize() const;
-private:
+protected:
   std::vector<std::shared_ptr<Expr> > args;
 };
 }
