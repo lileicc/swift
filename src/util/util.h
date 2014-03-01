@@ -7,9 +7,12 @@
 //
 //
 
+#include <cstring>
 #include <cmath>
 #include <vector>
 #include <functional>
+#include "..\random\Multinomial.cpp"
+
 #pragma once
 
 // computing log( exp(a) + exp(b) )
@@ -115,4 +118,32 @@ bool _exists(int n, std::function<bool(int)> fun) {
   for (int i=0;i<n;++i)
     if (fun(i)) return true;
   return false;
+}
+
+/*
+ * Resample Function
+ * For Particle Filtering
+ *   Using Multinomial Distribution
+ * >> Input Arguments:
+ *    > template: Dependency, SampleN, class name for static memorization, class name for temporal memorization
+ *    > arguments: weight, {static memorization and ptr}, {temporal memorization, ptr and backup ptr}
+ */
+template<int Dependency, int SampleN, class stat_T, class temp_T>
+void resample(
+  swift::random::Multinomial& dist,
+  double* weight, 
+  stat_T stat_memo[SampleN], stat_T* ptr_stat_memo, 
+  temp_T temp_memo[Dependency][SampleN], temp_T* ptr_temp_memo[Dependency][SampleN], temp_T* backup_ptr[Dependency][SampleN]) {
+  
+  dist.init(weight, weight + SampleN);
+  std::vector<int> candidate = dist.gen(SampleN);
+  for(int i = 0; i < SampleN; ++ i) {
+    int pos = candidate[i];
+    // Swap Static States
+    ptr_stat_memo[i] = stat_memo + pos;
+    for(int j = 0; j < Dependency; ++ j)
+      backup_ptr[j][i] = ptr_temp_memo[j][pos];
+  }
+  
+  std::memcpy(ptr_temp_memo, backup_ptr, sizeof(backup_ptr));
 }
