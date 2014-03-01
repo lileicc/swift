@@ -1,9 +1,0 @@
-(BlogProgram:
-  (args:
-    (OriginDecl:
-      :func Source
-      :typ Aircraft
-      :arg Blip
-    )
-  )
-)

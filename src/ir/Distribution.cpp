@@ -4,18 +4,29 @@ namespace swift {
 namespace ir {
 
 Distribution::Distribution(const std::string& name,
-    const predecl::PreDeclDistr* refer) :
-    refer(refer), name(name) {
+    const predecl::PreDecl* refer) :
+    refer(refer), name(name), arg_rand(false) {
 }
 
 Distribution::~Distribution() {
+}
+
+bool Distribution::isArgRandom() const {
+  return arg_rand;
+}
+
+void Distribution::processArgRandomness() {
+  for (auto a : args) {
+    if (a->isRandom())
+      arg_rand = true;
+  }
 }
 
 const std::string& Distribution::getDistrName() const {
   return name;
 }
 
-const predecl::PreDeclDistr* Distribution::getRefer() const {
+const predecl::PreDecl* Distribution::getRefer() const {
   return refer;
 }
 

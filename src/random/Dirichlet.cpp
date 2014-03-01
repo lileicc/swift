@@ -1,5 +1,5 @@
 /*
- * Dirichlet.h
+ * Dirichlet.cpp
  *
  *  Created on: Feb 6, 2014
  *      Author: yiwu
@@ -31,6 +31,17 @@ void Dirichlet::init(std::vector<double> alpha) {
   }
   coef *= std::tgamma(alpha_sum);
   log_coef += std::lgamma(alpha_sum);
+}
+
+void Dirichlet::init(int n_param, ...) {
+  va_list args;
+  va_start(args, n_param);
+  std::vector<double> vec_args;
+  for (int i = 0; i < n_param; ++i) {
+    vec_args.push_back(va_arg(args, double));
+  }
+  va_end(args);
+  init(vec_args);
 }
 
 std::vector<double> Dirichlet::gen() {

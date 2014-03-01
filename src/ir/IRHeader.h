@@ -37,6 +37,7 @@
 #include "SetExpr.h"
 #include "SetTy.h"
 #include "StringLiteral.h"
+#include "TimestepLiteral.h"
 #include "Ty.h"
 #include "TypeDomain.h"
 #include "UniformChoiceDistr.h"

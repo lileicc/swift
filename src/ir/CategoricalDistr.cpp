@@ -6,7 +6,7 @@
 namespace swift {
 namespace ir {
 
-CategoricalDistr::CategoricalDistr(const predecl::PreDeclDistr* refer) :
+CategoricalDistr::CategoricalDistr(const predecl::PreDecl* refer) :
     Distribution(std::string("Categorical"), refer) {
 }
 

@@ -32,6 +32,9 @@ std::string Ty::toString() const {
     return IRConstString::DOUBLE;
   case IRConstant::STRING:
     return IRConstString::STRING;
+  case IRConstant::TIMESTEP:
+    // TODO: To specify the type for timestamp in C++ code
+    return IRConstString::TIMESTEP;
   default:
     return IRConstString::NA;
   }

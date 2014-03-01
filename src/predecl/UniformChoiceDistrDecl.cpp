@@ -6,13 +6,13 @@
 namespace swift {
 namespace predecl {
 UniformChoiceDistrDecl::UniformChoiceDistrDecl() :
-    PreDeclDistr(std::string("UniformChoice")) {
+    PreDecl(std::string("UniformChoice")) {
 }
 
 UniformChoiceDistrDecl::~UniformChoiceDistrDecl() {
 }
 
-std::shared_ptr<ir::Distribution> UniformChoiceDistrDecl::getNew(
+std::shared_ptr<ir::Expr> UniformChoiceDistrDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   if (args.size() != 1 || args[0]->getTyp() == NULL
@@ -25,6 +25,7 @@ std::shared_ptr<ir::Distribution> UniformChoiceDistrDecl::getNew(
   auto ty = (const ir::SetTy*) (e->getTyp());
   ptr->setArgs(args);
   ptr->setTyp(ty->getRefer());
+  ptr->processArgRandomness();
   return ptr;
 }
 
