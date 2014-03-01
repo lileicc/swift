@@ -167,6 +167,11 @@ private:
    */
   code::Expr* transSetExpr(std::shared_ptr<ir::SetExpr> e);
 
+  /*
+  * translate the QuantForm. Including both forall and exists
+  */
+  code::Expr* transQuantForm(std::shared_ptr<ir::QuantForm> qt, code::Expr* cond);
+
   /**
    * translate the evidence in obs statement, the resulting statement is added
    * to the declaration context
