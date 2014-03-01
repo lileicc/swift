@@ -130,11 +130,10 @@ bool _exists(int n, std::function<bool(int)> fun) {
  */
 template<int Dependency, int SampleN, class stat_T, class temp_T>
 void resample(
-  swift::random::Multinomial& dist,
   double* weight, 
-  stat_T stat_memo[SampleN], stat_T* ptr_stat_memo, 
+  stat_T stat_memo[SampleN], stat_T* ptr_stat_memo[SampleN], 
   temp_T temp_memo[Dependency][SampleN], temp_T* ptr_temp_memo[Dependency][SampleN], temp_T* backup_ptr[Dependency][SampleN]) {
-  
+  swift::random::Multinomial dist;
   dist.init(weight, weight + SampleN);
   std::vector<int> candidate = dist.gen(SampleN);
   for(int i = 0; i < SampleN; ++ i) {
