@@ -8,7 +8,7 @@
 #include "absyn/BlogProgram.h"
 #include "preprocess/Preprocessor.h"
 #include "semant/Semant.h"
-#include "codegen/CPPTranslator.h"
+#include "codegen/Translator.h"
 #include "ir/BlogModel.h"
 #include "printer/CPPPrinter.h"
 
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
   }
 
   // translate ir to code representation
-  swift::codegen::CPPTranslator trans;
+  swift::codegen::Translator trans;
   trans.translate(model);
   swift::code::Code* program = trans.getResult();
 

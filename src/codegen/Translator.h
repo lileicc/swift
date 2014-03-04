@@ -1,5 +1,5 @@
 /*
- * CPPTranslator.h
+ * Translator.h
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
@@ -23,10 +23,10 @@ typedef code::FieldDecl* ORIGINDEFN;
 typedef code::Expr* EXPR;
 typedef code::Stmt* STMT;
 
-class CPPTranslator {
+class Translator {
 public:
-  CPPTranslator();
-  virtual ~CPPTranslator();
+  Translator();
+  virtual ~Translator();
   void translate(swift::ir::BlogModel* model);
   code::Code* getResult();
 
@@ -55,7 +55,6 @@ protected:
   
   inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
 
-private:
   code::Code* prog; // holder for result target code
   bool useTag;
   code::ClassDecl* coreCls; // main Class for the sampler;

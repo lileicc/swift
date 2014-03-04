@@ -1,91 +1,91 @@
 /*
- * CPPTranslator.cpp
+ * Translator.cpp
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
  */
 
 #include <cassert>
-#include "CPPTranslator.h"
+#include "Translator.h"
 
 namespace swift {
 namespace codegen {
 swift::Configuration* config = swift::Configuration::getConfiguration();
-bool CPPTranslator::COMPUTE_LIKELIHOOD_IN_LOG =
+bool Translator::COMPUTE_LIKELIHOOD_IN_LOG =
     swift::Configuration::getConfiguration()->getBoolValue(
         "COMPUTE_LIKELIHOOD_IN_LOG");
 
-const std::string CPPTranslator::VECTOR_CLASS_NAME = "vector";
-const std::string CPPTranslator::VECTOR_RESIZE_METHOD_NAME = "resize";
-const std::string CPPTranslator::VECTOR_ADD_METHOD_NAME = "push_back";
-const std::string CPPTranslator::APPEND_FUN_NAME = "append";
-const std::string CPPTranslator::DYNAMICTABLE_CLASS_NAME = "DynamicTable";
-const std::string CPPTranslator::DYNAMICTABLE_RESIZE_METHOD_NAME = "resize";
-const code::Type CPPTranslator::INT_TYPE("int");
-const code::Type CPPTranslator::INT_REF_TYPE("int", true);
-const code::Type CPPTranslator::INT_VECTOR_TYPE(VECTOR_CLASS_NAME,
+const std::string Translator::VECTOR_CLASS_NAME = "vector";
+const std::string Translator::VECTOR_RESIZE_METHOD_NAME = "resize";
+const std::string Translator::VECTOR_ADD_METHOD_NAME = "push_back";
+const std::string Translator::APPEND_FUN_NAME = "append";
+const std::string Translator::DYNAMICTABLE_CLASS_NAME = "DynamicTable";
+const std::string Translator::DYNAMICTABLE_RESIZE_METHOD_NAME = "resize";
+const code::Type Translator::INT_TYPE("int");
+const code::Type Translator::INT_REF_TYPE("int", true);
+const code::Type Translator::INT_VECTOR_TYPE(VECTOR_CLASS_NAME,
                                                 { INT_TYPE });
-const code::Type CPPTranslator::DOUBLE_TYPE("double");
-const code::Type CPPTranslator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {
+const code::Type Translator::DOUBLE_TYPE("double");
+const code::Type Translator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {
                                                        DOUBLE_TYPE });
-const code::Type CPPTranslator::STRING_TYPE("string");
-const code::Type CPPTranslator::TIMESTEP_TYPE("unsigned");
-const code::Type CPPTranslator::BOOL_TYPE("bool");
-const code::Type CPPTranslator::VOID_TYPE("void");
+const code::Type Translator::STRING_TYPE("string");
+const code::Type Translator::TIMESTEP_TYPE("unsigned");
+const code::Type Translator::BOOL_TYPE("bool");
+const code::Type Translator::VOID_TYPE("void");
 // TODO: This could be potentially replaced by array
-const code::Type CPPTranslator::ARRAY_BASE_TYPE("vector");
-const code::Type CPPTranslator::MAP_BASE_TYPE("map");
-const code::Type CPPTranslator::SET_BASE_TYPE("set");
-const std::string CPPTranslator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
-const std::string CPPTranslator::QUERY_EVALUATE_FUN_NAME = "_evaluate_query";
-const std::string CPPTranslator::DISTINCT_FIELDNAME = "_name";
-const std::string CPPTranslator::DISTRIBUTION_INIT_FUN_NAME = "init";
-const std::string CPPTranslator::DISTRIBUTION_GEN_FUN_NAME = "gen";
-const std::string CPPTranslator::DISTRIBUTION_LIKELI_FUN_NAME = "likeli";
-const std::string CPPTranslator::DISTRIBUTION_LOGLIKELI_FUN_NAME = "loglikeli";
-const std::string CPPTranslator::CURRENT_SAMPLE_NUM_VARNAME = "_cur_loop";
-const std::string CPPTranslator::WEIGHT_VAR_REF_NAME = "__local_weight";
-const std::string CPPTranslator::GLOBAL_WEIGHT_VARNAME = "_weight";
-const std::string CPPTranslator::VALUE_VAR_REF_NAME = "__value";
-const std::string CPPTranslator::VALUE_ARG_NAME = "__value_arg";
-const std::string CPPTranslator::MARK_VAR_REF_NAME = "__mark";
-const std::string CPPTranslator::HISTOGRAM_CLASS_NAME = "Hist";
-const std::string CPPTranslator::HISTOGRAM_ADD_METHOD_NAME = "add";
-const std::string CPPTranslator::HISTOGRAM_PRINT_METHOD_NAME = "print";
-const std::string CPPTranslator::LOG_EQUAL_FUN_NAME = "logEqual";
-const std::string CPPTranslator::ISFINITE_FUN_NAME = "isfinite";
-const std::string CPPTranslator::NEG_INFINITE_NAME = "-INFINITE";
-const std::string CPPTranslator::ANSWER_VAR_NAME_PREFIX = "_answer_";
-const std::string CPPTranslator::ANSWER_PRINT_METHOD_NAME = "print";
-const std::string CPPTranslator::MAIN_DEBUG_METHOD_NAME = "debug";
-const std::string CPPTranslator::MAIN_SAMPLING_FUN_NAME = "sample";
-const std::string CPPTranslator::SAMPLER_VAR_NAME = "sampler";
-const std::string CPPTranslator::MAIN_NAMESPACE_NAME = "swift";
-const std::string CPPTranslator::MAIN_INIT_FUN_NAME = "init";
-const std::string CPPTranslator::MAIN_FUN_NAME = "main";
-const std::string CPPTranslator::LOCAL_NUM_SAMPLE_ARG_NAME = "n";
+const code::Type Translator::ARRAY_BASE_TYPE("vector");
+const code::Type Translator::MAP_BASE_TYPE("map");
+const code::Type Translator::SET_BASE_TYPE("set");
+const std::string Translator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
+const std::string Translator::QUERY_EVALUATE_FUN_NAME = "_evaluate_query";
+const std::string Translator::DISTINCT_FIELDNAME = "_name";
+const std::string Translator::DISTRIBUTION_INIT_FUN_NAME = "init";
+const std::string Translator::DISTRIBUTION_GEN_FUN_NAME = "gen";
+const std::string Translator::DISTRIBUTION_LIKELI_FUN_NAME = "likeli";
+const std::string Translator::DISTRIBUTION_LOGLIKELI_FUN_NAME = "loglikeli";
+const std::string Translator::CURRENT_SAMPLE_NUM_VARNAME = "_cur_loop";
+const std::string Translator::WEIGHT_VAR_REF_NAME = "__local_weight";
+const std::string Translator::GLOBAL_WEIGHT_VARNAME = "_weight";
+const std::string Translator::VALUE_VAR_REF_NAME = "__value";
+const std::string Translator::VALUE_ARG_NAME = "__value_arg";
+const std::string Translator::MARK_VAR_REF_NAME = "__mark";
+const std::string Translator::HISTOGRAM_CLASS_NAME = "Hist";
+const std::string Translator::HISTOGRAM_ADD_METHOD_NAME = "add";
+const std::string Translator::HISTOGRAM_PRINT_METHOD_NAME = "print";
+const std::string Translator::LOG_EQUAL_FUN_NAME = "logEqual";
+const std::string Translator::ISFINITE_FUN_NAME = "isfinite";
+const std::string Translator::NEG_INFINITE_NAME = "-INFINITE";
+const std::string Translator::ANSWER_VAR_NAME_PREFIX = "_answer_";
+const std::string Translator::ANSWER_PRINT_METHOD_NAME = "print";
+const std::string Translator::MAIN_DEBUG_METHOD_NAME = "debug";
+const std::string Translator::MAIN_SAMPLING_FUN_NAME = "sample";
+const std::string Translator::SAMPLER_VAR_NAME = "sampler";
+const std::string Translator::MAIN_NAMESPACE_NAME = "swift";
+const std::string Translator::MAIN_INIT_FUN_NAME = "init";
+const std::string Translator::MAIN_FUN_NAME = "main";
+const std::string Translator::LOCAL_NUM_SAMPLE_ARG_NAME = "n";
 // randomness
-const std::string CPPTranslator::RANDOM_DEVICE_VAR_NAME = "__random_device";
-const code::Type CPPTranslator::RANDOM_ENGINE_TYPE("default_random_engine");
-const std::string CPPTranslator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
-const std::string CPPTranslator::UNIFORM_INT_DISTRIBUTION_NAME = "UniformInt";
-const std::string CPPTranslator::FILL_N_FUN_NAME = "fill_n";
-const std::string CPPTranslator::UNIFORM_CHOICE_DISTRIBUTION_NAME =
+const std::string Translator::RANDOM_DEVICE_VAR_NAME = "__random_device";
+const code::Type Translator::RANDOM_ENGINE_TYPE("default_random_engine");
+const std::string Translator::RANDOM_ENGINE_VAR_NAME = "__random_engine";
+const std::string Translator::UNIFORM_INT_DISTRIBUTION_NAME = "UniformInt";
+const std::string Translator::FILL_N_FUN_NAME = "fill_n";
+const std::string Translator::UNIFORM_CHOICE_DISTRIBUTION_NAME =
     "UniformChoice";
-const int CPPTranslator::INIT_SAMPLE_NUM = 0;
-const int CPPTranslator::NULLSYMBOL_VALUE = -1;
-const int CPPTranslator::TOTAL_NUM_SAMPLES = 1000000;
+const int Translator::INIT_SAMPLE_NUM = 0;
+const int Translator::NULLSYMBOL_VALUE = -1;
+const int Translator::TOTAL_NUM_SAMPLES = 1000000;
 
 // internal predefined functions
-const std::string CPPTranslator::GEN_FULL_SET_NAME = "_gen_full";
-const std::string CPPTranslator::FILTER_FUNC_NAME = "_filter";
-const std::string CPPTranslator::FILTER_RANGE_FUNC_NAME = "_filter";
-const std::string CPPTranslator::FILTER_COUNT_NAME = "_count";
-const std::string CPPTranslator::FILTER_RANGE_COUNT_NAME = "std::count";
-const std::string CPPTranslator::FORALL_NAME = "_forall";
-const std::string CPPTranslator::FORALL_RANGE_NAME = "std::all_of";
-const std::string CPPTranslator::EXISTS_NAME = "_exists";
-const std::string CPPTranslator::EXISTS_RANGE_NAME = "std::any_of";
+const std::string Translator::GEN_FULL_SET_NAME = "_gen_full";
+const std::string Translator::FILTER_FUNC_NAME = "_filter";
+const std::string Translator::FILTER_RANGE_FUNC_NAME = "_filter";
+const std::string Translator::FILTER_COUNT_NAME = "_count";
+const std::string Translator::FILTER_RANGE_COUNT_NAME = "std::count";
+const std::string Translator::FORALL_NAME = "_forall";
+const std::string Translator::FORALL_RANGE_NAME = "std::all_of";
+const std::string Translator::EXISTS_NAME = "_exists";
+const std::string Translator::EXISTS_RANGE_NAME = "std::any_of";
 
 /**
  * give the name of the type,
@@ -151,7 +151,7 @@ std::string getInstanceArrayName(std::string name) {
   return "__instance_" + name;
 }
 
-CPPTranslator::CPPTranslator() {
+Translator::Translator() {
   useTag = false;
   prog = new code::Code();
   coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
@@ -164,12 +164,12 @@ CPPTranslator::CPPTranslator() {
   mainFun = NULL;
 }
 
-CPPTranslator::~CPPTranslator() {
+Translator::~Translator() {
   if (!useTag)
     delete prog;
 }
 
-void CPPTranslator::translate(swift::ir::BlogModel* model) {
+void Translator::translate(swift::ir::BlogModel* model) {
   if (coreCls == NULL) {
     coreCls = code::ClassDecl::createClassDecl(coreNs, model->getName());
     createInit();
@@ -195,12 +195,12 @@ void CPPTranslator::translate(swift::ir::BlogModel* model) {
   createMain();
 }
 
-code::Code* CPPTranslator::getResult() {
+code::Code* Translator::getResult() {
   useTag = true;
   return prog;
 }
 
-code::FunctionDecl* CPPTranslator::transSampleAlg() {
+code::FunctionDecl* Translator::transSampleAlg() {
   // for the moment, only supporting likelihood weighting algorithm
   // declare the sample method within coreCls
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
@@ -276,7 +276,7 @@ code::FunctionDecl* CPPTranslator::transSampleAlg() {
   //TODO adding other algorithms
 }
 
-void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
+void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   const std::string& name = td->getName();
   // create a class for this declared type
   // and declare a vector to hold all instance in this type
@@ -433,7 +433,7 @@ void CPPTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   fun->addStmt(new code::ReturnStmt(new code::Identifier(numvar)));
 }
 
-void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
+void Translator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
   if (fd->isRand()) {
     // translate random function
     // create gettfunname function
@@ -451,7 +451,7 @@ void CPPTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
   }
 }
 
-code::FunctionDecl* CPPTranslator::transGetterFun(
+code::FunctionDecl* Translator::transGetterFun(
     std::shared_ptr<ir::FuncDefn> fd) {
   const std::string & name = fd->getName();
   std::string getterfunname = getGetterFunName(name);
@@ -513,7 +513,7 @@ code::FunctionDecl* CPPTranslator::transGetterFun(
   return getterfun;
 }
 
-code::FunctionDecl* CPPTranslator::transLikeliFun(
+code::FunctionDecl* Translator::transLikeliFun(
     std::shared_ptr<ir::FuncDefn> fd) {
   const std::string & name = fd->getName();
   std::string likelifunname = getLikeliFunName(name);
@@ -549,7 +549,7 @@ code::FunctionDecl* CPPTranslator::transLikeliFun(
   return likelifun;
 }
 
-code::FunctionDecl* CPPTranslator::transSetterFun(
+code::FunctionDecl* Translator::transSetterFun(
     std::shared_ptr<ir::FuncDefn> fd) {
   const std::string & name = fd->getName();
   std::string likelifunname = getLikeliFunName(name);
@@ -589,7 +589,7 @@ code::FunctionDecl* CPPTranslator::transSetterFun(
   return setterfun;
 }
 
-code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
+code::Stmt* Translator::transClause(std::shared_ptr<ir::Clause> clause,
                                        std::string retvar,
                                        std::string valuevar) {
   std::shared_ptr<ir::Branch> br = std::dynamic_pointer_cast<ir::Branch>(
@@ -613,13 +613,13 @@ code::Stmt* CPPTranslator::transClause(std::shared_ptr<ir::Clause> clause,
   return NULL;
 }
 
-code::ParamVarDecl* CPPTranslator::transParamVarDecl(
+code::ParamVarDecl* Translator::transParamVarDecl(
     code::DeclContext* context, const std::shared_ptr<ir::VarDecl> var) {
   return new code::ParamVarDecl(context, var->getVarName(),
                                 mapIRTypeToCodeType(var->getTyp()));
 }
 
-std::vector<code::ParamVarDecl*> CPPTranslator::transParamVarDecls(
+std::vector<code::ParamVarDecl*> Translator::transParamVarDecls(
     code::DeclContext* context,
     const std::vector<std::shared_ptr<ir::VarDecl> > & vars) {
   std::vector<code::ParamVarDecl*> vds;
@@ -629,7 +629,7 @@ std::vector<code::ParamVarDecl*> CPPTranslator::transParamVarDecls(
   return vds;
 }
 
-code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
+code::Stmt* Translator::transBranch(std::shared_ptr<ir::Branch> br,
                                        std::string retvar,
                                        std::string valuevar) {
   code::SwitchStmt* sst = new code::SwitchStmt(transExpr(br->getVar()));
@@ -643,7 +643,7 @@ code::Stmt* CPPTranslator::transBranch(std::shared_ptr<ir::Branch> br,
   return sst;
 }
 
-code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
+code::Stmt* Translator::transIfThen(std::shared_ptr<ir::IfThen> ith,
                                        std::string retvar,
                                        std::string valuevar) {
   code::Expr* cond = transExpr(ith->getCond());
@@ -654,7 +654,7 @@ code::Stmt* CPPTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
   return new code::IfStmt(cond, ifcl, elcl);
 }
 
-code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
+code::Expr* Translator::transExpr(std::shared_ptr<ir::Expr> expr,
                                      std::string valuevar) {
   std::vector<code::Expr*> args;
   for (size_t k = 0; k < expr->argSize(); k++) {
@@ -754,7 +754,7 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   return res;
 }
 
-code::Expr* CPPTranslator::transOriginRefer(
+code::Expr* Translator::transOriginRefer(
     std::shared_ptr<ir::OriginRefer> originref, std::string valuevar) {
   code::Expr* res = transExpr(originref->getOriginArg());
   res = ACCESS_ORIGIN_FIELD(originref->getRefer()->getSrc()->getName(), originref->getRefer()->getName(), res);
@@ -775,7 +775,7 @@ code::Expr* CPPTranslator::transOriginRefer(
   return res;
 }
 
-code::Expr* CPPTranslator::transCardExpr(std::shared_ptr<ir::CardExpr> cardexp,
+code::Expr* Translator::transCardExpr(std::shared_ptr<ir::CardExpr> cardexp,
                                          std::string valuevar) {
   std::shared_ptr<ir::CondSet> setexp = std::dynamic_pointer_cast<ir::CondSet>(
       cardexp->getBody());
@@ -821,7 +821,7 @@ code::Expr* CPPTranslator::transCardExpr(std::shared_ptr<ir::CardExpr> cardexp,
   return res;
 }
 
-code::Expr* CPPTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
+code::Expr* Translator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   auto lstset = std::dynamic_pointer_cast<ir::ListSet>(e);
   if (lstset != nullptr) {
     // list set: vector<int> initialization
@@ -867,7 +867,7 @@ code::Expr* CPPTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
  *    Output:
  *        _forall(__get_num_A(), [&](int a)->bool{return cond(a);})
  */
-code::Expr* CPPTranslator::transQuantForm(std::shared_ptr<ir::QuantForm> qt, code::Expr* cond) {
+code::Expr* Translator::transQuantForm(std::shared_ptr<ir::QuantForm> qt, code::Expr* cond) {
   std::string func = qt->isForall() ? FORALL_NAME : EXISTS_NAME;
   auto var = qt->getVar();
   std::string tyname = var->getTyp()->toString();
@@ -881,7 +881,7 @@ code::Expr* CPPTranslator::transQuantForm(std::shared_ptr<ir::QuantForm> qt, cod
   return new code::CallExpr(new code::Identifier(func), std::vector<code::Expr*>{num, lambda});
 }
 
-code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
+code::Expr* Translator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   std::vector<code::Expr*> args;
   std::vector<code::Expr*> inside;
   code::Type fromType = mapIRTypeToCodeType(mex->getFromTyp());
@@ -900,7 +900,7 @@ code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   return new code::CallClassConstructor(maptype, maparg);
 }
 
-code::Expr* CPPTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
+code::Expr* Translator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
                                         std::vector<code::Expr*> args) {
   code::OpKind kind;
   // only need two arguments
@@ -968,13 +968,13 @@ code::Expr* CPPTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
                                   kind);
 }
 
-code::Expr* CPPTranslator::transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
+code::Expr* Translator::transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
   std::vector<code::Expr*> args) {
   std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
   return new code::CallClassConstructor(mapIRTypeToCodeType(opr->getTyp()),sub);
 }
 
-code::Expr* CPPTranslator::transDistribution(
+code::Expr* Translator::transDistribution(
     std::shared_ptr<ir::Distribution> dist, std::vector<code::Expr*> args,
     std::string valuevar) {
   std::shared_ptr<ir::UniformChoiceDistr> ucdist = std::dynamic_pointer_cast<
@@ -1141,7 +1141,7 @@ code::Expr* CPPTranslator::transDistribution(
   }
 }
 
-void CPPTranslator::createInit() {
+void Translator::createInit() {
   // adding setup for
   // 1. member declarations for core class, need valuearray, mark array, ...
   // 2. initialization function to initialize the values (function called in sample(n)
@@ -1173,7 +1173,7 @@ void CPPTranslator::createInit() {
 }
 
 // add the in the class a field variable for a funcappvar with params
-void CPPTranslator::addFieldForFunVar(
+void Translator::addFieldForFunVar(
     std::string varname,
     const std::vector<std::shared_ptr<ir::VarDecl> >& params,
     code::Type valueType) {
@@ -1205,7 +1205,7 @@ void CPPTranslator::addFieldForFunVar(
   code::FieldDecl::createFieldDecl(coreCls, varname, valueType);
 }
 
-void CPPTranslator::addFunValueRefStmt(
+void Translator::addFunValueRefStmt(
     code::FunctionDecl* fun, std::string valuevarname,
     std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
     code::Type varType) {
@@ -1227,7 +1227,7 @@ void CPPTranslator::addFunValueRefStmt(
   fun->addStmt(dst);
 }
 
-void CPPTranslator::addFunValueAssignStmt(
+void Translator::addFunValueAssignStmt(
     code::FunctionDecl* fun, std::string valuevarname,
     std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname) {
   // the value of this function application variable is stored in
@@ -1244,7 +1244,7 @@ void CPPTranslator::addFunValueAssignStmt(
   fun->addStmt(dst);
 }
 
-void CPPTranslator::transEvidence(code::FunctionDecl* fun,
+void Translator::transEvidence(code::FunctionDecl* fun,
                                   std::shared_ptr<ir::Evidence> evid) {
   const std::shared_ptr<ir::Expr>& left = evid->getLeft();
   // check whether left is a function application variable
@@ -1312,7 +1312,7 @@ void CPPTranslator::transEvidence(code::FunctionDecl* fun,
   // 2. Set evidence
 }
 
-void CPPTranslator::transAllEvidence(
+void Translator::transAllEvidence(
     std::vector<std::shared_ptr<ir::Evidence> > evids) {
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
       coreCls, SET_EVIDENCE_FUN_NAME, DOUBLE_TYPE);
@@ -1326,7 +1326,7 @@ void CPPTranslator::transAllEvidence(
   fun->addStmt(new code::ReturnStmt(new code::Identifier(WEIGHT_VAR_REF_NAME)));
 }
 
-void CPPTranslator::transAllQuery(
+void Translator::transAllQuery(
     std::vector<std::shared_ptr<ir::Query> > queries) {
   // create evaluate function
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
@@ -1343,7 +1343,7 @@ void CPPTranslator::transAllQuery(
   }
 }
 
-void CPPTranslator::transQuery(code::FunctionDecl* fun,
+void Translator::transQuery(code::FunctionDecl* fun,
                                std::shared_ptr<ir::Query> qr, int n) {
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
   code::Expr* initvalue = new code::CallClassConstructor(
@@ -1369,7 +1369,7 @@ void CPPTranslator::transQuery(code::FunctionDecl* fun,
                                        HISTOGRAM_PRINT_METHOD_NAME));
 }
 
-code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef) {
+code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef) {
   // TODO add support for more ref type
   // TODO: To Make the type more general for other language, i.e. Java!
   ///    Note: in IR, the type->toString() will return the corresponding C++ translation of that type
@@ -1404,7 +1404,7 @@ code::Type CPPTranslator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef) {
   }
 }
 
-code::Expr* CPPTranslator::transConstSymbol(
+code::Expr* Translator::transConstSymbol(
     std::shared_ptr<ir::ConstSymbol> cs) {
   std::shared_ptr<ir::InstSymbolRef> isr = std::dynamic_pointer_cast<
       ir::InstSymbolRef>(cs);
@@ -1442,7 +1442,7 @@ code::Expr* CPPTranslator::transConstSymbol(
   return nullptr;
 }
 
-code::Expr* CPPTranslator::transFunctionCall(
+code::Expr* Translator::transFunctionCall(
     std::shared_ptr<ir::FunctionCall> fc, std::vector<code::Expr*> args) {
   std::string getterfunname;
   switch (fc->getKind()) {
@@ -1456,7 +1456,7 @@ code::Expr* CPPTranslator::transFunctionCall(
   }
 }
 
-void CPPTranslator::createMain() {
+void Translator::createMain() {
   mainFun = code::FunctionDecl::createFunctionDecl(prog, MAIN_FUN_NAME,
                                                    INT_TYPE);
 
@@ -1508,7 +1508,7 @@ void CPPTranslator::createMain() {
   mainFun->addStmt(st);
 }
 
-inline TYPEDEFN CPPTranslator::DECLARE_TYPE(std::string name) {
+inline TYPEDEFN Translator::DECLARE_TYPE(std::string name) {
   // create a class for this declared type
   TYPEDEFN cd = code::ClassDecl::createClassDecl(coreNs, name);
   code::FieldDecl::createFieldDecl(cd, DISTINCT_FIELDNAME, STRING_TYPE);
@@ -1522,13 +1522,13 @@ inline TYPEDEFN CPPTranslator::DECLARE_TYPE(std::string name) {
   return cd;
 }
 
-inline ORIGINDEFN CPPTranslator::DECLARE_ORIGIN_FIELD(TYPEDEFN typedf,
+inline ORIGINDEFN Translator::DECLARE_ORIGIN_FIELD(TYPEDEFN typedf,
                                                       std::string originname,
                                                       TYPE origintype) {
   return code::FieldDecl::createFieldDecl(typedf, originname, origintype);
 }
 
-inline STMT CPPTranslator::CREATE_INSTANCE(std::string tyname,
+inline STMT Translator::CREATE_INSTANCE(std::string tyname,
                                            std::string instname,
                                            std::vector<EXPR> originvalues,
                                            EXPR ncopy) {
@@ -1552,7 +1552,7 @@ inline STMT CPPTranslator::CREATE_INSTANCE(std::string tyname,
   return st;
 }
   
-inline EXPR CPPTranslator::ACCESS_ORIGIN_FIELD(std::string tyname,
+inline EXPR Translator::ACCESS_ORIGIN_FIELD(std::string tyname,
                                                std::string originname,
                                                EXPR originarg) {
   // this is the holder for the instances
