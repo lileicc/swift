@@ -726,9 +726,9 @@ code::Expr* CPPTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   // translate quantified formula
   std::shared_ptr<ir::QuantForm> form =
       std::dynamic_pointer_cast<ir::QuantForm>(expr);
-  if (form) {
-    // TODO
-    assert(false);
+  if (form != nullptr && args.size() == 1) {
+    used = true;
+    res = transQuantForm(form, args[0]);
   }
 
   // translate set expression
@@ -859,6 +859,26 @@ code::Expr* CPPTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   args.push_back(func);
 
   return new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
+}
+
+/*
+ *  Note: Translation Sample 
+ *    Input: forall A a : cond(a)
+ *    Output:
+ *        _forall(__get_num_A(), [&](int a)->bool{return cond(a);})
+ */
+code::Expr* CPPTranslator::transQuantForm(std::shared_ptr<ir::QuantForm> qt, code::Expr* cond) {
+  std::string func = qt->isForall() ? FORALL_NAME : EXISTS_NAME;
+  auto var = qt->getVar();
+  std::string tyname = var->getTyp()->toString();
+  std::string numvarname = getVarOfNumType(tyname);
+  std::string getnumvarfunname = getGetterFunName(numvarname);
+  auto num = new code::CallExpr(new code::Identifier(getnumvarfunname));
+  auto lambda = new code::LambdaExpr();
+  lambda->setType(BOOL_TYPE);
+  lambda->addParam(new code::ParamVarDecl(lambda, var->getVarName(), INT_TYPE));
+  lambda->addStmt(new code::ReturnStmt(cond));
+  return new code::CallExpr(new code::Identifier(func), std::vector<code::Expr*>{num, lambda});
 }
 
 code::Expr* CPPTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
