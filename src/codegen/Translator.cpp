@@ -203,12 +203,7 @@ code::Code* Translator::getResult() {
 code::FunctionDecl* Translator::transSampleAlg() {
   // for the moment, only supporting likelihood weighting algorithm
   // declare the sample method within coreCls
-  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
-      coreCls, MAIN_SAMPLING_FUN_NAME, VOID_TYPE);
-  std::vector<code::ParamVarDecl*> args;
-  args.push_back(
-      new code::ParamVarDecl(fun, LOCAL_NUM_SAMPLE_ARG_NAME, INT_TYPE));
-  fun->setParams(args);
+  SAMPLEFUN fun = DECLARE_SAMPLEFUN();
   fun->addStmt(
       new code::DeclStmt(
           new code::VarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)));
@@ -1560,6 +1555,17 @@ inline EXPR Translator::ACCESS_ORIGIN_FIELD(std::string tyname,
   EXPR exp = new code::ArraySubscriptExpr(new code::Identifier(inst_var_name), originarg);
   exp = new code::BinaryOperator(exp, new code::Identifier(originname), code::OpKind::BO_FIELD);
   return exp;
+}
+
+inline SAMPLEFUN Translator::DECLARE_SAMPLEFUN() {
+  // declare the sample method within coreCls
+  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
+      coreCls, MAIN_SAMPLING_FUN_NAME, VOID_TYPE);
+  std::vector<code::ParamVarDecl*> args;
+  args.push_back(
+      new code::ParamVarDecl(fun, LOCAL_NUM_SAMPLE_ARG_NAME, INT_TYPE));
+  fun->setParams(args);
+  return fun;
 }
 
 } /* namespace codegen */

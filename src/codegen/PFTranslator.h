@@ -19,10 +19,10 @@ public:
 
 protected:
   /**
-   *
+   * translate the sampling algorithm
    * @return
    */
-  virtual code::FunctionDecl* transSampleAlg();
+  virtual SAMPLEFUN transSampleAlg();
 };
 
 } /* namespace codegen */

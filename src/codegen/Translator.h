@@ -22,6 +22,7 @@ typedef code::Type TYPE;
 typedef code::FieldDecl* ORIGINDEFN;
 typedef code::Expr* EXPR;
 typedef code::Stmt* STMT;
+typedef code::FunctionDecl* SAMPLEFUN;
 
 class Translator {
 public:
@@ -54,6 +55,13 @@ protected:
   inline STMT CREATE_INSTANCE(std::string tyname, std::string instname, std::vector<EXPR> originvalues = std::vector<EXPR>(), EXPR ncopy = nullptr);
   
   inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
+
+  /**
+   * create FunctionDecl and setup argument for sampling algorithm
+   * the function should take one argument (number of samples)
+   * @return
+   */
+  inline SAMPLEFUN DECLARE_SAMPLEFUN();
 
   code::Code* prog; // holder for result target code
   bool useTag;

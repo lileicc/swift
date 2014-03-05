@@ -16,7 +16,10 @@ PFTranslator::PFTranslator() {
 PFTranslator::~PFTranslator() {
 }
 
-code::FunctionDecl* PFTranslator::transSampleAlg() {
+SAMPLEFUN PFTranslator::transSampleAlg() {
+  SAMPLEFUN samplefun = DECLARE_SAMPLEFUN();
+
+
   return nullptr;
 }
 
