@@ -69,7 +69,12 @@ protected:
 
   code::FunctionDecl* mainFun; //main function
   code::FunctionDecl* coreClsPrint; // print function for answers
-  code::FunctionDecl* transSampleAlg();
+
+  /**
+   * translate the sampling algorithm
+   * @return
+   */
+  virtual code::FunctionDecl* transSampleAlg();
 
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   /**

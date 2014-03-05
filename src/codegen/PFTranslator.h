@@ -16,6 +16,13 @@ class PFTranslator: public swift::codegen::Translator {
 public:
   PFTranslator();
   ~PFTranslator();
+
+protected:
+  /**
+   *
+   * @return
+   */
+  virtual code::FunctionDecl* transSampleAlg();
 };
 
 } /* namespace codegen */

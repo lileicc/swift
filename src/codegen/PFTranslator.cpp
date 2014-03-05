@@ -11,10 +11,13 @@ namespace swift {
 namespace codegen {
 
 PFTranslator::PFTranslator() {
-  // implicitly calling the Translator default constructor
 }
 
 PFTranslator::~PFTranslator() {
+}
+
+code::FunctionDecl* PFTranslator::transSampleAlg() {
+  return nullptr;
 }
 
 } /* namespace codegen */
