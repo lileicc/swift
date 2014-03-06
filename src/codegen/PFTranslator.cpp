@@ -16,11 +16,17 @@ PFTranslator::PFTranslator() {
 PFTranslator::~PFTranslator() {
 }
 
+void PFTranslator::translate() {
+}
+
 SAMPLEFUN PFTranslator::transSampleAlg() {
   SAMPLEFUN samplefun = DECLARE_SAMPLEFUN();
 
 
   return nullptr;
+}
+
+void PFTranslator::createInit() {
 }
 
 } /* namespace codegen */

@@ -17,12 +17,25 @@ public:
   PFTranslator();
   ~PFTranslator();
 
+  virtual void translate();
+
 protected:
   /**
    * translate the sampling algorithm
    * @return
    */
   virtual SAMPLEFUN transSampleAlg();
+
+  /**
+   * create declaration of variables/fields
+   * initialization statements
+   * @see Translator::createInit()
+   */
+  virtual void createInit();
+
+  STATE dynamicStates;
+
+
 };
 
 } /* namespace codegen */

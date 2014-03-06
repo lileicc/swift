@@ -23,12 +23,13 @@ typedef code::FieldDecl* ORIGINDEFN;
 typedef code::Expr* EXPR;
 typedef code::Stmt* STMT;
 typedef code::FunctionDecl* SAMPLEFUN;
+typedef code::ClassDecl* STATE; // state (partial possible world)
 
 class Translator {
 public:
   Translator();
   virtual ~Translator();
-  void translate(swift::ir::BlogModel* model);
+  virtual void translate(swift::ir::BlogModel* model);
   code::Code* getResult();
 
 protected:
@@ -65,7 +66,7 @@ protected:
 
   code::Code* prog; // holder for result target code
   bool useTag;
-  code::ClassDecl* coreCls; // main Class for the sampler;
+  STATE coreCls; // main Class for the sampler;
   code::NamespaceDecl* coreNs; // main namespace
   code::FunctionDecl* coreClsConstructor; // construction function for main class
   code::FunctionDecl* coreClsInit; // init function for main class
@@ -94,7 +95,7 @@ protected:
    * create declaration of variables/fields
    * initialization statements
    */
-  void createInit();
+  virtual void createInit();
 
   /**
    * create main function
