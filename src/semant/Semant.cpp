@@ -719,7 +719,8 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   // Add Local Variable
   local_var[ptr->getVar()->getVarName()].push(ptr->getVar());
 
-  ptr->addArg(transExpr(expr->getCond()));
+  ptr->setCond(transExpr(expr->getCond()));
+
   if (ptr->get(0)->getTyp() != lookupTy(ir::IRConstString::BOOL)) {
     error(expr->line, expr->col,
         "Condition in Quant Form must return boolean value!");

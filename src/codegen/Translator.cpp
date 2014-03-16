@@ -729,7 +729,7 @@ code::Expr* Translator::transExpr(std::shared_ptr<ir::Expr> expr,
   // translate set expression
   std::shared_ptr<ir::SetExpr> setexp = std::dynamic_pointer_cast<ir::SetExpr>(
       expr);
-  if (form) {
+  if (setexp) {
     res = transSetExpr(setexp);
   }
 
