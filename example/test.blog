@@ -1,0 +1,9 @@
+
+type Person;
+
+distinct Person P[10];
+
+random Integer friend(Person a, Person b) ~ Bernoulli(0.4);
+
+query friend(P[0], P[1]);
+
