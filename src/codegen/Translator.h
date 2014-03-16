@@ -24,6 +24,7 @@ typedef code::Expr* EXPR;
 typedef code::Stmt* STMT;
 typedef code::FunctionDecl* SAMPLEFUN;
 typedef code::ClassDecl* STATE; // state (partial possible world)
+typedef code::VarDecl* SITE; // storage site declaration
 
 class Translator {
 public:
@@ -63,6 +64,8 @@ protected:
    * @return
    */
   inline SAMPLEFUN DECLARE_SAMPLEFUN();
+  
+  inline SITE DECLARE_STORE_SITE();
 
   code::Code* prog; // holder for result target code
   bool useTag;

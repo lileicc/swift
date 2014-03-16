@@ -21,7 +21,8 @@ void PFTranslator::translate() {
 
 SAMPLEFUN PFTranslator::transSampleAlg() {
   SAMPLEFUN samplefun = DECLARE_SAMPLEFUN();
-
+  
+  samplefun->addStmt();
 
   return nullptr;
 }
