@@ -223,9 +223,11 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Dirichlet.h\"\n");
   fprintf(file, "#include \"random/Discrete.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
+  fprintf(file, "#include \"random/Geometric.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
+  fprintf(file, "#include \"random/UniformReal.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
   fprintf(file, "#include \"util/util.h\"\n");
   fprintf(file, "#include \"util/DynamicTable.h\"\n");
