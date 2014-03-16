@@ -13,7 +13,7 @@
 #include <cmath>
 #include <vector>
 #include <functional>
-#include "..\random\Multinomial.h"
+#include "../random/Multinomial.h"
 
 // computing log( exp(a) + exp(b) )
 // NOTE this function cannot handle infinity
