@@ -20,7 +20,7 @@ void CardExpr::setBody(std::shared_ptr<SetExpr> b) {
   referTyp = ((const SetTy*) b->getTyp())->getRefer();
 }
 
-const std::shared_ptr<SetExpr>& CardExpr::getBody() const {
+std::shared_ptr<SetExpr> CardExpr::getBody() const {
   return body;
 }
 
