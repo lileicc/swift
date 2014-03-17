@@ -1532,7 +1532,7 @@ inline STMT Translator::CREATE_INSTANCE(std::string tyname,
   code::Stmt* st;
   std::vector<code::Expr*> values;
   values.push_back(new code::StringLiteral(instname));
-  if (originvalues.empty())
+  if (!originvalues.empty())
     values.insert(values.end(), originvalues.begin(), originvalues.end());
   if (ncopy)
     st = new code::CallExpr(
