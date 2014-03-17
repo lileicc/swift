@@ -38,7 +38,7 @@ double Geometric::likeli(const int& x) {
 double Geometric::loglikeli(const int& x) {
   if (x < 0)
     return - INFINITY;
-  return x * logq + p;
+  return x * logq + logp;
 }
 } /* namespace random */
 } /* namespace swift */
