@@ -1240,12 +1240,12 @@ void Translator::addFunValueAssignStmt(
 }
 
 void Translator::transEvidence(code::FunctionDecl* fun,
-                                  std::shared_ptr<ir::Evidence> evid) {
+                                  std::shared_ptr<ir::Evidence> evid, bool transFuncApp) {
   const std::shared_ptr<ir::Expr>& left = evid->getLeft();
   // check whether left is a function application variable
   std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
       ir::FunctionCall>(left);
-  if (leftexp) {
+  if (leftexp && transFuncApp) {
     // left side of the evidence is a function application
     std::string blogfunname = leftexp->getRefer()->getName();  // the function name in blog model
     std::string setterfunname = getSetterFunName(blogfunname);  // setter function for the blog function predicate
@@ -1265,6 +1265,7 @@ void Translator::transEvidence(code::FunctionDecl* fun,
             code::OpKind::BO_SPLUS : code::OpKind::BO_SMUL);
     // add checking for infinity
     // :::=> if (isfinite(weight)) weight += ...
+    /*
     code::Expr* cond;
     if (COMPUTE_LIKELIHOOD_IN_LOG) {
       cond = new code::CallExpr(
@@ -1275,7 +1276,10 @@ void Translator::transEvidence(code::FunctionDecl* fun,
                                       new code::FloatingLiteral(0),
                                       code::OpKind::BO_GT);
     }
-    st = new code::IfStmt(cond, st);
+    */
+    // TODO: To polish the following
+    // NOTE: Now remove the if statement since we will print rejection terms firstly
+    //st = new code::IfStmt(cond, st);
     fun->addStmt(st);
     return;
   }
@@ -1283,7 +1287,12 @@ void Translator::transEvidence(code::FunctionDecl* fun,
   // check whether left is a cardinality expression
   std::shared_ptr<ir::CardExpr> cardexp =
       std::dynamic_pointer_cast<ir::CardExpr>(left);
-  if (cardexp) {
+
+  // TODO: remove transFuncApp
+  //    Now we have to firstly print all rejection sampling stmts
+  //    Then print the likelihood weighing stmts
+  //    TransFuncApp is a switch for this
+  if (cardexp && !transFuncApp) {
     // translate cardinality evidence
     // check whether the evidence doesnot hold
     code::Expr* cond = new code::BinaryOperator(transCardExpr(cardexp),
@@ -1295,16 +1304,13 @@ void Translator::transEvidence(code::FunctionDecl* fun,
     } else {
       res = new code::IntegerLiteral(0);
     }
-    code::Stmt* st = new code::BinaryOperator(
-        new code::Identifier(WEIGHT_VAR_REF_NAME), res,
-        code::OpKind::BO_ASSIGN);
+    code::Stmt* st = new code::ReturnStmt(res);
     st = new code::IfStmt(cond, st);
     fun->addStmt(st);
     return;
   }
   // TODO adding support for other evidence
   // 1. better setting evidence for Cardinality evidence
-  // 2. Set evidence
 }
 
 void Translator::transAllEvidence(
@@ -1316,7 +1322,12 @@ void Translator::transAllEvidence(
       new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0));
   fun->addStmt(new code::DeclStmt(weightvar));
   for (auto evid : evids) {
-    transEvidence(fun, evid);
+    // Firstly Translate all rejection sampling stmts
+    transEvidence(fun, evid, false);
+  }
+  for (auto evid : evids) {
+    // Firstly Translate all likelihood weighing stmts
+    transEvidence(fun, evid, true);
   }
   fun->addStmt(new code::ReturnStmt(new code::Identifier(WEIGHT_VAR_REF_NAME)));
 }

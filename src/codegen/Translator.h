@@ -196,7 +196,7 @@ protected:
    *  @param evid    ir evidence declaration
    */
   void transEvidence(code::FunctionDecl* context,
-      std::shared_ptr<ir::Evidence> evid);
+      std::shared_ptr<ir::Evidence> evid, bool transFuncApp = true);
 
   /**
    * translate all evidences
