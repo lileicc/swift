@@ -266,6 +266,7 @@ protected:
   static const code::Type INT_REF_TYPE;
 
   static const code::Type DOUBLE_TYPE;
+  static const code::Type DOUBLE_REF_TYPE;
   static const code::Type DOUBLE_VECTOR_TYPE;
 
   static const code::Type STRING_TYPE;

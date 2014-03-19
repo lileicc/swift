@@ -26,6 +26,7 @@ const code::Type Translator::INT_REF_TYPE("int", true);
 const code::Type Translator::INT_VECTOR_TYPE(VECTOR_CLASS_NAME,
                                                 { INT_TYPE });
 const code::Type Translator::DOUBLE_TYPE("double");
+const code::Type Translator::DOUBLE_REF_TYPE("double", true);
 const code::Type Translator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {
                                                        DOUBLE_TYPE });
 const code::Type Translator::STRING_TYPE("string");
@@ -238,27 +239,15 @@ code::FunctionDecl* Translator::transSampleAlg() {
       new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME), NULL,
       code::OpKind::UO_INC);
   code::CompoundStmt* body = new code::CompoundStmt();
-  // :::=> weight = set_evidence();
-  body->addStmt(
-      new code::BinaryOperator(
-          new code::Identifier(WEIGHT_VAR_REF_NAME),
-          new code::CallExpr(new code::Identifier(SET_EVIDENCE_FUN_NAME)),
-          code::OpKind::BO_ASSIGN));
-  // evaluate query
-  // :::=> 
-  std::vector<code::Expr*> weightArg;
-  weightArg.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
-  code::Expr* threshold;
-  if (COMPUTE_LIKELIHOOD_IN_LOG) {
-    threshold = new code::Identifier(NEG_INFINITE_NAME);
-  } else {
-    threshold = new code::IntegerLiteral(0);
-  }
-  // only evaluate the query when likelihood greater than threshold
-  body->addStmt(
-                new code::IfStmt(new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), threshold, code::OpKind::BO_GT),
-      new code::CallExpr(new code::Identifier(QUERY_EVALUATE_FUN_NAME),
-                         weightArg)));
+  // :::=> if (set_evidence(weight))
+  //           evaluate_query(weight);
+  code::CallExpr* set_evi = new code::CallExpr(
+    new code::Identifier(SET_EVIDENCE_FUN_NAME),
+    std::vector<code::Expr*>{new code::Identifier(WEIGHT_VAR_REF_NAME)});
+  code::CallExpr* eval_q = new code::CallExpr(
+    new code::Identifier(QUERY_EVALUATE_FUN_NAME),
+    std::vector<code::Expr*>{new code::Identifier(WEIGHT_VAR_REF_NAME)});
+  body->addStmt(new code::IfStmt(set_evi,eval_q));
   // :::==> weight[current_loop] = w;
   body->addStmt(
       new code::BinaryOperator(
@@ -1298,13 +1287,7 @@ void Translator::transEvidence(code::FunctionDecl* fun,
     code::Expr* cond = new code::BinaryOperator(transCardExpr(cardexp),
                                                 transExpr(evid->getRight()),
                                                 code::OpKind::BO_NEQ);
-    code::Expr* res;
-    if (COMPUTE_LIKELIHOOD_IN_LOG) {
-      res = new code::Identifier(NEG_INFINITE_NAME);
-    } else {
-      res = new code::IntegerLiteral(0);
-    }
-    code::Stmt* st = new code::ReturnStmt(res);
+    code::Stmt* st = new code::ReturnStmt(new code::BooleanLiteral(false));
     st = new code::IfStmt(cond, st);
     fun->addStmt(st);
     return;
@@ -1316,20 +1299,27 @@ void Translator::transEvidence(code::FunctionDecl* fun,
 void Translator::transAllEvidence(
     std::vector<std::shared_ptr<ir::Evidence> > evids) {
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
-      coreCls, SET_EVIDENCE_FUN_NAME, DOUBLE_TYPE);
-  code::VarDecl* weightvar = new code::VarDecl(
-      fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE,
-      new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0));
-  fun->addStmt(new code::DeclStmt(weightvar));
+      coreCls, SET_EVIDENCE_FUN_NAME, BOOL_TYPE);
+  fun->setParams(std::vector<code::ParamVarDecl*>{new code::ParamVarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_REF_TYPE)});
+
+  code::Expr* res;
+  if (COMPUTE_LIKELIHOOD_IN_LOG)
+    res = new code::Identifier(NEG_INFINITE_NAME);
+  else
+    res = new code::IntegerLiteral(0);
+  fun->addStmt(new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), res, code::OpKind::BO_ASSIGN));
   for (auto evid : evids) {
     // Firstly Translate all rejection sampling stmts
     transEvidence(fun, evid, false);
   }
+  fun->addStmt(new code::BinaryOperator(
+    new code::Identifier(WEIGHT_VAR_REF_NAME),
+    new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
   for (auto evid : evids) {
     // Firstly Translate all likelihood weighing stmts
     transEvidence(fun, evid, true);
   }
-  fun->addStmt(new code::ReturnStmt(new code::Identifier(WEIGHT_VAR_REF_NAME)));
+  fun->addStmt(new code::ReturnStmt(new code::BooleanLiteral(true)));
 }
 
 void Translator::transAllQuery(
