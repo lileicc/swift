@@ -221,17 +221,16 @@ statement_lst:
     }
   }
   | statement { blog->add($1); }
-  | error { yyerror("Possible missing semicolon here");}
   ;
 
 statement:
     declaration_stmt { $$ = $1; }
   | evidence_stmt { $$ = $1; }
   | query_stmt { $$ = $1; }
-  | error SEMI {
-      yyerror("Possible missing semicolon after a statement!"); 
-      $$ = NULL; 
-    }
+  | error SEMI { 
+    yyerror("Possible missing semicolon after statement");
+    $$ = NULL;
+  }
   ;
 
 
@@ -251,13 +250,15 @@ type_decl:
   { $$ = new TypDecl(curr_line, curr_col, Symbol($2->getValue())); }
   | TYPE SEMI
   { yyerror("Missing ID in type declaration"); $$ = NULL;}
+  | TYPE ID error
+  { yyerror("Possible missing semicolon after type declaration"); $$ = NULL;}
   ;
 
 type:
     name_type { $$ = $1; }
   | list_type { $$ = $1; }
   | map_type { $$ = $1; }
-  ;g
+  ;
 
 name_type:
   ID { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
@@ -287,6 +288,23 @@ opt_parenthesized_type_var_lst:
     { $$ = NULL; }
   | LPAREN RPAREN {$$ = NULL; }
   | LPAREN type_var_lst RPAREN { $$ = $2; }
+  | RPAREN type_var_lst LPAREN{
+    yyerror("Mismatched parentheses");
+    $$ = NULL;
+  }
+  | LPAREN LPARENS type_var_lst RPAREN{
+    yyerror("Mismatched parentheses");
+    $$ = NULL;
+  }
+  | LPAREN type_var_lst RPAREN RPARENS{
+    yyerror("Mismatched parentheses");
+    $$ = NULL;
+  }
+  | LPAREN LPARENS type_var_lst RPAREN RPARENS{
+    yyerror("Mismatched parentheses");
+    $$ = NULL;
+  }
+
   ;
 
 var_decl:
@@ -367,6 +385,11 @@ fixed_func_decl:
       yyerror("Malformed expression body of fixed function declaration");
       $$ = NULL;
     }
+    | FIXED type ID opt_parenthesized_type_var_lst EQ_ expression error
+    {
+      yyerror("Possible missing semicolon after fixed function declaration");
+      $$ = NULL;
+    }
     ;
 
 rand_func_decl:
@@ -388,9 +411,14 @@ rand_func_decl:
     }
     | RANDOM type ID opt_parenthesized_type_var_lst error
     {
-      yyerror("Malformed dependency body in random function declaration");
+      yyerror("Malformed dependecy body in random function declaration");
       $$ = NULL;
     }   
+    | RANDOM type ID opt_parenthesized_type_var_lst dependency_statement_body error
+    {
+      yyerror("Possible missing semicolon after random function declaration");
+      $$ = NULL;
+    }
     ;
     
 number_stmt:
@@ -418,6 +446,11 @@ number_stmt:
     | NUMSIGN name_type opt_parenthesized_origin_var_list error SEMI
     {
       yyerror("Missing or malformed body of number statement");
+      $$ = NULL;
+    }
+    | NUMSIGN name_type opt_parenthesized_origin_var_list dependency_statement_body error
+    {
+      yyerror("Possible missing semicolon after number statement");
       $$ = NULL;
     }
     ;
@@ -478,6 +511,11 @@ distinct_decl:
     DISTINCT id_or_subid_list SEMI
     {
       $$ = $2;
+    }
+    | DISTINCT id_or_subid_list error
+    {
+      yyerror("Possible missing semicolon after distinct declaration.");
+      $$ = NULL;
     }
     ;
 
@@ -810,6 +848,8 @@ origin_func_decl:
   { yyerror("Missing right parenthesis around type in origin function declaration"); $$ = NULL;}
   | ORIGIN type ID type SEMI
   { yyerror("Missing left parenthesis around type in origin function declaration"); $$ = NULL;}
+  | ORIGIN type ID LPAREN type RPAREN error
+  { yyerror("Possible missing semicolon in origin function declaration");}
   ;
 
 LPARENS:
@@ -869,6 +909,12 @@ tuple_set:
   
 evidence_stmt:
   OBS evidence SEMI {$$ = $2; }
+  | OBS evidence error
+  {
+    yyerror("Possible semicolon after evidence statement");
+    $$ = NULL;
+  }
+  ;
   
 evidence:
     symbol_evidence {$$ = $1; }
@@ -902,10 +948,14 @@ symbol_evidence:
 query_stmt:
   QUERY query SEMI {$$ = $2; }
   | QUERY error SEMI {yyerror("Query might not be an expression.");}
+  | QUERY query error {
+    yyerror("Possible semicolon after query statement");
+    $$ = NULL;
+  }
   ; 
   
 query:
-  expression { $$ = new Query(curr_line, curr_col, $1); }
+  expression { $$ = new Query(curr_line, curr_col, $1); } 
   ;
   
 %%
