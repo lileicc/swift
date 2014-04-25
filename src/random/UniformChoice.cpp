@@ -12,6 +12,7 @@ namespace swift {
 namespace random {
 
 UniformChoice::UniformChoice() {
+  time_stamp = 0;
 }
 
 UniformChoice::~UniformChoice() {
@@ -21,8 +22,10 @@ void UniformChoice::init(std::vector<int> values) {
   this->values = values;
   weight = 1.0 / values.size();
   log_weight = - std::log(values.size());
-  ind.clear();
-  ind.insert(values.begin(), values.end());
+  time_stamp ++;
+  if(ind.size() > SizeLimit) ind.clear();
+  for(auto &v:values)
+    ind[v] = time_stamp;
   dist = std::uniform_int_distribution<int>(0, values.size() - 1);
 }
 
@@ -36,12 +39,12 @@ int UniformChoice::gen() {
 }
 
 double UniformChoice::likeli(const int& x) {
-  if(ind.count(x) > 0) return weight;
+  if(ind[x] == time_stamp) return weight;
   return 0;
 }
 
 double UniformChoice::loglikeli(const int& x) {
-  if(ind.count(x) > 0) return log_weight;
+  if(ind[x] == time_stamp) return log_weight;
   return -INFINITY;
 }
 

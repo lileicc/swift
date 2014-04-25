@@ -30,7 +30,9 @@ private:
   std::uniform_int_distribution<int> dist;
   std::vector<int> values; // values that this distribution will generation
   double weight, log_weight;
-  std::unordered_set<int> ind; // value appear at which index
+  std::unordered_map<int,int> ind; // value appear at which index
+  int time_stamp; // record the total time of initializations
+  const int SizeLimit = 200000; // When ind.size() reach this number, we perform clear()
 };
 
 } /* namespace random */
