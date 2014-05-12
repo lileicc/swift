@@ -18,9 +18,9 @@ Gaussian::Gaussian() :
 Gaussian::~Gaussian() {
 }
 
-void Gaussian::init(double mean, double stddev) {
+void Gaussian::init(double mean, double var) {
   this->mean = mean;
-  this->stddev = stddev;
+  this->stddev = sqrt(var);
   coef = 1.0 / (stddev * std::sqrt(PI * 2));
   log_coef = - std::log(stddev * std::sqrt(PI * 2));
   scale = - 1.0 / (2 * stddev * stddev);
