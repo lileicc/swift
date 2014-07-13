@@ -40,6 +40,7 @@
 #include "../absyn/TypDecl.h"
 #include "../absyn/VarDecl.h"
 #include "../absyn/VarRef.h"
+#include "../absyn/CaseExpr.h"
 using namespace std;
 using namespace swift::absyn;
 
@@ -125,7 +126,7 @@ BlogProgram* parse(const char* inp) {
 // define the "terminal symbol" token types I'm going to use (in CAPS
 // by convention), and associate each with a field of the union:
 %token ELSE IF THEN
-%token TYPE RANDOM FIXED ORIGIN DISTINCT QUERY OBS PARAM LIST MAP DISTRIBUTION
+%token TYPE RANDOM FIXED ORIGIN DISTINCT QUERY OBS PARAM LIST MAP DISTRIBUTION CASE IN
 %token EXISTS_ FORALL_
 %token FOR
 %token NULLITY
@@ -153,22 +154,20 @@ BlogProgram* parse(const char* inp) {
 %type <origdec> origin_func_decl;
 %type <funcdec> fixed_func_decl, rand_func_decl;
 %type <distdec> distinct_decl;
-%type <stmt> evidence, value_evidence, symbol_evidence, query;
+%type <stmt> evidence, value_evidence;
 %type <exp> expression, literal, operation_expr, unary_operation_expr,
-  quantified_formula, distribution_expr,
-  function_call, list_construct_expression, symbol_expr,
-  elseif_list;
+  quantified_formula, function_call, list_construct_expression,
+  if_expr, case_expr;
 %type <cardexp> number_expr;
 %type <mapexp> map_construct_expression;
 %type <exp> dependency_statement_body;
 %type <setexp> set_expr;
 %type <setexp> explicit_set;
-%type <setexp> implicit_set;
 %type <setexp> tuple_set;
 %type <explst> semi_colon_separated_expression_list,
   opt_expression_list, expression_list;
 %type <exptuplst> expression_pair_list;
-%type <typ> type, array_type, list_type, map_type, name_type;
+%type <typ> type, array_type, list_type, map_type, name_type, array_type_or_sub;
 //%type <ast> opt_parenthesized_type_lst, type_lst // Not Used
 %type <varlist> type_var_lst;
 %type <varlist> opt_parenthesized_type_var_lst;
@@ -177,19 +176,18 @@ BlogProgram* parse(const char* inp) {
 %type <symbintpair> id_or_subid;
 %type <distdec> id_or_subid_list;
 %type <vardec> var_decl;
-%type <sval> class_name;
-%type <i> dims;
+%type <sval> refer_name;
 
-%left ELSE
 %nonassoc EQ_ DISTRIB
-%right RIGHTARROW
+%left SEMI
+%left ELSE
 %left DOUBLERIGHTARROW
 %left AND_ OR_
-%left NOT_
 %nonassoc LT_ GT_ LEQ_ GEQ_ EQEQ_ NEQ_
 %left PLUS_ MINUS_
 %left MULT_ DIV_ MOD_ POWER_
-%left LBRACKET
+%left NOT_, AT_
+%left LBRACKET, RBRACKET, LPAREN, RPAREN;
 
 %%
 program:
@@ -202,13 +200,13 @@ opt_statement_lst:
   ;
 
 statement_lst:
-  statement_lst statement 
+  statement_lst statement SEMI
   {
     if($2 != NULL){
       blog->add($2);
     }
   }
-  | statement { blog->add($1); }
+  | statement SEMI { blog->add($1); }
   ;
 
 statement:
@@ -230,35 +228,37 @@ declaration_stmt:
   ;
   
 type_decl:
-  TYPE ID SEMI
+  TYPE ID
   { $$ = new TypDecl(curr_line, curr_col, Symbol($2->getValue())); }
   ;
 
 type:
-    name_type { $$ = $1; }
+    refer_name { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
   | list_type { $$ = $1; }
   | map_type { $$ = $1; }
+  | array_type {$$ = $1;}
   ;
 
 name_type:
   ID { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
   ;
 
-//TODO: Not sure what type this should be
 list_type:
-  LIST LT_ ID GT_{ $$ = new Ty(curr_line, curr_col, Symbol($3->getValue())); }
+  LIST LT_ ID GT_
+  { $$ = new Ty(curr_line, curr_col, Symbol($3->getValue())); }
   ;
+
+array_type_or_sub:
+  refer_name LBRACKET {}
 
 //TODO: Not sure what type this should be
 array_type:
-  ID dims { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
+  array_type_or_sub RBRACKET
+  {}
+  | array_type LBRACKET RBRACKET
+  {}
   ;
 
-dims:
-    LBRACKET RBRACKET { $$ = 1; }
-  | LBRACKET RBRACKET dims { $$ = $3 + 1; }
-  ;
-  
 //TODO: Not sure what type this should be
 map_type:
   MAP LT_ type COMMA type GT_ { $$ = $3; }
@@ -281,19 +281,16 @@ type_var_lst:
       $$ = $1; 
       $$->push_back(*$3);
       delete($3);
-      //$$ = $1; 
-      //$$->add((Expr*)(new VarDecl(curr_line, curr_col, *$3, Symbol($4->getValue())))); 
     }
   | var_decl { 
       $$ = new vector<VarDecl>();
       $$->push_back(*$1);
       delete($1);
-      //$$ = new VarDecl(curr_line, curr_col, *$1, Symbol($2->getValue())); 
     }
   ;
 
 fixed_func_decl:
-    FIXED type ID opt_parenthesized_type_var_lst EQ_ expression SEMI
+    FIXED type ID opt_parenthesized_type_var_lst EQ_ expression
     { 
       $$ = new FuncDecl(curr_line, curr_col, false, *($2), Symbol($3->getValue()), $6);
       if($4 != NULL){
@@ -302,12 +299,11 @@ fixed_func_decl:
         }
         delete($4);
       }
-      //if ($4 != NULL) $$->addArg(*$4);
     }
     ;
 
 rand_func_decl:
-    RANDOM type ID opt_parenthesized_type_var_lst dependency_statement_body SEMI
+    RANDOM type ID opt_parenthesized_type_var_lst dependency_statement_body
     { 
       $$ = new FuncDecl(curr_line, curr_col, true, *($2), Symbol($3->getValue()), $5);
       if($4 != NULL){
@@ -316,14 +312,13 @@ rand_func_decl:
         }
         delete($4);
       }
-      //if ($4 != NULL) $$->addArg(*$4);
     }
     ;
     
 number_stmt:
-    NUMSIGN name_type opt_parenthesized_origin_var_list dependency_statement_body SEMI
+    NUMSIGN refer_name opt_parenthesized_origin_var_list dependency_statement_body
     {
-      $$ = new NumStDecl(curr_line, curr_col, $2->getTyp(), $4);
+      $$ = new NumStDecl(curr_line, curr_col, Symbol($2->getValue()), $4);
       if($3 != NULL){
         for(size_t i = 0; i < $3->size(); i++){
           $$->add(get<0>((*$3)[i]), get<1>((*$3)[i]));
@@ -352,15 +347,14 @@ origin_var_list:
     $$->push_back(make_tuple(Symbol($1->getValue()), Symbol($3->getValue())));
   }
   ;
-
-//TODO: DistributionDec/ClassName
-distribution_decl:
-    DISTRIBUTION ID EQ_ class_name LPAREN opt_expression_list RPAREN SEMI
-    { }
-    ;
+  
+origin_func_decl:
+  ORIGIN type ID LPAREN type RPAREN
+  { $$ = new OriginDecl(curr_line, curr_col, $2->getTyp(), Symbol($3->getValue()), $5->getTyp());  }
+  ;
     
 distinct_decl:
-    DISTINCT id_or_subid_list SEMI
+    DISTINCT id_or_subid_list
     {
       $$ = $2;
     }
@@ -402,38 +396,35 @@ id_or_subid:
     }
   ;      
   
-class_name:
+//TODO: DistributionDec/ClassName
+distribution_decl:
+    DISTRIBUTION ID EQ_ refer_name LPAREN opt_expression_list RPAREN
+    { }
+    ;
+
+refer_name:
     ID { 
       $$ = new BLOGSymbol<string>(curr_line, curr_col, $1->getValue());
     }
-  | ID DOT class_name {
+  | ID DOT refer_name {
       $$ = new BLOGSymbol<string>(curr_line, curr_col, $1->getValue() + "." + $3->getValue());
     }
   ;
   
 dependency_statement_body:
-    EQ_ expression { $$ = $2; }
-  | distribution_expr { $$ = $1; }
-  | IF expression THEN dependency_statement_body elseif_list
-  { $$ = new IfExpr(curr_line, curr_col, $2, $4, $5); }
-  | LBRACE dependency_statement_body RBRACE
+  DISTRIB expression
   { $$ = $2; }
   ;
   
-elseif_list:
-    ELSE dependency_statement_body {$$ = $2; }
-  | {$$ = NULL; }
-  ;
   
 //TODO: ParameterDec
 parameter_decl:
-    PARAM type ID SEMI { }
-  | PARAM type ID COLON expression SEMI { }
+    PARAM type ID { }
+  | PARAM type ID COLON expression { }
   ;
   
 expression:
     operation_expr {$$ = $1;}
-  | distribution_expr {$$ = $1;}
   | literal {$$ = $1;}
   | function_call {$$ = $1;}
   | list_construct_expression {$$ = $1;}
@@ -441,7 +432,8 @@ expression:
   | quantified_formula { $$ = $1; }
   | set_expr { $$ = $1; }
   | number_expr { $$ = $1; }
-  | symbol_expr { $$ = $1; }
+  | if_expr { $$ = $1; }
+  | case_expr { $$ = $1; }
   ;
   
 literal:
@@ -515,7 +507,7 @@ quantified_formula:
   ;
   
 function_call:
-  class_name LPAREN opt_expression_list RPAREN 
+  refer_name LPAREN opt_expression_list RPAREN 
   { 
     $$ = new FuncApp(curr_line, curr_col, Symbol($1->getValue())); 
     if ($3 != NULL){
@@ -525,30 +517,28 @@ function_call:
       delete($3);
     }
   }
+  | refer_name
+  {
+    $$ = new FuncApp(curr_line, curr_col, Symbol($1->getValue()));
+  }
   ;
-  
-//TODO: SymbolExpr
-symbol_expr:
-  ID { $$ = new VarRef(curr_line, curr_col, Symbol($1->getValue())); }
-  ;
-  
-distribution_expr:
-    DISTRIB class_name LPAREN opt_expression_list RPAREN
-    {
-      $$ = new DistrExpr(curr_line, curr_col, Symbol($2->getValue()));
-      if($4 != NULL){
-        for(size_t i = 0; i < $4->size(); i++){
-          $$->add((*$4)[i]);
-        }
-        delete($4);
-      }
-      //$$->add($4);
-      //for(size_t i = 0; i < $4->size(); i++){
-      //  $$->add($4->get(i));
-      //} 
+
+if_expr:
+  IF expression THEN expression ELSE expression
+  { $$ = new IfExpr(curr_line, curr_col, $2, $4, $6); }
+| IF expression THEN expression
+  { $$ = new IfExpr(curr_line, curr_col, $2, $4); }
+;
+
+case_expr:
+  CASE expression IN map_construct_expression
+  {
+    if ($2 != NULL && $4 != NULL){
+      $$ = new CaseExpr(curr_line, curr_col, $2, $4);
     }
+  }
   ;
-  
+
 opt_expression_list:
     expression_list {$$ = $1;}
   | {$$ = NULL; }
@@ -590,42 +580,34 @@ map_construct_expression:
   }
   ;
   
-//TODO: ExprTupleList  
 expression_pair_list:
     expression_pair_list COMMA expression RIGHTARROW expression
     { 
       $$ = $1;
       $$->push_back(make_tuple($3, $5));
-      //$$ = $1;
-      //$$->addMap($3, $5);
     }
   | expression RIGHTARROW expression 
     { 
       $$ = new vector<tuple<Expr*, Expr*>>();
       $$->push_back(make_tuple($1, $3));
-      //$$ = new MapExpr(curr_line, curr_col);
-      //$$->addMap($1, $3);
     }
   ;
 
 number_expr:
-    NUMSIGN set_expr {$$ = new CardinalityExpr(curr_line, curr_col, (Expr*)$2); }
-  | NUMSIGN type { 
+    NUMSIGN set_expr 
+    { $$ = new CardinalityExpr(curr_line, curr_col, (Expr*)$2); }
+  | NUMSIGN type 
+  { 
       VarDecl var(curr_line, curr_col, *$2);
       $$ = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, var));
   }
-  
-origin_func_decl:
-  ORIGIN type ID LPAREN type RPAREN SEMI
-  { $$ = new OriginDecl(curr_line, curr_col, $2->getTyp(), Symbol($3->getValue()), $5->getTyp());  }
-  ;
+
 
 set_expr:
     explicit_set {$$ = $1; }
-  | implicit_set {$$ = $1; }
+  | tuple_set {$$ = $1; }
   ;
- 
-//TODO: ExplicitSetExpr
+
 explicit_set:
     LBRACE opt_expression_list RBRACE
     {
@@ -634,22 +616,6 @@ explicit_set:
         $$->add((*$2)[i]);
       }
       delete($2);
-      //$$ = new SetExpr(curr_line, curr_col); 
-      //$$->add($2);
-    }
-    ;
-    
-//TODO: ImplicitSetExpr  
-implicit_set:
-    LBRACE type ID COLON expression RBRACE
-    { 
-      $$ = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue())), $5);
-      //$$ = new CondSet(curr_line, curr_col, NULL);
-      //$$->add($5);
-    }
-    | LBRACE type ID RBRACE
-    { 
-      $$ = new CondSet(curr_line, curr_col, VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue())));
     }
     ;
   
@@ -662,17 +628,13 @@ tuple_set:
   { }
   ;
   
-  
-  
 evidence_stmt:
-  OBS evidence SEMI {$$ = $2; }
+  OBS evidence {$$ = $2; }
   
 evidence:
-    symbol_evidence {$$ = $1; }
-  | value_evidence {$$ = $1; }
+  value_evidence {$$ = $1; }
   ;
-  
-//TODO: No ValueEvidence?  
+    
 value_evidence:
   expression EQ_ expression
   {
@@ -680,19 +642,10 @@ value_evidence:
   }
   ;
 
-//TODO: No SymbolEvidence?  
-symbol_evidence:
-  implicit_set EQ_ explicit_set
-  { $$ = new Evidence(curr_line, curr_col, $1, $3); }
-  ;
-
 query_stmt:
-  QUERY query SEMI {$$ = $2; }
+  QUERY expression 
+  { $$ = new Query(curr_line, curr_col, $2); }
   ; 
-  
-query:
-  expression { $$ = new Query(curr_line, curr_col, $1); }
-  ;
   
 %%
 

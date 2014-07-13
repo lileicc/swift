@@ -94,6 +94,8 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
     BEGIN(CHAR_LIT); 
    }
 
+[Ii][Nn] { return IN; }
+[Cc][Aa][Ss][Ee] { return CASE; }
 [Tt][Yy][Pp][Ee] { return TYPE; }
 [Rr][Aa][Nn][Dd][Oo][Mm] { return RANDOM; }
 [Nn][Oo][Nn][Rr][Aa][Nn][Dd][Oo][Mm] { return FIXED; }
