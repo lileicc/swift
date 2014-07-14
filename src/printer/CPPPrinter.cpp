@@ -24,6 +24,10 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "++"; // increment
   case OpKind::UO_DEC:
     return "--"; // decrement
+  case OpKind::UO_ADDR:
+    return "&"; // address of
+  case OpKind::UO_DEREF:
+    return "*"; // deference of
   case OpKind::UO_NEW:
     return "new "; // new or malloc
   case OpKind::UO_DEL:
@@ -113,6 +117,8 @@ std::pair<int, int> CPPPrinter::OpPrec(code::Expr* expr) {
       return std::make_pair<int, int>(1,0);
   case OpKind::UO_CMPT:
   case OpKind::UO_NEG:
+  case OpKind::UO_ADDR:
+  case OpKind::UO_DEREF:
     return std::make_pair<int, int>(2,1);
   case OpKind::UO_NEW:
   case OpKind::UO_DEL:
@@ -725,6 +731,8 @@ void CPPPrinter::print(code::Type* term) {
   }
   if (term->isRef())
     fprintf(file, "&");
+  if (term->isPtr)
+    fprintf(file, "*");
 }
 
 void CPPPrinter::print(code::VarDecl* term) {

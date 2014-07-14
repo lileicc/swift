@@ -21,6 +21,8 @@ enum class OpKind {
   UO_NEW, // new or malloc
   UO_DEL, // delete or dispose
   UO_ARRAY_DEL, // delete[] array
+  UO_ADDR, // address of (&) ; C++ only
+  UO_DEREF, // dereference (*); C++ only
   // Binary Operator
   BO_ASSIGN, // Assignment
   BO_FIELD, // reference to a field
