@@ -41,6 +41,7 @@
 #include "../absyn/VarDecl.h"
 #include "../absyn/VarRef.h"
 #include "../absyn/CaseExpr.h"
+#include "../absyn/TupleSetExpr.h"
 using namespace std;
 using namespace swift::absyn;
 
@@ -117,6 +118,8 @@ BlogProgram* parse(const char* inp) {
   class TypDecl* typdec;
   class VarDecl* vardec;
   class VarRef* varref;
+  void *compexp[3];
+  void *pair[2];
   vector<VarDecl>* varlist;
   vector<tuple<Expr*, Expr*>>* exptuplst;
   vector<Expr*>* explst;
@@ -139,7 +142,7 @@ BlogProgram* parse(const char* inp) {
 %token PARFACTOR FACTOR
 %token ERROR ELSEIF
 %token AT_
-%token PLUS_ MULT_ DIV_ MOD_ POWER_ MINUS_
+%token PLUS_ MULT_ DIV_ MOD_ POWER_ MINUS_ UMINUS
 %token LST LT_ GT_ LEQ_ GEQ_
 %token EQEQ_ NEQ_
 %token EQ_
@@ -158,6 +161,7 @@ BlogProgram* parse(const char* inp) {
 %type <exp> expression, literal, operation_expr, unary_operation_expr,
   quantified_formula, function_call, list_construct_expression,
   if_expr, case_expr;
+%type <compexp> comprehension_expr;
 %type <cardexp> number_expr;
 %type <mapexp> map_construct_expression;
 %type <exp> dependency_statement_body;
@@ -174,7 +178,7 @@ BlogProgram* parse(const char* inp) {
 %type <varlst> opt_parenthesized_origin_var_list,
   origin_var_list;
 %type <symbintpair> id_or_subid;
-%type <distdec> id_or_subid_list;
+%type <symbintvect> id_or_subid_list;
 %type <vardec> var_decl;
 %type <sval> refer_name;
 
@@ -186,8 +190,9 @@ BlogProgram* parse(const char* inp) {
 %nonassoc LT_ GT_ LEQ_ GEQ_ EQEQ_ NEQ_
 %left PLUS_ MINUS_
 %left MULT_ DIV_ MOD_ POWER_
+%left UMINUS
 %left NOT_, AT_
-%left LBRACKET, RBRACKET, LPAREN, RPAREN;
+%left LBRACKET;
 
 %%
 program:
@@ -354,45 +359,43 @@ origin_func_decl:
   ;
     
 distinct_decl:
-    DISTINCT id_or_subid_list
+    DISTINCT refer_name id_or_subid_list
     {
-      $$ = $2;
+      $$ = new DistinctDecl(curr_line, curr_col, Symbol($2->getValue()));
+      if ($3 != NULL){
+        for(size_t i = 0; i < $3->size(); i++){
+          $$->add(get<0>((*$3)[i]), get<1>((*$3)[i]));
+        }
+        delete($3);
+      }
     }
     ;
 
 id_or_subid_list:
-    name_type ID
-      {
-        $$ = new DistinctDecl(curr_line, curr_col, $1->getTyp());
-        $$->add(Symbol($2->getValue()), 1);
-      }
-  | name_type ID LBRACKET INT_LITERAL RBRACKET
-      {
-        $$ = new DistinctDecl(curr_line, curr_col, $1->getTyp());
-        $$->add(Symbol($2->getValue()), $4->getValue());
-      }
-  | id_or_subid_list COMMA ID
-      { 
-        $$ = $1;
-        $$->add(Symbol($3->getValue()), 1);
-      }
-  | id_or_subid_list COMMA ID LBRACKET INT_LITERAL RBRACKET
-      { 
-        $$ = $1;
-        $$->add(Symbol($3->getValue()), $5->getValue());
-      }
+    id_or_subid
+    {
+      $$ = new vector<tuple<string, int>>();
+      $$->push_back(*$1);
+      delete($1);
+    }
+  | id_or_subid_list COMMA id_or_subid
+    {
+      $$ = $1;
+      $$->push_back(*$3);
+      delete($3);
+    }
   ;
 
     
 id_or_subid:
     ID { 
-        auto idint = make_tuple($1->getValue(), 1);
-        $$ = &(idint); 
+        //tuple<string, int> idint = make_tuple($1->getValue(), 1);
+        $$ = new tuple<string, int>($1->getValue(), 1);
        }
   | ID LBRACKET INT_LITERAL RBRACKET
     { 
-      auto idint = make_tuple($1->getValue(), $3->getValue());
-      $$ = &(idint); 
+      //tuple<string, int> idint2 = make_tuple($1->getValue(), $3->getValue());
+      $$ = new tuple<string, int>($1->getValue(), $3->getValue());
     }
   ;      
   
@@ -491,7 +494,7 @@ operation_expr:
   
 unary_operation_expr:
     MINUS_ expression
-    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, new IntLiteral(curr_line, curr_col, 0), $2); }
+    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, new IntLiteral(curr_line, curr_col, 0), $2); } %prec UMINUS
   | NOT_ expression
     {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::NOT, NULL, $2); } 
   | AT_ expression
@@ -601,6 +604,7 @@ number_expr:
       VarDecl var(curr_line, curr_col, *$2);
       $$ = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, var));
   }
+  ;
 
 
 set_expr:
@@ -618,18 +622,32 @@ explicit_set:
       delete($2);
     }
     ;
+
+comprehension_expr:
+    expression_list FOR type_var_lst COLON expression
+    {
+      $$[0] = $1; $$[1] = $3; $$[2] = $5;
+    }
+  | expression_list FOR type_var_lst
+    {
+      $$[0] = $1; $$[1] = $3; $$[2] = NULL;
+    }
+  ;
   
   
 //TODO: TupleSetExpr
 tuple_set:
-    LBRACE expression_list FOR type_var_lst COLON expression RBRACE
-  { }
-  | LBRACE expression_list FOR type_var_lst RBRACE
-  { }
+    LBRACE comprehension_expr RBRACE
+  { 
+    $$ = new TupleSetExpr(curr_line, curr_col, *((vector<Expr*>*)$2[0]), *((vector<VarDecl>*)$2[1]), (Expr*)$2[2]); 
+    delete((vector<Expr*>*)$2[0]);
+    delete((vector<VarDecl>*)$2[1]);
+  }
   ;
   
 evidence_stmt:
   OBS evidence {$$ = $2; }
+  ;
   
 evidence:
   value_evidence {$$ = $1; }
