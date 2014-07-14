@@ -47,6 +47,7 @@ public:
   virtual void print(code::SwitchStmt* term)=0;
   virtual void print(code::Type* term)=0;
   virtual void print(code::VarDecl* term)=0;
+  virtual void print(code::VarArrayDecl* term) = 0;
   virtual void print(code::Identifier* term)=0;
 
 protected:

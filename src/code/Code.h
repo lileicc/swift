@@ -42,6 +42,7 @@
 #include "Stmt.h"
 #include "StringLiteral.h"
 #include "VarDecl.h"
+#include "VarArrayDecl.h"
 #include "Identifier.h"
 
 namespace swift {

@@ -57,6 +57,7 @@ public:
   void print(code::SwitchStmt* term);
   void print(code::Type* term);
   void print(code::VarDecl* term);
+  void print(code::VarArrayDecl* term);
   void print(code::Identifier* term);
 
 protected:

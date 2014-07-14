@@ -797,6 +797,34 @@ void CPPPrinter::print(code::VarDecl* term) {
   printLine();
 }
 
+void CPPPrinter::print(code::VarArrayDecl* term) {
+  if (!isheader)
+    return;
+
+  printIndent();
+  bool backup = newline;
+  newline = false;
+
+  term->getType().print(this);
+  fprintf(file, " %s", term->getId().c_str());
+
+  for (auto p : term->getArr()) {
+    fprintf(file, "[");
+    p->print(this);
+    fprintf(file, "]");
+  }
+
+  if (term->getValue() != NULL) {
+    fprintf(file, " = ");
+    term->getValue()->print(this);
+  }
+
+  newline = backup;
+  if (backup)
+    fprintf(file, ";"); // Note: VarDecl can be in a ForStmt
+  printLine();
+}
+
 void CPPPrinter::print(code::Identifier* term) {
   printIndent();
   fprintf(file, "%s", term->getId().c_str());
