@@ -11,22 +11,25 @@
 namespace swift {
 namespace codegen {
 
+const std::string PFTranslator::StaticClsName = "BLOG_Static_State";
+const std::string PFTranslator::TemporalClsName = "BLOG_Temporal_State";
+const std::string PFTranslator::MAIN_CLEAR_FUN_NAME = "_clear_marks";
+const std::string TimeStepLimitVarName = "_TimeLim_";
+const std::string ParticleNumVarName = "_ParticleN_";
+const std::string DependNumVarName = "_DependN_";
+
 PFTranslator::PFTranslator() {
-  useTag = false;
-  prog = new code::Code();
-  coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
-  prog->addDecl(coreNs);
-  coreCls = NULL;
-  coreClsInit = NULL;
-  coreClsConstructor = NULL;
-  coreClsPrint = NULL;
-  coreClsDebug = NULL;
-  mainFun = NULL;
+  Translator();
+  coreStaticCls = NULL;
+  coreTemporalCls = NULL;
+  coreTemporalClsClear = NULL;
 }
 
 void PFTranslator::translate(swift::ir::BlogModel* model) {
   if (coreCls == NULL) {
     coreCls = code::ClassDecl::createClassDecl(coreNs, model->getName());
+    coreStaticCls = code::ClassDecl::createClassDecl(coreCls, StaticClsName);
+    coreTemporalCls = code::ClassDecl::createClassDecl(coreCls, TemporalClsName);
     createInit();
   }
 
@@ -989,6 +992,16 @@ void PFTranslator::createInit() {
   coreClsInit = code::FunctionDecl::createFunctionDecl(coreCls,
                                                        MAIN_INIT_FUN_NAME,
                                                        VOID_TYPE);
+  // add clear and init method for static and temporal variables
+  coreStaticClsInit = code::FunctionDecl::createFunctionDecl(coreStaticCls,
+    MAIN_INIT_FUN_NAME,
+    VOID_TYPE);
+  coreTemporalClsInit = code::FunctionDecl::createFunctionDecl(coreTemporalCls,
+    MAIN_INIT_FUN_NAME,
+    VOID_TYPE);
+  coreTemporalClsClear = code::FunctionDecl::createFunctionDecl(coreTemporalCls,
+    MAIN_CLEAR_FUN_NAME,
+    VOID_TYPE);
 
   // add method print() in main class to print the answers
   coreClsPrint = code::FunctionDecl::createFunctionDecl(

@@ -384,6 +384,47 @@ void CPPPrinter::print(code::CallExpr* term) {
   printLine();
 }
 
+void CPPPrinter::print(code::CallTemplateExpr* term) {
+  printIndent();
+  bool backup = newline;
+  newline = false;
+
+  // Note: () operatorƒf
+  auto f_prec = OpPrec(term->getFunc());
+  if (f_prec.first > 1)
+    fprintf(file, "(");
+  term->getFunc()->print(this);
+  if (f_prec.first > 1)
+    fprintf(file, ")");
+
+  bool not_first = false;
+  fprintf(file, "<");
+  for (auto p : term->getTempArgs()) {
+    if (not_first)
+      fprintf(file, ",");
+    else 
+      not_first = true;
+    p->print(this);
+  }
+  fprintf(file, ">");
+
+  fprintf(file, "(");
+  not_first = false;
+  for (auto p : term->getArgs()) {
+    if (not_first)
+      fprintf(file, ",");
+    else
+      not_first = true;
+    p->print(this);
+  }
+  fprintf(file, ")");
+
+  newline = backup;
+  if (backup)
+    fprintf(file, ";");
+  printLine();
+}
+
 void CPPPrinter::print(code::CaseStmt* term) {
   decIndent();
   printIndent();

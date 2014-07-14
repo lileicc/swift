@@ -13,6 +13,7 @@
 #include "BooleanLiteral.h"
 #include "BreakStmt.h"
 #include "CallExpr.h"
+#include "CallTemplateExpr.h"
 #include "CaseStmt.h"
 #include "ClassConstructor.h"
 #include "CallClassConstructor.h"

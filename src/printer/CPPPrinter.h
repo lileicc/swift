@@ -30,6 +30,7 @@ public:
   void print(code::BooleanLiteral* term);
   void print(code::BreakStmt* term);
   void print(code::CallExpr* term);
+  void print(code::CallTemplateExpr* term);
   void print(code::CaseStmt* term);
   void print(code::ClassDecl* term);
   void print(code::ClassConstructor* term);

@@ -19,6 +19,20 @@ public:
   code::Code* getResult();
   
 protected:
+  // classes for memorization for static and temporal data
+  STATE coreStaticCls; // memorization data structure for static variables
+  static const std::string StaticClsName;
+  code::FunctionDecl* coreStaticClsInit; // clear function for static varaibles
+  STATE coreTemporalCls; // memorization data structure for temporal variables
+  code::FunctionDecl* coreTemporalClsInit; // init function for temporal varaibles
+  code::FunctionDecl* coreTemporalClsClear; // clear function for temporal varaibles
+  static const std::string MAIN_CLEAR_FUN_NAME;
+  static const std::string TemporalClsName;
+  
+  //Variable Names of Parameters of Particle Filtering
+  static const std::string TimeStepLimitVarName; // variable for Maximum TimeStep
+  static const std::string ParticleNumVarName; // variable for Number of Particles
+  static const std::string DependNumVarName; // variable for dependency
 
   /**
    * declare a named type
