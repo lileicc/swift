@@ -212,12 +212,22 @@ statement_lst:
     }
   }
   | statement SEMI { blog->add($1); }
+  | statement_lst statement
+  {
+    yyerror("missing ; after statement");
+  }
+  | statement {
+    yyerror("missing ; after statement");
+  }
   ;
 
 statement:
     declaration_stmt { $$ = $1; }
   | evidence_stmt { $$ = $1; }
   | query_stmt { $$ = $1; }
+  | error{
+    yyerror("incorrect statement");
+  }
   ;
 
 
@@ -235,6 +245,10 @@ declaration_stmt:
 type_decl:
   TYPE ID
   { $$ = new TypDecl(curr_line, curr_col, Symbol($2->getValue())); }
+  | TYPE error
+  {
+    yyerror("invalid type declaration");
+  }
   ;
 
 type:
@@ -273,6 +287,9 @@ opt_parenthesized_type_var_lst:
     { $$ = NULL; }
   | LPAREN RPAREN {$$ = NULL; }
   | LPAREN type_var_lst RPAREN { $$ = $2; }
+  | type_var_lst {
+    yyerror("missing parentheses");
+  }
   ;
 
 var_decl:
@@ -280,6 +297,10 @@ var_decl:
     $$ = new VarDecl(curr_line, curr_col, *$1, Symbol($2->getValue())); 
   }
   ;
+
+extra_commas:
+  COMMA COMMA
+| extra_commas COMMA
   
 type_var_lst:
     type_var_lst COMMA var_decl{ 
@@ -292,6 +313,16 @@ type_var_lst:
       $$->push_back(*$1);
       delete($1);
     }
+  | type_var_lst extra_commas var_decl {
+    yyerror("extra commas in type variable list");
+  }
+  | type_var_lst var_decl {
+    yyerror("missing commas");
+  }
+  | type_var_lst COMMA error
+  {
+    yyerror("incorrect variable declaration");
+  }
   ;
 
 fixed_func_decl:
@@ -305,6 +336,10 @@ fixed_func_decl:
         delete($4);
       }
     }
+  | FIXED error
+  {
+    yyerror("error in fixed function declaration");
+  }
     ;
 
 rand_func_decl:
@@ -317,6 +352,14 @@ rand_func_decl:
         }
         delete($4);
       }
+    }
+    | RANDOM error dependency_statement_body
+    {
+      yyerror("incorrect function header, return type, or function name");
+    }
+    | RANDOM error
+    {
+      yyerror("error in random function declaration");
     }
     ;
     
@@ -332,6 +375,22 @@ number_stmt:
       }
       //$$->add(Symbol($4->getValue()), Symbol($6->getValue()));
     }
+  | NUMSIGN opt_parenthesized_origin_var_list dependency_statement_body
+  {
+    yyerror("missing type name in number statement");
+  }
+  | NUMSIGN refer_name opt_parenthesized_origin_var_list DISTRIB error
+  {
+    yyerror("missing body in number statement");
+  }
+  | NUMSIGN refer_name error
+  {
+    yyerror("missing body in number statement");
+  }
+  | NUMSIGN error
+  {
+    yyerror("error in number statement");
+  }
     ;
     
 opt_parenthesized_origin_var_list:
@@ -524,6 +583,10 @@ function_call:
   {
     $$ = new FuncApp(curr_line, curr_col, Symbol($1->getValue()));
   }
+  | refer_name LPAREN error
+  {
+    yyerror("error in body of function call");
+  }
   ;
 
 if_expr:
@@ -539,6 +602,9 @@ case_expr:
     if ($2 != NULL && $4 != NULL){
       $$ = new CaseExpr(curr_line, curr_col, $2, $4);
     }
+    else{
+      yyerror("error in case expression");
+    }
   }
   ;
 
@@ -552,6 +618,10 @@ expression_list:
     { $$ = $1;
       $$->push_back($3);
     }
+  | expression_list extra_commas expression
+  {
+    yyerror("extra commas in expression list");
+  }
   | expression 
     { 
       $$ = new vector<Expr*>();
@@ -604,6 +674,10 @@ number_expr:
       VarDecl var(curr_line, curr_col, *$2);
       $$ = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, var));
   }
+  | NUMSIGN error
+  {
+    yyerror("expecting number expression here.");
+  }
   ;
 
 
@@ -639,14 +713,23 @@ comprehension_expr:
 tuple_set:
     LBRACE comprehension_expr RBRACE
   { 
-    $$ = new TupleSetExpr(curr_line, curr_col, *((vector<Expr*>*)$2[0]), *((vector<VarDecl>*)$2[1]), (Expr*)$2[2]); 
-    delete((vector<Expr*>*)$2[0]);
-    delete((vector<VarDecl>*)$2[1]);
+    if ($2 != NULL){
+      $$ = new TupleSetExpr(curr_line, curr_col, *((vector<Expr*>*)$2[0]), *((vector<VarDecl>*)$2[1]), (Expr*)$2[2]); 
+      delete((vector<Expr*>*)$2[0]);
+      delete((vector<VarDecl>*)$2[1]);
+    }
+    else{
+      yyerror("invalid tupleset");
+    }
   }
   ;
   
 evidence_stmt:
   OBS evidence {$$ = $2; }
+  | OBS error
+  {
+    yyerror("incorrect obs statement");
+  }
   ;
   
 evidence:
@@ -658,11 +741,23 @@ value_evidence:
   {
     $$ = new Evidence(curr_line, curr_col, $1, $3); 
   }
+  | error EQ_ expression
+  {
+    yyerror("incorrect lefthand expression in evidence");
+  }
+  | expression EQ_ error
+  {
+    yyerror("incorrect righthand expression in evidence");
+  }
   ;
 
 query_stmt:
   QUERY expression 
   { $$ = new Query(curr_line, curr_col, $2); }
+| QUERY error
+  {
+    yyerror("invalid query");
+  }
   ; 
   
 %%
@@ -670,7 +765,7 @@ query_stmt:
 
 
 void yyerror(const char *s) {
-  cout << "Parse error!  Message: " << s << endl;
+  cout << "Parse error at line number: " << curr_line << " and column number: " << curr_col << "!  Message: " << s << endl;
   // might as well halt now:
-  exit(-1);
+  //exit(-1);
 }
