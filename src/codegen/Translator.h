@@ -259,7 +259,7 @@ protected:
       code::DeclContext* context,
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
-  static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false); // map ir type to code type
+  static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false, bool isPtr = false); // map ir type to code type
 
   static const code::Type INT_TYPE;
   static const code::Type INT_VECTOR_TYPE;
@@ -488,68 +488,69 @@ protected:
   static swift::Configuration* config;
 
   /**
-  * give the name of the type,
-  * return the variable name corresponding to the number of objects for this type
-  */
-  std::string getVarOfNumType(std::string name) {
-    return "__num_" + name;
-  }
+* give the name of the type,
+* return the variable name corresponding to the number of objects for this type
+*/
+std::string getVarOfNumType(std::string name) {
+  return "__num_" + name;
+}
 
-  /**
-  * given the name of a variable (can be number var, or random function)
-  * return the function name to get the number of objects for this type
-  */
-  std::string getGetterFunName(std::string name) {
-    return "__get_" + name;
-  }
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to get the number of objects for this type
+*/
+std::string getGetterFunName(std::string name) {
+  return "__get_" + name;
+}
 
-  /**
-  * given the name of a variable (can be number var, or random function)
-  * return the function name to get the likelihood of objects for this type
-  */
-  std::string getLikeliFunName(std::string name) {
-    return "__likeli_" + name;
-  }
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to get the likelihood of objects for this type
+*/
+std::string getLikeliFunName(std::string name) {
+  return "__likeli_" + name;
+}
 
-  /**
-  * given the name of a variable (can be number var, or random function)
-  * return the function name to set the value
-  */
-  std::string getSetterFunName(std::string name) {
-    return "__set_" + name;
-  }
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to set the value
+*/
+std::string getSetterFunName(std::string name) {
+  return "__set_" + name;
+}
 
-  /**
-  * given the name of a variable (can be number var, or random function)
-  * return the function name to set the value
-  */
-  std::string getEnsureFunName(std::string name) {
-    return "__ensure_" + name;
-  }
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to set the value
+*/
+std::string getEnsureFunName(std::string name) {
+  return "__ensure_" + name;
+}
 
-  /**
-  * given the name of a variable (can be number var, or random function)
-  * return the variable name to get the number of samples for the current variable
-  */
-  std::string getMarkVarName(std::string name) {
-    return "__mark_" + name;
-  }
+/**
+* given the name of a variable (can be number var, or random function)
+* return the variable name to get the number of samples for the current variable
+*/
+std::string getMarkVarName(std::string name) {
+  return "__mark_" + name;
+}
 
-  /**
-  * given the name of a variable (can be number var, or random function)
-  * return the variable name to get the value of that var/fun
-  */
-  std::string getValueVarName(std::string name) {
-    return "__value_" + name;
-  }
+/**
+* given the name of a variable (can be number var, or random function)
+* return the variable name to get the value of that var/fun
+*/
+std::string getValueVarName(std::string name) {
+  return "__value_" + name;
+}
 
-  /**
-  * given the type name,
-  * return the variable name to store all the instances in that type
-  */
-  std::string getInstanceArrayName(std::string name) {
-    return "__instance_" + name;
-  }
+/**
+* given the type name,
+* return the variable name to store all the instances in that type
+*/
+std::string getInstanceArrayName(std::string name) {
+  return "__instance_" + name;
+}
+
 };
 
 } /* namespace codegen */

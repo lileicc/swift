@@ -1301,7 +1301,7 @@ void Translator::transQuery(code::FunctionDecl* fun,
                                        HISTOGRAM_PRINT_METHOD_NAME));
 }
 
-code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef) {
+code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool isPtr) {
   // TODO add support for more ref type
   // TODO: To Make the type more general for other language, i.e. Java!
   ///    Note: in IR, the type->toString() will return the corresponding C++ translation of that type
@@ -1316,23 +1316,24 @@ code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef) {
       auto arr = dynamic_cast<const ir::ArrayTy*>(ty);
       std::vector<code::Type> args;
       args.push_back(mapIRTypeToCodeType(arr->getBase(), false));
-      return code::Type(ARRAY_BASE_TYPE.getName(), args, isRef);
+      return code::Type(ARRAY_BASE_TYPE.getName(), args, isRef, isPtr);
     }
     case ir::IRConstant::SET: {
       auto st = dynamic_cast<const ir::SetTy*>(ty);
       std::vector<code::Type> args;
       args.push_back(mapIRTypeToCodeType(st->getRefer(), false));
-      return code::Type(SET_BASE_TYPE.getName(), args, isRef);
+      return code::Type(SET_BASE_TYPE.getName(), args, isRef, isPtr);
     }
     case ir::IRConstant::MAP: {
       auto mp = dynamic_cast<const ir::MapTy*>(ty);
       std::vector<code::Type> args;
       args.push_back(mapIRTypeToCodeType(mp->getFrom(), false));
       args.push_back(mapIRTypeToCodeType(mp->getTo(), false));
-      return code::Type(MAP_BASE_TYPE.getName(), args, isRef);
+      return code::Type(MAP_BASE_TYPE.getName(), args, isRef, isPtr);
     }
     default:
       return isRef ? INT_REF_TYPE : INT_TYPE;  // all declared type return int type
+      // assume isPtr = false
   }
 }
 
