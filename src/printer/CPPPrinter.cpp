@@ -731,7 +731,7 @@ void CPPPrinter::print(code::Type* term) {
   }
   if (term->isRef())
     fprintf(file, "&");
-  if (term->isPtr)
+  if (term->isPtr())
     fprintf(file, "*");
 }
 
