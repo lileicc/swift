@@ -8,6 +8,7 @@
 #pragma once
 #include <cstdlib>
 #include <string>
+#include <vector>
 #include "Decl.h"
 #include "Type.h"
 #include "DeclContext.h"
@@ -20,11 +21,14 @@ class VarDecl: public swift::code::Decl {
 public:
   VarDecl(DeclContext * context, std::string id, Type ty,
       Expr* value = nullptr);
+  VarDecl(DeclContext * context, std::string id, std::vector<Expr*> arr, 
+    Type ty, Expr* value = nullptr);
   virtual ~VarDecl();
 
   const std::string& getId() const;
   Type& getType();
   Expr* getValue();
+  const std::vector<Expr*>& getArrArgs() const;
 
   // For Printer
   virtual void print(printer::Printer* prt);
@@ -33,6 +37,7 @@ protected:
   std::string id;
   Type ty;
   Expr* value; // initial value
+  std::vector<Expr*> arr; // for Array Variable Decl
 };
 
 } /* namespace code */

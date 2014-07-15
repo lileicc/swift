@@ -45,7 +45,6 @@ class StringLiteral;
 class SwitchStmt;
 class Type;
 class VarDecl;
-class VarArrayDecl;
 class Identifier;
 }
 }

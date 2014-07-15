@@ -19,6 +19,10 @@ public:
   code::Code* getResult();
   
 protected:
+  // Time Series Features
+  int ModelDependency;
+  int ModelTimeLimit;
+
   // classes for memorization for static and temporal data
   STATE coreStaticCls; // memorization data structure for static variables
   static const std::string StaticClsName;
@@ -29,10 +33,28 @@ protected:
   static const std::string MAIN_CLEAR_FUN_NAME;
   static const std::string TemporalClsName;
   
-  //Variable Names of Parameters of Particle Filtering
-  static const std::string TimeStepLimitVarName; // variable for Maximum TimeStep
-  static const std::string ParticleNumVarName; // variable for Number of Particles
-  static const std::string DependNumVarName; // variable for dependency
+  //Constant Variable Names of Parameters of Particle Filtering
+  static const std::string TIMESTEP_LIMIT_VAR_NAME; // variable for Maximum TimeStep
+  static const std::string PARTICLE_NUM_VAR_NAME; // variable for Number of Particles
+  static const std::string DEPEND_NUM_VAE_NAME; // variable for dependency
+  
+  // Internal Varaibles for Memorization Particles
+  static const std::string STAT_MEMO_VAR_NAME;
+  static const std::string TEMP_MEMO_VAR_NAME;
+  static const std::string PTR_STAT_MEMO_VAR_NAME;
+  static const std::string PTR_TEMP_MEMO_VAR_NAME;
+  static const std::string PTR_BACKUP_VAR_NAME;
+
+  // Types for Memorization Data Structure
+  static const TYPE STAT_MEMO_TYPE;
+  static const TYPE REF_STAT_MEMO_TYPE;
+  static const TYPE PTR_STAT_MEMO_TYPE;
+  static const TYPE TEMP_MEMO_TYPE;
+  static const TYPE REF_TEMP_MEMO_TYPE;
+  static const TYPE PTR_TEMP_MEMO_TYPE;
+
+  // Variable Name denoting data structure containing all the required info
+  static const std::string CUR_STAT_VAR_NAME;
 
   /**
    * declare a named type
@@ -243,6 +265,10 @@ protected:
       code::DeclContext* context,
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
+  // Util Functions
+  code::Stmt* referStaticStateStmt(code::DeclContext* context);
+  code::Stmt* referTempStateStmt(code::DeclContext* context, std::string tempVar);
+  code::Expr* referVarFromState(code::Expr*);
 };
 
 } /* namespace codegen */

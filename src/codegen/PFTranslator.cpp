@@ -14,9 +14,42 @@ namespace codegen {
 const std::string PFTranslator::StaticClsName = "BLOG_Static_State";
 const std::string PFTranslator::TemporalClsName = "BLOG_Temporal_State";
 const std::string PFTranslator::MAIN_CLEAR_FUN_NAME = "_clear_marks";
-const std::string TimeStepLimitVarName = "_TimeLim_";
-const std::string ParticleNumVarName = "_ParticleN_";
-const std::string DependNumVarName = "_DependN_";
+const std::string PFTranslator::TIMESTEP_LIMIT_VAR_NAME = "_TimeLim_";
+const std::string PFTranslator::PARTICLE_NUM_VAR_NAME = "_ParticleN_";
+const std::string PFTranslator::DEPEND_NUM_VAE_NAME = "_DependN_";
+const std::string PFTranslator::STAT_MEMO_VAR_NAME = "_stat_memo";
+const std::string PFTranslator::TEMP_MEMO_VAR_NAME = "_temp_memo";
+const std::string PFTranslator::PTR_STAT_MEMO_VAR_NAME = "_ptr_stat_memo";
+const std::string PFTranslator::PTR_TEMP_MEMO_VAR_NAME = "_ptr_temp_memo";
+const std::string PFTranslator::PTR_BACKUP_VAR_NAME = "_ptr_backup";
+const TYPE PFTranslator::STAT_MEMO_TYPE = code::Type(StaticClsName,false,false);
+const TYPE PFTranslator::REF_STAT_MEMO_TYPE = code::Type(StaticClsName, true, false);
+const TYPE PFTranslator::PTR_STAT_MEMO_TYPE = code::Type(StaticClsName, false, true);
+const TYPE PFTranslator::TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, false);
+const TYPE PFTranslator::REF_TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, false);
+const TYPE PFTranslator::PTR_TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, true);
+const std::string PFTranslator::CUR_STAT_VAR_NAME = "_cur_state";
+
+code::Stmt* PFTranslator::referStaticStateStmt(code::DeclContext* context) {
+  return new code::DeclStmt(new code::VarDecl(context, CUR_STAT_VAR_NAME, REF_STAT_MEMO_TYPE,
+    new code::BinaryOperator(NULL,
+      new code::ArraySubscriptExpr(new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
+                                   new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),code::OpKind::UO_DEREF)));
+}
+
+code::Stmt* PFTranslator::referTempStateStmt(code::DeclContext* context, std::string tempArg) {
+  code::Expr* TS_loc = new code::BinaryOperator(
+    new code::Identifier(tempArg), new code::Identifier(DEPEND_NUM_VAE_NAME), code::OpKind::BO_MOD);
+  return new code::DeclStmt(new code::VarDecl(context, CUR_STAT_VAR_NAME, REF_TEMP_MEMO_TYPE,
+    new code::BinaryOperator(NULL,
+      new code::ArraySubscriptExpr(
+        new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME),TS_loc),
+        new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)), code::OpKind::UO_DEREF)));
+}
+
+code::Expr* PFTranslator::referVarFromState(code::Expr* var) {
+  return new code::BinaryOperator(new code::Identifier(CUR_STAT_VAR_NAME), var, code::OpKind::BO_FIELD);
+}
 
 PFTranslator::PFTranslator() {
   Translator();
@@ -26,10 +59,40 @@ PFTranslator::PFTranslator() {
 }
 
 void PFTranslator::translate(swift::ir::BlogModel* model) {
+  ModelDependency = model->getMarkovOrder();
+  ModelTimeLimit = model->getTempLimit();
+
   if (coreCls == NULL) {
+    // create Data Structure for Memorization of Particles
     coreCls = code::ClassDecl::createClassDecl(coreNs, model->getName());
     coreStaticCls = code::ClassDecl::createClassDecl(coreCls, StaticClsName);
     coreTemporalCls = code::ClassDecl::createClassDecl(coreCls, TemporalClsName);
+    
+    /*
+    translated code for basic data structures looks like:
+      Static_State stat_memo[SampleN];
+      Temp_State temp_memo[Dependency][SampleN];
+      Static_State* ptr_stat_memo[SampleN];
+      Temp_State* ptr_temp_memo[Dependency][SampleN];
+      Temp_State* backup_ptr[Dependency][SampleN];
+    */
+    // Basic Memorization Data Structure for variables
+    code::FieldDecl::createFieldDecl(coreCls, STAT_MEMO_VAR_NAME, 
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), STAT_MEMO_TYPE);
+    code::FieldDecl::createFieldDecl(coreCls, TEMP_MEMO_VAR_NAME,
+      std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME), 
+                          new code::Identifier(PARTICLE_NUM_VAR_NAME) }), TEMP_MEMO_TYPE);
+    // Pointer to Memorization Data Structures
+    code::FieldDecl::createFieldDecl(coreCls, PTR_STAT_MEMO_VAR_NAME,
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_STAT_MEMO_TYPE);
+    code::FieldDecl::createFieldDecl(coreCls, PTR_TEMP_MEMO_VAR_NAME,
+      std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME), 
+                          new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_TEMP_MEMO_TYPE);
+    code::FieldDecl::createFieldDecl(coreCls, PTR_BACKUP_VAR_NAME,
+      std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME),
+                          new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_TEMP_MEMO_TYPE);
+
+    // create Init Method
     createInit();
   }
 
@@ -135,38 +198,48 @@ void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
     for (size_t i = 0; i < len; ++i) {
       // :::=>   inst_var_name[i] = "name of the instance";
       code::Stmt* assignst = CREATE_INSTANCE(name, td->getInstName(i));
-      coreClsInit->addStmt(assignst);
+      coreStaticClsInit->addStmt(assignst); // in StaticMemo
     }
   }
   std::string numvar = getVarOfNumType(name);
+  /*
+   * TODO: 
+   * We currently DO NOT support temporal number statment for typeDomain
+   */
   // create a field in the main class:::    int numvar;
-  code::FieldDecl::createFieldDecl(coreCls, numvar, INT_TYPE);
+  code::FieldDecl::createFieldDecl(coreStaticCls, numvar, INT_TYPE); // in StaticMemo
   // create a field in the main class:::    int mark_numvar;
   std::string marknumvar = getMarkVarName(numvar);
-  code::FieldDecl::createFieldDecl(coreCls, marknumvar, INT_TYPE);
+  code::FieldDecl::createFieldDecl(coreStaticCls, marknumvar, INT_TYPE); // in StaticMemo
   // add in the init function:::            numvar = len;
-  coreClsInit->addStmt(
+  coreStaticClsInit->addStmt(
       new code::BinaryOperator(new code::Identifier(numvar),
                                new code::IntegerLiteral((int) len),
-                               code::OpKind::BO_ASSIGN));
+                               code::OpKind::BO_ASSIGN)); // in StaticMemo
   // add in the init function:::            mark_numvar = -1;
-  coreClsInit->addStmt(
+  coreStaticClsInit->addStmt(
       new code::BinaryOperator(new code::Identifier(marknumvar),
-                               new code::IntegerLiteral(INIT_SAMPLE_NUM - 1),
-                               code::OpKind::BO_ASSIGN));
+                               new code::IntegerLiteral(-1),
+                               code::OpKind::BO_ASSIGN)); // in StaticMemo
   // create ensure_num function
   code::FunctionDecl* ensureFun = code::FunctionDecl::createFunctionDecl(
-      coreCls, getEnsureFunName(numvar), VOID_TYPE, true);
+      coreStaticCls, getEnsureFunName(numvar), VOID_TYPE, true); // in StaticMemo
   declared_funs[ensureFun->getName()] = ensureFun;
   // add in the init function to call this ensure_fun
   // :::=> ensure_numvar();
-  coreClsInit->addStmt(
-      new code::CallExpr(new code::Identifier(ensureFun->getName())));
+  coreStaticClsInit->addStmt(
+      new code::CallExpr(new code::Identifier(ensureFun->getName()))); // StaticMemo
   // create the function for getting number of objects in this instance, i.e.
   // numvar
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
-      coreCls, getGetterFunName(numvar), INT_TYPE, true);
+      coreCls, getGetterFunName(numvar), INT_TYPE, true); // Global
   declared_funs[fun->getName()] = fun;
+
+  // add references
+  code::Stmt* st = referStaticStateStmt(fun);
+  fun->addStmt(st);
+  addFunValueRefStmt(fun, marknumvar, std::vector<code::ParamVarDecl*>(), marknumvar, INT_REF_TYPE);
+  addFunValueRefStmt(fun, numvar, std::vector<code::ParamVarDecl*>(), numvar, INT_REF_TYPE);
 
   // handle number statement
   size_t numstlen = td->getNumberStmtSize();
@@ -191,7 +264,7 @@ void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
             std::vector<code::Expr*>(
                 { new code::IntegerLiteral((int) len) })));
     for (size_t k = 0; k < numstlen; k++) {
-      // suppoert multiple number statements
+      // support multiple number statements
       std::string localnumvarname = numvar + std::to_string(k);
       st = new code::DeclStmt(
           new code::VarDecl(fun, localnumvarname, INT_TYPE));
@@ -1063,7 +1136,7 @@ void PFTranslator::addFunValueRefStmt(
   // the value of this function application variable is stored in
   // valuevarname[index1][index2]...
   // where the index are corresponding to the arguments
-  code::Expr* exp = new code::Identifier(valuevarname);
+  code::Expr* exp = referVarFromState(new code::Identifier(valuevarname));
   for (auto prm : valueindex) {
     exp = new code::ArraySubscriptExpr(exp, new code::Identifier(prm->getId()));
   }
@@ -1361,7 +1434,7 @@ inline STMT PFTranslator::CREATE_INSTANCE(std::string tyname,
                                            std::vector<EXPR> originvalues,
                                            EXPR ncopy) {
   // this is the holder for the instances
-  std::string inst_var_name = getInstanceArrayName(tyname);
+  std::string inst_var_name = CUR_STAT_VAR_NAME + "." + getInstanceArrayName(tyname); // need to refer to current state
   code::Stmt* st;
   std::vector<code::Expr*> values;
   values.push_back(new code::StringLiteral(instname));
