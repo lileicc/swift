@@ -398,23 +398,52 @@ opt_parenthesized_origin_var_list:
   | {$$ = NULL; }
   ;
 
-//TODO: memory management 
 origin_var_list:
   origin_var_list COMMA ID EQ_ ID
   {
     $$ = $1;
     $$->push_back(make_tuple(Symbol($3->getValue()), Symbol($5->getValue())));
   }
+  | origin_var_list extra_commas ID EQ_ ID
+  {
+    yyerror("extra commas");
+  }
+  | origin_var_list COMMA ID EQ_ error
+  {
+    yyerror("missing origin variable name");
+  }
+  | origin_var_list ID EQ_ ID
+  {
+    yyerror("missing comma");
+  }
   | ID EQ_ ID
   { 
     $$ = new vector<tuple<Symbol, Symbol>>();
     $$->push_back(make_tuple(Symbol($1->getValue()), Symbol($3->getValue())));
+  }
+  | ID ID
+  {
+    yyerror("missing =");
   }
   ;
   
 origin_func_decl:
   ORIGIN type ID LPAREN type RPAREN
   { $$ = new OriginDecl(curr_line, curr_col, $2->getTyp(), Symbol($3->getValue()), $5->getTyp());  }
+| ORIGIN type ID LPAREN error RPAREN
+  { yyerror("syntax error in type argument of origin function"); }
+| ORIGIN type LPAREN type RPAREN
+  {
+    yyerror("missing type or origin function name");
+  }
+| ORIGIN type ID type RPAREN
+  {
+    yyerror("missing ( in origin function");
+  }
+| ORIGIN error
+  {
+    yyerror("error in origin function definition");
+  }
   ;
     
 distinct_decl:
@@ -443,6 +472,15 @@ id_or_subid_list:
       $$->push_back(*$3);
       delete($3);
     }
+  | id_or_subid_list id_or_subid
+    {
+      yyerror("missing comma");
+    }
+  | id_or_subid_list extra_commas id_or_subid
+    {
+      yyerror("missing comma");
+    }
+
   ;
 
     
