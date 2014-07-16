@@ -111,7 +111,7 @@ void PFTranslator::translate(swift::ir::BlogModel* model) {
   transAllEvidence(model->getEvidences());
   
   transSampleAlg();
-  
+  ss
   transAllQuery(model->getQueries());
   
   createMain();
@@ -122,7 +122,7 @@ code::Code* PFTranslator::getResult() {
   return prog;
 }
 
-code::FunctionDecl* PFTranslator::transSampleAlg() {
+code::FunctionDecl* PFTranslator::transSampleAlg() {ss
   // only support classical particle filtering here
   // declare the sample method within coreCls
   SAMPLEFUN fun = DECLARE_SAMPLEFUN();

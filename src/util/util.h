@@ -146,3 +146,18 @@ void resample(
   
   std::memcpy(ptr_temp_memo, backup_ptr, sizeof(backup_ptr));
 }
+
+/*
+ * Pointer Copy function
+ * For Particle Filtering
+ * >> Input Arguments:
+ *    > ptr: array containing pointers
+ *    > state: array that ptr points to
+ * >> Usage:
+ *    > make sure ptr[i] points to state[i]
+ */
+template<class State>
+void pointer_copy(State** ptr, State* state, int N) {
+  for(int i=0;i<N;++i)
+    ptr[i] = state + i;
+}
