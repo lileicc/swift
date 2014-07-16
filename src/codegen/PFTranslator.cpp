@@ -29,6 +29,7 @@ const TYPE PFTranslator::TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, fal
 const TYPE PFTranslator::REF_TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, false);
 const TYPE PFTranslator::PTR_TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, true);
 const std::string PFTranslator::CUR_STAT_VAR_NAME = "_cur_state";
+const std::string PFTranslator::CUR_TIMESTEP_VAR_NAME = "_cur_time";
 
 code::Stmt* PFTranslator::referStaticStateStmt(code::DeclContext* context) {
   return new code::DeclStmt(new code::VarDecl(context, CUR_STAT_VAR_NAME, REF_STAT_MEMO_TYPE,
@@ -103,16 +104,16 @@ void PFTranslator::translate(swift::ir::BlogModel* model) {
   // translate random function
   for (auto fun : model->getRandFuncs())
     transFun(fun);
-
+  
   // TODO translate fixed function
 
   // translate evidence
   transAllEvidence(model->getEvidences());
-
+  
   transSampleAlg();
-
+  
   transAllQuery(model->getQueries());
-
+  
   createMain();
 }
 
@@ -122,7 +123,7 @@ code::Code* PFTranslator::getResult() {
 }
 
 code::FunctionDecl* PFTranslator::transSampleAlg() {
-  // for the moment, only supporting likelihood weighting algorithm
+  // only support classical particle filtering here
   // declare the sample method within coreCls
   SAMPLEFUN fun = DECLARE_SAMPLEFUN();
   fun->addStmt(
@@ -229,6 +230,8 @@ void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   // :::=> ensure_numvar();
   coreStaticClsInit->addStmt(
       new code::CallExpr(new code::Identifier(ensureFun->getName()))); // StaticMemo
+  // TODO: 
+  //    to support number statement with temporal arguments
   // create the function for getting number of objects in this instance, i.e.
   // numvar
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
@@ -352,7 +355,7 @@ void PFTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
     // translate random function
     // create gettfunname function
     transGetterFun(fd);
-
+    
     // add likelihood function::: double likeli_fun(int, ...);
     transLikeliFun(fd);
 
@@ -370,15 +373,17 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   const std::string & name = fd->getName();
   std::string getterfunname = getGetterFunName(name);
   code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+  bool isTemp = fd->isTemporal();
+  code::ClassDecl* cls = (isTemp ? coreTemporalCls : coreStaticCls);
 
   // __value__name for recording the value of the function application variable
   std::string valuevarname = getValueVarName(name);
   // adding in the main class a declaration of field for value of a random variable
-  addFieldForFunVar(valuevarname, fd->getArgs(), valuetype);
+  addFieldForFunVar(valuevarname, fd->getArgs(), cls, valuetype);
   // __mark__name
   std::string markvarname = getMarkVarName(name);
   // adding in the main class a declaration of field for mark of a random variable
-  addFieldForFunVar(markvarname, fd->getArgs());
+  addFieldForFunVar(markvarname, fd->getArgs(), cls);
 
   // Note: when adding field, refTag MUST be false!
   // Optimization for Vector/Map/Set Return
@@ -389,9 +394,14 @@ code::FunctionDecl* PFTranslator::transGetterFun(
 
   // define getter function :::==> __get_value()
   code::FunctionDecl* getterfun = code::FunctionDecl::createFunctionDecl(
-      coreCls, getterfunname, valuetype);
-  getterfun->setParams(transParamVarDecls(getterfun, fd->getArgs()));
+      coreCls, getterfunname, valuetype); // Global
+  getterfun->setParams(transParamVarDecls(getterfun, fd));
   declared_funs[getterfun->getName()] = getterfun;
+
+  code::Stmt *st = (isTemp ? referTempStateStmt(getterfun,fd->getTemporalArg()->getVarName()) 
+                           : referStaticStateStmt(getterfun));
+  getterfun->addStmt(st);
+
   code::Type valueRefType = valuetype;
   if (valuetype != BOOL_TYPE)  // special treatment for bool
     valueRefType.setRef(true);
@@ -400,9 +410,10 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
                      MARK_VAR_REF_NAME);
   // now translating::: if (markvar == current sample num) then return value;
-  code::Stmt* st = new code::IfStmt(
+  std::string flagVarName = (isTemp ? fd->getTemporalArg()->getVarName() : CURRENT_SAMPLE_NUM_VARNAME);
+  st = new code::IfStmt(
       new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
-                               new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+                               new code::Identifier(flagVarName), // Mark Current TimeStep if Temporal
                                code::OpKind::BO_EQU),
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)), NULL);
   getterfun->addStmt(st);
@@ -414,7 +425,7 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   // ::: => markvar = cur_loop
   st = new code::BinaryOperator(
       new code::Identifier(MARK_VAR_REF_NAME),
-      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+      new code::Identifier(flagVarName),
       code::OpKind::BO_ASSIGN);
   getterfun->addStmt(st);
   // special treatment for bool
@@ -438,9 +449,15 @@ code::FunctionDecl* PFTranslator::transLikeliFun(
   std::string markvarname = getMarkVarName(name);
   // adding method declaration in the main class
   code::FunctionDecl* likelifun = code::FunctionDecl::createFunctionDecl(
-      coreCls, likelifunname, DOUBLE_TYPE);
-  likelifun->setParams(transParamVarDecls(likelifun, fd->getArgs()));
+      coreCls, likelifunname, DOUBLE_TYPE); // Globally defined function
+  likelifun->setParams(transParamVarDecls(likelifun, fd));
   declared_funs[likelifun->getName()] = likelifun;
+
+  // Assume current random function has been already sampled!
+  bool isTemp = fd->isTemporal();
+  code::Stmt* st = (isTemp ? referTempStateStmt(likelifun, fd->getTemporalArg()->getVarName())
+                           : referStaticStateStmt(likelifun));
+  likelifun->addStmt(st); // refer to current memorization data structure
   // now the value of this function app var is in VALUE_VAR_REF_NAME
   code::Type valueRefType = valuetype;
   if (valuetype != BOOL_TYPE)  // special treatment for bool
@@ -475,10 +492,17 @@ code::FunctionDecl* PFTranslator::transSetterFun(
   std::string setterfunname = getSetterFunName(name);
   // adding setter method declaration in the main class
   code::FunctionDecl* setterfun = code::FunctionDecl::createFunctionDecl(
-      coreCls, setterfunname, DOUBLE_TYPE);
+      coreCls, setterfunname, DOUBLE_TYPE); // Globally defined
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
-      setterfun, fd->getArgs());
+      setterfun, fd);
   declared_funs[setterfun->getName()] = setterfun;
+
+  // Memorization State
+  bool isTemp = fd->isTemporal();
+  code::Stmt* st = (isTemp ? referTempStateStmt(setterfun, fd->getTemporalArg()->getVarName())
+                           : referStaticStateStmt(setterfun));
+  setterfun->addStmt(st);
+
   addFunValueAssignStmt(setterfun, valuevarname, args_with_value,
                         VALUE_ARG_NAME);
   addFunValueRefStmt(setterfun, markvarname, args_with_value,
@@ -487,9 +511,11 @@ code::FunctionDecl* PFTranslator::transSetterFun(
   args_with_value.push_back(
       new code::ParamVarDecl(setterfun, VALUE_ARG_NAME, valuetype));
   setterfun->setParams(args_with_value);
-  code::Stmt* st = new code::BinaryOperator(
+
+  std::string flagVarName = (isTemp ? fd->getTemporalArg()->getVarName() : CURRENT_SAMPLE_NUM_VARNAME);
+  st = new code::BinaryOperator(
       new code::Identifier(MARK_VAR_REF_NAME),
-      new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME),
+      new code::Identifier(flagVarName), // when temporal, mark by timestep
       code::OpKind::BO_ASSIGN);
   setterfun->addStmt(st);
   // :::==> value_var = value_arg
@@ -535,9 +561,11 @@ code::ParamVarDecl* PFTranslator::transParamVarDecl(
 
 std::vector<code::ParamVarDecl*> PFTranslator::transParamVarDecls(
     code::DeclContext* context,
-    const std::vector<std::shared_ptr<ir::VarDecl> > & vars) {
+    std::shared_ptr<ir::FuncDefn> fun) {
   std::vector<code::ParamVarDecl*> vds;
-  for (auto v : vars) {
+  if (fun->isTemporal())
+    vds.push_back(transParamVarDecl(context, fun->getTemporalArg()));
+  for (auto v : fun->getArgs()) {
     vds.push_back(transParamVarDecl(context, v));
   }
   return vds;
@@ -591,6 +619,9 @@ code::Expr* PFTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
       ir::FunctionCall>(expr);
   if (fc) {
     used = true;
+    // TimeStep Function Call
+    if (fc->isTemporal())
+      args.insert(args.begin(), transExpr(fc->getTemporalArg()));
     res = transFunctionCall(fc, args);
   }
 
@@ -1092,6 +1123,8 @@ void PFTranslator::createInit() {
   coreClsInit->setParams(args);
   code::FieldDecl::createFieldDecl(coreCls, CURRENT_SAMPLE_NUM_VARNAME,
                                    INT_TYPE);
+  code::FieldDecl::createFieldDecl(coreCls, CUR_TIMESTEP_VAR_NAME,
+                                   TIMESTEP_TYPE);
   code::FieldDecl::createFieldDecl(coreCls, RANDOM_DEVICE_VAR_NAME,
                                    RANDOM_ENGINE_TYPE);
 }
@@ -1100,6 +1133,7 @@ void PFTranslator::createInit() {
 void PFTranslator::addFieldForFunVar(
     std::string varname,
     const std::vector<std::shared_ptr<ir::VarDecl> >& params,
+    code::ClassDecl* cls,
     code::Type valueType) {
   if (!params.empty()) {
     // currently a hack, since code do not support expression as template
@@ -1126,7 +1160,7 @@ void PFTranslator::addFieldForFunVar(
   }
   // adding in the main class a declaration of field for value of a random
   // variable
-  code::FieldDecl::createFieldDecl(coreCls, varname, valueType);
+  code::FieldDecl::createFieldDecl(cls, varname, valueType);
 }
 
 void PFTranslator::addFunValueRefStmt(
@@ -1157,7 +1191,7 @@ void PFTranslator::addFunValueAssignStmt(
   // the value of this function application variable is stored in
   // valuevarname[index1][index2]...
   // where the index are corresponding to the arguments
-  code::Expr* exp = new code::Identifier(valuevarname);
+  code::Expr* exp = referVarFromState(new code::Identifier(valuevarname));
   for (auto prm : valueindex) {
     exp = new code::ArraySubscriptExpr(exp, new code::Identifier(prm->getId()));
   }
@@ -1168,7 +1202,7 @@ void PFTranslator::addFunValueAssignStmt(
   fun->addStmt(dst);
 }
 
-void PFTranslator::transEvidence(code::FunctionDecl* fun,
+void PFTranslator::transEvidence(code::CompoundStmt* fun,
                                   std::shared_ptr<ir::Evidence> evid, bool transFuncApp) {
   const std::shared_ptr<ir::Expr>& left = evid->getLeft();
   // check whether left is a function application variable
@@ -1179,6 +1213,9 @@ void PFTranslator::transEvidence(code::FunctionDecl* fun,
     std::string blogfunname = leftexp->getRefer()->getName();  // the function name in blog model
     std::string setterfunname = getSetterFunName(blogfunname);  // setter function for the blog function predicate
     std::vector<code::Expr*> args;
+    // check special case for timestep functioncall
+    if (leftexp->isTemporal())
+      args.push_back(transExpr(leftexp->getTemporalArg()));
     // now translate arguments to this setter function
     for (auto a : leftexp->getArgs()) {
       args.push_back(transExpr(a));
@@ -1221,6 +1258,7 @@ void PFTranslator::transEvidence(code::FunctionDecl* fun,
   //    Now we have to firstly print all rejection sampling stmts
   //    Then print the likelihood weighing stmts
   //    TransFuncApp is a switch for this
+  // TODO: to check whether the cardExpr contains timestep. Now assume NO!
   if (cardexp && !transFuncApp) {
     // translate cardinality evidence
     // check whether the evidence doesnot hold
@@ -1242,28 +1280,78 @@ void PFTranslator::transAllEvidence(
       coreCls, SET_EVIDENCE_FUN_NAME, BOOL_TYPE);
   fun->setParams(std::vector<code::ParamVarDecl*>{new code::ParamVarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_REF_TYPE)});
 
-  code::Expr* res;
-  if (COMPUTE_LIKELIHOOD_IN_LOG)
-    res = new code::Identifier(NEG_INFINITE_NAME);
-  else
-    res = new code::IntegerLiteral(0);
-  fun->addStmt(new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), res, code::OpKind::BO_ASSIGN));
+  code::BinaryOperator* cond = new code::BinaryOperator(
+    new code::Identifier(CUR_TIMESTEP_VAR_NAME),
+    new code::IntegerLiteral(0),code::OpKind::BO_EQU);
+  code::CompoundStmt* cmp = new code::CompoundStmt();
+
+  //TODO: 
+  //  gather timestep information for evidence in Semant
   for (auto evid : evids) {
     // Firstly Translate all rejection sampling stmts
-    transEvidence(fun, evid, false);
+    // TODO:
+    //   Now we assume all rejection sampling contain no timestep!!! to add timestep support
+    transEvidence(cmp, evid, false);
   }
+  // if (_cur_timestep == 0) {set all rejection evidence;}
+  code::IfStmt* brch = new code::IfStmt(cond, cmp, NULL);
+  if (cmp->size() > 0)
+    fun->addStmt(brch);
+  else
+    delete brch;
+
+  // all likelihood evidence
   fun->addStmt(new code::BinaryOperator(
     new code::Identifier(WEIGHT_VAR_REF_NAME),
     new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
+
+  // branch for static likelihood evidences
+  code::BinaryOperator* stat_cond = new code::BinaryOperator(
+    new code::Identifier(CUR_TIMESTEP_VAR_NAME),
+    new code::IntegerLiteral(0), code::OpKind::BO_EQU);
+  code::CompoundStmt* stat_cmp = new code::CompoundStmt();
+
+  // Make sure that all the branches are non-empty and sorted in input order
+  // Make sure that non-timestep evidence locates in the beginning
+  std::vector<code::IfStmt*> branches;
+  branches.push_back(new code::IfStmt(stat_cond, stat_cmp, NULL));
   for (auto evid : evids) {
     // Firstly Translate all likelihood weighing stmts
-    transEvidence(fun, evid, true);
+    // TODO:
+    //  to better organize timporal/static evidence
+    //  e.g. firstly do non-temporal then use caseExpr to better organize all timestep branches;
+    std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
+      ir::FunctionCall>(evid->getLeft());
+    if (leftexp != nullptr) continue; // not likelihood evidence at all!
+    if (leftexp->isTemporal()) { // timestep evidence
+      cond = new code::BinaryOperator(
+        new code::Identifier(CUR_TIMESTEP_VAR_NAME),
+        transExpr(leftexp->getTemporalArg()), code::OpKind::BO_EQU); // if (tmp_arg == cur_time) {set_evidence(cur_time);}
+      cmp = new code::CompoundStmt();
+      branches.push_back(new code::IfStmt(cond, cmp, NULL));
+      transEvidence(cmp, evid, true);
+    }
+    else { // static evidence
+      transEvidence(stat_cmp, evid, true);
+    }
   }
+  if (stat_cmp->size() == 0) { // make sure there is no empty branch
+    delete branches[0];
+    branches.erase(branches.begin());
+  }
+  for (auto p : branches)
+    fun->addStmt(p);
+
   fun->addStmt(new code::ReturnStmt(new code::BooleanLiteral(true)));
 }
 
 void PFTranslator::transAllQuery(
     std::vector<std::shared_ptr<ir::Query> > queries) {
+  // Note:
+  //  Assume TimeStep only appears when query->getVar() is temporal FunctionCall
+  // TODO:
+  //  to parse timestep in general expressions in Semant
+
   // create evaluate function
   code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
       coreCls, QUERY_EVALUATE_FUN_NAME, VOID_TYPE, true);
@@ -1272,14 +1360,42 @@ void PFTranslator::transAllQuery(
   // query function has one argument of double, for weight
   args.push_back(new code::ParamVarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE));
   fun->setParams(args);
+
+  // Branches of all temporal queries
+  code::BinaryOperator* cond, *stat_cond = new code::BinaryOperator(
+      new code::Identifier(CUR_TIMESTEP_VAR_NAME), 
+      new code::IntegerLiteral(0), code::OpKind::BO_EQU);
+  code::CompoundStmt* cmp, *stat_cmp = new code::CompoundStmt();
+  std::vector<code::IfStmt*> branches;
+  branches.push_back(new code::IfStmt(stat_cond, stat_cmp, NULL));
+
   int index = 0;
   for (auto qr : queries) {
-    transQuery(fun, qr, index);
-    ++index;
+    std::shared_ptr<ir::FunctionCall> fc = std::dynamic_pointer_cast<ir::FunctionCall>(qr->getVar());
+    if (fc != nullptr && fc->isTemporal()) { // Temporal Function Call!
+      cond = new code::BinaryOperator(new code::Identifier(CUR_STAT_VAR_NAME), 
+                                      transExpr(qr->getVar()), code::OpKind::BO_EQU);
+      cmp = new code::CompoundStmt();
+      branches.push_back(new code::IfStmt(cond, cmp, NULL));
+
+      transQuery(cmp, qr, index);
+    }
+    else { // we assume static otherwise
+      transQuery(stat_cmp, qr, index);
+    }
+    index ++;
   }
+
+  if (stat_cmp->size() == 0) {
+    delete branches[0];
+    branches.erase(branches.begin());
+  }
+
+  for (auto st : branches)
+    fun->addStmt(st);
 }
 
-void PFTranslator::transQuery(code::FunctionDecl* fun,
+void PFTranslator::transQuery(code::CompoundStmt* cmp,
                                std::shared_ptr<ir::Query> qr, int n) {
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
   code::Expr* initvalue = new code::CallClassConstructor(
@@ -1295,7 +1411,7 @@ void PFTranslator::transQuery(code::FunctionDecl* fun,
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
   args.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
-  fun->addStmt(
+  cmp->addStmt(
       code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
                                        args));
   // add print this result in print()
@@ -1325,6 +1441,11 @@ code::Expr* PFTranslator::transConstSymbol(
   std::shared_ptr<ir::IntLiteral> il =
       std::dynamic_pointer_cast<ir::IntLiteral>(cs);
   if (il) {
+    return new code::IntegerLiteral(il->getValue());
+  }
+  std::shared_ptr<ir::TimestepLiteral> tl =
+    std::dynamic_pointer_cast<ir::TimestepLiteral>(cs);
+  if (tl) {
     return new code::IntegerLiteral(il->getValue());
   }
   std::shared_ptr<ir::NullSymbol> nl =

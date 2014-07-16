@@ -55,6 +55,7 @@ protected:
 
   // Variable Name denoting data structure containing all the required info
   static const std::string CUR_STAT_VAR_NAME;
+  static const std::string CUR_TIMESTEP_VAR_NAME;
 
   /**
    * declare a named type
@@ -201,7 +202,7 @@ protected:
    *  @param context within which the translated statment will reside
    *  @param evid    ir evidence declaration
    */
-  void transEvidence(code::FunctionDecl* context,
+  void transEvidence(code::CompoundStmt* fun,
       std::shared_ptr<ir::Evidence> evid, bool transFuncApp = true);
 
   /**
@@ -216,7 +217,7 @@ protected:
   /**
    * translate n-th query
    */
-  void transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr,
+  void transQuery(code::CompoundStmt* cmp, std::shared_ptr<ir::Query> qr,
       int n);
   /**
    * create reference to blog function value
@@ -238,7 +239,7 @@ protected:
    */
   void addFieldForFunVar(std::string varname,
       const std::vector<std::shared_ptr<ir::VarDecl> >& params,
-      code::Type valueType = INT_TYPE);
+      code::ClassDecl* cls, code::Type valueType = INT_TYPE);
 
   /**
    * translate the distribution expression
@@ -262,8 +263,7 @@ protected:
    * vector of parameter varible declaration in code
    */
   std::vector<code::ParamVarDecl*> transParamVarDecls(
-      code::DeclContext* context,
-      const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
+      code::DeclContext* context, std::shared_ptr<ir::FuncDefn> fun);
 
   // Util Functions
   code::Stmt* referStaticStateStmt(code::DeclContext* context);
