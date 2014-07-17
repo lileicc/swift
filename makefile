@@ -25,3 +25,4 @@ compile: $(SRC)
 	
 genparser:
 	cd src/parse; flex -olexer.cpp blog.flex; yacc -d -o parser.cpp blog.yacc
+
