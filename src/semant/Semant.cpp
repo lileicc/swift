@@ -3,6 +3,8 @@
  *
  *  Created on: Nov 2, 2013
  *      Author: leili
+ * 
+ * Issue: @MarkovOrder created on Jul 17, 2014 by yiwu
  */
 
 #include "Semant.h"
@@ -533,6 +535,10 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
     return lookupTy(IRConstString::BOOL);
     // Numerical Operator
   case IRConstant::MOD:
+    // Special Check for TimeStep (MOD)
+    if (arg[0]->getTyp() == arg[1]->getTyp()
+      && arg[0]->getTyp() == lookupTy(ir::IRConstString::TIMESTEP))
+      return arg[0]->getTyp();
     if (arg[0]->getTyp() != arg[1]->getTyp()
         || arg[0]->getTyp() != lookupTy(IRConstString::INT))
       return NULL;
@@ -545,6 +551,10 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
   case IRConstant::MINUS:
   case IRConstant::MUL:
   case IRConstant::DIV:
+    // Special Check for TimeStep (PLUS, MINUS, MUL, DIV)
+    if (arg[0]->getTyp() == arg[1]->getTyp()
+        && arg[0]->getTyp() == lookupTy(ir::IRConstString::TIMESTEP))
+        return arg[0]->getTyp();
   case IRConstant::POWER:
     if (arg[0]->getTyp() != arg[1]->getTyp()
         || !OprExpr_isNumerical(arg[0]->getTyp()))
@@ -613,6 +623,17 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
   if (ret->getTyp() == NULL) {
     error(expr->line, expr->col, "Error Type Matching for OprExpr!");
   }
+  /*
+   * TODO: Add crucial check for Markov Order! Now it is a hack!! (@MarkovOrder)
+   *   we only check the case of:
+   *    MINUS-EXPR: (A) - @k
+   *      k will be the markov order
+   */
+  if (ret->getTyp() == lookupTy(ir::IRConstString::TIMESTEP)
+      && ret->getOp() == ir::IRConstant::MINUS && ret->getArgs().size() == 2
+      && std::dynamic_pointer_cast<ir::TimestepLiteral>(ret->get(1)) != nullptr)
+      model->updateMarkovOrder(std::dynamic_pointer_cast<ir::TimestepLiteral>(ret->get(1))->getValue());
+
   // Randomness Checking
   for (auto a : ret->getArgs())
     if (a->isRandom()) {
@@ -641,6 +662,15 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
       warning(expr->line, expr->col, "Function < " + func + " > is Built-in! Type Checking Error for Built-in Function!");
     }
     else {
+      // TODO: here is a hack!!!! Better Checking for Markov Order (@MarkovOrder)
+      // Special Check : (hack, @MarkovOrder)
+      //   when ptr is Prev(t, k) then k will become the markov order!
+      if (std::dynamic_pointer_cast<ir::FunctionCall>(ptr) != nullptr) {
+        auto ref = std::dynamic_pointer_cast<ir::FunctionCall>(ptr);
+        if (ref->isBuiltin() && ref->getBuiltinRefer()->getName() == "prev") {
+          model->updateMarkovOrder(std::dynamic_pointer_cast<ir::IntLiteral>(ref->get(0))->getValue());
+        }
+      }
       return ptr;
     }
   }
