@@ -33,7 +33,7 @@ std::shared_ptr<ir::Expr> PrevFuncDecl::getNew(
   //Special Check for Multiple Prev()
   //  i.e. Prev(Prev(t, 1), 1) :::==> Prev(t, 2)
   auto sub = std::dynamic_pointer_cast<ir::FunctionCall>(args[0]);
-  if (sub->isBuiltin() && sub->getBuiltinRefer() == this && sub->argSize() == 1
+  if (sub != nullptr && sub->isBuiltin() && sub->getBuiltinRefer() == this && sub->argSize() == 1
       && std::dynamic_pointer_cast<ir::IntLiteral>(sub->get(0)) != nullptr) {
     auto val = std::dynamic_pointer_cast<ir::IntLiteral>(sub->get(0));
     func->addArg(sub->getTemporalArg());

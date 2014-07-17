@@ -913,8 +913,7 @@ std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
   }
   if (dynamic_cast<absyn::TimeStampLiteral*>(expr) != NULL) {
     auto ret = std::make_shared<ir::TimestepLiteral>((dynamic_cast<absyn::TimeStampLiteral*>(expr))->getValue());
-    ret->setTyp(lookupNameTy(ir::IRConstString::TIMESTEP));
-    
+    ret->setTyp(lookupTy(ir::IRConstString::TIMESTEP));
     // TODO: Currently is a Hacking Implementation
     //     Should Move to Analyser Finally!!!!
     if (ret->getValue() > model->getTempLimit())

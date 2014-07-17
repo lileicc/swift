@@ -83,8 +83,10 @@ std::string FuncDefn::toSignature() const {
   std::string ret;
   ret.append(name);
   ret.push_back('(');
+  if (istmp)
+    ret.append(tmparg->toSignature());
   for (size_t i = 0; i < args.size(); i++) {
-    if (i > 0)
+    if (i > 0 || istmp)
       ret.push_back(',');
     ret.append(args[i]->toSignature());
   }
