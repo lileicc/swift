@@ -6,6 +6,8 @@
  */
 
 #include <cassert>
+#include "../predecl/PreDecl.h"
+
 #include "Translator.h"
 
 namespace swift {
@@ -1379,6 +1381,10 @@ code::Expr* Translator::transConstSymbol(
 code::Expr* Translator::transFunctionCall(
     std::shared_ptr<ir::FunctionCall> fc, std::vector<code::Expr*> args) {
   std::string getterfunname;
+  // Special Check for builtin functions
+  if (fc->isBuiltin()) {
+    return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
+  }
   switch (fc->getKind()) {
     case ir::IRConstant::RANDOM:
       getterfunname = getGetterFunName(fc->getRefer()->getName());

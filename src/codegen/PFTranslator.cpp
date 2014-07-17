@@ -6,6 +6,8 @@
  */
 
 #include <cassert>
+#include "../predecl/PreDecl.h"
+
 #include "PFTranslator.h"
 
 namespace swift {
@@ -1537,7 +1539,7 @@ code::Expr* PFTranslator::transConstSymbol(
   std::shared_ptr<ir::TimestepLiteral> tl =
     std::dynamic_pointer_cast<ir::TimestepLiteral>(cs);
   if (tl) {
-    return new code::IntegerLiteral(il->getValue());
+    return new code::IntegerLiteral(tl->getValue());
   }
   std::shared_ptr<ir::NullSymbol> nl =
       std::dynamic_pointer_cast<ir::NullSymbol>(cs);
@@ -1558,6 +1560,10 @@ code::Expr* PFTranslator::transConstSymbol(
 code::Expr* PFTranslator::transFunctionCall(
     std::shared_ptr<ir::FunctionCall> fc, std::vector<code::Expr*> args) {
   std::string getterfunname;
+  // Special Check for builtin functions
+  if (fc->isBuiltin()) {
+    return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
+  }
   switch (fc->getKind()) {
     case ir::IRConstant::RANDOM:
       getterfunname = getGetterFunName(fc->getRefer()->getName());
