@@ -19,7 +19,7 @@ public:
   virtual ~TupleSetExpr();
 
   Expr* getExp(size_t i);
-  std::vector<VarDecl> getVarDecls();
+  const std::vector<VarDecl>& getVarDecls();
   Expr* getCond();
   
   // For Debugging Use

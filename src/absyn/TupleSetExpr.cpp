@@ -27,7 +27,7 @@ Expr* TupleSetExpr::getExp(size_t i){
   return NULL;
 }
 
-std::vector<VarDecl> TupleSetExpr::getVarDecls(){
+const std::vector<VarDecl>& TupleSetExpr::getVarDecls(){
   return vardecls;
 }
 
