@@ -164,3 +164,4 @@ void pointer_copy(State** ptr, State* state, int N) {
 
 // Internal Function for TimeStep Operation
 inline unsigned prev(unsigned u) {return u - 1;}
+inline unsigned prev(unsigned u, int t) {return u - t;}

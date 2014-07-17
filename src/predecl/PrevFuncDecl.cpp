@@ -43,11 +43,11 @@ std::shared_ptr<ir::Expr> PrevFuncDecl::getNew(
     func->addArg(args[0]);
     func->addArg(std::make_shared<ir::IntLiteral>(1));
   }
+  // check randomness
+  func->setRandom(func->get(0)->isRandom());
 
   func->processTemporal(ts_ty);
   func->setTyp(ts_ty);
-  // check randomness
-  func->setRandom(func->get(0)->isRandom());
 
   return func;
 }

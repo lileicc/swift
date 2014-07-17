@@ -7,6 +7,7 @@
 
 #include "Semant.h"
 
+#include<iostream>
 #include <memory>
 #include <utility>
 #include <set>
@@ -671,17 +672,17 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   ptr->setTyp(ptr->getRefer()->getRetTyp());
   ptr->setArgs(args);
 
-  // Special Check for Temporal FunctionCall
-  if (ptr->getRefer()->isTemporal())
-    ptr->processTemporal(tyFactory.getTimestepTy());
-
   // Random Checking
   ptr->setRandom(ptr->getRefer()->isRand());
-  for (auto a: args)
+  for (auto a : args)
     if (a->isRandom()) {
       ptr->setRandom(true);
       break;
     }
+
+  // Special Check for Temporal FunctionCall
+  if (ptr->getRefer()->isTemporal())
+    ptr->processTemporal(tyFactory.getTimestepTy());
   return ptr;
 }
 
@@ -912,7 +913,7 @@ std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
     return ret;
   }
   if (dynamic_cast<absyn::TimeStampLiteral*>(expr) != NULL) {
-    auto ret = std::make_shared<ir::TimestepLiteral>((dynamic_cast<absyn::TimeStampLiteral*>(expr))->getValue());
+    std::shared_ptr<ir::TimestepLiteral> ret = std::make_shared<ir::TimestepLiteral>((dynamic_cast<absyn::TimeStampLiteral*>(expr))->getValue());
     ret->setTyp(lookupTy(ir::IRConstString::TIMESTEP));
     // TODO: Currently is a Hacking Implementation
     //     Should Move to Analyser Finally!!!!
