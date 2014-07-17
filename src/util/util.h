@@ -86,6 +86,20 @@ std::vector<int> _filter(std::vector<int>::iterator st, std::vector<int>::iterat
 }
 
 /*
+ * apply function for list of elements
+ * Input : a list of input elements and a function to apply
+ * Output : a sorted list (namely set) of output of the function
+ */
+template<class ret_T, class in_T>
+std::vector<ret_T> _apply(std::vector<in_T> args, std::function<ret_T(in_T)> fun) {
+  std::vector<ret_T>ret;
+  for(auto &u : args)
+    ret.push_back(fun(u));
+  sort(ret.begin(), ret.end());
+  return ret;
+}
+
+/*
  * Count the number of filtered elements
  * Note: For the Range Version, please refer to std::count()
  */
