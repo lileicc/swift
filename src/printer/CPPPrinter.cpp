@@ -754,6 +754,8 @@ void CPPPrinter::print(code::SwitchStmt* term) {
 void CPPPrinter::print(code::Type* term) {
   // assume newline == false;
   assert(newline == false);
+  if (term->isConst())
+    fprintf(file, "const ");
   if (term->hasScope()) {
     for (auto & nm : term->getScope()) {
       fprintf(file, "%s::", nm.c_str());

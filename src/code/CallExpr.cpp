@@ -36,6 +36,13 @@ CallExpr* CallExpr::createMethodCall(std::string varname,
           OpKind::BO_FIELD), args);
 }
 
+CallExpr* CallExpr::createMethodCall(code::Expr* var,
+  std::string methodname, std::vector<Expr*> args) {
+  return new CallExpr(
+    new BinaryOperator(var, new Identifier(methodname),
+    OpKind::BO_FIELD), args);
+}
+
 } /* namespace code */
 } /* namespace swift */
 

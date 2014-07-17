@@ -19,6 +19,11 @@ public:
   code::Code* getResult();
   
 protected:
+  /**
+  * how many particles to sample in total : default parameter for PF
+  */
+  static const int TOTAL_NUM_PARTICLES;
+
   // Time Series Features
   int ModelDependency;
   int ModelTimeLimit;
@@ -54,8 +59,16 @@ protected:
   static const TYPE PTR_TEMP_MEMO_TYPE;
 
   // Variable Name denoting data structure containing all the required info
-  static const std::string CUR_STAT_VAR_NAME;
+  static const std::string CUR_STATE_VAR_NAME;
   static const std::string CUR_TIMESTEP_VAR_NAME;
+
+  // Temperary Variable Name
+  static const std::string TMP_LOOP_VAR_NAME;
+  static const std::string TMP_LOCAL_TS_INDEX_VAR_NAME;
+
+  // Util Functions for Particle Filtering in Util.h
+  static const std::string PF_RESAMPLE_FUN_NAME;
+  static const std::string PF_COPY_PTR_FUN_NAME;
 
   /**
    * declare a named type
@@ -76,7 +89,7 @@ protected:
    *
    *  @return an assignment statement in target code
    */
-  inline STMT CREATE_INSTANCE(std::string tyname, std::string instname, std::vector<EXPR> originvalues = std::vector<EXPR>(), EXPR ncopy = nullptr);
+  inline STMT CREATE_INSTANCE(std::string tyname, std::string instname, std::vector<EXPR> originvalues = std::vector<EXPR>(), EXPR ncopy = nullptr, bool inGetter = false);
   
   inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
 
@@ -266,9 +279,12 @@ protected:
       code::DeclContext* context, std::shared_ptr<ir::FuncDefn> fun);
 
   // Util Functions
-  code::Stmt* referStaticStateStmt(code::DeclContext* context);
-  code::Stmt* referTempStateStmt(code::DeclContext* context, std::string tempVar);
-  code::Expr* referVarFromState(code::Expr*);
+  static code::Stmt* referStaticStateStmt(code::DeclContext* context);
+  static code::Stmt* referTempStateStmt(code::DeclContext* context, std::string tempVar);
+  static code::Expr* referVarFromState(code::Expr*);
+  static code::ForStmt* createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body = NULL, 
+      bool isVarDefined = false, bool isLess = true);
+  static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
 };
 
 } /* namespace codegen */

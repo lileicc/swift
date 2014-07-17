@@ -23,6 +23,7 @@ const std::string Translator::DYNAMICTABLE_CLASS_NAME = "DynamicTable";
 const std::string Translator::DYNAMICTABLE_RESIZE_METHOD_NAME = "resize";
 const code::Type Translator::INT_TYPE("int");
 const code::Type Translator::INT_REF_TYPE("int", true);
+const code::Type Translator::INT_CONST_TYPE("int", false, false, true);
 const code::Type Translator::INT_VECTOR_TYPE(VECTOR_CLASS_NAME,
                                                 { INT_TYPE });
 const code::Type Translator::DOUBLE_TYPE("double");

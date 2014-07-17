@@ -10,20 +10,20 @@
 namespace swift {
 namespace code {
 Type::Type(std::vector<std::string> scope, std::string name,
-  std::vector<Type> typeArgs, bool refTag, bool ptrTag) :
+  std::vector<Type> typeArgs, bool refTag, bool ptrTag, bool constTag) :
     scope(scope), name(name), typeArgs(typeArgs), refTag(refTag), ptrTag(ptrTag) {
 }
 
 Type::Type(std::vector<std::string> scope, std::string name, Type typeArg,
-  bool refTag, bool ptrTag) :
+  bool refTag, bool ptrTag, bool constTag) :
     Type(scope, name, std::vector<Type>( { typeArg }), refTag, ptrTag) {
 }
 
-Type::Type(const std::string name, bool refTag, bool ptrTag) :
+Type::Type(const std::string name, bool refTag, bool ptrTag, bool constTag) :
   Type(std::vector<std::string>(), name, std::vector<Type>(), refTag, ptrTag) {
 }
 
-Type::Type(std::vector<std::string> scope, std::string name, bool refTag, bool ptrTag) :
+Type::Type(std::vector<std::string> scope, std::string name, bool refTag, bool ptrTag, bool constTag) :
   Type(scope, name, std::vector<Type>(), refTag, ptrTag) {
 }
 
@@ -31,11 +31,11 @@ bool Type::hasScope() const {
   return scope.size() > 0;
 }
 
-Type::Type(std::string name, std::vector<Type> typeArgs, bool refTag, bool ptrTag) :
+Type::Type(std::string name, std::vector<Type> typeArgs, bool refTag, bool ptrTag, bool constTag) :
     Type(std::vector<std::string>(), name, typeArgs, refTag, ptrTag) {
 }
 
-Type::Type(Type baseType, std::vector<Type> typeArgs, bool refTag, bool ptrTag) :
+Type::Type(Type baseType, std::vector<Type> typeArgs, bool refTag, bool ptrTag, bool constTag) :
     Type(baseType.scope, baseType.name, typeArgs, refTag, ptrTag) {
 }
 
@@ -61,6 +61,14 @@ void Type::setPtr(bool ptrTag) {
 
 bool Type::isPtr() const {
   return ptrTag;
+}
+
+void Type::setConst() {
+  this->constTag = true;
+}
+
+bool Type::isConst() const {
+  return constTag;
 }
 
 std::vector<Type> & Type::getTypeArgs() {

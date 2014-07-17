@@ -13,7 +13,7 @@ namespace code {
 
 class CallTemplateExpr: public CallExpr {
 public:
-  CallTemplateExpr(Expr* fn, std::vector<Expr*> args = std::vector<Expr *>(), std::vector<Expr*> tempArgs = std::vector<Expr*>());
+  CallTemplateExpr(Expr* fn, std::vector<Expr*> tempArgs = std::vector<Expr *>(), std::vector<Expr*> args = std::vector<Expr*>());
   ~CallTemplateExpr();
 
   static CallTemplateExpr* createMethodCall(std::string varname, std::string methodname,

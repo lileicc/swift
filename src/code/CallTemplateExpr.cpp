@@ -12,7 +12,7 @@
 namespace swift {
 namespace code {
 
-CallTemplateExpr::CallTemplateExpr(code::Expr* fn, std::vector<code::Expr*> args, std::vector<code::Expr*> tempArgs) :
+CallTemplateExpr::CallTemplateExpr(code::Expr* fn, std::vector<code::Expr*> tempArgs, std::vector<code::Expr*> args) :
     CallExpr(fn, args), tempArgs(tempArgs) {
 }
 
