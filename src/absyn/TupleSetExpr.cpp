@@ -12,27 +12,36 @@ namespace absyn {
 
 TupleSetExpr::TupleSetExpr(int l, int c, std::vector<Expr*> exps, 
                             std::vector<VarDecl> vardecls, Expr* cond) :
-    SetExpr(l, c), vardecls(vardecls) {
+    SetExpr(l, c), vardecls(vardecls), cond(cond) {
     for(size_t i = 0; i < exps.size(); i++){
       args.push_back(exps[i]);
     }
-    args.push_back(cond);
 }
 
 TupleSetExpr::~TupleSetExpr() {
+  if (cond != NULL)
+    delete cond;
 }
 
-Expr* TupleSetExpr::getExp(size_t i){
-  if (i < args.size()-1) return args[i];
+Expr* TupleSetExpr::getExp(size_t i) const {
+  if (i < args.size()) return args[i];
   return NULL;
 }
 
-const std::vector<VarDecl>& TupleSetExpr::getVarDecls(){
+const std::vector<Expr*>& TupleSetExpr::getExps() const {
+  return args;
+}
+
+const VarDecl& TupleSetExpr::getVarDecl(size_t i) const {
+  return vardecls[i];
+}
+
+const std::vector<VarDecl>& TupleSetExpr::getVarDecls() const {
   return vardecls;
 }
 
-Expr* TupleSetExpr::getCond(){
-  return args[args.size() - 1];
+Expr* TupleSetExpr::getCond() const {
+  return cond;
 }
 
 // For Debugging Use

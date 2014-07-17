@@ -18,14 +18,17 @@ public:
   TupleSetExpr(int l, int c, std::vector<Expr*> exps, std::vector<VarDecl> vardecls, Expr* cond);
   virtual ~TupleSetExpr();
 
-  Expr* getExp(size_t i);
-  const std::vector<VarDecl>& getVarDecls();
-  Expr* getCond();
+  Expr* getExp(size_t i) const;
+  const std::vector<Expr*>& getExps() const;
+  const VarDecl& getVarDecl(size_t i) const;
+  const std::vector<VarDecl>& getVarDecls() const;
+  Expr* getCond() const;
   
   // For Debugging Use
   void print(FILE *file, int indent);
 private:
   std::vector<VarDecl> vardecls;
+  Expr* cond;
 };
 
 }

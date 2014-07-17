@@ -812,6 +812,8 @@ code::Expr* PFTranslator::transCardExpr(std::shared_ptr<ir::CardExpr> cardexp,
   std::shared_ptr<ir::CondSet> setexp = std::dynamic_pointer_cast<ir::CondSet>(
       cardexp->getBody());
   assert(setexp);
+  // Note: For CardExpr, we can directly ignore the func field of this SetExpr
+
   // can only handle conditional set for the moment.
   std::shared_ptr<ir::VarDecl> var = setexp->getVar();
   const ir::NameTy* tp = dynamic_cast<const ir::NameTy*>(var->getTyp());
@@ -880,17 +882,34 @@ code::Expr* PFTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   std::vector<code::Expr*> args;
   args.push_back(new code::CallExpr(new code::Identifier(getnumvarfunname)));
 
+  code::CallExpr* gen_set = NULL;
   if (condset->getCond() == nullptr) {
-    return new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
+    gen_set = new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
+  }
+  else {
+    auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
+    func->addParam(
+      new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
+    func->addStmt(new code::ReturnStmt(transExpr(condset->getCond())));
+    args.push_back(func);
+
+    gen_set = new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
   }
 
-  auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
-  func->addParam(
+  if (condset->getFunc() == nullptr) {
+    return gen_set;
+  }
+  else {
+    args.clear();
+    args.push_back(gen_set);
+    auto func = new code::LambdaExpr(code::LambdaKind::REF, mapIRTypeToCodeType(condset->getFunc()->getTyp()));
+    func->addParam(
       new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
-  func->addStmt(new code::ReturnStmt(transExpr(condset->getCond())));
-  args.push_back(func);
+    func->addStmt(new code::ReturnStmt(transExpr(condset->getFunc())));
+    args.push_back(func);
 
-  return new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
+    new code::CallExpr(new code::Identifier(APPLY_FUNC_NAME), args);
+  }
 }
 
 /*
@@ -1024,7 +1043,7 @@ code::Expr* PFTranslator::transDistribution(
     std::string tyname = tp->toString();
     std::string numvarname = getVarOfNumType(tyname);
     std::string getnumvarfunname = getGetterFunName(numvarname);
-    if (!(setexp->getCond())) {
+    if (setexp->getCond() == nullptr && setexp->getFunc() == nullptr) {
       // if there is no condition
       std::string distvarname = UNIFORM_INT_DISTRIBUTION_NAME
           + std::to_string((size_t) &(dist->getArgs()));
@@ -1080,7 +1099,7 @@ code::Expr* PFTranslator::transDistribution(
         code::VarDecl::createVarDecl(
             coreNs, distvarname, code::Type(UNIFORM_CHOICE_DISTRIBUTION_NAME));
         // put init just before sampling
-        // :::=> dist.init(_filter(...))
+        // :::=> dist.init(_filter(...)) or dist.init(_apply(...))
         code::Expr* callinit = code::CallExpr::createMethodCall(
             distvarname, DISTRIBUTION_INIT_FUN_NAME, std::vector<code::Expr*>( {
                 transSetExpr(setexp) }));

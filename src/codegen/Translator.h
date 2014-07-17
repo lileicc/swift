@@ -372,6 +372,9 @@ protected:
   // function name for generating a full set: _gen_full() in util.h
   static const std::string GEN_FULL_SET_NAME;
 
+  // function name for internal apply: _apply() in util.h
+  static const std::string APPLY_FUNC_NAME;
+
   // function name for internal filter: _filer() in util.h
   static const std::string FILTER_FUNC_NAME;
 

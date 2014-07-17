@@ -862,7 +862,7 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
     if (it->second.empty())
       local_var.erase(it);
   }
-  auto ptr = std::make_shared<ir::CondSet>(var, e);
+  auto ptr = std::make_shared<ir::CondSet>(var, nullptr, e);
 
   if (e != nullptr && e->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
     error(expr->line, expr->col,
@@ -870,6 +870,68 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
   }
 
   ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(var->getTyp())));
+
+  // randomness checking
+  // TODO: to check randomness in special cases
+  ptr->setRandom(true);
+  return ptr;
+}
+
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
+  if (expr->getVarDecls().size() != expr->getExps().size()) {
+    error(expr->line, expr->col, "The length of Expr List does not match the length of VarDecl List for < TupleSetExpr >");
+  }
+  if (expr->getVarDecls().size() == 0) {
+    error(expr->line, expr->col, "< TupleSetExpr > should contain at least one variable!");
+    return std::shared_ptr<ir::CondSet>(new ir::CondSet(nullptr,nullptr));
+  }
+  if (expr->getVarDecls().size() > 1) {
+    warning(expr->line,expr->col,"We now only suppor < TupleSetExpr > with one variable! By default we will only pick the first variable.");
+    // TODO:
+    // @TupleSetExpr
+    // To support general TupleSetExpr
+  }
+
+  std::shared_ptr<ir::VarDecl> var = transVarDecl(expr->getVarDecl(0));
+
+  // Add Local Variable
+  if (var->getTyp() != NULL
+    && var->getVarName().size() > 0 && expr->getCond() != NULL)
+    local_var[var->getVarName()].push(var);
+  std::shared_ptr<ir::Expr> cond =
+    expr->getCond() == NULL ? nullptr : transExpr(expr->getCond());
+  std::shared_ptr<ir::Expr> func = 
+    expr->getExp(0) == NULL ? nullptr : transExpr(expr->getExp(0));
+  // Remove Local Variable
+  if (var->getTyp() != NULL
+    && var->getVarName().size() > 0 && expr->getCond() != NULL) {
+    auto it = local_var.find(var->getVarName());
+    it->second.pop();
+    if (it->second.empty())
+      local_var.erase(it);
+  }
+
+  // Process Expression applied on variable defined in the setExpr
+  if (std::dynamic_pointer_cast<ir::ConstSymbol>(func) != nullptr) {
+    return func;
+  }
+  if (std::dynamic_pointer_cast<ir::VarRefer>(func) != nullptr) { // just normal condset
+    auto v = std::dynamic_pointer_cast<ir::VarRefer>(func);
+    if (v->getRefer().get() == var.get())
+      func = nullptr;
+  }
+
+  auto ptr = std::make_shared<ir::CondSet>(var, func, cond);
+
+  if (cond != nullptr && cond->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
+    error(expr->line, expr->col,
+      "Condition of the set must return Boolean Value!");
+  }
+
+  if (func == nullptr)
+    ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(var->getTyp())));
+  else
+    ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(func->getTyp())));
 
   // randomness checking
   // TODO: to check randomness in special cases

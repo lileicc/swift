@@ -77,6 +77,8 @@ private:
 
   std::shared_ptr<ir::CondSet> transExpr(absyn::CondSet* expr);
 
+  std::shared_ptr<ir::Expr> transExpr(absyn::TupleSetExpr* expr);
+
   std::shared_ptr<ir::Expr> transExpr(absyn::DistrExpr* expr);
 
   std::shared_ptr<ir::ConstSymbol> transExpr(absyn::Literal* expr);
