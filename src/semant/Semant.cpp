@@ -295,10 +295,10 @@ std::shared_ptr<ir::IfThen> Semant::transIfThen(absyn::IfExpr* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
+std::shared_ptr<ir::Branch> Semant::transBranch(absyn::CaseExpr* expr) {
   std::shared_ptr<ir::Branch> ptr(new ir::Branch());
-  if (expr->size() != 2 || dynamic_cast<absyn::MapExpr*>(expr->get(0)) == NULL) {
-    error(expr->line, expr->col, "Arguments Format Error for < TabularCPD >!");
+  if (expr->getTest() == NULL || expr->getMap() == NULL) {
+    error(expr->line, expr->col, "Arguments Format Error for < CaseExpr >!");
     return ptr;
   }
   /*
@@ -306,7 +306,7 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
    *   since arguments of MapExpr are all Expr
    *   while for Branch, arguments could be clauses
    */
-  absyn::MapExpr* mp = (absyn::MapExpr*) (expr->get(0));
+  absyn::MapExpr* mp = (absyn::MapExpr*) (expr->getMap());
   // Similar Type Checking Process to transExpr(MapExpr)
   const ir::Ty* fromTy = NULL;
   const ir::Ty* toTy = NULL;
@@ -315,7 +315,7 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
     std::shared_ptr<ir::Clause> clause = transClause(mp->getTo(i));
     if (dynamic_cast<ir::ConstSymbol*>(symbol.get()) == NULL) {
       error(expr->line, expr->col,
-          "From Terms of the MapExpr in < TabularCPD > must be constant symbols!");
+          "From Terms of the MapExpr in < CaseExpr > must be constant symbols!");
       return ptr;
     }
     if (symbol->getTyp() != NULL) {
@@ -358,9 +358,9 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
     if (b->getTyp() == NULL)
       b->setTyp(toTy);
   ptr->setTyp(toTy);
-  ptr->setVar(transExpr(expr->get(1)));
+  ptr->setVar(transExpr(expr->getTest()));
   if (ptr->getVar()->getTyp() != fromTy) {
-    error(expr->line, expr->col, "Argument types do not match!");
+    error(expr->line, expr->col, "Argument types do not match for < CaseExpr >!");
     return ptr;
   }
 
@@ -376,9 +376,8 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
 std::shared_ptr<ir::Clause> Semant::transClause(absyn::Expr* expr) {
   if (dynamic_cast<absyn::IfExpr*>(expr) != NULL)
     return transIfThen((absyn::IfExpr*) expr);
-  if (dynamic_cast<absyn::DistrExpr*>(expr) != NULL
-      && ((absyn::DistrExpr*) expr)->getDistrName().getValue() == "TabularCPD")
-    return transBranch((absyn::DistrExpr*) expr);
+  if (dynamic_cast<absyn::CaseExpr*>(expr) != NULL)
+    return transBranch((absyn::CaseExpr*) expr);
   return transExpr(expr);
 }
 

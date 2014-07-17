@@ -49,7 +49,7 @@ private:
 
   std::shared_ptr<ir::IfThen> transIfThen(absyn::IfExpr* expr);
 
-  std::shared_ptr<ir::Branch> transBranch(absyn::DistrExpr* expr);
+  std::shared_ptr<ir::Branch> transBranch(absyn::CaseExpr* expr);
 
   std::shared_ptr<ir::Clause> transClause(absyn::Expr* expr);
 
