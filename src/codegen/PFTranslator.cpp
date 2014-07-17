@@ -78,7 +78,7 @@ code::ForStmt* PFTranslator::createForeachLoop(std::string loop_var, std::string
     body);
 }
 
-code::Expr* PFTranslator::createVarPlusDetExpr(std::string varName, int det = 0) {
+code::Expr* PFTranslator::createVarPlusDetExpr(std::string varName, int det) {
   if (det == 0) 
     return new code::Identifier(varName);
   code::OpKind opr = (det > 0 ? code::OpKind::BO_PLUS : (det = -det, code::OpKind::BO_MINUS));

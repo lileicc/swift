@@ -9,7 +9,7 @@
 namespace swift {
 namespace predecl {
 PrevFuncDecl::PrevFuncDecl() :
-    PreDecl(std::string("Prev")) {
+    PreDecl(std::string("prev")) {
 }
 
 PrevFuncDecl::~PrevFuncDecl() {
