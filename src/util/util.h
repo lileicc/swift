@@ -161,3 +161,6 @@ void pointer_copy(State** ptr, State* state, int N) {
   for(int i=0;i<N;++i)
     ptr[i] = state + i;
 }
+
+// Internal Function for TimeStep Operation
+inline unsigned Prev(unsigned u) {return u - 1;}
