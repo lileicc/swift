@@ -42,6 +42,20 @@ const std::vector<Expr*>& VarDecl::getArrArgs() const {
   return arr;
 }
 
+VarDecl* VarDecl::createVarDecl(DeclContext* cd, std::string name, Type ty,
+  Expr* value) {
+  VarDecl* fd = new VarDecl(cd, name, ty, value);
+  cd->addDecl(fd);
+  return fd;
+}
+
+VarDecl* VarDecl::createVarDecl(DeclContext* cd, std::string name, std::vector<Expr*> arr,
+  Type ty, Expr* value) {
+  VarDecl* fd = new VarDecl(cd, name, arr, ty, value);
+  cd->addDecl(fd);
+  return fd;
+}
+
 // For Printer
 void VarDecl::print(printer::Printer* prt) {
   prt->print(this);

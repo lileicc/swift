@@ -11,20 +11,20 @@ namespace swift {
 namespace code {
 Type::Type(std::vector<std::string> scope, std::string name,
   std::vector<Type> typeArgs, bool refTag, bool ptrTag, bool constTag) :
-    scope(scope), name(name), typeArgs(typeArgs), refTag(refTag), ptrTag(ptrTag) {
+    scope(scope), name(name), typeArgs(typeArgs), refTag(refTag), ptrTag(ptrTag), constTag(constTag) {
 }
 
 Type::Type(std::vector<std::string> scope, std::string name, Type typeArg,
   bool refTag, bool ptrTag, bool constTag) :
-    Type(scope, name, std::vector<Type>( { typeArg }), refTag, ptrTag) {
+    Type(scope, name, std::vector<Type>( { typeArg }), refTag, ptrTag, constTag) {
 }
 
 Type::Type(const std::string name, bool refTag, bool ptrTag, bool constTag) :
-  Type(std::vector<std::string>(), name, std::vector<Type>(), refTag, ptrTag) {
+  Type(std::vector<std::string>(), name, std::vector<Type>(), refTag, ptrTag, constTag) {
 }
 
 Type::Type(std::vector<std::string> scope, std::string name, bool refTag, bool ptrTag, bool constTag) :
-  Type(scope, name, std::vector<Type>(), refTag, ptrTag) {
+  Type(scope, name, std::vector<Type>(), refTag, ptrTag, constTag) {
 }
 
 bool Type::hasScope() const {
@@ -32,11 +32,11 @@ bool Type::hasScope() const {
 }
 
 Type::Type(std::string name, std::vector<Type> typeArgs, bool refTag, bool ptrTag, bool constTag) :
-    Type(std::vector<std::string>(), name, typeArgs, refTag, ptrTag) {
+    Type(std::vector<std::string>(), name, typeArgs, refTag, ptrTag, constTag) {
 }
 
 Type::Type(Type baseType, std::vector<Type> typeArgs, bool refTag, bool ptrTag, bool constTag) :
-    Type(baseType.scope, baseType.name, typeArgs, refTag, ptrTag) {
+    Type(baseType.scope, baseType.name, typeArgs, refTag, ptrTag, constTag) {
 }
 
 Type::~Type() {

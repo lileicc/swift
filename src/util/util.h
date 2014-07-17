@@ -144,7 +144,7 @@ void resample(
       backup_ptr[j][i] = ptr_temp_memo[j][pos];
   }
   
-  std::memcpy(ptr_temp_memo, backup_ptr, sizeof(backup_ptr));
+  std::memcpy(ptr_temp_memo, backup_ptr, sizeof(temp_T*) * Dependency * SampleN);
 }
 
 /*

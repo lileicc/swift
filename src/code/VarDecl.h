@@ -30,6 +30,12 @@ public:
   Expr* getValue();
   const std::vector<Expr*>& getArrArgs() const;
 
+  static VarDecl* createVarDecl(DeclContext* cd, std::string name, Type ty,
+    Expr* value = nullptr);
+
+  static VarDecl* createVarDecl(DeclContext* cd, std::string name, std::vector<Expr*> arr,
+    Type ty, Expr* value = nullptr);
+
   // For Printer
   virtual void print(printer::Printer* prt);
 protected:

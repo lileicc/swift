@@ -22,6 +22,7 @@ public:
   virtual void print(code::BooleanLiteral* term)=0;
   virtual void print(code::BreakStmt* term) = 0;
   virtual void print(code::CallExpr* term)=0;
+  virtual void print(code::CallTemplateExpr* term) = 0;
   virtual void print(code::CaseStmt* term)=0;
   virtual void print(code::ClassDecl* term)=0;
   virtual void print(code::ClassConstructor* term)=0;

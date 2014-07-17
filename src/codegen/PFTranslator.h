@@ -285,6 +285,7 @@ protected:
   static code::ForStmt* createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body = NULL, 
       bool isVarDefined = false, bool isLess = true);
   static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
+  static bool isTemporalType(code::Type ty);
 };
 
 } /* namespace codegen */
