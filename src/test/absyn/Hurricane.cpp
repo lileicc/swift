@@ -48,21 +48,24 @@ void Hurricane::build(){
     blog->add(dis);
   }
   /*
-  random City First  ~ UniformChoice({City c});
+  random City First  ~ UniformChoice({c for City c});
   */
   {
-    SetExpr *se = new CondSet(0, 0, VarDecl(0, 0, Symbol("City"), Symbol("c")));
+    SetExpr *se = new TupleSetExpr(0, 0, 
+      std::vector<Expr*>({new VarRef(0,0,Symbol("c"))}),
+      std::vector<VarDecl>({ VarDecl(0, 0, Symbol("City"), Symbol("c")) }),NULL);
     DistrExpr *dis = new DistrExpr(0, 0, Symbol("UniformChoice"));
     dis->add(se);
     FuncDecl *fd = new FuncDecl(0, 0, true, Symbol("City"), Symbol("First"), dis);
     blog->add(fd);
   }
   /*
-  random PrepLevel Prep(City c) {
-  if (First == c) then  ~ Categorical({High -> 0.5, Low -> 0.5})
-  else  ~ TabularCPD({Severe ->  ~ Categorical({High -> 0.9, Low -> 0.1}),
-  Mild ->  ~ Categorical({High -> 0.1, Low -> 0.9})},
-  Damage(First))
+  random PrepLevel Prep(City c) ~
+    if (First == c) then Categorical({High -> 0.5, Low -> 0.5})
+    else 
+      case Damage(First) in
+        {Severe ->  ~ Categorical({High -> 0.9, Low -> 0.1}),
+         Mild ->  ~ Categorical({High -> 0.1, Low -> 0.9})};
   };
   */
   {
@@ -98,11 +101,9 @@ void Hurricane::build(){
       MapExpr *map_t = new MapExpr(0, 0);
       map_t->addMap(new VarRef(0, 0, Symbol("Severe")), cat_s);
       map_t->addMap(new VarRef(0, 0, Symbol("Mild")), cat_m);
-      DistrExpr *tab_els = new DistrExpr(0, 0, Symbol("TabularCPD"));
-      tab_els->add(map_t);
-      tab_els->add(dam_f);
+      CaseExpr *cas_els = new CaseExpr(0, 0, dam_f, map_t);
 
-      els = tab_els;
+      els = cas_els;
     }
     IfExpr *ife = new IfExpr(0, 0, cond, thn, els);
     FuncDecl *func = new FuncDecl(0, 0, true, Symbol("PrepLevel"), Symbol("Prep"), ife);
@@ -111,10 +112,10 @@ void Hurricane::build(){
     blog->add(func);
   }
   /*
-  random DamageLevel Damage(City c) {
-  ~ TabularCPD({High ->  ~ Categorical({Severe -> 0.2, Mild -> 0.8}),
-  Low ->  ~ Categorical({Severe -> 0.8, Mild -> 0.2})},
-  Prep(c))
+  random DamageLevel Damage(City c) ~
+    case Prep(c) in 
+    {High ->  ~ Categorical({Severe -> 0.2, Mild -> 0.8}),
+     Low ->  ~ Categorical({Severe -> 0.8, Mild -> 0.2})};
   };
   */
   {
@@ -133,11 +134,9 @@ void Hurricane::build(){
     MapExpr *map_t = new MapExpr(0, 0);
     map_t->addMap(new VarRef(0, 0, Symbol("High")), cat_h);
     map_t->addMap(new VarRef(0, 0, Symbol("Low")), cat_l);
-    DistrExpr *tab = new DistrExpr(0, 0, Symbol("TabularCPD"));
-    tab->add(map_t);
-    tab->add(prep);
+    CaseExpr *cas = new CaseExpr(0,0,prep,map_t);
 
-    FuncDecl* func = new FuncDecl(0, 0, true, Symbol("DamageLevel"), Symbol("Damage"), tab);
+    FuncDecl* func = new FuncDecl(0, 0, true, Symbol("DamageLevel"), Symbol("Damage"), cas);
     func->addArg(VarDecl(0, 0, Symbol("City"), Symbol("c")));
     blog->add(func);
   }

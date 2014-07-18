@@ -46,11 +46,13 @@ void Birthday::build(){
     blog->add(num);
   }
   /*
-  random Date Birthday(Person p) ~ UniformChoice({Date d});
+  random Date Birthday(Person p) ~ UniformChoice({d for Date d});
   */
   {
     SetExpr*st;
-    st = new CondSet(0, 0, VarDecl(0, 0, Symbol("Date"), Symbol("d")), NULL);
+    st = new TupleSetExpr(0, 0, 
+      std::vector<Expr*>({new VarRef(0,0,Symbol("d"))}),
+      std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Date"), Symbol("d")) }), NULL);
     DistrExpr*uc;
     uc = new DistrExpr(0, 0, Symbol("UniformChoice"));
     uc->add(st);
@@ -60,11 +62,14 @@ void Birthday::build(){
     blog->add(fun);
   }
   /*
-  obs #Person = 23;
+  obs size({p for Person p}) = 23;
   */
   {
-    CondSet* cset = new CondSet(0, 0, VarDecl(0, 0, Symbol("Person")));
-    CardinalityExpr* lft = new CardinalityExpr(0, 0, cset);
+    TupleSetExpr* tset = new TupleSetExpr(0, 0, 
+      std::vector<Expr*>({new VarRef(0,0,Symbol("p"))}),
+      std::vector<VarDecl>({VarDecl(0,0,Symbol("Person"),Symbol("p"))}),NULL);
+    FuncApp* lft = new FuncApp(0,0,Symbol("size"));
+    lft->add(tset);
     IntLiteral* rght = new IntLiteral(0, 0, 23);
     Evidence* evi = new Evidence(0, 0, lft, rght);
     blog->add(evi);

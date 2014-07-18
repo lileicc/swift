@@ -51,12 +51,11 @@ void HMM::build(){
                  C -> 0.2, 
                  G -> 0.1, 
                  T -> 0.4})
-    else TabularCPD(
+    else Case S(prev(t)) in 
       {A -> Categorical({A -> 0.1, C -> 0.3, G -> 0.3, T -> 0.3}),
        C -> Categorical({A -> 0.3, C -> 0.1, G -> 0.3, T -> 0.3}),
        G -> Categorical({A -> 0.3, C -> 0.3, G -> 0.1, T -> 0.3}),
-       T -> Categorical({A -> 0.3, C -> 0.3, G -> 0.3, T -> 0.1})},
-      S(prev(t)));
+       T -> Categorical({A -> 0.3, C -> 0.3, G -> 0.3, T -> 0.1})};
   */
   {
     Expr *cond, *thn, *els;
@@ -115,11 +114,9 @@ void HMM::build(){
       fun_prv->add(new VarRef(0,0,Symbol("t")));
       FuncApp *fun_S = new FuncApp(0,0,Symbol("S"));
       fun_S->add(fun_prv);
-      DistrExpr *tab_els = new DistrExpr(0, 0, Symbol("TabularCPD"));
-      tab_els->add(map_S);
-      tab_els->add(fun_S);
+      CaseExpr *cas_els = new CaseExpr(0,0,fun_S,map_S);
 
-      els = tab_els;
+      els = cas_els;
     }
     IfExpr *ife = new IfExpr(0, 0, cond, thn, els);
     FuncDecl *func = new FuncDecl(0, 0, true, Symbol("State"), Symbol("S"), ife);
@@ -129,12 +126,11 @@ void HMM::build(){
   }
   /*
   random Output O(Timestep t)
-   ~ TabularCPD(
+   ~ case S(t) in 
      {A -> Categorical({ResultA -> 0.85, ResultC -> 0.05, ResultG -> 0.05, ResultT -> 0.05}),
       C -> Categorical({ResultA -> 0.05, ResultC -> 0.85, ResultG -> 0.05, ResultT -> 0.05}),
       G -> Categorical({ResultA -> 0.05, ResultC -> 0.05, ResultG -> 0.85, ResultT -> 0.05}),
-      T -> Categorical({ResultA -> 0.05, ResultC -> 0.05, ResultG -> 0.05, ResultT -> 0.85})},
-     S(t));
+      T -> Categorical({ResultA -> 0.05, ResultC -> 0.05, ResultG -> 0.05, ResultT -> 0.85})};
   */
   {
     MapExpr *map_A = new MapExpr(0, 0);
@@ -172,11 +168,9 @@ void HMM::build(){
     map_S->addMap(new VarRef(0, 0, Symbol("T")), cat_T);
     FuncApp *fun_S = new FuncApp(0, 0, Symbol("S"));
     fun_S->add(new VarRef(0, 0, Symbol("t")));
-    DistrExpr *tab = new DistrExpr(0, 0, Symbol("TabularCPD"));
-    tab->add(map_S);
-    tab->add(fun_S);
+    CaseExpr *cas = new CaseExpr(0,0,fun_S,map_S);
 
-    FuncDecl* func = new FuncDecl(0, 0, true, Symbol("Output"), Symbol("O"), tab);
+    FuncDecl* func = new FuncDecl(0, 0, true, Symbol("Output"), Symbol("O"), cas);
     func->addArg(VarDecl(0, 0, Symbol("Timestep"), Symbol("t")));
     blog->add(func);
   }

@@ -71,11 +71,13 @@ void PoissonBall::build(){
     blog->add(fun);
   }
   /*
-  random Ball BallDrawn(Draw d) ~UniformChoice({ Ball b });
+  random Ball BallDrawn(Draw d) ~UniformChoice({ b for Ball b });
   */
   {
     SetExpr*st;
-    st = new CondSet(0, 0, VarDecl(0, 0, Symbol("Ball"), Symbol("b")), NULL);
+    st = new TupleSetExpr(0, 0, 
+      std::vector<Expr*>({new VarRef(0,0,Symbol("b"))}),
+      std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Ball"), Symbol("b")) }), NULL);
     DistrExpr*uc;
     uc = new DistrExpr(0, 0, Symbol("UniformChoice"));
     uc->add(st);
@@ -85,12 +87,11 @@ void PoissonBall::build(){
     blog->add(fun);
   }
   /*
-  random Color ObsColor(Draw d) {
-  if (BallDrawn(d) != null)
-  then ~ TabularCPD({Blue -> ~ Categorical({Blue -> 0.8, Green -> 0.2}),
-  Green -> ~ Categorical({Blue -> 0.2, Green -> 0.8})},
-  TrueColor(BallDrawn(d)))
-  };
+  random Color ObsColor(Draw d) ~
+  if (BallDrawn(d) != null) then 
+    case TrueColor(BallDrawn(d)) in 
+    {Blue -> ~ Categorical({Blue -> 0.8, Green -> 0.2}),
+    Green -> ~ Categorical({Blue -> 0.2, Green -> 0.8})};
   */
   {
     FuncApp* ball_draw;
@@ -98,7 +99,7 @@ void PoissonBall::build(){
     ball_draw->add(new VarRef(0, 0, Symbol("d")));
     OpExpr* cond;
     cond = new OpExpr(0,0,AbsynConstant::NEQ,ball_draw, new NullLiteral(0,0));
-    DistrExpr*cate = new DistrExpr(0, 0, Symbol("TabularCPD"));;
+    CaseExpr*cas = NULL;
     {
       MapExpr* mp = new MapExpr(0,0);
       {
@@ -124,11 +125,10 @@ void PoissonBall::build(){
       true_color = new FuncApp(0, 0, Symbol("TrueColor"));
       true_color->add(ball_draw);
       
-      cate->add(mp);
-      cate->add(true_color);
+      cas = new CaseExpr(0,0,true_color,mp);
     }
     IfExpr* ift;
-    ift = new IfExpr(0,0,cond,cate,NULL);
+    ift = new IfExpr(0,0,cond,cas,NULL);
     FuncDecl*fun;
     fun = new FuncDecl(0, 0, true, Symbol("Color"), Symbol("ObsColor"), ift);
     fun->addArg(VarDecl(0, 0, Symbol("Draw"), Symbol("d")));
@@ -157,11 +157,14 @@ void PoissonBall::build(){
   }
 
   /*
-  query #{Ball b};
+  query size({b for Ball b});
   */
   {
-    CondSet* st = new CondSet(0, 0, VarDecl(0, 0, Symbol("Ball"), Symbol("b")), NULL);
-    CardinalityExpr* num = new CardinalityExpr(0, 0, st);
+    TupleSetExpr* st = new TupleSetExpr(0, 0, 
+      std::vector<Expr*>({new VarRef(0,0,Symbol("b"))}),
+      std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Ball"), Symbol("b")) }), NULL);
+    FuncApp* num = new FuncApp(0,0,Symbol("size"));
+    num->add(st);
     Query* query = new Query(0,0,num);
     blog->add(query);
   }
