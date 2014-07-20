@@ -652,10 +652,21 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
     decl.push_back(std::make_shared<ir::VarDecl>(args.back()->getTyp(), ""));
   }
 
+  //TODO: Think more about size()  @sizefunction
+  // Currently a hack for size()
+  if (expr->getFuncName().getValue() == "size") {
+    if (expr->size() != 1) {
+      error(expr->line, expr->col, "size() only accept exactly one argument!");
+      return processCardExpr(NULL);
+    } else
+      return processCardExpr(expr->get(0));
+  }
+
   // Check Builtin Functions
   //   Note: Especially for Prev()!!!!
   auto fc = predeclFactory.getDecl(func);
   if (fc != nullptr) {
+
     auto ptr = fc->getNew(args, &tyFactory);
     if (ptr == nullptr) {
       warning(expr->line, expr->col, "Function < " + func + " > is Built-in! Type Checking Error for Built-in Function!");
@@ -715,6 +726,22 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   return ptr;
 }
 
+std::shared_ptr<ir::CardExpr> Semant::processCardExpr(absyn::Expr* expr) {
+  std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
+  cd->setTyp(lookupTy(ir::IRConstString::INT));
+  std::shared_ptr<ir::Expr> b = transExpr(expr);
+  std::shared_ptr<ir::SetExpr> st = std::dynamic_pointer_cast<ir::SetExpr>(b);
+  if (st == nullptr) {
+    error(expr->line, expr->col,
+      "Invalid Cardinality Expression! Body must be a SetExpr!");
+    return cd;
+  }
+  cd->setBody(st);
+  // randomness checking
+  cd->setRandom(st->isRandom());
+  return cd;
+}
+
 std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
   std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
   cd->setTyp(lookupTy(ir::IRConstString::INT));
@@ -722,17 +749,7 @@ std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
     error(expr->line, expr->col, "Invalid Cardinality Expression!");
     return cd;
   }
-  std::shared_ptr<ir::Expr> b = transExpr(expr->get(0));
-  std::shared_ptr<ir::SetExpr> st = std::dynamic_pointer_cast<ir::SetExpr>(b);
-  if (st == nullptr) {
-    error(expr->line, expr->col,
-        "Invalid Cardinality Expression! Body must be a SetExpr!");
-    return cd;
-  }
-  cd->setBody(st);
-  // randomness checking
-  cd->setRandom(st->isRandom());
-  return cd;
+  return processCardExpr(expr->get(0));
 }
 
 std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
