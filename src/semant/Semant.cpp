@@ -1245,7 +1245,7 @@ bool Semant::isCardAll(std::shared_ptr<ir::Expr> ptr) {
   if (st == nullptr) {
     return false;
   }
-  return st->getCond() == nullptr;
+  return st->getCond() == nullptr; // Nothing to do with func!
 }
 
 void Semant::error(int line, int col, std::string info) {
