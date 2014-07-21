@@ -98,12 +98,11 @@ void Preprocessor::processSetEvidence(absyn::BlogProgram*& prog) {
       }
       auto arg = new absyn::CondSet(line, col, var, root);
       dist->add(arg);
-      auto func = new absyn::FuncDecl(line, col, true, var.getTyp(), sym[k], dist);
-      all.push_back(func);
+      auto ucfunc = new absyn::FuncDecl(line, col, true, var.getTyp(), sym[k], dist);
+      all.push_back(ucfunc);
     }
 
     // Do the Pointer Clearance
-    delete lt;
     delete rt;
   }
 }
