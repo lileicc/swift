@@ -26,6 +26,11 @@ public:
   
   // For Debugging Use
   void print(FILE *file, int indent);
+  Expr* clone();
+
+protected:
+  void cloneArgs();
+
 private:
   std::vector<VarDecl> vardecls;
   Expr* cond;

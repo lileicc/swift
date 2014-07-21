@@ -69,5 +69,19 @@ void TupleSetExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+void TupleSetExpr::cloneArgs() {
+  for (size_t i = 0; i < args.size(); ++ i)
+    if (args[i] != NULL)
+      args[i] = args[i]->clone();
+  if (cond != NULL)
+    cond = cond->clone();
+}
+
+Expr* TupleSetExpr::clone() {
+  TupleSetExpr* ret = new TupleSetExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

@@ -43,5 +43,11 @@ void CondSet::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+Expr* CondSet::clone() {
+  CondSet* ret = new CondSet(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

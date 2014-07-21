@@ -26,5 +26,9 @@ void DoubleLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(DoubleLiteral: %f )\n", indent, "", value);
 }
 
+Expr* DoubleLiteral::clone() {
+  return new DoubleLiteral(line, col, value);
+}
+
 }
 }

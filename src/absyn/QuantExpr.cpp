@@ -42,5 +42,11 @@ void QuantExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+Expr* QuantExpr::clone() {
+  QuantExpr* ret = new QuantExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

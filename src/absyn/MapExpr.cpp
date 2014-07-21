@@ -46,5 +46,11 @@ void MapExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+Expr* MapExpr::clone() {
+  MapExpr* ret = new MapExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

@@ -33,5 +33,11 @@ void DistrExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+Expr* DistrExpr::clone() {
+  DistrExpr* ret = new DistrExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

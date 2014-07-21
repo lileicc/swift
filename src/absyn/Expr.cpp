@@ -32,5 +32,11 @@ size_t Expr::size() {
   return args.size();
 }
 
+void Expr::cloneArgs() {
+  for (size_t i = 0; i < args.size(); ++ i)
+    if (args[i] != NULL)
+      args[i] = args[i]->clone();
+}
+
 }
 }

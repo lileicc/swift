@@ -28,6 +28,7 @@ public:
 
   // For Debugging Use
   void print(FILE* file, int indent);
+  Expr* clone();
 };
 
 }

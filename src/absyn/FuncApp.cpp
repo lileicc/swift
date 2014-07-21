@@ -33,5 +33,11 @@ void FuncApp::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+Expr* FuncApp::clone() {
+  FuncApp* ret = new FuncApp(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

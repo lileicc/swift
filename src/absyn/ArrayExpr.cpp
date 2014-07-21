@@ -33,5 +33,11 @@ void ArrayExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+Expr* ArrayExpr::clone(){
+  ArrayExpr* ret = new ArrayExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }
