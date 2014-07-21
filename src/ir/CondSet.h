@@ -17,10 +17,12 @@ public:
   std::shared_ptr<Expr> getFunc() const;
   void setFunc(std::shared_ptr<Expr> f);
   std::shared_ptr<Expr> getCond() const;
+  void setCond(std::shared_ptr<Expr> c);
   void print(FILE* file, int indent) const;
 
 private:
   std::shared_ptr<VarDecl> var;
+  int func_id, cond_id;
 };
 
 }

@@ -9,8 +9,16 @@ namespace ir {
 
 CondSet::CondSet(std::shared_ptr<VarDecl> var, std::shared_ptr<Expr> func, std::shared_ptr<Expr> cond) :
     SetExpr(IRConstant::CONDSET), var(var) {
-  addArg(func);
-  addArg(cond);
+  if (func != nullptr) {
+    func_id = args.size();
+    addArg(func);
+  } else
+    func_id = -1;
+  if (cond != nullptr) {
+    cond_id = args.size();
+    addArg(cond);
+  } else
+    cond_id = -1;
 }
 
 CondSet::~CondSet() {
@@ -21,15 +29,29 @@ const std::shared_ptr<VarDecl>& CondSet::getVar() const {
 }
 
 void CondSet::setFunc(std::shared_ptr<Expr> f) {
-  args[0] = f;
+  if (func_id > -1)
+    args[func_id] = f;
+  else {
+    func_id = args.size();
+    args.push_back(f);
+  }
+}
+
+void CondSet::setCond(std::shared_ptr<Expr> c) {
+  if (cond_id > -1)
+    args[cond_id] = c;
+  else {
+    cond_id = args.size();
+    args.push_back(c);
+  }
 }
 
 std::shared_ptr<Expr> CondSet::getFunc() const {
-  return get(0);
+  return (func_id < 0 ? nullptr : args[func_id]);
 }
 
 std::shared_ptr<Expr> CondSet::getCond() const {
-  return get(1);
+  return (cond_id < 0 ? nullptr : args[cond_id]);
 }
 
 void CondSet::print(FILE* file, int indent) const {

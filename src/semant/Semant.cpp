@@ -817,7 +817,9 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
   return std::make_shared<ir::Expr>();
 }
 
-std::shared_ptr<ir::SetExpr> Semant::transExpr(absyn::SetExpr* expr) {
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::SetExpr* expr) {
+  if (dynamic_cast<absyn::TupleSetExpr*>(expr) != NULL)
+    return transExpr((absyn::TupleSetExpr*) expr);
   if (dynamic_cast<absyn::CondSet*>(expr) != NULL)
     return transExpr((absyn::CondSet*) expr);
   if (dynamic_cast<absyn::ListSet*>(expr) != NULL)
@@ -913,7 +915,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
 
   // Add Local Variable
   if (var->getTyp() != NULL
-    && var->getVarName().size() > 0 && expr->getCond() != NULL)
+    && var->getVarName().size() > 0)
     local_var[var->getVarName()].push(var);
   std::shared_ptr<ir::Expr> cond =
     expr->getCond() == NULL ? nullptr : transExpr(expr->getCond());
@@ -921,7 +923,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
     expr->getExp(0) == NULL ? nullptr : transExpr(expr->getExp(0));
   // Remove Local Variable
   if (var->getTyp() != NULL
-    && var->getVarName().size() > 0 && expr->getCond() != NULL) {
+    && var->getVarName().size() > 0) {
     auto it = local_var.find(var->getVarName());
     it->second.pop();
     if (it->second.empty())

@@ -72,7 +72,7 @@ private:
 
   std::shared_ptr<ir::Expr> transExpr(absyn::VarRef* expr);
 
-  std::shared_ptr<ir::SetExpr> transExpr(absyn::SetExpr* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::SetExpr* expr);
 
   std::shared_ptr<ir::ListSet> transExpr(absyn::ListSet* expr);
 
