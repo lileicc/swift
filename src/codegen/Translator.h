@@ -120,7 +120,10 @@ protected:
    * and calculate the likelihood (need to call the likelifun)
    */
   code::FunctionDecl* transSetterFun(std::shared_ptr<ir::FuncDefn> fd);
-
+  /**
+  * translate the blog function body to a fixed function
+  */
+  code::FunctionDecl* transFixedFun(std::shared_ptr<ir::FuncDefn> fd);
   /**
    * translate a clause in ir to a statement in code,
    * retvar is for return variable
@@ -529,6 +532,14 @@ std::string getSetterFunName(std::string name) {
 */
 std::string getEnsureFunName(std::string name) {
   return "__ensure_" + name;
+}
+
+/**
+* given the name of a fixed function
+* return the function name  assigned in the translated program
+*/
+std::string getFixedFunName(std::string name) {
+  return "__fixed_" + name;
 }
 
 /**

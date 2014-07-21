@@ -140,7 +140,10 @@ protected:
    * and calculate the likelihood (need to call the likelifun)
    */
   code::FunctionDecl* transSetterFun(std::shared_ptr<ir::FuncDefn> fd);
-
+  /**
+  * translate the blog function body to a fixed function
+  */
+  code::FunctionDecl* transFixedFun(std::shared_ptr<ir::FuncDefn> fd);
   /**
    * translate a clause in ir to a statement in code,
    * retvar is for return variable

@@ -149,11 +149,13 @@ void PFTranslator::translate(swift::ir::BlogModel* model) {
   for (auto ty : model->getTypes())
     transTypeDomain(ty);
 
+  // translate fixed function
+  for (auto fun : model->getFixFuncs())
+    transFun(fun);
+
   // translate random function
   for (auto fun : model->getRandFuncs())
     transFun(fun);
-  
-  // TODO translate fixed function
 
   // translate evidence
   transAllEvidence(model->getEvidences());
@@ -447,9 +449,8 @@ void PFTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
     // add setter function::: double set_fun(int, ,,,);
     transSetterFun(fd);
   } else {
-    // TODO handle fixed function
-    // fixed function not supported yet
-    assert(false);
+    // handle fixed function
+    transFixedFun(fd);
   }
 }
 
@@ -616,6 +617,22 @@ code::FunctionDecl* PFTranslator::transSetterFun(
   return setterfun;
 }
 
+code::FunctionDecl* PFTranslator::transFixedFun(
+  std::shared_ptr<ir::FuncDefn> fd) {
+  const std::string & name = fd->getName();
+  std::string fixedfunname = getFixedFunName(name);
+  code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+  // adding method declaration in the main class
+  code::FunctionDecl* fixedfun = code::FunctionDecl::createFunctionDecl(
+    coreNs, fixedfunname, valuetype);
+  fixedfun->setParams(transParamVarDecls(fixedfun, fd));
+  declared_funs[fixedfun->getName()] = fixedfun;
+  // translate the Clause and calculate weight
+  fixedfun->addStmt(
+    transClause(fd->getBody(), ""));
+  return fixedfun;
+}
+
 code::Stmt* PFTranslator::transClause(std::shared_ptr<ir::Clause> clause,
                                        std::string retvar,
                                        std::string valuevar) {
@@ -776,6 +793,11 @@ code::Expr* PFTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   if (arrexp != nullptr) {
     used = true;
     res = transArrayExpr(arrexp, args);
+  }
+
+  // Special check when a branch returns a fixed expression rather than a distribution
+  if (valuevar.size() > 0) {
+    res = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_EQU);
   }
 
   // TODO translate other expression
@@ -1598,7 +1620,8 @@ code::Expr* PFTranslator::transFunctionCall(
       getterfunname = getGetterFunName(fc->getRefer()->getName());
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     case ir::IRConstant::FIXED:
-      // TODO
+      getterfunname = getFixedFunName(fc->getRefer()->getName());
+      return new code::CallExpr(new code::Identifier(getterfunname), args);
     default:
       return nullptr;
   }
