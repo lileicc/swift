@@ -51,9 +51,9 @@ void NumStDecl::print(FILE* file, int indent) {
   if (origin.size() > 0) {
     fprintf(file, "%*s(args:\n", indent + 2, "");
     for (size_t i = 0; i < origin.size(); i++) {
-      fprintf(file, "%*sorigin# %s", indent + 4, "",
+      fprintf(file, "%*sorigin#%d: %s\n", indent + 4, "", i,
           origin[i].getValue().c_str());
-      fprintf(file, "%*svar# %s", indent + 4, "", var[i].getValue().c_str());
+      fprintf(file, "%*svar#%d: %s\n", indent + 4, "", i, var[i].getValue().c_str());
     }
     fprintf(file, "%*s)\n", indent + 2, "");
   }

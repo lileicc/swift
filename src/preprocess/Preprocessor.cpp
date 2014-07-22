@@ -14,11 +14,10 @@ namespace swift {
 namespace preprocess {
 
 Preprocessor::Preprocessor() :
-    errorMsg(stderr), blogProg(NULL), isResultUsed(false) {
+    errorMsg(stderr), blogProg(NULL) {
 }
 
 Preprocessor::~Preprocessor() {
-  if (!isResultUsed) delete blogProg;
 }
 
 void Preprocessor::process(absyn::BlogProgram* prog) {
@@ -51,15 +50,12 @@ void Preprocessor::processSetEvidence(absyn::BlogProgram*& prog) {
     absyn::VarDecl lvar(lts != NULL ? lts->getVarDecl(0) : lcs->getVar());
     // Set Evidence: obs {CondSet} = {ListSet}
 
-    // TODO: IMPORTANT!!!
-    //   We current do not have clone method for Absyn instances!!!
-    //   So we do not support conditional set!!!
     absyn::Expr* cd = lcond;
     if (cd != NULL) {
-      error(cd->line, cd->col, "For Evidence Set, We DO NOT support condition for Set Expr now.");
-      return;
+      // We DO support condition now, but a warning will be printer
+      // TODO: use UniformChoiceK to better support condition
+      warning(cd->line, cd->col, "For Evidence Set, condition on the set expression is not recommended!");
     }
-    // assume condition is NULL
 
     // TODO: IMPORTANT!!!
     //   due to lack of clone method, 
@@ -68,7 +64,7 @@ void Preprocessor::processSetEvidence(absyn::BlogProgram*& prog) {
     for (size_t k = 0; k < rt->size(); ++k) {
       auto ref = dynamic_cast<absyn::VarRef*>(rt->get(k));
       if (ref == NULL) {
-        error(rt->line, rt->col, "For Evidence Set, We Only Support VarRef in the List Set.");
+        error(rt->line, rt->col, "For Evidence Set, We Only Support VarRef in the List Set (right hand side of the evidence).");
         return;
       }
       sym.push_back(ref->getVar());
@@ -76,7 +72,7 @@ void Preprocessor::processSetEvidence(absyn::BlogProgram*& prog) {
     // For the same reason, we do not support general expression in TupleSetExpr
     if (lfunc.size() != 1 || dynamic_cast<absyn::VarRef*>(lfunc[0]) == NULL
       || (dynamic_cast<absyn::VarRef*>(lfunc[0]))->getVar().getValue() != lvar.getVar().getValue()) {
-      error(cd->line, cd->col, "For Evidence Set, We DO NOT general expression in TupleSetExpr.");
+      error(cd->line, cd->col, "For Evidence Set, We DO NOT general expression in TupleSetExpr (the left hand side of the evidence).");
       return;
     }
 
@@ -88,13 +84,14 @@ void Preprocessor::processSetEvidence(absyn::BlogProgram*& prog) {
     // :::=> randon <element> ~ UniformChoice({T t: t != prev})
     for (size_t k = 0; k < sym.size(); ++k) {
       auto dist = new absyn::DistrExpr(line, col, absyn::Symbol("UniformChoice"));
-      absyn::Expr* root = NULL;
+      absyn::Expr* root = (lcond != NULL ? lcond->clone() : NULL);
       for (size_t p = 0; p < k; ++p) {
-        auto cur = new absyn::OpExpr(line, col, absyn::AbsynConstant::NEQ,
-          new absyn::VarRef(line, col, var.getVar()), new absyn::VarRef(line, col, sym[p]));
+        absyn::Expr* cur = 
+            new absyn::OpExpr(line, col, absyn::AbsynConstant::NEQ,
+            new absyn::VarRef(line, col, var.getVar()), new absyn::VarRef(line, col, sym[p]));
         if (root == NULL) root = cur;
         else
-          root = new absyn::OpExpr(line, col, absyn::AbsynConstant::AND, root, cur);
+          root = new absyn::OpExpr(line, col, absyn::AbsynConstant::AND, root->clone(), cur);
       }
       auto arg = new absyn::CondSet(line, col, var, root);
       dist->add(arg);
@@ -120,7 +117,6 @@ bool Preprocessor::Okay() {
 }
 
 absyn::BlogProgram* Preprocessor::getProg() {
-  isResultUsed = true;
   return blogProg;
 }
 
