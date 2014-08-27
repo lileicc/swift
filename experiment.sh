@@ -1,5 +1,4 @@
 make compile 
-./swift 
 ./run-target.sh aircraft-static1
 ./run-target.sh birthday
 ./run-target.sh birthday0

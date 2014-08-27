@@ -1305,7 +1305,7 @@ void PFTranslator::addFieldForFunVar(
 
 void PFTranslator::addFunValueRefStmt(
     code::FunctionDecl* fun, std::string valuevarname,
-    std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
+    const std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
     code::Type varType) {
   // the value of this function application variable is stored in
   // valuevarname[index1][index2]...

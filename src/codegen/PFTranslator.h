@@ -239,7 +239,7 @@ protected:
    * create reference to blog function value
    */
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
-      std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
+      const std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
       code::Type varType = INT_REF_TYPE);
 
   /**
