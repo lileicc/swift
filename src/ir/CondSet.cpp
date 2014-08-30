@@ -10,12 +10,12 @@ namespace ir {
 CondSet::CondSet(std::shared_ptr<VarDecl> var, std::shared_ptr<Expr> func, std::shared_ptr<Expr> cond) :
     SetExpr(IRConstant::CONDSET), var(var) {
   if (func != nullptr) {
-    func_id = args.size();
+    func_id = (int) args.size();
     addArg(func);
   } else
     func_id = -1;
   if (cond != nullptr) {
-    cond_id = args.size();
+    cond_id = (int) args.size();
     addArg(cond);
   } else
     cond_id = -1;
@@ -32,7 +32,7 @@ void CondSet::setFunc(std::shared_ptr<Expr> f) {
   if (func_id > -1)
     args[func_id] = f;
   else {
-    func_id = args.size();
+    func_id = (int) args.size();
     args.push_back(f);
   }
 }
@@ -41,7 +41,7 @@ void CondSet::setCond(std::shared_ptr<Expr> c) {
   if (cond_id > -1)
     args[cond_id] = c;
   else {
-    cond_id = args.size();
+    cond_id = (int) args.size();
     args.push_back(c);
   }
 }
