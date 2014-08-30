@@ -930,7 +930,7 @@ code::Expr* PFTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
     func->addStmt(new code::ReturnStmt(transExpr(condset->getFunc())));
     args.push_back(func);
 
-    new code::CallExpr(new code::Identifier(APPLY_FUNC_NAME), args);
+    return new code::CallExpr(new code::Identifier(APPLY_FUNC_NAME), args);
   }
 }
 
