@@ -15,7 +15,7 @@ VarDecl::VarDecl(DeclContext * context, std::string id, Type ty, Expr* value) :
 }
 
 VarDecl::VarDecl(DeclContext * context, std::string id, std::vector<Expr*> arr, Type ty, Expr* value) :
-  parent(context), id(id), ty(ty), arr(arr), value(value) {
+  parent(context), id(id), ty(ty), value(value), arr(arr) {
 }
 
 VarDecl::~VarDecl() {
