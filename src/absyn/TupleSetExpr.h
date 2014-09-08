@@ -25,7 +25,7 @@ public:
   Expr* getCond() const;
   
   // For Debugging Use
-  void print(FILE *file, int indent);
+  void print(FILE *file, int indent = 0);
   Expr* clone();
 
 protected:

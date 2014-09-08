@@ -14,7 +14,7 @@ TupleSetExpr::TupleSetExpr(int l, int c, std::vector<Expr*> exps,
                             std::vector<VarDecl> vardecls, Expr* cond) :
     SetExpr(l, c), vardecls(vardecls), cond(cond) {
     for(size_t i = 0; i < exps.size(); i++){
-      args.push_back(exps[i]);
+      add(exps[i]);
     }
 }
 
@@ -47,23 +47,22 @@ Expr* TupleSetExpr::getCond() const {
 // For Debugging Use
 void TupleSetExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s(TupleSetExpr:\n", indent, "");
-  fprintf(file, "%*s(VarDecls:\n", indent+2, "");
-  for(size_t i = 0; i < vardecls.size(); i++){
-    vardecls[i].print(file, indent+4);
-  }
-  fprintf(file, "%*s)\n", indent+2, "");
 
-  fprintf(file, "%*s(Exps:\n", indent+2, "");
-  for(size_t i = 0; i < args.size() - 1; i++){
+  fprintf(file, "%*s:setTuple\n", indent+2, "");
+  for(size_t i = 0; i < args.size(); i++){
     if (args[i] != NULL){
       args[i]->print(file, indent+4);
     }
   }
-  fprintf(file, "%*s)\n", indent+2, "");
 
   fprintf(file, "%*s:cond\n", indent+2, "");
-  if (args[args.size()-1] != NULL){
-    args[args.size()-1]->print(file, indent+4);
+  if (cond != NULL){
+    cond->print(file, indent+4);
+  }
+
+  fprintf(file, "%*s:enumVars\n", indent+2, "");
+  for(size_t i = 0; i < vardecls.size(); i++){
+    vardecls[i].print(file, indent+4);
   }
 
   fprintf(file, "%*s)\n", indent, "");
