@@ -135,10 +135,10 @@ public:
 
 private:
   std::string name;
+  const NameTy* refer;
   std::vector<std::shared_ptr<NumberStmt>> gen;
   size_t prelen;
   std::vector<OriginAttr*> origin;
-  const NameTy* refer;
   std::vector<std::string> instName;
   std::vector<std::shared_ptr<FuncDefn> > usedBy; //all random functions that use this type domain.
   std::map<std::string, size_t> originID;

@@ -30,10 +30,10 @@ protected:
   const long double PI = 3.141592653589793238L;
 };
 
-template<typename T>
-std::default_random_engine SwiftDistribution<T>::engine(0);
-//template <typename T>
-//std::default_random_engine SwiftDistribution<T>::engine = std::default_random_engine((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
+//template<typename T>
+//std::default_random_engine SwiftDistribution<T>::engine(0);
+template <typename T>
+std::default_random_engine SwiftDistribution<T>::engine = std::default_random_engine((unsigned) std::chrono::system_clock::now().time_since_epoch().count());
 
 } /* namespace random */
 } /* namespace swift */

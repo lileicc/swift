@@ -41,5 +41,11 @@ void CaseExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+Expr* CaseExpr::clone() {
+  CaseExpr* ret = new CaseExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

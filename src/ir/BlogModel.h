@@ -32,7 +32,8 @@ public:
   // For Temporal Features
   int getMarkovOrder() const;
   void setMarkovOrder(int k = -1);
-  bool isTemporal();
+  void updateMarkovOrder(int k);
+  bool isTemporal() const;
   unsigned getTempLimit() const ;
   void setTempLimit(unsigned k);
 

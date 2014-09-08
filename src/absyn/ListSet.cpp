@@ -26,5 +26,11 @@ void ListSet::print(FILE* file, int indent) {
   fprintf(file, "%*s) )\n", indent, "");
 }
 
+Expr* ListSet::clone() {
+  ListSet* ret = new ListSet(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

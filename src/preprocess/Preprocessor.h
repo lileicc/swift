@@ -38,7 +38,6 @@ private:
 
   msg::ErrorMsg errorMsg;
   absyn::BlogProgram* blogProg;
-  bool isResultUsed;
 };
 
 }

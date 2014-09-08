@@ -1,0 +1,39 @@
+/**
+ * A Gaussian mixture model by leili
+ */
+
+type Component;
+type DataPoint;
+
+distinct DataPoint data[10];
+
+#Component ~ Poisson(3);
+
+
+fixed Real[] mean_of_means = [0; 0];
+fixed Real[][] var_of_means = [100, 0; 0, 100];
+
+fixed Real[][] var_obs = [4, 0; 0, 4];
+
+random Real[] Theta(Component c) 
+    ~ MultivarGaussian(mean_of_means, var_of_means);
+
+random Component AssociatedComponent(DataPoint d) ~ UniformChoice({Component c});
+
+random Real[] ObservedPos(DataPoint d) {
+    if AssociatedComponent(d) != null 
+        then ~ MultivarGaussian(Theta(AssociatedComponent(d)), var_obs)
+};
+
+obs ObservedPos(data[0]) = [12.67793353555662; -1.9664716909857873];
+obs ObservedPos(data[1]) = [-2.8532629328653387; 1.9835955994671455];
+obs ObservedPos(data[2]) = [14.038276526975675; -0.7965855078759345];
+obs ObservedPos(data[3]) = [7.266151580745358; -2.3250409878823604];
+obs ObservedPos(data[4]) = [9.509239592358833; 0.19760082592471284];
+obs ObservedPos(data[5]) = [9.468096292088818; -3.494357573180091];
+obs ObservedPos(data[6]) = [0.09843279350983836; 6.486824475838083];
+obs ObservedPos(data[7]) = [9.656636137170704; 1.4337030141433968];
+obs ObservedPos(data[8]) = [0.2172831054584281; 4.16126230159904];
+obs ObservedPos(data[9]) = [6.294380168511825; -1.4899535512591284];
+
+query #Component;

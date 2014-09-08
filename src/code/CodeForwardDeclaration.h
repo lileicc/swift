@@ -15,6 +15,7 @@ class BinaryOperator;
 class BooleanLiteral;
 class BreakStmt;
 class CallExpr;
+class CallTemplateExpr;
 class CaseStmt;
 class ClassDecl;
 class ClassConstructor;

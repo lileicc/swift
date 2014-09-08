@@ -16,8 +16,8 @@ unsigned TimestepLiteral::getValue() const {
   return value;
 }
 
-void TimestepLiteral::print(FILE* file, int indent){
-  fprintf(file, "%*sTimestepLiteral: %u", indent, "", value);
+void TimestepLiteral::print(FILE* file, int indent) const {
+  fprintf(file, "%*sTimestepLiteral: %u\n", indent, "", value);
 }
 
 }

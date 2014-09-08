@@ -22,6 +22,8 @@ public:
 
   static CallExpr* createMethodCall(std::string varname, std::string methodname,
       std::vector<Expr*> args = std::vector<Expr *>());
+  static CallExpr* createMethodCall(code::Expr* var, std::string methodname,
+    std::vector<Expr*> args = std::vector<Expr *>());
   // For Printer
   void print(printer::Printer* prt);
 protected:

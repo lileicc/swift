@@ -56,10 +56,11 @@ void AircraftSimple::build(){
     blog->add(num);
   }
   /*
-  obs {Blip b} = {b1, b2, b3};
+  obs {b for Blip b} = {b1, b2, b3};
   */
   {
-    CondSet* st = new CondSet(0, 0, VarDecl(0,0,Symbol("Blip"),Symbol("b")));
+    TupleSetExpr* st = new TupleSetExpr(0, 0, std::vector<Expr*>({new VarRef(0,0,Symbol("b"))}),
+      std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Blip"),Symbol("b")) }), NULL);
     ListSet* lst = new ListSet(0,0);
     lst->add(new VarRef(0, 0, Symbol("b1")));
     lst->add(new VarRef(0, 0, Symbol("b2")));
@@ -71,11 +72,14 @@ void AircraftSimple::build(){
   }
 
   /*
-  query #{Aircraft a};
+  query size({a for Aircraft a});
   */
   {
-    CardinalityExpr* num = new CardinalityExpr(0, 0, new CondSet(0, 0, VarDecl(0, 0, Symbol("Blip"),Symbol("a"))));
-    Query* query = new Query(0,0,num);
+    TupleSetExpr* st = new TupleSetExpr(0, 0, std::vector<Expr*>({new VarRef(0,0,Symbol("a"))}),
+      std::vector<VarDecl>({VarDecl(0,0,Symbol("Aircraft"),Symbol("a"))}),NULL);
+    FuncApp* fun = new FuncApp(0,0,Symbol("size"));
+    fun->add(st);
+    Query* query = new Query(0,0,fun);
     blog->add(query);
   }
 }

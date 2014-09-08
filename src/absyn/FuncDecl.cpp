@@ -54,13 +54,13 @@ void FuncDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s:type %s\n", indent + 2, "", typ.toString().c_str());
   fprintf(file, "%*s:func %s\n", indent + 2, "", func.getValue().c_str());
   if (args.size() > 0) {
-    fprintf(file, "%*s(args:\n", indent + 2, "");
+    fprintf(file, "%*s:args (\n", indent + 2, "");
     for (size_t i = 0; i < args.size(); i++)
       args[i].print(file, indent + 4);
     fprintf(file, "%*s)\n", indent + 2, "");
   }
   if (expr != NULL) {
-    fprintf(file, "%*sexpr:\n", indent + 2, "");
+    fprintf(file, "%*s:expr\n", indent + 2, "");
     expr->print(file, indent + 4);
   }
   fprintf(file, "%*s)\n", indent, "");

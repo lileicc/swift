@@ -22,8 +22,12 @@ public:
   Expr* get(size_t id);
   size_t size();
 
+  virtual Expr* clone() = 0;
+
 protected:
   std::vector<Expr*> args;
+
+  virtual void cloneArgs();
 };
 
 }

@@ -32,6 +32,12 @@ bool QuantForm::isExists() const {
   return op == IRConstant::EXISTS;
 }
 
+// Note: only may use addArg to add Condition!!
+void QuantForm::addArg(std::shared_ptr<Expr> e) {
+  args.resize(1);
+  args[0] = e;
+}
+
 void QuantForm::setCond(std::shared_ptr<Expr> e) {
   setArgs(std::vector<std::shared_ptr<Expr> >({e}));
 }

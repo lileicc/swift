@@ -1,5 +1,5 @@
 /*
- * CPPTranslator.h
+ * Translator.h
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
@@ -7,6 +7,8 @@
 
 #pragma once
 #include <string>
+#include <memory>
+#include <vector>
 #include "../ir/IRHeader.h"
 #include "../code/Code.h"
 #include "../util/Configuration.h"
@@ -22,12 +24,15 @@ typedef code::Type TYPE;
 typedef code::FieldDecl* ORIGINDEFN;
 typedef code::Expr* EXPR;
 typedef code::Stmt* STMT;
+typedef code::FunctionDecl* SAMPLEFUN;
+typedef code::ClassDecl* STATE; // state (partial possible world)
+typedef code::VarDecl* SITE; // storage site declaration
 
-class CPPTranslator {
+class Translator {
 public:
-  CPPTranslator();
-  virtual ~CPPTranslator();
-  void translate(swift::ir::BlogModel* model);
+  Translator();
+  virtual ~Translator();
+  virtual void translate(swift::ir::BlogModel* model);
   code::Code* getResult();
 
 protected:
@@ -55,10 +60,18 @@ protected:
   
   inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
 
-private:
+  /**
+   * create FunctionDecl and setup argument for sampling algorithm
+   * the function should take one argument (number of samples)
+   * @return
+   */
+  inline SAMPLEFUN DECLARE_SAMPLEFUN();
+  
+  inline SITE DECLARE_STORE_SITE();
+
   code::Code* prog; // holder for result target code
   bool useTag;
-  code::ClassDecl* coreCls; // main Class for the sampler;
+  STATE coreCls; // main Class for the sampler;
   code::NamespaceDecl* coreNs; // main namespace
   code::FunctionDecl* coreClsConstructor; // construction function for main class
   code::FunctionDecl* coreClsInit; // init function for main class
@@ -70,7 +83,12 @@ private:
 
   code::FunctionDecl* mainFun; //main function
   code::FunctionDecl* coreClsPrint; // print function for answers
-  code::FunctionDecl* transSampleAlg();
+
+  /**
+   * translate the sampling algorithm
+   * @return
+   */
+  virtual code::FunctionDecl* transSampleAlg();
 
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
   /**
@@ -82,7 +100,7 @@ private:
    * create declaration of variables/fields
    * initialization statements
    */
-  void createInit();
+  virtual void createInit();
 
   /**
    * create main function
@@ -104,7 +122,10 @@ private:
    * and calculate the likelihood (need to call the likelifun)
    */
   code::FunctionDecl* transSetterFun(std::shared_ptr<ir::FuncDefn> fd);
-
+  /**
+  * translate the blog function body to a fixed function
+  */
+  code::FunctionDecl* transFixedFun(std::shared_ptr<ir::FuncDefn> fd);
   /**
    * translate a clause in ir to a statement in code,
    * retvar is for return variable
@@ -180,7 +201,7 @@ private:
    *  @param evid    ir evidence declaration
    */
   void transEvidence(code::FunctionDecl* context,
-      std::shared_ptr<ir::Evidence> evid);
+      std::shared_ptr<ir::Evidence> evid, bool transFuncApp = true);
 
   /**
    * translate all evidences
@@ -200,7 +221,7 @@ private:
    * create reference to blog function value
    */
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
-      std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
+      const std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
       code::Type varType = INT_REF_TYPE);
 
   /**
@@ -243,13 +264,15 @@ private:
       code::DeclContext* context,
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
-  static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false); // map ir type to code type
+  static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false, bool isPtr = false); // map ir type to code type
 
   static const code::Type INT_TYPE;
   static const code::Type INT_VECTOR_TYPE;
   static const code::Type INT_REF_TYPE;
+  static const code::Type INT_CONST_TYPE; // this is to define global constant values
 
   static const code::Type DOUBLE_TYPE;
+  static const code::Type DOUBLE_REF_TYPE;
   static const code::Type DOUBLE_VECTOR_TYPE;
 
   static const code::Type STRING_TYPE;
@@ -353,6 +376,9 @@ private:
 
   // function name for generating a full set: _gen_full() in util.h
   static const std::string GEN_FULL_SET_NAME;
+
+  // function name for internal apply: _apply() in util.h
+  static const std::string APPLY_FUNC_NAME;
 
   // function name for internal filter: _filer() in util.h
   static const std::string FILTER_FUNC_NAME;
@@ -469,6 +495,79 @@ private:
   static bool COMPUTE_LIKELIHOOD_IN_LOG;
 
   static swift::Configuration* config;
+
+  /**
+* give the name of the type,
+* return the variable name corresponding to the number of objects for this type
+*/
+std::string getVarOfNumType(std::string name) {
+  return "__num_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to get the number of objects for this type
+*/
+std::string getGetterFunName(std::string name) {
+  return "__get_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to get the likelihood of objects for this type
+*/
+std::string getLikeliFunName(std::string name) {
+  return "__likeli_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to set the value
+*/
+std::string getSetterFunName(std::string name) {
+  return "__set_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to set the value
+*/
+std::string getEnsureFunName(std::string name) {
+  return "__ensure_" + name;
+}
+
+/**
+* given the name of a fixed function
+* return the function name  assigned in the translated program
+*/
+std::string getFixedFunName(std::string name) {
+  return "__fixed_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the variable name to get the number of samples for the current variable
+*/
+std::string getMarkVarName(std::string name) {
+  return "__mark_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the variable name to get the value of that var/fun
+*/
+std::string getValueVarName(std::string name) {
+  return "__value_" + name;
+}
+
+/**
+* given the type name,
+* return the variable name to store all the instances in that type
+*/
+std::string getInstanceArrayName(std::string name) {
+  return "__instance_" + name;
+}
+
 };
 
 } /* namespace codegen */

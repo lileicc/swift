@@ -31,5 +31,9 @@ void VarDecl::print(FILE* file, int indent) {
       typ.toString().c_str(), var.getValue().c_str());
 }
 
+Expr* VarDecl::clone() {
+  return new VarDecl(line, col, typ, var);
+}
+
 }
 }
