@@ -108,7 +108,6 @@ typedef union {
   class Ty* typ;
   class TypDecl* typdec;
   class VarDecl* vardec;
-  class VarRef* varref;
   void *compexp[3];
   void *pair[2];
   vector<VarDecl>* varlist;

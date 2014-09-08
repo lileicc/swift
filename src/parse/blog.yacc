@@ -39,7 +39,6 @@
 #include "../absyn/Ty.h"
 #include "../absyn/TypDecl.h"
 #include "../absyn/VarDecl.h"
-#include "../absyn/VarRef.h"
 #include "../absyn/CaseExpr.h"
 #include "../absyn/TupleSetExpr.h"
 using namespace std;
@@ -117,7 +116,6 @@ BlogProgram* parse(const char* inp) {
   class Ty* typ;
   class TypDecl* typdec;
   class VarDecl* vardec;
-  class VarRef* varref;
   void *compexp[3];
   void *pair[2];
   vector<VarDecl>* varlist;
@@ -171,7 +169,7 @@ BlogProgram* parse(const char* inp) {
 %type <explst> semi_colon_separated_expression_list
   opt_expression_list expression_list;
 %type <exptuplst> expression_pair_list;
-%type <typ> type array_type list_type map_type name_type array_type_or_sub;
+%type <typ> type;
 //%type <ast> opt_parenthesized_type_lst, type_lst // Not Used
 %type <varlist> type_var_lst;
 %type <varlist> opt_parenthesized_type_var_lst;
@@ -253,34 +251,6 @@ type_decl:
 
 type:
     refer_name { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
-  | list_type { $$ = $1; }
-  | map_type { $$ = $1; }
-  | array_type {$$ = $1;}
-  ;
-
-name_type:
-  ID { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
-  ;
-
-list_type:
-  LIST LT_ ID GT_
-  { $$ = new Ty(curr_line, curr_col, Symbol($3->getValue())); }
-  ;
-
-array_type_or_sub:
-  refer_name LBRACKET {}
-
-//TODO: Not sure what type this should be
-array_type:
-  array_type_or_sub RBRACKET
-  {}
-  | array_type LBRACKET RBRACKET
-  {}
-  ;
-
-//TODO: Not sure what type this should be
-map_type:
-  MAP LT_ type COMMA type GT_ { $$ = $3; }
   ;
 
 opt_parenthesized_type_var_lst:
