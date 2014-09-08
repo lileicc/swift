@@ -151,16 +151,16 @@ BlogProgram* parse(const char* inp) {
 %token COMMA SEMI COLON DOT NUMSIGN RIGHTARROW
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
 
-%type <stmt> statement, declaration_stmt, type_decl, distribution_decl, parameter_decl,
-  evidence_stmt, query_stmt;
+%type <stmt> statement declaration_stmt type_decl distribution_decl parameter_decl
+  evidence_stmt query_stmt;
 %type <numstdec> number_stmt;
 %type <origdec> origin_func_decl;
-%type <funcdec> fixed_func_decl, rand_func_decl;
+%type <funcdec> fixed_func_decl rand_func_decl;
 %type <distdec> distinct_decl;
-%type <stmt> evidence, value_evidence;
-%type <exp> expression, literal, operation_expr, unary_operation_expr,
-  quantified_formula, function_call, list_construct_expression,
-  if_expr, case_expr;
+%type <stmt> evidence value_evidence;
+%type <exp> expression literal operation_expr unary_operation_expr
+  quantified_formula function_call list_construct_expression
+  if_expr case_expr;
 %type <compexp> comprehension_expr;
 %type <cardexp> number_expr;
 %type <mapexp> map_construct_expression;
@@ -168,14 +168,14 @@ BlogProgram* parse(const char* inp) {
 %type <setexp> set_expr;
 %type <setexp> explicit_set;
 %type <setexp> tuple_set;
-%type <explst> semi_colon_separated_expression_list,
-  opt_expression_list, expression_list;
+%type <explst> semi_colon_separated_expression_list
+  opt_expression_list expression_list;
 %type <exptuplst> expression_pair_list;
-%type <typ> type, array_type, list_type, map_type, name_type, array_type_or_sub;
+%type <typ> type array_type list_type map_type name_type array_type_or_sub;
 //%type <ast> opt_parenthesized_type_lst, type_lst // Not Used
 %type <varlist> type_var_lst;
 %type <varlist> opt_parenthesized_type_var_lst;
-%type <varlst> opt_parenthesized_origin_var_list,
+%type <varlst> opt_parenthesized_origin_var_list
   origin_var_list;
 %type <symbintpair> id_or_subid;
 %type <symbintvect> id_or_subid_list;
@@ -191,7 +191,7 @@ BlogProgram* parse(const char* inp) {
 %left PLUS_ MINUS_
 %left MULT_ DIV_ MOD_ POWER_
 %left UMINUS
-%left NOT_, AT_
+%left NOT_ AT_
 %left LBRACKET;
 
 %%
