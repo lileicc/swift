@@ -32,7 +32,7 @@ private:
   double weight, log_weight;
   std::unordered_map<int,int> ind; // value appear at which index
   int time_stamp; // record the total time of initializations
-  const int SizeLimit = 200000; // When ind.size() reach this number, we perform clear()
+  const size_t SizeLimit = 200000; // When ind.size() reach this number, we perform clear()
 };
 
 } /* namespace random */

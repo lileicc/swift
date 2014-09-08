@@ -11,24 +11,28 @@
 #include "codegen/Translator.h"
 #include "ir/BlogModel.h"
 #include "printer/CPPPrinter.h"
+#include "codegen/PFTranslator.h"
 
 extern swift::absyn::BlogProgram* parse(const char* inp);
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
     std::cout
-        << "\t[main] -i <input filename> -o <output filename> --ir <filename for printing ir>"
+        << "\t[main] [-e ParticleFilter] -i <input filename> -o <output filename> --ir <filename for printing ir>"
         << std::endl;
     exit(0);
   }
   const char* inp = "";
   const char* out = "";
   const char* irfile = nullptr;
+  std::string engine_type = "LWSampler";
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-i") == 0)
       inp = argv[++i];
     if (strcmp(argv[i], "-o") == 0)
       out = argv[++i];
+    if (strcmp(argv[i], "-e") == 0)
+      engine_type = std::string(argv[++i]);
     if (strcmp(argv[i], "--ir") == 0) {
       irfile = argv[++i];
       if (i >= argc || (irfile && irfile[0] == '-')) {
@@ -73,20 +77,30 @@ int main(int argc, char** argv) {
   }
 
   // translate ir to code representation
-  swift::codegen::Translator trans;
-  trans.translate(model);
-  swift::code::Code* program = trans.getResult();
-
-  // print code
-  swift::printer::Printer * prt = new swift::printer::CPPPrinter(
-      std::string(out));
-  program->print(prt);
-
-  printf("correctly translated %s!\n", inp);
+  swift::codegen::Translator* trans = nullptr;
+  if (engine_type == "LWSampler") {
+    trans = new swift::codegen::Translator();
+  } else if (engine_type == "ParticleFilter") {
+    trans = new swift::codegen::PFTranslator();
+  } else {
+    printf("%s engine not found", engine_type.c_str());
+  }
+  
+  if (trans != nullptr) {
+    trans->translate(model);
+    swift::code::Code* program = trans->getResult();
+    
+    // print code
+    swift::printer::Printer * prt = new swift::printer::CPPPrinter(
+                                                                   std::string(out));
+    program->print(prt);
+    
+    printf("correctly translated %s!\n", inp);
+    delete program;
+    delete prt;
+  }
 
   delete blog_absyn;
   delete model;
-  delete program;
-  delete prt;
   return 0;
 }
