@@ -51,6 +51,8 @@ int main(int argc, char** argv) {
     return 1;
   }
   
+  blog_absyn->print(stdout, 0);
+  
   // preprocess of input blog program
   swift::preprocess::Preprocessor preproc;
   preproc.process(blog_absyn);
