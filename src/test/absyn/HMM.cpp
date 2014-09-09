@@ -61,16 +61,16 @@ void HMM::build(){
     Expr *cond, *thn, *els;
     { // Cond
       OpExpr *eq = new OpExpr(0, 0, AbsynConstant::EQ,
-        new VarRef(0, 0, Symbol("t")), new TimeStampLiteral(0,0,0));
+        new FuncApp(0, 0, Symbol("t")), new TimeStampLiteral(0, 0, 0));
 
       cond = eq;
     }
     { // Then Clause
       MapExpr *map = new MapExpr(0, 0);
-      map->addMap(new VarRef(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.3));
-      map->addMap(new VarRef(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.2));
-      map->addMap(new VarRef(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.1));
-      map->addMap(new VarRef(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.4));
+      map->addMap(new FuncApp(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.3));
+      map->addMap(new FuncApp(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.2));
+      map->addMap(new FuncApp(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.1));
+      map->addMap(new FuncApp(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.4));
       DistrExpr *cat = new DistrExpr(0, 0, Symbol("Categorical"));
       cat->add(map);
 
@@ -78,40 +78,40 @@ void HMM::build(){
     }
     { // Else Clause
       MapExpr *map_A = new MapExpr(0, 0);
-      map_A->addMap(new VarRef(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.1));
-      map_A->addMap(new VarRef(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.3));
-      map_A->addMap(new VarRef(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.3));
-      map_A->addMap(new VarRef(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.3));
+      map_A->addMap(new FuncApp(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.1));
+      map_A->addMap(new FuncApp(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.3));
+      map_A->addMap(new FuncApp(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.3));
+      map_A->addMap(new FuncApp(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.3));
       DistrExpr *cat_A = new DistrExpr(0, 0, Symbol("Categorical"));
       cat_A->add(map_A);
       MapExpr *map_C = new MapExpr(0, 0);
-      map_C->addMap(new VarRef(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.3));
-      map_C->addMap(new VarRef(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.1));
-      map_C->addMap(new VarRef(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.3));
-      map_C->addMap(new VarRef(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.3));
+      map_C->addMap(new FuncApp(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.3));
+      map_C->addMap(new FuncApp(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.1));
+      map_C->addMap(new FuncApp(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.3));
+      map_C->addMap(new FuncApp(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.3));
       DistrExpr *cat_C = new DistrExpr(0, 0, Symbol("Categorical"));
       cat_C->add(map_C);
       MapExpr *map_G = new MapExpr(0, 0);
-      map_G->addMap(new VarRef(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.3));
-      map_G->addMap(new VarRef(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.3));
-      map_G->addMap(new VarRef(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.1));
-      map_G->addMap(new VarRef(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.3));
+      map_G->addMap(new FuncApp(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.3));
+      map_G->addMap(new FuncApp(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.3));
+      map_G->addMap(new FuncApp(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.1));
+      map_G->addMap(new FuncApp(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.3));
       DistrExpr *cat_G = new DistrExpr(0, 0, Symbol("Categorical"));
       cat_G->add(map_G);
       MapExpr *map_T = new MapExpr(0, 0);
-      map_T->addMap(new VarRef(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.3));
-      map_T->addMap(new VarRef(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.3));
-      map_T->addMap(new VarRef(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.3));
-      map_T->addMap(new VarRef(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.1));
+      map_T->addMap(new FuncApp(0, 0, Symbol("A")), new DoubleLiteral(0, 0, 0.3));
+      map_T->addMap(new FuncApp(0, 0, Symbol("C")), new DoubleLiteral(0, 0, 0.3));
+      map_T->addMap(new FuncApp(0, 0, Symbol("G")), new DoubleLiteral(0, 0, 0.3));
+      map_T->addMap(new FuncApp(0, 0, Symbol("T")), new DoubleLiteral(0, 0, 0.1));
       DistrExpr *cat_T = new DistrExpr(0, 0, Symbol("Categorical"));
       cat_T->add(map_T);
       MapExpr *map_S = new MapExpr(0, 0);
-      map_S->addMap(new VarRef(0, 0, Symbol("A")), cat_A);
-      map_S->addMap(new VarRef(0, 0, Symbol("C")), cat_C);
-      map_S->addMap(new VarRef(0, 0, Symbol("G")), cat_G);
-      map_S->addMap(new VarRef(0, 0, Symbol("T")), cat_T);
+      map_S->addMap(new FuncApp(0, 0, Symbol("A")), cat_A);
+      map_S->addMap(new FuncApp(0, 0, Symbol("C")), cat_C);
+      map_S->addMap(new FuncApp(0, 0, Symbol("G")), cat_G);
+      map_S->addMap(new FuncApp(0, 0, Symbol("T")), cat_T);
       FuncApp *fun_prv = new FuncApp(0, 0, Symbol("prev"));
-      fun_prv->add(new VarRef(0,0,Symbol("t")));
+      fun_prv->add(new FuncApp(0, 0, Symbol("t")));
       FuncApp *fun_S = new FuncApp(0,0,Symbol("S"));
       fun_S->add(fun_prv);
       CaseExpr *cas_els = new CaseExpr(0,0,fun_S,map_S);
@@ -134,40 +134,40 @@ void HMM::build(){
   */
   {
     MapExpr *map_A = new MapExpr(0, 0);
-    map_A->addMap(new VarRef(0, 0, Symbol("ResultA")), new DoubleLiteral(0, 0, 0.85));
-    map_A->addMap(new VarRef(0, 0, Symbol("ResultC")), new DoubleLiteral(0, 0, 0.05));
-    map_A->addMap(new VarRef(0, 0, Symbol("ResultG")), new DoubleLiteral(0, 0, 0.05));
-    map_A->addMap(new VarRef(0, 0, Symbol("ResultT")), new DoubleLiteral(0, 0, 0.05));
+    map_A->addMap(new FuncApp(0, 0, Symbol("ResultA")), new DoubleLiteral(0, 0, 0.85));
+    map_A->addMap(new FuncApp(0, 0, Symbol("ResultC")), new DoubleLiteral(0, 0, 0.05));
+    map_A->addMap(new FuncApp(0, 0, Symbol("ResultG")), new DoubleLiteral(0, 0, 0.05));
+    map_A->addMap(new FuncApp(0, 0, Symbol("ResultT")), new DoubleLiteral(0, 0, 0.05));
     DistrExpr *cat_A = new DistrExpr(0, 0, Symbol("Categorical"));
     cat_A->add(map_A);
     MapExpr *map_C = new MapExpr(0, 0);
-    map_C->addMap(new VarRef(0, 0, Symbol("ResultA")), new DoubleLiteral(0, 0, 0.05));
-    map_C->addMap(new VarRef(0, 0, Symbol("ResultC")), new DoubleLiteral(0, 0, 0.85));
-    map_C->addMap(new VarRef(0, 0, Symbol("ResultG")), new DoubleLiteral(0, 0, 0.05));
-    map_C->addMap(new VarRef(0, 0, Symbol("ResultT")), new DoubleLiteral(0, 0, 0.05));
+    map_C->addMap(new FuncApp(0, 0, Symbol("ResultA")), new DoubleLiteral(0, 0, 0.05));
+    map_C->addMap(new FuncApp(0, 0, Symbol("ResultC")), new DoubleLiteral(0, 0, 0.85));
+    map_C->addMap(new FuncApp(0, 0, Symbol("ResultG")), new DoubleLiteral(0, 0, 0.05));
+    map_C->addMap(new FuncApp(0, 0, Symbol("ResultT")), new DoubleLiteral(0, 0, 0.05));
     DistrExpr *cat_C = new DistrExpr(0, 0, Symbol("Categorical"));
     cat_C->add(map_C);
     MapExpr *map_G = new MapExpr(0, 0);
-    map_G->addMap(new VarRef(0, 0, Symbol("ResultA")), new DoubleLiteral(0, 0, 0.05));
-    map_G->addMap(new VarRef(0, 0, Symbol("ResultC")), new DoubleLiteral(0, 0, 0.05));
-    map_G->addMap(new VarRef(0, 0, Symbol("ResultG")), new DoubleLiteral(0, 0, 0.85));
-    map_G->addMap(new VarRef(0, 0, Symbol("ResultT")), new DoubleLiteral(0, 0, 0.05));
+    map_G->addMap(new FuncApp(0, 0, Symbol("ResultA")), new DoubleLiteral(0, 0, 0.05));
+    map_G->addMap(new FuncApp(0, 0, Symbol("ResultC")), new DoubleLiteral(0, 0, 0.05));
+    map_G->addMap(new FuncApp(0, 0, Symbol("ResultG")), new DoubleLiteral(0, 0, 0.85));
+    map_G->addMap(new FuncApp(0, 0, Symbol("ResultT")), new DoubleLiteral(0, 0, 0.05));
     DistrExpr *cat_G = new DistrExpr(0, 0, Symbol("Categorical"));
     cat_G->add(map_G);
     MapExpr *map_T = new MapExpr(0, 0);
-    map_T->addMap(new VarRef(0, 0, Symbol("ResultA")), new DoubleLiteral(0, 0, 0.05));
-    map_T->addMap(new VarRef(0, 0, Symbol("ResultC")), new DoubleLiteral(0, 0, 0.05));
-    map_T->addMap(new VarRef(0, 0, Symbol("ResultG")), new DoubleLiteral(0, 0, 0.05));
-    map_T->addMap(new VarRef(0, 0, Symbol("ResultT")), new DoubleLiteral(0, 0, 0.85));
+    map_T->addMap(new FuncApp(0, 0, Symbol("ResultA")), new DoubleLiteral(0, 0, 0.05));
+    map_T->addMap(new FuncApp(0, 0, Symbol("ResultC")), new DoubleLiteral(0, 0, 0.05));
+    map_T->addMap(new FuncApp(0, 0, Symbol("ResultG")), new DoubleLiteral(0, 0, 0.05));
+    map_T->addMap(new FuncApp(0, 0, Symbol("ResultT")), new DoubleLiteral(0, 0, 0.85));
     DistrExpr *cat_T = new DistrExpr(0, 0, Symbol("Categorical"));
     cat_T->add(map_T);
     MapExpr *map_S = new MapExpr(0, 0);
-    map_S->addMap(new VarRef(0, 0, Symbol("A")), cat_A);
-    map_S->addMap(new VarRef(0, 0, Symbol("C")), cat_C);
-    map_S->addMap(new VarRef(0, 0, Symbol("G")), cat_G);
-    map_S->addMap(new VarRef(0, 0, Symbol("T")), cat_T);
+    map_S->addMap(new FuncApp(0, 0, Symbol("A")), cat_A);
+    map_S->addMap(new FuncApp(0, 0, Symbol("C")), cat_C);
+    map_S->addMap(new FuncApp(0, 0, Symbol("G")), cat_G);
+    map_S->addMap(new FuncApp(0, 0, Symbol("T")), cat_T);
     FuncApp *fun_S = new FuncApp(0, 0, Symbol("S"));
-    fun_S->add(new VarRef(0, 0, Symbol("t")));
+    fun_S->add(new FuncApp(0, 0, Symbol("t")));
     CaseExpr *cas = new CaseExpr(0,0,fun_S,map_S);
 
     FuncDecl* func = new FuncDecl(0, 0, true, Symbol("Output"), Symbol("O"), cas);
@@ -186,23 +186,23 @@ void HMM::build(){
     Evidence *obs;
     o = new FuncApp(0, 0, Symbol("O"));
     o->add(new TimeStampLiteral(0,0,0));
-    obs = new Evidence(0, 0, o, new VarRef(0, 0, Symbol("ResultC")));
+    obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultC")));
     blog->add(obs);
     o = new FuncApp(0, 0, Symbol("O"));
     o->add(new TimeStampLiteral(0, 0, 1));
-    obs = new Evidence(0, 0, o, new VarRef(0, 0, Symbol("ResultA")));
+    obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultA")));
     blog->add(obs);
     o = new FuncApp(0, 0, Symbol("O"));
     o->add(new TimeStampLiteral(0, 0, 2));
-    obs = new Evidence(0, 0, o, new VarRef(0, 0, Symbol("ResultA")));
+    obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultA")));
     blog->add(obs);
     o = new FuncApp(0, 0, Symbol("O"));
     o->add(new TimeStampLiteral(0, 0, 3));
-    obs = new Evidence(0, 0, o, new VarRef(0, 0, Symbol("ResultA")));
+    obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultA")));
     blog->add(obs);
     o = new FuncApp(0, 0, Symbol("O"));
     o->add(new TimeStampLiteral(0, 0, 4));
-    obs = new Evidence(0, 0, o, new VarRef(0, 0, Symbol("ResultG")));
+    obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultG")));
     blog->add(obs);
   }
   /*

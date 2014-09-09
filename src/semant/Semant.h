@@ -70,7 +70,9 @@ private:
 
   std::shared_ptr<ir::QuantForm> transExpr(absyn::QuantExpr* expr);
 
-  std::shared_ptr<ir::Expr> transExpr(absyn::VarRef* expr);
+  // @Deprecated
+  //std::shared_ptr<ir::Expr> transExpr(absyn::VarRef* expr);
+  std::shared_ptr<ir::Expr> transVarRef(std::string var);
 
   std::shared_ptr<ir::Expr> transExpr(absyn::SetExpr* expr);
 

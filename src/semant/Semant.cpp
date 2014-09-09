@@ -254,14 +254,18 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
     return (ret = transExpr((absyn::CardinalityExpr*) expr));
   if (dynamic_cast<absyn::QuantExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::QuantExpr*) expr));
-  if (dynamic_cast<absyn::VarRef*>(expr) != nullptr)
-    return (ret = transExpr((absyn::VarRef*) expr));
   if (dynamic_cast<absyn::SetExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::SetExpr*) expr));
   if (dynamic_cast<absyn::Literal*>(expr) != nullptr)
     return (ret = transExpr((absyn::Literal*) expr));
   if (dynamic_cast<absyn::ArrayExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::ArrayExpr*) expr));
+  if (dynamic_cast<absyn::VarRef*>(expr) != nullptr) {
+    //@Deprecated
+    warning(expr->line, expr->col, "Parsing expression to <VarRef> in Absyn should be deprecated! FuncApp is recommended!");
+    ret = transVarRef(((absyn::VarRef*) expr)->getVar().getValue());
+    if (ret != nullptr) return ret;
+  }
   error(expr->line, expr->col, "Semant Error! Illegal Expression!");
   return ret;
 }
@@ -652,6 +656,12 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
     decl.push_back(std::make_shared<ir::VarDecl>(args.back()->getTyp(), ""));
   }
 
+  if (args.size() == 0) {
+    // Single Variable Reference
+    std::shared_ptr<ir::Expr> varRef = transVarRef(func);
+    if (varRef != nullptr) return varRef;
+  }
+
   //TODO: Think more about size()  @sizefunction
   // Currently a hack for size()
   if (expr->getFuncName().getValue() == "size") {
@@ -784,9 +794,8 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
+std::shared_ptr<ir::Expr> Semant::transVarRef(std::string var) {
   // 3 cases: local variable, voidfunccall, const symbol
-  std::string var = expr->getVar().getValue();
   if (local_var.count(var) != 0) {
     // Local Variable
     std::shared_ptr<ir::VarRefer> ret = std::make_shared<ir::VarRefer>(
@@ -813,8 +822,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
     ret->setTyp(lookupNameTy(sym->getRefer()->getName()));
     return ret; // randomness = false;
   }
-  error(expr->line, expr->col, "Illegal Symbol Reference of < " + var + " >!");
-  return std::make_shared<ir::Expr>();
+  return nullptr;
 }
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::SetExpr* expr) {

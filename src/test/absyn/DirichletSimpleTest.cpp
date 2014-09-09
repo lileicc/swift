@@ -39,7 +39,7 @@ void DirichletSimpleTest::build(){
   */
   {
     DistrExpr *dis = new DistrExpr(0, 0, Symbol("Discrete"));
-    dis->add(new VarRef(0, 0, Symbol("w")));
+    dis->add(new FuncApp(0, 0, Symbol("w")));
     FuncDecl *fd = new FuncDecl(0, 0, true, Symbol("Integer"), Symbol("x"), dis);
     blog->add(fd);
   }
@@ -47,7 +47,7 @@ void DirichletSimpleTest::build(){
   query x;
   */
   {
-    blog->add(new Query(0, 0, new VarRef(0, 0, Symbol("x"))));
+    blog->add(new Query(0, 0, new FuncApp(0, 0, Symbol("x"))));
   }
 }
 

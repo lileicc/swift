@@ -51,7 +51,7 @@ void Birthday::build(){
   {
     SetExpr*st;
     st = new TupleSetExpr(0, 0, 
-      std::vector<Expr*>({new VarRef(0,0,Symbol("d"))}),
+      std::vector<Expr*>({ new FuncApp(0, 0, Symbol("d")) }),
       std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Date"), Symbol("d")) }), NULL);
     DistrExpr*uc;
     uc = new DistrExpr(0, 0, Symbol("UniformChoice"));
@@ -66,7 +66,7 @@ void Birthday::build(){
   */
   {
     TupleSetExpr* tset = new TupleSetExpr(0, 0, 
-      std::vector<Expr*>({new VarRef(0,0,Symbol("p"))}),
+      std::vector<Expr*>({ new FuncApp(0, 0, Symbol("p")) }),
       std::vector<VarDecl>({VarDecl(0,0,Symbol("Person"),Symbol("p"))}),NULL);
     FuncApp* lft = new FuncApp(0,0,Symbol("size"));
     lft->add(tset);
@@ -80,12 +80,12 @@ void Birthday::build(){
   */
   {
     // x != y
-    OpExpr* lft = new OpExpr(0, 0, AbsynConstant::NEQ, new VarRef(0, 0, Symbol("x")), new VarRef(0, 0, Symbol("y")));
+    OpExpr* lft = new OpExpr(0, 0, AbsynConstant::NEQ, new FuncApp(0, 0, Symbol("x")), new FuncApp(0, 0, Symbol("y")));
     // Birthday(x) == Birthday(y)
     FuncApp* bth_x = new FuncApp(0, 0, Symbol("Birthday"));
-    bth_x->add(new VarRef(0, 0, Symbol("x")));
+    bth_x->add(new FuncApp(0, 0, Symbol("x")));
     FuncApp* bth_y = new FuncApp(0, 0, Symbol("Birthday"));
-    bth_y->add(new VarRef(0, 0, Symbol("y")));
+    bth_y->add(new FuncApp(0, 0, Symbol("y")));
     OpExpr* rght = new OpExpr(0,0,AbsynConstant::EQ,bth_x,bth_y);
 
     OpExpr* cond = new OpExpr(0,0,AbsynConstant::AND,lft,rght);

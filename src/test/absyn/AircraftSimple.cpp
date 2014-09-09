@@ -59,12 +59,12 @@ void AircraftSimple::build(){
   obs {b for Blip b} = {b1, b2, b3};
   */
   {
-    TupleSetExpr* st = new TupleSetExpr(0, 0, std::vector<Expr*>({new VarRef(0,0,Symbol("b"))}),
+    TupleSetExpr* st = new TupleSetExpr(0, 0, std::vector<Expr*>({new FuncApp(0,0,Symbol("b"))}),
       std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Blip"),Symbol("b")) }), NULL);
     ListSet* lst = new ListSet(0,0);
-    lst->add(new VarRef(0, 0, Symbol("b1")));
-    lst->add(new VarRef(0, 0, Symbol("b2")));
-    lst->add(new VarRef(0, 0, Symbol("b3")));
+    lst->add(new FuncApp(0, 0, Symbol("b1")));
+    lst->add(new FuncApp(0, 0, Symbol("b2")));
+    lst->add(new FuncApp(0, 0, Symbol("b3")));
 //    CardinalityExpr* num = new CardinalityExpr(0, 0, new CondSet(0, 0, VarDecl(0, 0, Symbol("Blip"))));
 //    Evidence* e = new Evidence(0, 0, num, new IntLiteral(0,0,3));
     Evidence* e = new Evidence(0,0,st,lst); // Set Evidence Here!
@@ -75,7 +75,7 @@ void AircraftSimple::build(){
   query size({a for Aircraft a});
   */
   {
-    TupleSetExpr* st = new TupleSetExpr(0, 0, std::vector<Expr*>({new VarRef(0,0,Symbol("a"))}),
+    TupleSetExpr* st = new TupleSetExpr(0, 0, std::vector<Expr*>({ new FuncApp(0, 0, Symbol("a")) }),
       std::vector<VarDecl>({VarDecl(0,0,Symbol("Aircraft"),Symbol("a"))}),NULL);
     FuncApp* fun = new FuncApp(0,0,Symbol("size"));
     fun->add(st);

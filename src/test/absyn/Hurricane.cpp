@@ -52,7 +52,7 @@ void Hurricane::build(){
   */
   {
     SetExpr *se = new TupleSetExpr(0, 0, 
-      std::vector<Expr*>({new VarRef(0,0,Symbol("c"))}),
+      std::vector<Expr*>({ new FuncApp(0, 0, Symbol("c")) }),
       std::vector<VarDecl>({ VarDecl(0, 0, Symbol("City"), Symbol("c")) }),NULL);
     DistrExpr *dis = new DistrExpr(0, 0, Symbol("UniformChoice"));
     dis->add(se);
@@ -72,14 +72,14 @@ void Hurricane::build(){
     Expr *cond, *thn, *els;
     { // Cond
       OpExpr *eq = new OpExpr(0, 0, AbsynConstant::EQ,
-        new VarRef(0, 0, Symbol("First")), new VarRef(0, 0, Symbol("c")));
+        new FuncApp(0, 0, Symbol("First")), new FuncApp(0, 0, Symbol("c")));
 
       cond = eq;
     }
     { // Then Clause
       MapExpr *map = new MapExpr(0, 0);
-      map->addMap(new VarRef(0, 0, Symbol("High")), new DoubleLiteral(0, 0, 0.5));
-      map->addMap(new VarRef(0, 0, Symbol("Low")), new DoubleLiteral(0, 0, 0.5));
+      map->addMap(new FuncApp(0, 0, Symbol("High")), new DoubleLiteral(0, 0, 0.5));
+      map->addMap(new FuncApp(0, 0, Symbol("Low")), new DoubleLiteral(0, 0, 0.5));
       DistrExpr *cat = new DistrExpr(0, 0, Symbol("Categorical"));
       cat->add(map);
 
@@ -87,20 +87,20 @@ void Hurricane::build(){
     }
     { // Else Clause
       FuncApp *dam_f = new FuncApp(0, 0, Symbol("Damage"));
-      dam_f->add(new VarRef(0, 0, Symbol("First")));
+      dam_f->add(new FuncApp(0, 0, Symbol("First")));
       MapExpr *map_s = new MapExpr(0, 0);
-      map_s->addMap(new VarRef(0, 0, Symbol("High")), new DoubleLiteral(0, 0, 0.9));
-      map_s->addMap(new VarRef(0, 0, Symbol("Low")), new DoubleLiteral(0, 0, 0.1));
+      map_s->addMap(new FuncApp(0, 0, Symbol("High")), new DoubleLiteral(0, 0, 0.9));
+      map_s->addMap(new FuncApp(0, 0, Symbol("Low")), new DoubleLiteral(0, 0, 0.1));
       DistrExpr *cat_s = new DistrExpr(0, 0, Symbol("Categorical"));
       cat_s->add(map_s);
       MapExpr *map_m = new MapExpr(0, 0);
-      map_m->addMap(new VarRef(0, 0, Symbol("High")), new DoubleLiteral(0, 0, 0.1));
-      map_m->addMap(new VarRef(0, 0, Symbol("Low")), new DoubleLiteral(0, 0, 0.9));
+      map_m->addMap(new FuncApp(0, 0, Symbol("High")), new DoubleLiteral(0, 0, 0.1));
+      map_m->addMap(new FuncApp(0, 0, Symbol("Low")), new DoubleLiteral(0, 0, 0.9));
       DistrExpr *cat_m = new DistrExpr(0, 0, Symbol("Categorical"));
       cat_m->add(map_m);
       MapExpr *map_t = new MapExpr(0, 0);
-      map_t->addMap(new VarRef(0, 0, Symbol("Severe")), cat_s);
-      map_t->addMap(new VarRef(0, 0, Symbol("Mild")), cat_m);
+      map_t->addMap(new FuncApp(0, 0, Symbol("Severe")), cat_s);
+      map_t->addMap(new FuncApp(0, 0, Symbol("Mild")), cat_m);
       CaseExpr *cas_els = new CaseExpr(0, 0, dam_f, map_t);
 
       els = cas_els;
@@ -121,19 +121,19 @@ void Hurricane::build(){
   {
     DistrExpr *cat_h = new DistrExpr(0, 0, Symbol("Categorical"));
     MapExpr *map_h = new MapExpr(0, 0);
-    map_h->addMap(new VarRef(0, 0, Symbol("Severe")), new DoubleLiteral(0, 0, 0.2));
-    map_h->addMap(new VarRef(0, 0, Symbol("Mild")), new DoubleLiteral(0, 0, 0.8));
+    map_h->addMap(new FuncApp(0, 0, Symbol("Severe")), new DoubleLiteral(0, 0, 0.2));
+    map_h->addMap(new FuncApp(0, 0, Symbol("Mild")), new DoubleLiteral(0, 0, 0.8));
     cat_h->add(map_h);
     DistrExpr *cat_l = new DistrExpr(0, 0, Symbol("Categorical"));
     MapExpr *map_l = new MapExpr(0, 0);
-    map_l->addMap(new VarRef(0, 0, Symbol("Severe")), new DoubleLiteral(0, 0, 0.8));
-    map_l->addMap(new VarRef(0, 0, Symbol("Mild")), new DoubleLiteral(0, 0, 0.2));
+    map_l->addMap(new FuncApp(0, 0, Symbol("Severe")), new DoubleLiteral(0, 0, 0.8));
+    map_l->addMap(new FuncApp(0, 0, Symbol("Mild")), new DoubleLiteral(0, 0, 0.2));
     cat_l->add(map_l);
     FuncApp *prep = new FuncApp(0, 0, Symbol("Prep"));
-    prep->add(new VarRef(0, 0, Symbol("c")));
+    prep->add(new FuncApp(0, 0, Symbol("c")));
     MapExpr *map_t = new MapExpr(0, 0);
-    map_t->addMap(new VarRef(0, 0, Symbol("High")), cat_h);
-    map_t->addMap(new VarRef(0, 0, Symbol("Low")), cat_l);
+    map_t->addMap(new FuncApp(0, 0, Symbol("High")), cat_h);
+    map_t->addMap(new FuncApp(0, 0, Symbol("Low")), cat_l);
     CaseExpr *cas = new CaseExpr(0,0,prep,map_t);
 
     FuncDecl* func = new FuncDecl(0, 0, true, Symbol("DamageLevel"), Symbol("Damage"), cas);
@@ -145,8 +145,8 @@ void Hurricane::build(){
   */
   {
     FuncApp *dam = new FuncApp(0, 0, Symbol("Damage"));
-    dam->add(new VarRef(0, 0, Symbol("First")));
-    Evidence *obs = new Evidence(0, 0, dam, new VarRef(0, 0, Symbol("Severe")));
+    dam->add(new FuncApp(0, 0, Symbol("First")));
+    Evidence *obs = new Evidence(0, 0, dam, new FuncApp(0, 0, Symbol("Severe")));
     blog->add(obs);
   }
   /*
@@ -155,12 +155,12 @@ void Hurricane::build(){
   query Damage(B);
   */
   {
-    blog->add(new Query(0, 0, new VarRef(0, 0, Symbol("First"))));
+    blog->add(new Query(0, 0, new FuncApp(0, 0, Symbol("First"))));
     FuncApp *dam_A = new FuncApp(0, 0, Symbol("Damage"));
-    dam_A->add(new VarRef(0, 0, Symbol("A")));
+    dam_A->add(new FuncApp(0, 0, Symbol("A")));
     blog->add(new Query(0, 0, dam_A));
     FuncApp *dam_B = new FuncApp(0, 0, Symbol("Damage"));
-    dam_B->add(new VarRef(0, 0, Symbol("B")));
+    dam_B->add(new FuncApp(0, 0, Symbol("B")));
     blog->add(new Query(0, 0, dam_B));
   }
 }

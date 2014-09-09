@@ -60,8 +60,8 @@ void PoissonBall::build(){
     {
       MapExpr* mp;
       mp = new MapExpr(0, 0);
-      mp->addMap(new VarRef(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.5));
-      mp->addMap(new VarRef(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.5));
+      mp->addMap(new FuncApp(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.5));
+      mp->addMap(new FuncApp(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.5));
       cate = new DistrExpr(0, 0, Symbol("Categorical"));
       cate->add(mp);
     }
@@ -76,7 +76,7 @@ void PoissonBall::build(){
   {
     SetExpr*st;
     st = new TupleSetExpr(0, 0, 
-      std::vector<Expr*>({new VarRef(0,0,Symbol("b"))}),
+      std::vector<Expr*>({ new FuncApp(0, 0, Symbol("b")) }),
       std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Ball"), Symbol("b")) }), NULL);
     DistrExpr*uc;
     uc = new DistrExpr(0, 0, Symbol("UniformChoice"));
@@ -96,7 +96,7 @@ void PoissonBall::build(){
   {
     FuncApp* ball_draw;
     ball_draw = new FuncApp(0, 0, Symbol("BallDrawn"));
-    ball_draw->add(new VarRef(0, 0, Symbol("d")));
+    ball_draw->add(new FuncApp(0, 0, Symbol("d")));
     OpExpr* cond;
     cond = new OpExpr(0,0,AbsynConstant::NEQ,ball_draw, new NullLiteral(0,0));
     CaseExpr*cas = NULL;
@@ -104,23 +104,23 @@ void PoissonBall::build(){
       MapExpr* mp = new MapExpr(0,0);
       {
         MapExpr*sub1 = new MapExpr(0,0);
-        sub1->addMap(new VarRef(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.8));
-        sub1->addMap(new VarRef(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.2));
+        sub1->addMap(new FuncApp(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.8));
+        sub1->addMap(new FuncApp(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.2));
         DistrExpr*cate1 = new DistrExpr(0,0,Symbol("Categorical"));
         cate1->add(sub1);
 
         MapExpr*sub2 = new MapExpr(0, 0);
-        sub2->addMap(new VarRef(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.2));
-        sub2->addMap(new VarRef(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.8));
+        sub2->addMap(new FuncApp(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.2));
+        sub2->addMap(new FuncApp(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.8));
         DistrExpr*cate2 = new DistrExpr(0, 0, Symbol("Categorical"));
         cate2->add(sub2);
 
-        mp->addMap(new VarRef(0, 0, Symbol("Blue")), cate1);
-        mp->addMap(new VarRef(0, 0, Symbol("Green")), cate2);
+        mp->addMap(new FuncApp(0, 0, Symbol("Blue")), cate1);
+        mp->addMap(new FuncApp(0, 0, Symbol("Green")), cate2);
       }
       FuncApp* ball_draw;
       ball_draw = new FuncApp(0, 0, Symbol("BallDrawn"));
-      ball_draw->add(new VarRef(0, 0, Symbol("d")));
+      ball_draw->add(new FuncApp(0, 0, Symbol("d")));
       FuncApp* true_color;
       true_color = new FuncApp(0, 0, Symbol("TrueColor"));
       true_color->add(ball_draw);
@@ -148,10 +148,10 @@ void PoissonBall::build(){
   obs ObsColor(Draw[9]) = Green;
   */
   for (int k = 0; k < 10; ++k) {
-    OpExpr* ball = new OpExpr(0, 0, AbsynConstant::SUB, new VarRef(0, 0, Symbol("Draw")), new IntLiteral(0,0,k));
+    OpExpr* ball = new OpExpr(0, 0, AbsynConstant::SUB, new FuncApp(0, 0, Symbol("Draw")), new IntLiteral(0, 0, k));
     FuncApp* fun = new FuncApp(0, 0, Symbol("ObsColor"));
     fun->add(ball);
-    Evidence* e = new Evidence(0,0,fun,new VarRef(0,0,Symbol(k & 1 ? "Green" : "Blue")));
+    Evidence* e = new Evidence(0, 0, fun, new FuncApp(0, 0, Symbol(k & 1 ? "Green" : "Blue")));
 
     blog->add(e);
   }
@@ -161,7 +161,7 @@ void PoissonBall::build(){
   */
   {
     TupleSetExpr* st = new TupleSetExpr(0, 0, 
-      std::vector<Expr*>({new VarRef(0,0,Symbol("b"))}),
+      std::vector<Expr*>({ new FuncApp(0, 0, Symbol("b")) }),
       std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Ball"), Symbol("b")) }), NULL);
     FuncApp* num = new FuncApp(0,0,Symbol("size"));
     num->add(st);
