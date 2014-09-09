@@ -1,3 +1,0 @@
-random RealMatrix x(Timestep t) ~ Multinomial(10, [0.1, 0.2, 0.3, 0.4]); 
-random Real y = x(@1)[0];
-query y;
