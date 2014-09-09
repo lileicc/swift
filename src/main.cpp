@@ -18,15 +18,18 @@ int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
     std::cout
-        << "\t[main] [-e ParticleFilter] -i <input filename> -o <output filename> --ir <filename for printing ir>"
+        << "\t[main] -v [-e ParticleFilter] -i <input filename> -o <output filename> --ir <filename for printing ir>"
         << std::endl;
     exit(0);
   }
   const char* inp = "";
   const char* out = "";
   const char* irfile = nullptr;
+  bool verbose = false;
   std::string engine_type = "LWSampler";
   for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-v") == 0)
+      verbose = true;
     if (strcmp(argv[i], "-i") == 0)
       inp = argv[++i];
     if (strcmp(argv[i], "-o") == 0)
@@ -51,7 +54,8 @@ int main(int argc, char** argv) {
     return 1;
   }
   
-  blog_absyn->print(stdout, 0);
+  if (verbose)
+    blog_absyn->print(stdout, 0);
   
   // preprocess of input blog program
   swift::preprocess::Preprocessor preproc;
