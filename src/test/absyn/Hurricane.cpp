@@ -54,7 +54,7 @@ void Hurricane::build(){
     SetExpr *se = new TupleSetExpr(0, 0, 
       std::vector<Expr*>({ new FuncApp(0, 0, Symbol("c")) }),
       std::vector<VarDecl>({ VarDecl(0, 0, Symbol("City"), Symbol("c")) }),NULL);
-    DistrExpr *dis = new DistrExpr(0, 0, Symbol("UniformChoice"));
+    FuncApp *dis = new FuncApp(0, 0, Symbol("UniformChoice"));
     dis->add(se);
     FuncDecl *fd = new FuncDecl(0, 0, true, Symbol("City"), Symbol("First"), dis);
     blog->add(fd);
@@ -80,7 +80,7 @@ void Hurricane::build(){
       MapExpr *map = new MapExpr(0, 0);
       map->addMap(new FuncApp(0, 0, Symbol("High")), new DoubleLiteral(0, 0, 0.5));
       map->addMap(new FuncApp(0, 0, Symbol("Low")), new DoubleLiteral(0, 0, 0.5));
-      DistrExpr *cat = new DistrExpr(0, 0, Symbol("Categorical"));
+      FuncApp *cat = new FuncApp(0, 0, Symbol("Categorical"));
       cat->add(map);
 
       thn = cat;
@@ -91,12 +91,12 @@ void Hurricane::build(){
       MapExpr *map_s = new MapExpr(0, 0);
       map_s->addMap(new FuncApp(0, 0, Symbol("High")), new DoubleLiteral(0, 0, 0.9));
       map_s->addMap(new FuncApp(0, 0, Symbol("Low")), new DoubleLiteral(0, 0, 0.1));
-      DistrExpr *cat_s = new DistrExpr(0, 0, Symbol("Categorical"));
+      FuncApp *cat_s = new FuncApp(0, 0, Symbol("Categorical"));
       cat_s->add(map_s);
       MapExpr *map_m = new MapExpr(0, 0);
       map_m->addMap(new FuncApp(0, 0, Symbol("High")), new DoubleLiteral(0, 0, 0.1));
       map_m->addMap(new FuncApp(0, 0, Symbol("Low")), new DoubleLiteral(0, 0, 0.9));
-      DistrExpr *cat_m = new DistrExpr(0, 0, Symbol("Categorical"));
+      FuncApp *cat_m = new FuncApp(0, 0, Symbol("Categorical"));
       cat_m->add(map_m);
       MapExpr *map_t = new MapExpr(0, 0);
       map_t->addMap(new FuncApp(0, 0, Symbol("Severe")), cat_s);
@@ -119,12 +119,12 @@ void Hurricane::build(){
   };
   */
   {
-    DistrExpr *cat_h = new DistrExpr(0, 0, Symbol("Categorical"));
+    FuncApp *cat_h = new FuncApp(0, 0, Symbol("Categorical"));
     MapExpr *map_h = new MapExpr(0, 0);
     map_h->addMap(new FuncApp(0, 0, Symbol("Severe")), new DoubleLiteral(0, 0, 0.2));
     map_h->addMap(new FuncApp(0, 0, Symbol("Mild")), new DoubleLiteral(0, 0, 0.8));
     cat_h->add(map_h);
-    DistrExpr *cat_l = new DistrExpr(0, 0, Symbol("Categorical"));
+    FuncApp *cat_l = new FuncApp(0, 0, Symbol("Categorical"));
     MapExpr *map_l = new MapExpr(0, 0);
     map_l->addMap(new FuncApp(0, 0, Symbol("Severe")), new DoubleLiteral(0, 0, 0.8));
     map_l->addMap(new FuncApp(0, 0, Symbol("Mild")), new DoubleLiteral(0, 0, 0.2));

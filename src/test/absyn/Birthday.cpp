@@ -38,8 +38,8 @@ void Birthday::build(){
   #Person ~ Poisson(13);
   */
   {
-    DistrExpr*dis;
-    dis = new DistrExpr(0, 0, Symbol("Poisson"));
+    FuncApp*dis;
+    dis = new FuncApp(0, 0, Symbol("Poisson"));
     dis->add(new IntLiteral(0, 0, 13));
     NumStDecl*num;
     num = new NumStDecl(0, 0, Symbol("Person"), dis);
@@ -53,8 +53,8 @@ void Birthday::build(){
     st = new TupleSetExpr(0, 0, 
       std::vector<Expr*>({ new FuncApp(0, 0, Symbol("d")) }),
       std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Date"), Symbol("d")) }), NULL);
-    DistrExpr*uc;
-    uc = new DistrExpr(0, 0, Symbol("UniformChoice"));
+    FuncApp*uc;
+    uc = new FuncApp(0, 0, Symbol("UniformChoice"));
     uc->add(st);
     FuncDecl*fun;
     fun = new FuncDecl(0, 0, true, Symbol("Date"), Symbol("Birthday"), uc);

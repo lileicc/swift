@@ -21,6 +21,7 @@ public:
   void add(Expr* e);
   Expr* get(size_t id);
   size_t size();
+  void clearArgs();
 
   virtual Expr* clone() = 0;
 

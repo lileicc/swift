@@ -30,6 +30,7 @@ std::shared_ptr<ir::Expr> DiscreteDistrDecl::getNew(
   ret->setArgs(args);
   ret->setTyp(fact->getTy(ir::IRConstString::INT));
   ret->processArgRandomness();
+  ret->setRandom(true);
   return ret;
 }
 

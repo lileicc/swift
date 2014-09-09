@@ -36,8 +36,8 @@ void AircraftSimple::build(){
   #Aircraft ~ Poisson(5);
   */
   {
-    DistrExpr*dis;
-    dis = new DistrExpr(0, 0, Symbol("Poisson"));
+    FuncApp*dis;
+    dis = new FuncApp(0, 0, Symbol("Poisson"));
     dis->add(new IntLiteral(0, 0, 5));
     NumStDecl*num;
     num = new NumStDecl(0, 0, Symbol("Aircraft"), dis);
@@ -47,8 +47,8 @@ void AircraftSimple::build(){
   #Blip(Source=a) ~ Poisson(4);
   */
   {
-    DistrExpr*dis;
-    dis = new DistrExpr(0, 0, Symbol("Poisson"));
+    FuncApp*dis;
+    dis = new FuncApp(0, 0, Symbol("Poisson"));
     dis->add(new IntLiteral(0, 0, 4));
     NumStDecl*num;
     num = new NumStDecl(0, 0, Symbol("Blip"), dis);

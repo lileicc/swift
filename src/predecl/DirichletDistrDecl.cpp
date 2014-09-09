@@ -31,6 +31,7 @@ std::shared_ptr<ir::Expr> DirichletDistrDecl::getNew(
     ret->setArgs(args);
     ret->setTyp(ary_dbl);
     ret->processArgRandomness();
+    ret->setRandom(true);
     return ret;
   }
   
@@ -51,6 +52,7 @@ std::shared_ptr<ir::Expr> DirichletDistrDecl::getNew(
     ret->setArgs(args);
     ret->setTyp(ary_dbl);
     ret->processArgRandomness();
+    ret->setRandom(true);
     return ret;
   }
   return nullptr;

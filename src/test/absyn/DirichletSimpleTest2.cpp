@@ -31,7 +31,7 @@ void DirichletSimpleTest2::build(){
     arr->add(new DoubleLiteral(0, 0, 1.0));
     arr->add(new DoubleLiteral(0, 0, 2.0));
     arr->add(new DoubleLiteral(0, 0, 3.0));
-    DistrExpr *dis = new DistrExpr(0, 0, Symbol("Dirichlet"));
+    FuncApp *dis = new FuncApp(0, 0, Symbol("Dirichlet"));
     dis->add(arr);
     FuncDecl *fd = new FuncDecl(0, 0, true, Ty(Symbol("Real"),1), Symbol("w"), dis);
     blog->add(fd);
@@ -40,7 +40,7 @@ void DirichletSimpleTest2::build(){
   random Integer x ~ Discrete(w);
   */
   {
-    DistrExpr *dis = new DistrExpr(0, 0, Symbol("Discrete"));
+    FuncApp *dis = new FuncApp(0, 0, Symbol("Discrete"));
     dis->add(new FuncApp(0, 0, Symbol("w")));
     FuncDecl *fd = new FuncDecl(0, 0, true, Symbol("Integer"), Symbol("x"), dis);
     blog->add(fd);

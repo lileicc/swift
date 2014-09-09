@@ -38,5 +38,9 @@ void Expr::cloneArgs() {
       args[i] = args[i]->clone();
 }
 
+void Expr::clearArgs() {
+  args.clear();
+}
+
 }
 }

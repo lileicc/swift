@@ -246,8 +246,6 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
     return (ret = transExpr((absyn::OpExpr*) expr));
   if (dynamic_cast<absyn::FuncApp*>(expr) != nullptr)
     return (ret = transExpr((absyn::FuncApp*) expr));
-  if (dynamic_cast<absyn::DistrExpr*>(expr) != nullptr)
-    return (ret = transExpr((absyn::DistrExpr*) expr));
   if (dynamic_cast<absyn::MapExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::MapExpr*) expr));
   if (dynamic_cast<absyn::CardinalityExpr*>(expr) != nullptr)
@@ -260,6 +258,21 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
     return (ret = transExpr((absyn::Literal*) expr));
   if (dynamic_cast<absyn::ArrayExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::ArrayExpr*) expr));
+
+  if (dynamic_cast<absyn::DistrExpr*>(expr) != nullptr) {
+    //@Deprecated
+    warning(expr->line, expr->col, "Parsing expression to <DistrExpr> in Absyn should be deprecated! FuncApp is recommended!");
+    absyn::FuncApp* funcapp = new absyn::FuncApp(expr->line, expr->col, ((absyn::DistrExpr*)expr)->getDistrName());
+    for (size_t i = 0; i < expr->size(); ++ i)
+      funcapp->add(expr->get(i));
+    ret = transExpr(funcapp);
+
+    // delete extra pointer
+    funcapp->clearArgs();
+    delete funcapp;
+
+    return ret;
+  }
   if (dynamic_cast<absyn::VarRef*>(expr) != nullptr) {
     //@Deprecated
     warning(expr->line, expr->col, "Parsing expression to <VarRef> in Absyn should be deprecated! FuncApp is recommended!");
@@ -672,14 +685,14 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
       return processCardExpr(expr->get(0));
   }
 
-  // Check Builtin Functions
+  // Check Builtin Functions and Distributions
   //   Note: Especially for Prev()!!!!
   auto fc = predeclFactory.getDecl(func);
   if (fc != nullptr) {
 
     auto ptr = fc->getNew(args, &tyFactory);
     if (ptr == nullptr) {
-      warning(expr->line, expr->col, "Function < " + func + " > is Built-in! Type Checking Error for Built-in Function!");
+      warning(expr->line, expr->col, "Function/Distribution < " + func + " > is Built-in! Type Checking Error for Built-in Function/Distribution!");
     }
     else {
       // TODO: here is a hack!!!! Better Checking for Markov Order (@MarkovOrder)
@@ -712,10 +725,10 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
 
   auto ptr = std::make_shared<ir::FunctionCall>(functory.getFunc(func, decl));
 
-  if (ptr->getRefer() == NULL) {
-    error(expr->line, expr->col,
-        "Error on Function Call! No Such Function < " + func + " >.");
-    return ptr;
+  if (ptr->getRefer() == nullptr) {
+    // No Corresponding Function found!
+    //  assume it is a distribution
+    return transDistrb(func, args, expr->line, expr->col);
   }
 
   // Type Checking
@@ -966,21 +979,15 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::Expr> Semant::transExpr(absyn::DistrExpr* expr) {
+std::shared_ptr<ir::Expr> Semant::transDistrb(
+  std::string name, std::vector<std::shared_ptr<ir::Expr>> args,
+  int line, int col) {
   // TODO: add type checking for predecl distribution
-  std::string name = expr->getDistrName().getValue();
   const predecl::PreDecl* distr = predeclFactory.getDecl(name);
-  // parse arguments of distribution
-  std::vector<std::shared_ptr<ir::Expr>> args;
-  for (size_t i = 0; i < expr->size(); ++i) {
-    auto ag = transExpr(expr->get(i));
-    if (ag)
-      args.push_back(ag);
-  }
   
   if (distr == NULL) {
     // not predeclared distribution
-    warning(expr->line, expr->col, "<" + name + "> customized distribution assumed! No type checking will be performed!");
+    warning(line, col, "No function defined for <" + name + ">! Customized distribution assumed! No type checking will be performed!");
     
     auto dist = std::make_shared<ir::Distribution>(name);
     dist->setArgs(args);
@@ -991,11 +998,10 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::DistrExpr* expr) {
 
   auto ret = distr->getNew(args, &tyFactory);
   if (ret == nullptr) {
-    error(expr->line, expr->col,
+    error(line, col,
         "Type Checking failed for <" + name + "> distribution!");
     return std::make_shared<ir::Distribution>(name, distr);
   }
-  ret->setRandom(true);
   return ret;
 }
 

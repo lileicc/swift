@@ -45,8 +45,8 @@ void PoissonBall::build(){
   #Ball ~ Poisson(6);
   */
   {
-    DistrExpr*dis;
-    dis = new DistrExpr(0, 0, Symbol("Poisson"));
+    FuncApp*dis;
+    dis = new FuncApp(0, 0, Symbol("Poisson"));
     dis->add(new IntLiteral(0, 0, 6));
     NumStDecl*num;
     num = new NumStDecl(0, 0, Symbol("Ball"), dis);
@@ -56,13 +56,13 @@ void PoissonBall::build(){
   random Color TrueColor(Ball b) ~ Categorical({Blue -> 0.5, Green -> 0.5});
   */
   {
-    DistrExpr*cate;
+    FuncApp*cate;
     {
       MapExpr* mp;
       mp = new MapExpr(0, 0);
       mp->addMap(new FuncApp(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.5));
       mp->addMap(new FuncApp(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.5));
-      cate = new DistrExpr(0, 0, Symbol("Categorical"));
+      cate = new FuncApp(0, 0, Symbol("Categorical"));
       cate->add(mp);
     }
     FuncDecl*fun;
@@ -78,8 +78,8 @@ void PoissonBall::build(){
     st = new TupleSetExpr(0, 0, 
       std::vector<Expr*>({ new FuncApp(0, 0, Symbol("b")) }),
       std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Ball"), Symbol("b")) }), NULL);
-    DistrExpr*uc;
-    uc = new DistrExpr(0, 0, Symbol("UniformChoice"));
+    FuncApp*uc;
+    uc = new FuncApp(0, 0, Symbol("UniformChoice"));
     uc->add(st);
     FuncDecl*fun;
     fun = new FuncDecl(0, 0, true, Symbol("Ball"), Symbol("BallDrawn"), uc);
@@ -106,13 +106,13 @@ void PoissonBall::build(){
         MapExpr*sub1 = new MapExpr(0,0);
         sub1->addMap(new FuncApp(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.8));
         sub1->addMap(new FuncApp(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.2));
-        DistrExpr*cate1 = new DistrExpr(0,0,Symbol("Categorical"));
+        FuncApp*cate1 = new FuncApp(0,0,Symbol("Categorical"));
         cate1->add(sub1);
 
         MapExpr*sub2 = new MapExpr(0, 0);
         sub2->addMap(new FuncApp(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.2));
         sub2->addMap(new FuncApp(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.8));
-        DistrExpr*cate2 = new DistrExpr(0, 0, Symbol("Categorical"));
+        FuncApp*cate2 = new FuncApp(0, 0, Symbol("Categorical"));
         cate2->add(sub2);
 
         mp->addMap(new FuncApp(0, 0, Symbol("Blue")), cate1);

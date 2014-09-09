@@ -82,7 +82,11 @@ private:
 
   std::shared_ptr<ir::Expr> transExpr(absyn::TupleSetExpr* expr);
 
-  std::shared_ptr<ir::Expr> transExpr(absyn::DistrExpr* expr);
+  // @Deprecated
+  //std::shared_ptr<ir::Expr> transExpr(absyn::DistrExpr* expr);
+  std::shared_ptr<ir::Expr> transDistrb(
+    std::string name, std::vector<std::shared_ptr<ir::Expr>> args,
+    int line = -1, int col = -1);
 
   std::shared_ptr<ir::ConstSymbol> transExpr(absyn::Literal* expr);
 
