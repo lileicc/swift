@@ -19,11 +19,11 @@ ListSet::~ListSet() {
 
 // For Debugging Use
 void ListSet::print(FILE* file, int indent) {
-  fprintf(file, "%*s(ListSet: (:\n", indent, "");
+  fprintf(file, "%*s(ListSet:\n", indent, "");
   for (size_t i = 0; i < args.size(); i++)
     if (args[i] != NULL)
       args[i]->print(file, indent + 2);
-  fprintf(file, "%*s) )\n", indent, "");
+  fprintf(file, "%*s)\n", indent, "");
 }
 
 Expr* ListSet::clone() {
