@@ -613,9 +613,15 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
   //         Replace OprExpr with a InstSymbolRef
   // Note: isRandom() == false
   if (ret->getOp()
-      == ir::IRConstant::SUB&& (dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL
+      == ir::IRConstant::SUB 
+      && ((dynamic_cast<absyn::FuncApp*>(expr->getLeft())) != NULL || (dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL) 
+      // Although VarRef is deprecated, we did the checking here!
       && (dynamic_cast<absyn::IntLiteral*>(expr->getRight())) != NULL) {
-    std::string var = ((absyn::VarRef*) (expr->getLeft()))->getVar().getValue();
+    std::string var;
+    if ((dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL)
+      var = ((absyn::VarRef*) (expr->getLeft()))->getVar().getValue();
+    else
+      var = ((absyn::FuncApp*) (expr->getLeft()))->getFuncName().getValue();
     int k = ((absyn::IntLiteral*) (expr->getRight()))->getValue();
     if (k >= 0) {
       auto sym = tyFactory.getInstSymbol(arrayRefToString(var, k));
