@@ -30,6 +30,7 @@ class IntLiteral;
 class ListSet;
 class MapExpr;
 class MapTy;
+class MatrixTy;
 class NameTy;
 class NullSymbol;
 class NumberStmt;

@@ -26,6 +26,7 @@
 #include "ListSet.h"
 #include "MapExpr.h"
 #include "MapTy.h"
+#include "MatrixExpr.h"
 #include "NameTy.h"
 #include "NullSymbol.h"
 #include "NumberStmt.h"
