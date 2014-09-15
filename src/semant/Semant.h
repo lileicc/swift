@@ -169,6 +169,14 @@ private:
 
   // Check whether type A is a subType of type B
   bool isSubType(const ir::Ty* A, const ir::Ty* B);
+  
+  /* 
+    return the super type of A and B
+      -> if A is subtype of B, return B;
+      -> if B is subtype of A, return A;
+      -> otherwise, return NULL
+  */
+  const ir::Ty* getSuperType(const ir::Ty*A, const ir::Ty* B);
 
   void error(int line, int col, std::string info);
   void warning(int line, int col, std::string info);

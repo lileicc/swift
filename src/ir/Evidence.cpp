@@ -7,7 +7,7 @@ namespace swift {
 namespace ir {
 
 Evidence::Evidence(std::shared_ptr<Expr> left,
-    std::shared_ptr<ConstSymbol> right) :
+    std::shared_ptr<Expr> right) :
     left(left), right(right) {
 }
 
@@ -18,7 +18,7 @@ const std::shared_ptr<Expr>& Evidence::getLeft() const {
   return left;
 }
 
-const std::shared_ptr<ConstSymbol>& Evidence::getRight() const {
+const std::shared_ptr<Expr>& Evidence::getRight() const {
   return right;
 }
 

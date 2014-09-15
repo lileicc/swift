@@ -503,13 +503,15 @@ bool OprExpr_isPrimitive(const ir::Ty* t) {
       && (t->getTyp() == ir::IRConstant::INT
           || t->getTyp() == ir::IRConstant::DOUBLE
           || t->getTyp() == ir::IRConstant::BOOL
-          || t->getTyp() == ir::IRConstant::STRING);
+          || t->getTyp() == ir::IRConstant::STRING
+          || t->getTyp() == ir::IRConstant::TIMESTEP);
 }
 
 bool OprExpr_isNumerical(const ir::Ty* t) {
   return (t != NULL)
       && (t->getTyp() == ir::IRConstant::INT
-          || t->getTyp() == ir::IRConstant::DOUBLE);
+          || t->getTyp() == ir::IRConstant::DOUBLE
+          || t->getTyp() == ir::IRConstant::MATRIX);
 }
 
 const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
@@ -538,6 +540,10 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
     if (!OprExpr_isPrimitive(arg[0]->getTyp())
         || !OprExpr_isPrimitive(arg[1]->getTyp()))
       return NULL;
+    if ((arg[0]->getTyp()->getTyp() == ir::IRConstant::STRING 
+          || arg[1]->getTyp()->getTyp() == ir::IRConstant::STRING)
+      && arg[0]->getTyp() != arg[1]->getTyp())
+      return NULL;
     return lookupTy(IRConstString::BOOL);
   case IRConstant::NEQ:
   case IRConstant::EQ:
@@ -552,10 +558,10 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
     // Numerical Operator
   case IRConstant::MOD:
     // Special Check for TimeStep (MOD)
-    if (arg[0]->getTyp() == arg[1]->getTyp()
+    if (isSubType(arg[0]->getTyp(), arg[1]->getTyp())
       && arg[0]->getTyp() == lookupTy(ir::IRConstString::TIMESTEP))
       return arg[0]->getTyp();
-    if (arg[0]->getTyp() != arg[1]->getTyp()
+    if (arg[0]->getTyp() != arg[1]->getTyp() // For MOD, current everything should be INT
         || arg[0]->getTyp() != lookupTy(IRConstString::INT))
       return NULL;
     return arg[0]->getTyp();
@@ -568,16 +574,19 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
   case IRConstant::MUL:
   case IRConstant::DIV:
     // Special Check for TimeStep (PLUS, MINUS, MUL, DIV)
-    if (arg[0]->getTyp() == arg[1]->getTyp()
-        && arg[0]->getTyp() == lookupTy(ir::IRConstString::TIMESTEP))
-        return arg[0]->getTyp();
+    if (getSuperType(arg[0]->getTyp(), arg[1]->getTyp()) == lookupTy(ir::IRConstString::TIMESTEP))
+      return lookupTy(ir::IRConstString::TIMESTEP);
   case IRConstant::POWER:
-    if (arg[0]->getTyp() != arg[1]->getTyp()
-        || !OprExpr_isNumerical(arg[0]->getTyp()))
+    if (getSuperType(arg[0]->getTyp(), arg[1]->getTyp()) == NULL
+        || !OprExpr_isNumerical(arg[0]->getTyp())
+        || !OprExpr_isNumerical(arg[1]->getTyp()))
       return NULL;
-    if (op == IRConstant::POWER)
+    if (op == IRConstant::POWER) {
+      if (arg[1]->getTyp()->getTyp() == ir::IRConstant::MATRIX)
+        return NULL;
       return lookupTy(IRConstString::DOUBLE);
-    return arg[0]->getTyp();
+    }
+    return getSuperType(arg[0]->getTyp(), arg[1]->getTyp());
 
     // Address Operator
   case IRConstant::SUB: {
@@ -1209,8 +1218,41 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
       local_var[fun->getTemporalArg()->getVarName()].push(fun->getTemporalArg());
 
     fun->setBody(transClause(fd->getExpr()));
+    // Type checking for Function Declaration
     if (fun->getBody()->getTyp() == NULL)
       fun->getBody()->setTyp(rettyp);
+    else {
+      if (!isSubType(fun->getBody()->getTyp(), rettyp)) { // Type Checking Failed!
+        bool special_case = false;
+        // Special Case checking for Real func() = RealMatrix * RealMatrix
+        // We only raise a warning and return the first element of the result matrix
+        if (rettyp == lookupTy(ir::IRConstString::DOUBLE)
+          && fun->getBody()->getTyp() == lookupTy(ir::IRConstString::MATRIX)) {
+          auto body = std::dynamic_pointer_cast<ir::Expr>(fun->getBody());
+          if (body != nullptr && std::dynamic_pointer_cast<ir::MatrixExpr>(body) == nullptr) {
+            /*
+              The computation result of the body is a RealMatrix.
+              However, the declaration of the function is Real.
+              We assume that the return value will always become a 1x1 RealMatrix. A warnning will be raised.
+              e.g. Real fun() = A * B ===> Real fun() = (A * B)[0]
+            */ 
+            auto mat = std::make_shared<ir::OprExpr>(ir::IRConstant::SUB);
+            mat->setTyp(lookupTy(ir::IRConstString::DOUBLE));
+            mat->setRandom(body->isRandom());
+            mat->addArg(body);
+            auto lit = std::make_shared<ir::IntLiteral>(0);
+            lit->setRandom(false);
+            lit->setTyp(lookupTy(ir::IRConstString::INT));
+            mat->addArg(lit);
+            fun->setBody(mat);
+            warning(fd->line, fd->col, "The return type of the body is RealMatrix. But the Declared Type is Real! The first element of the result matrix will be returned.");
+            special_case = true;
+          }
+        }
+        if (!special_case)
+          error(fd->line, fd->col, "The type of the function body does not match its declaration!");
+      }
+    }
 
     // Check Randomness
     if (fun->getBody()->isRandom() != fun->isRand()) {
@@ -1317,6 +1359,15 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
 void Semant::transEvidence(absyn::Evidence* ne) {
   auto lhs = transExpr(ne->getLeft());
   auto rhs = transExpr(ne->getRight());
+  if (std::dynamic_pointer_cast<ir::Expr>(lhs) == nullptr) {
+    error(ne->line, ne->col, "Left hand side of Evidence must be an Expression!");
+    return;
+  }
+  if (std::dynamic_pointer_cast<ir::Expr>(rhs) == nullptr) {
+    error(ne->line, ne->col, "Right hand side of Evidence must be an Expression!");
+    return;
+  }
+
   // type checking for equality
   if (lhs->getTyp() == NULL && rhs->getTyp() != NULL)
     lhs->setTyp(rhs->getTyp());
@@ -1324,24 +1375,24 @@ void Semant::transEvidence(absyn::Evidence* ne) {
     rhs->setTyp(lhs->getTyp());
   if (lhs->getTyp() == NULL) // Both are NULL! always hold!
     return;
-  if (lhs->getTyp() != rhs->getTyp()) {
+  if (!isSubType(rhs->getTyp(), lhs->getTyp()) ||
+      (lhs->getTyp()->getTyp() == ir::IRConstant::MATRIX && rhs->getTyp() != lhs->getTyp())) {
     error(ne->line, ne->col, "Types not match for equality in Evidence!");
     return;
   }
   // Format Checking
   //     we assume that :
   //         left side  : function call | #TypeName
-  //         right side : const symbol
-  if ((std::dynamic_pointer_cast<ir::ConstSymbol>(rhs)) == nullptr
+  //         right side : non-random expression
+  if (rhs->isRandom()
       || ((std::dynamic_pointer_cast<ir::FunctionCall>(lhs) == nullptr)
           && !isCardAll(lhs))) {
     error(ne->line, ne->col,
-        "Evidence format not correct! We assume < FunctionCall | #TypeName = ConstSymbol >!");
+        "Evidence format not correct! We assume < FunctionCall | #TypeName = Non-Random Expr >!");
     return; // TODO: build internal function to avoid this
   }
   model->addEvidence(
-      std::make_shared<ir::Evidence>(std::dynamic_pointer_cast<ir::Expr>(lhs),
-          std::dynamic_pointer_cast<ir::ConstSymbol>(rhs)));
+      std::make_shared<ir::Evidence>(lhs, rhs));
 }
 
 void Semant::transQuery(absyn::Query* nq) {
@@ -1412,6 +1463,9 @@ std::string Semant::arrayRefToString(const std::string & name, int idx) {
 bool Semant::isSubType(const ir::Ty* A, const ir::Ty*B) {
   if (A==NULL || B==NULL) return false;
   if (A->getTyp() == B->getTyp()) return true;
+  // special case for A = INT && B = UNSIGNED(TIMESTEP)
+  if (A->getTyp() == ir::IRConstant::INT && B->getTyp() == ir::IRConstant::TIMESTEP)
+    return true;
   // special case for A = INT && B = DOUBLE
   if(A->getTyp() == ir::IRConstant::INT && B->getTyp() == ir::IRConstant::DOUBLE)
     return true;
@@ -1420,6 +1474,12 @@ bool Semant::isSubType(const ir::Ty* A, const ir::Ty*B) {
       && B->getTyp() == ir::IRConstant::MATRIX)
       return true;
   return false;
+}
+
+const ir::Ty* Semant::getSuperType(const ir::Ty* A, const ir::Ty* B) {
+  if (isSubType(A, B)) return B;
+  if (isSubType(B, A)) return A;
+  return NULL;
 }
 
 bool Semant::Okay() {
