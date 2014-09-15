@@ -167,6 +167,9 @@ private:
   // Check whether an expr is : #TypeDomain
   static bool isCardAll(std::shared_ptr<ir::Expr> ptr);
 
+  // Check whether type A is a subType of type B
+  bool isSubType(const ir::Ty* A, const ir::Ty* B);
+
   void error(int line, int col, std::string info);
   void warning(int line, int col, std::string info);
 

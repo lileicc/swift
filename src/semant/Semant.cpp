@@ -1056,31 +1056,109 @@ std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
 }
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
-  std::shared_ptr<ir::ArrayExpr> ret = std::make_shared<ir::ArrayExpr>();
+  std::shared_ptr<ir::Expr> ret = std::make_shared<ir::ArrayExpr>();
+  int dim = expr->getDim();
   for (size_t i = 0; i < expr->size(); ++i) {
     ret->addArg(transExpr(expr->get(i)));
   }
   const ir::Ty* base = NULL;
   for (size_t i = 0; i < ret->argSize(); ++i)
-    if (ret->get(i)->getTyp() != NULL)
-      base = ret->get(i)->getTyp();
-  if (base == NULL
-      || (base->getTyp() == ir::IRConstant::ARRAY
-          && ((const ir::ArrayTy*) base)->getDim() != expr->getDim() - 1)
-      || (base->getTyp() != ir::IRConstant::ARRAY && expr->getDim() != 1)) {
-    error(expr->line, expr->col, "Illegal Array Expr");
-  } else {
-    for (size_t i = 0; i < ret->argSize(); ++i) {
-      const ir::Ty* t = ret->get(i)->getTyp();
-      if (t == NULL)
-        ret->get(i)->setTyp(base);
-      else if (t != base) {
-        error(expr->line, expr->col, "Illegal Array Expr");
-        break;
+    if (ret->get(i)->getTyp() != NULL) {
+      if (base == NULL || isSubType(base, ret->get(i)->getTyp()))
+        base = ret->get(i)->getTyp();
+    }
+
+  // Special Check for MatrixExpr
+  bool isMatrix = false;
+  if (base != NULL) {
+    if (base->getTyp() == ir::IRConstant::DOUBLE && dim == 1) {
+      // special check for RowVector
+      bool okay = true;
+      for (size_t i = 0; i < ret->argSize() && okay; ++i) {
+        const ir::Ty* t = ret->get(i)->getTyp();
+        if (t == NULL || !isSubType(t, base)) okay = false;
+      }
+      if (okay) {
+        std::shared_ptr<ir::MatrixExpr> mat_ret = std::make_shared<ir::MatrixExpr>();
+        mat_ret->setArgs(ret->getArgs());
+        mat_ret->setTyp(lookupTy(ir::IRConstString::MATRIX));
+        mat_ret->setRowVecFlag(true);
+        mat_ret->setColVecFlag(ret->argSize() == 1);
+        ret=mat_ret;
+        isMatrix = true;
       }
     }
-    ret->setTyp(tyFactory.getUpdateTy(new ir::ArrayTy(base, expr->getDim())));
+    else
+    if (base->getTyp() == ir::IRConstant::MATRIX && dim == 2) {
+      // special check for ColVector and RealMatrix
+      bool okay_colvec = true, okay_mat = true;
+      bool has_intarray = false;
+      const ir::Ty* intarray_ty = tyFactory.getUpdateTy(new ir::ArrayTy(lookupTy(ir::IRConstString::INT),1));
+      for (size_t i = 0; i < ret->argSize() && okay_mat; ++i) {
+        // check whether it is a int array
+        if (ret->get(i)->getTyp() == intarray_ty && std::dynamic_pointer_cast<ir::ArrayExpr>(ret->get(i)) != nullptr) {
+          has_intarray = true;
+          continue;
+        }
+        if (std::dynamic_pointer_cast<ir::MatrixExpr>(ret->get(i)) != nullptr) {
+          auto mat_expr = std::dynamic_pointer_cast<ir::MatrixExpr>(ret->get(i));
+          if (mat_expr->isRowVec()) { // must be a row vector!
+            if (mat_expr->argSize() > 1) // one row has more than 1 element ==> must not be a col vector
+              okay_colvec = false;
+          } else
+            okay_mat = false;
+        } else
+          okay_mat = false; // not a valid row matrix in this case
+      }
+      if (okay_mat) {
+        if (has_intarray) { // convert all Int ArrayExpr to Real Row Vectors
+          std::vector<std::shared_ptr<ir::Expr>> args = ret->getArgs();
+          for (size_t i = 0; i < ret->argSize(); ++i) {
+            if (ret->get(i)->getTyp() == intarray_ty) {
+              auto row_vec = std::make_shared<ir::MatrixExpr>();
+              row_vec->setArgs(ret->get(i)->getArgs());
+              row_vec->setRandom(ret->get(i)->isRandom());
+              row_vec->setTyp(base);
+              row_vec->setRowVecFlag(true);
+              row_vec->setColVecFlag(ret->get(i)->argSize() == 1);
+              args[i] = row_vec; // replace the ArrayExpr with a new MatrixExpr(rowvec = true)
+            }
+          }
+          ret->setArgs(args);
+        }
+        std::shared_ptr<ir::MatrixExpr> mat_ret = std::make_shared<ir::MatrixExpr>();
+        mat_ret->setArgs(ret->getArgs());
+        mat_ret->setTyp(lookupTy(ir::IRConstString::MATRIX));
+        mat_ret->setRowVecFlag(ret->argSize() == 1);
+        mat_ret->setColVecFlag(okay_colvec);
+        ret = mat_ret;
+        isMatrix = true;
+      }
+    }
   }
+
+  // Normal ArrayExpr Case
+  if (!isMatrix) { // Not Converted to MatrixExpr
+    if (base == NULL
+      || (base->getTyp() == ir::IRConstant::ARRAY
+      && ((const ir::ArrayTy*) base)->getDim() != expr->getDim() - 1)
+      || (base->getTyp() != ir::IRConstant::ARRAY && expr->getDim() != 1)) {
+      error(expr->line, expr->col, "Illegal Array Expr");
+    }
+    else {
+      for (size_t i = 0; i < ret->argSize(); ++i) {
+        const ir::Ty* t = ret->get(i)->getTyp();
+        if (t == NULL)
+          ret->get(i)->setTyp(base);
+        else if (t != base && !isSubType(t, base)) {
+          error(expr->line, expr->col, "Illegal Array Expr");
+          break;
+        }
+      }
+      ret->setTyp(tyFactory.getUpdateTy(new ir::ArrayTy(base, dim)));
+    }
+  }
+
   // randomness
   for (auto a: ret->getArgs())
     if (a->isRandom()) {
@@ -1305,6 +1383,19 @@ const ir::Ty* Semant::lookupTy(const std::string & name) {
 
 std::string Semant::arrayRefToString(const std::string & name, int idx) {
   return name + "[" + std::to_string(idx) + "]";
+}
+
+bool Semant::isSubType(const ir::Ty* A, const ir::Ty*B) {
+  if (A==NULL || B==NULL) return false;
+  if (A->getTyp() == B->getTyp()) return true;
+  // special case for A = INT && B = DOUBLE
+  if(A->getTyp() == ir::IRConstant::INT && B->getTyp() == ir::IRConstant::DOUBLE)
+    return true;
+  // special cases for RealMatrix
+  if ((A->getTyp() == ir::IRConstant::INT || A->getTyp() == ir::IRConstant::DOUBLE)
+      && B->getTyp() == ir::IRConstant::MATRIX)
+      return true;
+  return false;
 }
 
 bool Semant::Okay() {

@@ -3,10 +3,26 @@
 namespace swift {
 namespace ir {
 
-MatrixExpr::MatrixExpr() {
+MatrixExpr::MatrixExpr(): flag_colvec(false), flag_rowvec(false) {
 }
 
 MatrixExpr::~MatrixExpr() {
+}
+
+void MatrixExpr::setRowVecFlag(bool flag) {
+  flag_rowvec = flag;
+}
+
+bool MatrixExpr::isRowVec() {
+  return flag_rowvec;
+}
+
+void MatrixExpr::setColVecFlag(bool flag) {
+  flag_colvec = flag;
+}
+
+bool MatrixExpr::isColVec() {
+  return flag_colvec;
 }
 
 void MatrixExpr::print(FILE* file, int indent) const {

@@ -11,7 +11,9 @@ public:
   // For Debugging Use
   void print(FILE* file, int indent) const;
 
+  void setRowVecFlag(bool flag);
   bool isRowVec();
+  void setColVecFlag(bool flag);
   bool isColVec();
 
 private:
