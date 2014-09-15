@@ -48,6 +48,7 @@ enum class IRConstant {
   NOT,
   IMPLY,
   SUB,
+  PARENTHESES,
   // Quantified Formula: For QuantForm
   FORALL,
   EXISTS,

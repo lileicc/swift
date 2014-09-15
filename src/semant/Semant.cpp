@@ -581,9 +581,13 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
 
     // Address Operator
   case IRConstant::SUB: {
+    if (arg[0]->getTyp() == NULL) return NULL;
     if (arg[1]->getTyp() != tyFactory.getTy(ir::IRConstString::INT)
-        || (dynamic_cast<const ir::ArrayTy*>(arg[0]->getTyp()) == NULL))
+        || (arg[0]->getTyp()->getTyp() != ir::IRConstant::ARRAY
+            && arg[0]->getTyp()->getTyp() != ir::IRConstant::MATRIX))
       return NULL;
+    if (arg[0]->getTyp()->getTyp() == ir::IRConstant::MATRIX) // We assume that RealMatrix[] always return *DOUBLE*
+      return lookupTy(ir::IRConstString::DOUBLE);
     const ir::ArrayTy* arr = (const ir::ArrayTy*) (arg[0]->getTyp());
     if (arr->getDim() == 1)
       return arr->getBase();
@@ -643,7 +647,27 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
   // Type Checking
   ret->setTyp(OprExpr_checkType(ret->getOp(), ret->getArgs()));
   if (ret->getTyp() == NULL) {
-    error(expr->line, expr->col, "Error Type Matching for OprExpr!");
+    // Special Checking for RealMatrix[][]
+    // We need to convert RealMatrix[i][j] to RealMatrix(i,j)
+    bool isGetMatrixEntry = false;
+    if (ret->getOp() == ir::IRConstant::SUB
+      && std::dynamic_pointer_cast<ir::OprExpr>(ret->get(0)) != nullptr) {
+      auto left_sub = std::dynamic_pointer_cast<ir::OprExpr>(ret->get(0));
+      if (left_sub->getOp() == ir::IRConstant::SUB
+        && left_sub->get(0)->getTyp() == lookupTy(ir::IRConstString::MATRIX)) { // Here is the Case!
+        std::vector<std::shared_ptr<ir::Expr>> args;
+        args.push_back(left_sub->get(0));
+        args.push_back(left_sub->get(1));
+        args.push_back(ret->get(1));
+        ret = std::make_shared<ir::OprExpr>(ir::IRConstant::PARENTHESES);
+        ret->setArgs(args);
+        ret->setTyp(lookupTy(ir::IRConstString::DOUBLE));
+        isGetMatrixEntry = true;
+      }
+    }
+
+    if (!isGetMatrixEntry)
+      error(expr->line, expr->col, "Error Type Matching for OprExpr!");
   }
   /*
    * TODO: Add crucial check for Markov Order! Now it is a hack!! (@MarkovOrder)
