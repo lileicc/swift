@@ -168,6 +168,11 @@ protected:
   code::Expr* transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
     std::vector<code::Expr*> args);
 
+  /**
+  * translate the matrix construction expression
+  */
+  code::Expr* transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat);
+
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
   code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, std::string valuevar =
@@ -282,6 +287,13 @@ protected:
   static const code::Type BOOL_TYPE;
 
   static const code::Type VOID_TYPE;
+
+  static const code::Type MATRIX_TYPE;
+  static const code::Type MATRIX_REF_TYPE;
+  static const code::Type MATRIX_CONST_TYPE;
+  static const code::Type MATRIX_ROW_VECTOR_TYPE;
+  static const code::Type MATRIX_COL_VECTOR_TYPE;
+  static const code::Type MATRIX_CONTAINER_TYPE;
 
   static const code::Type ARRAY_BASE_TYPE;
 
@@ -403,6 +415,9 @@ protected:
 
   // function name for internal exists operator with range input: std::any_of() in <algorithm>
   static const std::string EXISTS_RANGE_NAME;
+
+  // Builtin Functions for Matrix Initialization
+  static const std::string TO_MATRIX_FUN_NAME;
 
   /**
    * method name for vector.resize()

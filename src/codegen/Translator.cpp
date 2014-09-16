@@ -36,6 +36,14 @@ const code::Type Translator::STRING_TYPE("string");
 const code::Type Translator::TIMESTEP_TYPE("unsigned");
 const code::Type Translator::BOOL_TYPE("bool");
 const code::Type Translator::VOID_TYPE("void");
+
+const code::Type Translator::MATRIX_TYPE("mat");
+const code::Type Translator::MATRIX_REF_TYPE("mat", true);
+const code::Type Translator::MATRIX_CONST_TYPE("mat", false, false, true);
+const code::Type Translator::MATRIX_ROW_VECTOR_TYPE("rowvec");
+const code::Type Translator::MATRIX_COL_VECTOR_TYPE("vec");
+const code::Type Translator::MATRIX_CONTAINER_TYPE("vector<double>");
+
 // TODO: This could be potentially replaced by array
 const code::Type Translator::ARRAY_BASE_TYPE("vector");
 const code::Type Translator::MAP_BASE_TYPE("map");
@@ -91,6 +99,9 @@ const std::string Translator::FORALL_NAME = "_forall";
 const std::string Translator::FORALL_RANGE_NAME = "std::all_of";
 const std::string Translator::EXISTS_NAME = "_exists";
 const std::string Translator::EXISTS_RANGE_NAME = "std::any_of";
+
+// internal predefined functions for Matrix
+const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
 
 Translator::Translator() {
   useTag = false;
@@ -603,11 +614,16 @@ code::Stmt* Translator::transIfThen(std::shared_ptr<ir::IfThen> ith,
 code::Expr* Translator::transExpr(std::shared_ptr<ir::Expr> expr,
                                      std::string valuevar) {
   std::vector<code::Expr*> args;
-  for (size_t k = 0; k < expr->argSize(); k++) {
-    args.push_back(transExpr(expr->get(k)));
-  }
   bool used = false;
   code::Expr * res = nullptr;
+  // Special Check for MatrixExpr
+  if (std::dynamic_pointer_cast<ir::MatrixExpr>(expr) != nullptr)
+    res = transMatrixExpr(std::dynamic_pointer_cast<ir::MatrixExpr>(expr));
+  else {
+    for (size_t k = 0; k < expr->argSize(); k++) {
+      args.push_back(transExpr(expr->get(k)));
+    }
+  }
   // warning::: better to put the above code in separate function
 
   // translate distribution expression
@@ -942,6 +958,47 @@ code::Expr* Translator::transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
   std::vector<code::Expr*> args) {
   std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
   return new code::CallClassConstructor(mapIRTypeToCodeType(opr->getTyp()),sub);
+}
+
+code::Expr* Translator::transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat) {
+  /*
+    Construction of Matrix
+    1. construct a row vector
+    2. construct a col vector
+    3. construct a fixed 2-D real matrix
+    4. construct a general 2-D real matrix
+  */
+  std::vector<code::Expr*> args;
+  if (mat->isColVec() || mat->isRowVec()) { // row vector / col vector, which could be constructed via vector directly
+    for (size_t i = 0; i < mat->argSize(); ++ i)
+      args.push_back(transExpr(mat->get(i)));
+    code::Type matTy = (mat->isColVec() ? MATRIX_COL_VECTOR_TYPE : MATRIX_ROW_VECTOR_TYPE);
+    std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
+    code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE, sub);
+    return new code::CallClassConstructor(matTy, std::vector<code::Expr*>{ container });
+  }
+  // general cases for matrix
+  //    matrixExpr = arrays of row matrixExpr
+  size_t row = mat->argSize();
+  size_t col = 0;
+  for (size_t i = 0; i < mat->argSize(); ++i) {
+    if (mat->get(i)->argSize() > col)
+      col = mat->get(i)->argSize();
+  }
+  for (size_t i = 0; i < mat->argSize(); ++i) {
+    std::shared_ptr<ir::Expr> row = mat->get(i);
+    for (size_t j = 0; j < row->argSize(); ++j) {
+      args.push_back(transExpr(row->get(j)));
+    }
+    for (size_t j = row->argSize(); j < col; ++j) {
+      args.push_back(new code::IntegerLiteral(0));
+    }
+  }
+  code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE, 
+    std::vector<code::Expr*>{new code::ListInitExpr(args)});
+  code::Expr* func = new code::CallExpr(new code::Identifier(TO_MATRIX_FUN_NAME),
+    std::vector<code::Expr*>{container, new code::IntegerLiteral((int)row), new code::IntegerLiteral((int)col)});
+  return func;
 }
 
 code::Expr* Translator::transDistribution(
@@ -1361,7 +1418,8 @@ code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool is
     case ir::IRConstant::DOUBLE:
     case ir::IRConstant::STRING:
     case ir::IRConstant::TIMESTEP:
-      return code::Type(ty->toString(), isRef);
+    case ir::IRConstant::MATRIX:
+      return code::Type(ty->toString(), isRef, isPtr);
     case ir::IRConstant::ARRAY: {
       auto arr = dynamic_cast<const ir::ArrayTy*>(ty);
       std::vector<code::Type> args;

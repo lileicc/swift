@@ -1160,7 +1160,13 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
           ret->setArgs(args);
         }
         std::shared_ptr<ir::MatrixExpr> mat_ret = std::make_shared<ir::MatrixExpr>();
-        mat_ret->setArgs(ret->getArgs());
+        if (okay_colvec) {
+          std::vector<std::shared_ptr<ir::Expr>> colvec_args;
+          for (size_t i = 0; i < ret->argSize(); ++ i)
+            colvec_args.push_back(ret->get(i)->get(i));
+          mat_ret->setArgs(colvec_args);
+        } else
+          mat_ret->setArgs(ret->getArgs());
         mat_ret->setTyp(lookupTy(ir::IRConstString::MATRIX));
         mat_ret->setRowVecFlag(ret->argSize() == 1);
         mat_ret->setColVecFlag(okay_colvec);
