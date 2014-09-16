@@ -32,7 +32,7 @@ class Translator {
 public:
   Translator();
   virtual ~Translator();
-  virtual void translate(swift::ir::BlogModel* model);
+  virtual void translate(std::shared_ptr<ir::BlogModel> model);
   code::Code* getResult();
 
 protected:

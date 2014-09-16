@@ -21,23 +21,18 @@ namespace semant {
 
 Semant::Semant() :
     errorMsg(stderr) {
-  model = new ir::BlogModel();
+  model = std::make_shared<ir::BlogModel>();
   isResultUsed = false;
 }
 
 Semant::~Semant() {
-  // model should be externally deleted
-  // if the model is not used through getModel(), then delete the model
-  if (!isResultUsed)
-    delete model;
 }
 
-ir::BlogModel* Semant::getModel() {
+std::shared_ptr<ir::BlogModel> Semant::getModel() {
   // Note: IMPORTANT
   // Since model uses shared_ptr to store type domains
   // after deleting model, all type domains will be deleted!
   // and they should not be deleted again from tyFactory!
-  isResultUsed = true;
   return model;
 }
 
@@ -1421,6 +1416,11 @@ const ir::Ty* Semant::transTy(const absyn::Ty& typ) {
         "Type < " + typ.getTyp().getValue() + " > not found");
     return NULL;
   }
+
+  // Check if use Matrix
+  if (ty->getTyp() == ir::IRConstant::MATRIX)
+    model->setUseMatrix(true);
+
   if (dim == 0) {
     return ty;
   } else {
@@ -1459,6 +1459,9 @@ const ir::NameTy* Semant::lookupNameTy(const std::string & name) {
 }
 
 const ir::Ty* Semant::lookupTy(const std::string & name) {
+  if (name == ir::IRConstString::BLOG_MATRIX
+      || name == ir::IRConstString::MATRIX)
+      model->setUseMatrix(true);
   return tyFactory.getTy(name);
 }
 

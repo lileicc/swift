@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
   // semantic checking and translating to ir
   swift::semant::Semant sem;
   sem.process(blog_absyn);
-  swift::ir::BlogModel* model = sem.getModel();
+  std::shared_ptr<swift::ir::BlogModel> model = sem.getModel();
 
   if (!sem.Okay()) {
     fprintf(stderr, "Error in semantic checking input %s!", inp);
@@ -107,6 +107,5 @@ int main(int argc, char** argv) {
   }
 
   delete blog_absyn;
-  delete model;
   return 0;
 }

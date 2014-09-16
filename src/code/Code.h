@@ -68,10 +68,14 @@ public:
   void addMacro(SpecialMacro* macro);
   std::vector<SpecialMacro*> & getAllMacros();
 
+  void addOption(std::string op);
+  const std::vector<std::string>& getAllOptions();
+
   // For Printer
   void print(printer::Printer* prt);
 private:
   std::vector<SpecialMacro*> macros;
+  std::vector<std::string> options;
 };
 
 } /* namespace code */

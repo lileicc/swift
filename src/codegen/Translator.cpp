@@ -121,7 +121,11 @@ Translator::~Translator() {
     delete prog;
 }
 
-void Translator::translate(swift::ir::BlogModel* model) {
+void Translator::translate(std::shared_ptr<ir::BlogModel> model) {
+  // Special Check for Matrix Usage
+  if (model->isUseMatrix())
+    prog->addOption("matrix");
+
   if (coreCls == NULL) {
     coreCls = code::ClassDecl::createClassDecl(coreNs, model->getName());
     createInit();
@@ -940,7 +944,27 @@ code::Expr* Translator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       assert(false);  // not supported yet
       break;
     case ir::IRConstant::SUB:
-      assert(false);  // not supported yet
+    {
+      // Special Check for Matrix Computation
+      //   (A*B)[2] is not allowed! have to convert to mat(A*B)[2]
+      code::Expr* base = args[0];
+      if(opr->get(0)->getTyp()->getTyp()==ir::IRConstant::MATRIX) {
+        if (std::dynamic_pointer_cast<ir::OprExpr>(opr->get(0)) != nullptr) {
+          base = new code::CallClassConstructor(MATRIX_TYPE, std::vector<code::Expr*>{base});
+        }
+      }
+      return new code::ArraySubscriptExpr(base, args[1]);
+    }
+      break;
+    case ir::IRConstant::PARENTHESES:
+    {
+      code::Expr* base = args[0];
+      args.erase(args.begin());
+      if (opr->get(0)->getTyp()->getTyp() == ir::IRConstant::MATRIX
+        && std::dynamic_pointer_cast<ir::OprExpr>(opr->get(0)) != nullptr)
+        base = new code::CallClassConstructor(MATRIX_TYPE, std::vector<code::Expr*>{ base });
+      return new code::CallExpr(base, args);
+    }
       break;
     default:
       assert(false);

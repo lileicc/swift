@@ -53,7 +53,15 @@ const std::vector<std::shared_ptr<Evidence>>& BlogModel::getEvidences() {
 }
 
 BlogModel::BlogModel(const std::string name) :
-    name(name), markov_order(-1), time_limit(0) {
+    name(name), markov_order(-1), time_limit(0), useMatrix(false) {
+}
+
+void BlogModel::setUseMatrix(bool flag) {
+  useMatrix = flag;
+}
+
+bool BlogModel::isUseMatrix() {
+  return useMatrix;
 }
 
 const std::vector<std::shared_ptr<TypeDomain>>& BlogModel::getTypes() {

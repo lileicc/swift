@@ -247,6 +247,15 @@ void CPPPrinter::print(code::Code* prog) {
     s->print(this);
   printLine();
 
+  // Check for Special Printing Option 
+  for (auto s : prog->getAllOptions())
+    if (s == "matrix") {
+      // Support Matrix
+      fprintf(file, "\n// Matrix Library included\n");
+      fprintf(file, "#include \"armadillo\"\n");
+      fprintf(file, "using namespace arma;\n\n");
+    }
+
   fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
   fprintf(file, "using namespace std;\n");
   fprintf(file, "using namespace swift::random;\n");

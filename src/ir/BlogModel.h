@@ -37,6 +37,10 @@ public:
   unsigned getTempLimit() const ;
   void setTempLimit(unsigned k);
 
+  // for Matrix Usage
+  bool isUseMatrix();
+  void setUseMatrix(bool flag);
+
 private:
   std::vector<std::shared_ptr<FuncDefn>> fixFunc;
   std::vector<std::shared_ptr<FuncDefn>> randFunc;
@@ -48,6 +52,9 @@ private:
   // Temporal Features
   int markov_order;
   unsigned time_limit;
+
+  // Matrix Feature
+  bool useMatrix;
 };
 
 }

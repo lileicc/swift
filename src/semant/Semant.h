@@ -25,7 +25,7 @@ public:
   Semant();
   ~Semant();
   void process(absyn::BlogProgram* prog);
-  ir::BlogModel* getModel();
+  std::shared_ptr<ir::BlogModel> getModel();
   bool Okay();
 private:
   /**
@@ -185,7 +185,7 @@ private:
   fabrica::Functory functory;
   fabrica::PreDeclFactory predeclFactory;
   msg::ErrorMsg errorMsg;
-  ir::BlogModel* model;
+  std::shared_ptr<ir::BlogModel> model;
 
   //stack used to store local variable
   std::map<std::string, std::stack<std::shared_ptr<ir::VarDecl> > > local_var;
