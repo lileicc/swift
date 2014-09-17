@@ -253,6 +253,8 @@ void CPPPrinter::print(code::Code* prog) {
       // Support Matrix
       fprintf(file, "\n// Matrix Library included\n");
       fprintf(file, "#include \"armadillo\"\n");
+      fprintf(file, "#include \"util/Hist_matrix.h\"\n");
+      fprintf(file, "#include \"util/util_matrix.h\"\n");
       fprintf(file, "using namespace arma;\n\n");
     }
 
