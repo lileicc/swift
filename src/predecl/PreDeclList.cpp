@@ -31,6 +31,9 @@ const GammaDistrDecl PreDeclList::gammaDistr =
 const GaussianDistrDecl PreDeclList::gaussianDistr =
     GaussianDistrDecl();
 
+const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
+    MultivarGaussianDistrDecl();
+
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
 

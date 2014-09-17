@@ -9,6 +9,7 @@
 #include "DiscreteDistrDecl.h"
 #include "GammaDistrDecl.h"
 #include "GaussianDistrDecl.h"
+#include "MultivarGaussianDistrDecl.h"
 #include "PoissonDistrDecl.h"
 #include "UniformChoiceDistrDecl.h"
 // PreDecl Functions
@@ -31,6 +32,7 @@ public:
   static const DiscreteDistrDecl discreteDistr;
   static const GammaDistrDecl gammaDistr;
   static const GaussianDistrDecl gaussianDistr;
+  static const MultivarGaussianDistrDecl multivargaussianDistr;
   static const PoissonDistrDecl poissonDistr;
   static const UniformChoiceDistrDecl uniformChoiceDistr;
   // PreDecl Functions

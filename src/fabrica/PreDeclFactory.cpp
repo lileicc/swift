@@ -23,6 +23,8 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::gammaDistr;
   decls[predecl::PreDeclList::gaussianDistr.getName()] =
     &predecl::PreDeclList::gaussianDistr;
+  decls[predecl::PreDeclList::multivargaussianDistr.getName()] =
+    &predecl::PreDeclList::multivargaussianDistr;
   decls[predecl::PreDeclList::poissonDistr.getName()] =
       &predecl::PreDeclList::poissonDistr;
   decls[predecl::PreDeclList::uniformChoiceDistr.getName()] =
