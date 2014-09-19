@@ -230,6 +230,7 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Discrete.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
   fprintf(file, "#include \"random/Geometric.h\"\n");
+  fprintf(file, "#include \"random/MultivarGaussian.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
