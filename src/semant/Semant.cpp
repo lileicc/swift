@@ -46,8 +46,8 @@ void Semant::process(absyn::BlogProgram* prog) {
           std::shared_ptr<ir::TypeDomain>(
               ((const ir::NameTy*) p.second)->getRefer()));
   // Add Functions
-  for (auto p : functory.getAllFuncTable())
-    model->addFunction(std::shared_ptr<ir::FuncDefn>(p.second));
+  for (auto p : functory.getAllFuncList())
+    model->addFunction(std::shared_ptr<ir::FuncDefn>(p));
 }
 
 void Semant::processDeclarations(absyn::BlogProgram* prog) {

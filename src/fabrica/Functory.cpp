@@ -25,6 +25,7 @@ bool Functory::addFuncDefn(const std::string& name, const ir::Ty * retTy,
       std::string(name), retTy);
   fd->setArgs(args);
   funTable[fd->toSignature()] = fd;
+  funList.push_back(fd);
   return true;
 }
 
@@ -41,6 +42,10 @@ std::shared_ptr<ir::FuncDefn> Functory::getFunc(const std::string& name,
 
 const std::map<std::string, std::shared_ptr<ir::FuncDefn> >& Functory::getAllFuncTable() const {
   return funTable;
+}
+
+const std::vector<std::shared_ptr<ir::FuncDefn> >& Functory::getAllFuncList() const {
+  return funList;
 }
 
 } /* namespace fabrica */

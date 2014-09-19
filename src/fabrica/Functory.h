@@ -42,8 +42,10 @@ public:
    * get all the FuncDefn*
    */
   const std::map<std::string, std::shared_ptr<ir::FuncDefn> >& getAllFuncTable() const;
+  const std::vector<std::shared_ptr<ir::FuncDefn> >& getAllFuncList() const;
 private:
   std::map<std::string, std::shared_ptr<ir::FuncDefn> > funTable;
+  std::vector<std::shared_ptr<ir::FuncDefn> > funList; // According to the order defined in the BLOG program
 };
 
 } /* namespace fabrica */
