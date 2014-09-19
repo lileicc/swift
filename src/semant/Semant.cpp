@@ -577,8 +577,11 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
         || !OprExpr_isNumerical(arg[1]->getTyp()))
       return NULL;
     if (op == IRConstant::POWER) {
-      if (arg[1]->getTyp()->getTyp() == ir::IRConstant::MATRIX)
-        return NULL;
+      if (arg[1]->getTyp()->getTyp() == ir::IRConstant::MATRIX) {
+        return nullptr;
+      }
+      if (arg[0]->getTyp()->getTyp() == ir::IRConstant::MATRIX) 
+        return lookupTy(IRConstString::MATRIX);
       return lookupTy(IRConstString::DOUBLE);
     }
     return getSuperType(arg[0]->getTyp(), arg[1]->getTyp());
