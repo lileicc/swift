@@ -28,7 +28,7 @@ void MultivarGaussian::init(mat mean, mat cov) {
   assert(mean.n_rows == cov.n_rows && cov.n_cols == cov.n_rows);
   c.set_size(mean.n_rows, mean.n_cols);
   A = trans(chol(cov));
-  dist = std::normal_distribution<double>(1, 0);
+  dist = std::normal_distribution<double>(0, 1);
 
   // Variables for computing cpd
   k = mean.n_rows;

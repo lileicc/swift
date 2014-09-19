@@ -204,8 +204,8 @@ public:
     var /= sum_wei;
     printf("Mean = %.5lf   Var = %.5lf\n", mean, var);
     std::fill(bucket.begin(), bucket.end(), 0);
-    double lo = table.begin()->first;
-    double hi = table.rbegin()->first;
+    double lo = std::floor(table.begin()->first);
+    double hi = std::ceil(table.rbegin()->first);
     int n = bucket.size();
     double det = (hi - lo) / n, cur = lo;
     int pt = 0;
