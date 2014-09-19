@@ -92,6 +92,15 @@ protected:
   virtual code::FunctionDecl* transSampleAlg();
 
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
+
+  /**
+   * Given a fixed function, check whether it is corresponding to a constant value
+   * If so, add to constValTable
+   *   i.e. fixed Real x = 1.0;
+   *         x here is a constant value rather than a function
+   */
+  void checkConstValue(std::shared_ptr<ir::FuncDefn> fd);
+
   /**
    * translate blog function
    */
