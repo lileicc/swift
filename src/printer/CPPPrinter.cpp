@@ -255,7 +255,7 @@ void CPPPrinter::print(code::Code* prog) {
       fprintf(file, "#include \"armadillo\"\n");
       fprintf(file, "#include \"util/Hist_matrix.h\"\n");
       fprintf(file, "#include \"util/util_matrix.h\"\n");
-      fprintf(file, "#define transpose trans");
+      fprintf(file, "#define transpose trans\n");
       fprintf(file, "using namespace arma;\n\n");
     }
 
