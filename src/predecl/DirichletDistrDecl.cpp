@@ -23,13 +23,16 @@ std::shared_ptr<ir::Expr> DirichletDistrDecl::getNew(
   // Two Kinds of Accepted Arguments
   //   1. vector<double>
   //   2. all double type
+  //   3. matrix
   // check vector<double>
   auto dbl = fact->getTy(ir::IRConstString::DOUBLE);
   auto ary_dbl = fact->getUpdateTy(new ir::ArrayTy(dbl, 1));
-  if (args.size() == 1 && args[0]->getTyp() == ary_dbl) {
+  auto mtrx = fact->getTy(ir::IRConstString::MATRIX);
+  if (args.size() == 1 && 
+      (args[0]->getTyp() == ary_dbl || args[0]->getTyp() == mtrx)) {
     auto ret = std::make_shared<ir::Distribution>(this->getName(), this);
     ret->setArgs(args);
-    ret->setTyp(ary_dbl);
+    ret->setTyp(mtrx);
     ret->processArgRandomness();
     ret->setRandom(true);
     return ret;

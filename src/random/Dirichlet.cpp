@@ -19,6 +19,7 @@ Dirichlet::~Dirichlet() {
 
 void Dirichlet::init(std::vector<double> alpha) {
   this->alpha = alpha;
+  arr.reshape(1, (int)alpha.size());
   dist_alpha.clear();
   double alpha_sum = 0;
   coef = 1;
@@ -33,6 +34,13 @@ void Dirichlet::init(std::vector<double> alpha) {
   log_coef += std::lgamma(alpha_sum);
 }
 
+void Dirichlet::init(mat alpha) {
+  std::vector<double> vec;
+  for (int i = 0; i < alpha.n_elem; ++ i)
+    vec.push_back(alpha[i]);
+  init(vec);
+}
+
 void Dirichlet::init(int n_param, ...) {
   va_list args;
   va_start(args, n_param);
@@ -44,28 +52,26 @@ void Dirichlet::init(int n_param, ...) {
   init(vec_args);
 }
 
-std::vector<double> Dirichlet::gen() {
-  std::vector<double> x;
+mat Dirichlet::gen() {
+  int i = 0;
   double sum = 0;
   for(auto dist: dist_alpha) {
-    x.push_back(dist(engine));
-    sum += x.back();
+    sum += (arr[i++] = dist(engine));
   }
-  for(size_t i = 0; i < x.size(); ++ i)
-    x[i] /= sum;
-  return x;
+  arr /= sum;
+  return arr;
 }
 
-double Dirichlet::likeli(const std::vector<double>& x) {
-  if(x.size() != alpha.size()) return 0;
+double Dirichlet::likeli(const mat& x) {
+  if(x.n_elem != alpha.size()) return 0;
   double ret = coef;
   for(size_t i = 0; i < alpha.size(); ++ i)
     ret*= pow(x[i], alpha[i] - 1.0);
   return ret;
 }
 
-double Dirichlet::loglikeli(const std::vector<double>& x) {
-  if(x.size() != alpha.size()) return - INFINITY;
+double Dirichlet::loglikeli(const mat& x) {
+  if(x.n_elem != alpha.size()) return - INFINITY;
   double ret = log_coef;
   for(size_t i = 0; i < alpha.size(); ++ i)
     ret += (alpha[i] - 1.0) * x[i];
