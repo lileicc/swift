@@ -14,6 +14,14 @@
 #include "UniformChoiceDistrDecl.h"
 // PreDecl Functions
 #include "PrevFuncDecl.h"
+// BuiltinFunction Interface
+#include "MathFuncDecl.h"
+#include "MatrixMatrixFuncDecl.h"
+#include "MatrixRealFuncDecl.h"
+
+#include <vector>
+#include <string>
+#include <map>
 
 namespace swift {
 namespace predecl {
@@ -37,6 +45,12 @@ public:
   static const UniformChoiceDistrDecl uniformChoiceDistr;
   // PreDecl Functions
   static const PrevFuncDecl prevFuncDecl;
+  
+  // Functions using Builtin Function Interface
+  static std::map<std::string, PreDecl*> funcStore; // used to store builtin functions using function interface
+  static const std::vector<std::string> mathFuncList;
+  static const std::vector<std::string> matRealFuncList;
+  static const std::vector<std::string> matMatFuncList;
 };
 
 }
