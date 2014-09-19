@@ -95,9 +95,8 @@ std::string FuncDefn::toSignature() const {
 }
 
 void FuncDefn::print(FILE* file, int indent) const {
-  fprintf(file, "%*sFuncDefn:\n", indent, "");
-  fprintf(file, "%*s%s\n", indent + 2, "", toSignature().c_str());
-  fprintf(file, "%*sbody:\n", indent + 2, "");
+  fprintf(file, "%*sFuncDefn: %s\n", indent, "", (isrand ? "Random" : "Fixed"));
+  fprintf(file, "%*s%s %s\n", indent + 2, "", getRetTyp()->toString().c_str(), toSignature().c_str());
   if (getBody() != nullptr) {
     getBody()->print(file, indent + 4);
   }

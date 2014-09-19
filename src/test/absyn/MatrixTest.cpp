@@ -106,7 +106,7 @@ void MatrixTest::build(){
     trs->add(new FuncApp(0, 0, Symbol("A")));
     OpExpr* sub = new OpExpr(0, 0, AbsynConstant::MUL, trs, new FuncApp(0, 0, Symbol("A")));
     OpExpr* expr = new OpExpr(0, 0, AbsynConstant::MUL, sub, new FuncApp(0, 0, Symbol("k")));
-    FuncDecl *fd = new FuncDecl(0, 0, false, Symbol("RealMatrix"), Symbol("scale"), expr);
+    FuncDecl *fd = new FuncDecl(0, 0, false, Symbol("Real"), Symbol("scale"), expr);
     fd->addArg(VarDecl(0, 0, Symbol("Real"), Symbol("k")));
     blog->add(fd);
   }

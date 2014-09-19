@@ -578,7 +578,7 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
       return NULL;
     if (op == IRConstant::POWER) {
       if (arg[1]->getTyp()->getTyp() == ir::IRConstant::MATRIX) {
-        return nullptr;
+        return NULL;
       }
       if (arg[0]->getTyp()->getTyp() == ir::IRConstant::MATRIX) 
         return lookupTy(IRConstString::MATRIX);
@@ -1161,7 +1161,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
         if (okay_colvec) {
           std::vector<std::shared_ptr<ir::Expr>> colvec_args;
           for (size_t i = 0; i < ret->argSize(); ++ i)
-            colvec_args.push_back(ret->get(i)->get(i));
+            colvec_args.push_back(ret->get(i)->get(0));
           mat_ret->setArgs(colvec_args);
         } else
           mat_ret->setArgs(ret->getArgs());
