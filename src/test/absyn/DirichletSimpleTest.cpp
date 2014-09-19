@@ -24,14 +24,14 @@ void DirichletSimpleTest::build(){
   BlogProgram *blog = new BlogProgram(0, 0);
   root = blog;
   /*
-  random Real[] w ~ Dirichlet(1.0, 2.0, 3.0);
+  random RealMatrix w ~ Dirichlet(1.0, 2.0, 3.0);
   */
   {
     FuncApp *dis = new FuncApp(0, 0, Symbol("Dirichlet"));
     dis->add(new DoubleLiteral(0, 0, 1.0));
     dis->add(new DoubleLiteral(0, 0, 2.0));
     dis->add(new DoubleLiteral(0, 0, 3.0));
-    FuncDecl *fd = new FuncDecl(0, 0, true, Ty(Symbol("Real"),1), Symbol("w"), dis);
+    FuncDecl *fd = new FuncDecl(0, 0, true, Symbol("RealMatrix"), Symbol("w"), dis);
     blog->add(fd);
   }
   /*

@@ -226,7 +226,6 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Beta.h\"\n");
   fprintf(file, "#include \"random/BooleanDistrib.h\"\n");
   fprintf(file, "#include \"random/Categorical.h\"\n");
-  fprintf(file, "#include \"random/Discrete.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
   fprintf(file, "#include \"random/Geometric.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
@@ -253,6 +252,7 @@ void CPPPrinter::print(code::Code* prog) {
       fprintf(file, "\n// Matrix Library included\n");
       fprintf(file, "#include \"armadillo\"\n");
       fprintf(file, "#include \"random/Dirichlet.h\"\n");
+      fprintf(file, "#include \"random/Discrete.h\"\n");
       fprintf(file, "#include \"random/MultivarGaussian.h\"\n");
       fprintf(file, "#include \"util/Hist_matrix.h\"\n");
       fprintf(file, "#include \"util/util_matrix.h\"\n");
