@@ -35,7 +35,8 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::prevFuncDecl;
 
   // Add Builtin Function using Function Interface
-  decls.insert(predecl::PreDeclList::funcStore.begin(), predecl::PreDeclList::funcStore.end());
+  for (auto& s : predecl::PreDeclList::funcStore)
+    decls[s.first] = s.second.get();
 }
 
 PreDeclFactory::~PreDeclFactory() {

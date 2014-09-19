@@ -122,6 +122,9 @@ Translator::~Translator() {
 }
 
 void Translator::translate(std::shared_ptr<ir::BlogModel> model) {
+  // Cleaning
+  constValTable.clear();
+
   // Special Check for Matrix Usage
   if (model->isUseMatrix())
     prog->addOption("matrix");
@@ -534,6 +537,16 @@ code::FunctionDecl* Translator::transFixedFun(
   const std::string & name = fd->getName();
   std::string fixedfunname = getFixedFunName(name);
   code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+
+  // special check to translate to const value instead of a function
+  if (fd->argSize() == 0 && std::dynamic_pointer_cast<ir::Expr>(fd->getBody()) != nullptr) {
+    constValTable.insert(fixedfunname);
+    code::FieldDecl::createFieldDecl(
+      coreCls, fixedfunname, code::Type(fd->getRetTyp()->toString(),false,false,true),
+      transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody())));
+    return NULL;
+  }
+
   // adding method declaration in the main class
   code::FunctionDecl* fixedfun = code::FunctionDecl::createFunctionDecl(
     coreCls, fixedfunname, valuetype);
@@ -1520,6 +1533,10 @@ code::Expr* Translator::transFunctionCall(
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     case ir::IRConstant::FIXED:
       getterfunname = getFixedFunName(fc->getRefer()->getName());
+      if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
+        // This fixed function is actually a constant variable
+        return new code::Identifier(getterfunname);
+      }
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     default:
       return nullptr;

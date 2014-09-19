@@ -22,6 +22,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 
 namespace swift {
 namespace predecl {
@@ -47,10 +48,13 @@ public:
   static const PrevFuncDecl prevFuncDecl;
   
   // Functions using Builtin Function Interface
-  static std::map<std::string, PreDecl*> funcStore; // used to store builtin functions using function interface
+  static const std::map<std::string, std::shared_ptr<PreDecl>> funcStore; // used to store builtin functions using function interface
   static const std::vector<std::string> mathFuncList;
   static const std::vector<std::string> matRealFuncList;
   static const std::vector<std::string> matMatFuncList;
+
+private:
+  static std::map<std::string, std::shared_ptr<PreDecl>> initFuncStore();
 };
 
 }

@@ -9,6 +9,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <set>
 #include "../ir/IRHeader.h"
 #include "../code/Code.h"
 #include "../util/Configuration.h"
@@ -510,6 +511,8 @@ protected:
   static bool COMPUTE_LIKELIHOOD_IN_LOG;
 
   static swift::Configuration* config;
+
+  std::set<std::string> constValTable;
 
   /**
 * give the name of the type,

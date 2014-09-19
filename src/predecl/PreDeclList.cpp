@@ -46,24 +46,29 @@ const PrevFuncDecl PreDeclList::prevFuncDecl =
 // Functions using Builtin Function Interface
 
 // general math function: both for real and matrix
-const std::vector<std::string> mathFuncList{"abs","exp","log","sqrt","round","floor","ceil","tan","sin","cos"};
+const std::vector<std::string> PreDeclList::mathFuncList{ "abs", "exp", "log", "sqrt", "round", "floor", "ceil", "tan", "sin", "cos" };
 // function from matrix to real
-const std::vector<std::string> matRealFuncList{ "trace", "det", "norm", "cond", "as_scalar" };
+const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "norm", "cond", "as_scalar" };
 // function from matrix to matrix
-const std::vector<std::string> matMatFuncList{ "trans", "transpose", "chol", "inv", "pinv"};
+const std::vector<std::string> PreDeclList::matMatFuncList{ "trans", "transpose", "chol", "inv", "pinv" };
+
+std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::initFuncStore() {
+  std::map<std::string, std::shared_ptr<PreDecl>> ret;
+  for (auto& s : mathFuncList)
+    ret[s] = std::make_shared<MathFuncDecl>(s);
+  for (auto& s : matRealFuncList)
+    ret[s] = std::make_shared<MatrixRealFuncDecl>(s);
+  for (auto& s : matMatFuncList)
+    ret[s] = std::make_shared<MatrixMatrixFuncDecl>(s);
+  return ret;
+}
+
+const std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::funcStore = PreDeclList::initFuncStore();
 
 PreDeclList::PreDeclList() {
-  for (auto& s: mathFuncList) 
-    funcStore[s] = new MathFuncDecl(s);
-  for (auto& s : matRealFuncList)
-    funcStore[s] = new MatrixRealFuncDecl(s);
-  for (auto& s : matMatFuncList)
-    funcStore[s] = new MatrixMatrixFuncDecl(s);
 }
 
 PreDeclList::~PreDeclList() {
-  for (auto& s: funcStore)
-    delete s.second;
 }
 
 }
