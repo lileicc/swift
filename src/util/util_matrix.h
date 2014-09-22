@@ -40,4 +40,31 @@ inline mat _to_matrix(const std::vector<std::vector<double>>& val) {
       ret(i, j) = val[i][j];
   return ret;
 }
+
+
+// horizontally stack all the matrix/col vector
+mat hstack(int n_param, ...) {
+  va_list args;
+  va_start(args, n_param);
+  mat ret;
+  for (int i = 0; i < n_param; ++i) {
+    if (i == 0) ret = va_arg(args, mat);
+    else ret = join_horiz(ret, va_arg(args, mat));
+  }
+  va_end(args);
+  return ret;
+}
+
+// vertically stack all the matrix/row vector
+mat vstack(int n_param, ...) {
+  va_list args;
+  va_start(args, n_param);
+  mat ret;
+  for (int i = 0; i < n_param; ++i) {
+    if (i == 0) ret = va_arg(args, mat);
+    else ret = join_vert(ret, va_arg(args, mat));
+  }
+  va_end(args);
+  return ret;
+}
 }
