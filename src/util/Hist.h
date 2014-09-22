@@ -13,6 +13,7 @@
 #include <cmath>
 #include "util.h"
 
+namespace swift {
 /**
  * histogram for storing answer
  */
@@ -237,3 +238,4 @@ public:
     }
   }
 };
+}

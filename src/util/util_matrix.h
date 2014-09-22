@@ -19,15 +19,16 @@
 #include "armadillo"
 
 using namespace arma;
-using namespace std;
+
+namespace swift {
 
 // convert a vector containing all the elements to a row x col matrix
-inline mat _to_matrix(const vector<double>& val, int row, int col) {
+inline mat _to_matrix(const std::vector<double>& val, int row, int col) {
   return mat(val.data(), row, col);
 }
 
 // convert a vector<vector> to a real matrix
-inline mat _to_matrix(const vector<vector<double>>& val) {
+inline mat _to_matrix(const std::vector<std::vector<double>>& val) {
   int row = val.size();
   if (row == 0)return mat();
   int col = val[0].size();
@@ -38,4 +39,5 @@ inline mat _to_matrix(const vector<vector<double>>& val) {
     for (int j = 0; j < col; ++ j)
       ret(i, j) = val[i][j];
   return ret;
+}
 }

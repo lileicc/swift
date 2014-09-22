@@ -17,6 +17,8 @@ using namespace arma;
  * special histogram for matrix
  */
 
+namespace swift {
+
 template<>
 class Hist<mat> {
 private:
@@ -110,3 +112,4 @@ public:
     }
   }
 };
+}

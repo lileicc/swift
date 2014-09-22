@@ -15,6 +15,8 @@
 #include <functional>
 #include "../random/Multinomial.h"
 
+namespace swift {
+
 // computing log( exp(a) + exp(b) )
 // NOTE this function cannot handle infinity
 template<typename T>
@@ -179,3 +181,5 @@ void pointer_copy(State** ptr, State* state, int N) {
 // Internal Function for TimeStep Operation
 inline unsigned prev(unsigned u) {return u - 1;}
 inline unsigned prev(unsigned u, int t) {return u - t;}
+
+}
