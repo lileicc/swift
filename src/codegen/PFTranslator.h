@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Translator.h"
+#include <memory>
 
 namespace swift {
 namespace codegen {
@@ -15,7 +16,7 @@ namespace codegen {
 class PFTranslator: public swift::codegen::Translator {
 public:
   PFTranslator();
-  void translate(swift::ir::BlogModel* model);
+  void translate(std::shared_ptr<swift::ir::BlogModel> model);
   code::Code* getResult();
   
 protected:

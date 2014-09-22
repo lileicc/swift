@@ -300,6 +300,13 @@ std::shared_ptr<ir::IfThen> Semant::transIfThen(absyn::IfExpr* expr) {
     ptr->setElse(std::make_shared<ir::NullSymbol>());
   if (ptr->getElse()->getTyp() == NULL)
     ptr->getElse()->setTyp(ptr->getTyp());
+  else {
+    if (ptr->getElse()->getTyp() != ptr->getThen()->getTyp()) {
+      error(expr->line, expr->col, "Return type conflict between thenclause<"+
+        ptr->getThen()->getTyp()->toString()+"> and elseclause<"+
+        ptr->getElse()->getTyp()->toString()+">");
+    }
+  }
 
   // Randomness Checking
   ptr->setRandom(ptr->getCond()->isRandom() || ptr->getThen()->isRandom() || ptr->getElse()->isRandom());
@@ -1254,8 +1261,11 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
             special_case = true;
           }
         }
-        if (!special_case)
+        if (!special_case) {
+          fprintf(stderr, "func<%s> rettyp = %s  bodytyp = %s\n", fun->getName().c_str(), fun->getRetTyp()->toString().c_str(),
+            fun->getBody()->getTyp()->toString().c_str());
           error(fd->line, fd->col, "The type of the function body does not match its declaration!");
+        }
       }
     }
 

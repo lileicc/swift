@@ -100,7 +100,7 @@ PFTranslator::PFTranslator() {
   coreTemporalClsClear = NULL;
 }
 
-void PFTranslator::translate(swift::ir::BlogModel* model) {
+void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   ModelDependency = model->getMarkovOrder();
   ModelTimeLimit = model->getTempLimit();
 
