@@ -1092,10 +1092,12 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
   for (size_t i = 0; i < expr->size(); ++i) {
     ret->addArg(transExpr(expr->get(i)));
   }
+  const ir::Ty* intarray_ty = tyFactory.getUpdateTy(new ir::ArrayTy(lookupTy(ir::IRConstString::INT), 1));
   const ir::Ty* base = NULL;
   for (size_t i = 0; i < ret->argSize(); ++i)
     if (ret->get(i)->getTyp() != NULL) {
-      if (base == NULL || isSubType(base, ret->get(i)->getTyp()))
+      if (base == NULL || isSubType(base, ret->get(i)->getTyp())
+        || (base == intarray_ty && ret->get(i)->getTyp()->getTyp() == ir::IRConstant::MATRIX))
         base = ret->get(i)->getTyp();
     }
 
@@ -1124,7 +1126,6 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
       // special check for ColVector and RealMatrix
       bool okay_colvec = true, okay_mat = true;
       bool has_intarray = false;
-      const ir::Ty* intarray_ty = tyFactory.getUpdateTy(new ir::ArrayTy(lookupTy(ir::IRConstString::INT),1));
       for (size_t i = 0; i < ret->argSize() && okay_mat; ++i) {
         // check whether it is a int array
         if (ret->get(i)->getTyp() == intarray_ty && std::dynamic_pointer_cast<ir::ArrayExpr>(ret->get(i)) != nullptr) {
