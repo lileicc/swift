@@ -149,6 +149,11 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   for (auto ty : model->getTypes())
     transTypeDomain(ty);
 
+  // Check Constant Values
+  constValTable.clear();
+  for (auto fun : model->getFixFuncs())
+    checkConstValue(fun);
+
   // translate fixed function
   for (auto fun : model->getFixFuncs())
     transFun(fun);
@@ -475,7 +480,8 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   // Optimization for Vector/Map/Set Return
   if (valuetype.getName() == ARRAY_BASE_TYPE.getName()
     || valuetype.getName() == MAP_BASE_TYPE.getName()
-    || valuetype.getName() == SET_BASE_TYPE.getName())
+    || valuetype.getName() == SET_BASE_TYPE.getName()
+    || valuetype.getName() == MATRIX_TYPE.getName())
     valuetype.setRef(true);
 
   // define getter function :::==> __get_value()
@@ -622,6 +628,15 @@ code::FunctionDecl* PFTranslator::transFixedFun(
   const std::string & name = fd->getName();
   std::string fixedfunname = getFixedFunName(name);
   code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+
+  // special check to translate to const value instead of a function
+  if (fd->argSize() == 0 && constValTable.count(fixedfunname) > 0) {
+    code::FieldDecl::createFieldDecl(
+      coreCls, fixedfunname, code::Type(fd->getRetTyp()->toString(), false, false, true),
+      transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody())));
+    return NULL;
+  }
+
   // adding method declaration in the main class
   code::FunctionDecl* fixedfun = code::FunctionDecl::createFunctionDecl(
     coreNs, fixedfunname, valuetype);
@@ -703,11 +718,16 @@ code::Stmt* PFTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
 code::Expr* PFTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
                                      std::string valuevar) {
   std::vector<code::Expr*> args;
-  for (size_t k = 0; k < expr->argSize(); k++) {
-    args.push_back(transExpr(expr->get(k)));
-  }
   bool used = false;
   code::Expr * res = nullptr;
+  // Special Check for MatrixExpr
+  if (std::dynamic_pointer_cast<ir::MatrixExpr>(expr) != nullptr)
+    res = transMatrixExpr(std::dynamic_pointer_cast<ir::MatrixExpr>(expr));
+  else {
+    for (size_t k = 0; k < expr->argSize(); k++) {
+      args.push_back(transExpr(expr->get(k)));
+    }
+  }
   // warning::: better to put the above code in separate function
 
   // translate distribution expression
@@ -1027,7 +1047,27 @@ code::Expr* PFTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       assert(false);  // not supported yet
       break;
     case ir::IRConstant::SUB:
-      assert(false);  // not supported yet
+    {
+      // Special Check for Matrix Computation
+      //   (A*B)[2] is not allowed! have to convert to mat(A*B)[2]
+      code::Expr* base = args[0];
+      if(opr->get(0)->getTyp()->getTyp()==ir::IRConstant::MATRIX) {
+        if (std::dynamic_pointer_cast<ir::OprExpr>(opr->get(0)) != nullptr) {
+          base = new code::CallClassConstructor(MATRIX_TYPE, std::vector<code::Expr*>{base});
+        }
+      }
+      return new code::ArraySubscriptExpr(base, args[1]);
+    }
+      break;
+    case ir::IRConstant::PARENTHESES:
+    {
+      code::Expr* base = args[0];
+      args.erase(args.begin());
+      if (opr->get(0)->getTyp()->getTyp() == ir::IRConstant::MATRIX
+        && std::dynamic_pointer_cast<ir::OprExpr>(opr->get(0)) != nullptr)
+        base = new code::CallClassConstructor(MATRIX_TYPE, std::vector<code::Expr*>{ base });
+      return new code::CallExpr(base, args);
+    }
       break;
     default:
       assert(false);
@@ -1045,6 +1085,47 @@ code::Expr* PFTranslator::transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
   std::vector<code::Expr*> args) {
   std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
   return new code::CallClassConstructor(mapIRTypeToCodeType(opr->getTyp()),sub);
+}
+
+code::Expr* PFTranslator::transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat) {
+  /*
+  Construction of Matrix
+  1. construct a row vector
+  2. construct a col vector
+  3. construct a fixed 2-D real matrix
+  4. construct a general 2-D real matrix
+  */
+  std::vector<code::Expr*> args;
+  if (mat->isColVec() || mat->isRowVec()) { // row vector / col vector, which could be constructed via vector directly
+    for (size_t i = 0; i < mat->argSize(); ++i)
+      args.push_back(transExpr(mat->get(i)));
+    code::Type matTy = (mat->isColVec() ? MATRIX_COL_VECTOR_TYPE : MATRIX_ROW_VECTOR_TYPE);
+    std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
+    code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE, sub);
+    return new code::CallClassConstructor(matTy, std::vector<code::Expr*>{ container });
+  }
+  // general cases for matrix
+  //    matrixExpr = arrays of row matrixExpr
+  size_t row = mat->argSize();
+  size_t col = 0;
+  for (size_t i = 0; i < mat->argSize(); ++i) {
+    if (mat->get(i)->argSize() > col)
+      col = mat->get(i)->argSize();
+  }
+  for (size_t i = 0; i < mat->argSize(); ++i) {
+    std::shared_ptr<ir::Expr> row = mat->get(i);
+    for (size_t j = 0; j < row->argSize(); ++j) {
+      args.push_back(transExpr(row->get(j)));
+    }
+    for (size_t j = row->argSize(); j < col; ++j) {
+      args.push_back(new code::IntegerLiteral(0));
+    }
+  }
+  code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE,
+    std::vector<code::Expr*>{new code::ListInitExpr(args)});
+  code::Expr* func = new code::CallExpr(new code::Identifier(TO_MATRIX_FUN_NAME),
+    std::vector<code::Expr*>{container, new code::IntegerLiteral((int)row), new code::IntegerLiteral((int)col)});
+  return func;
 }
 
 code::Expr* PFTranslator::transDistribution(

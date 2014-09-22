@@ -187,6 +187,11 @@ protected:
   code::Expr* transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
     std::vector<code::Expr*> args);
 
+  /**
+  * translate the matrix construction expression
+  */
+  code::Expr* transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat);
+
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
   code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, std::string valuevar =

@@ -415,7 +415,8 @@ code::FunctionDecl* Translator::transGetterFun(
   // Optimization for Vector/Map/Set Return
   if (valuetype.getName() == ARRAY_BASE_TYPE.getName()
     || valuetype.getName() == MAP_BASE_TYPE.getName()
-    || valuetype.getName() == SET_BASE_TYPE.getName())
+    || valuetype.getName() == SET_BASE_TYPE.getName()
+    || valuetype.getName() == MATRIX_TYPE.getName())
     valuetype.setRef(true);
 
   // define getter function :::==> __get_value()
