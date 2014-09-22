@@ -101,6 +101,10 @@ PFTranslator::PFTranslator() {
 }
 
 void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
+  // Special Check for Matrix Usage
+  if (model->isUseMatrix())
+    prog->addOption("matrix");
+
   ModelDependency = model->getMarkovOrder();
   ModelTimeLimit = model->getTempLimit();
 
@@ -1702,6 +1706,10 @@ code::Expr* PFTranslator::transFunctionCall(
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     case ir::IRConstant::FIXED:
       getterfunname = getFixedFunName(fc->getRefer()->getName());
+      if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
+        // This fixed function is actually a constant variable
+        return new code::Identifier(getterfunname);
+      }
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     default:
       return nullptr;
