@@ -19,6 +19,7 @@
 #include "MathFuncDecl.h"
 #include "MatrixMatrixFuncDecl.h"
 #include "MatrixRealFuncDecl.h"
+#include "MatrixInitFuncDecl.h"
 
 #include <vector>
 #include <string>
@@ -54,6 +55,7 @@ public:
   static const std::vector<std::string> mathFuncList;
   static const std::vector<std::string> matRealFuncList;
   static const std::vector<std::string> matMatFuncList;
+  static const std::vector<std::string> matInitFuncList;
 
 private:
   static std::map<std::string, std::shared_ptr<PreDecl>> initFuncStore();
