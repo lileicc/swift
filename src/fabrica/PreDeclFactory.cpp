@@ -29,7 +29,9 @@ PreDeclFactory::PreDeclFactory() {
       &predecl::PreDeclList::poissonDistr;
   decls[predecl::PreDeclList::uniformChoiceDistr.getName()] =
       &predecl::PreDeclList::uniformChoiceDistr;
-  
+  decls[predecl::PreDeclList::uniformVectorDistr.getName()] =
+    &predecl::PreDeclList::uniformVectorDistr;
+
   // Predecl Functions
   decls[predecl::PreDeclList::prevFuncDecl.getName()] =
     &predecl::PreDeclList::prevFuncDecl;

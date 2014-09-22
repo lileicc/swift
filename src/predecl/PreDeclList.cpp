@@ -37,6 +37,8 @@ const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
 
+const UniformVectorDistrDecl PreDeclList::uniformVectorDistr =
+    UniformVectorDistrDecl();
 
 // PreDecl Functions
 
@@ -50,7 +52,7 @@ const std::vector<std::string> PreDeclList::mathFuncList{ "abs", "exp", "log", "
 // function from matrix to real
 const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "norm", "cond", "as_scalar" };
 // function from matrix to matrix
-const std::vector<std::string> PreDeclList::matMatFuncList{ "trans", "transpose", "chol", "inv", "pinv" };
+const std::vector<std::string> PreDeclList::matMatFuncList{ "trans", "transpose", "chol", "inv", "pinv", "sum", "diag" };
 
 std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::initFuncStore() {
   std::map<std::string, std::shared_ptr<PreDecl>> ret;

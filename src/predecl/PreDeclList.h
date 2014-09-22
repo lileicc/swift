@@ -12,6 +12,7 @@
 #include "MultivarGaussianDistrDecl.h"
 #include "PoissonDistrDecl.h"
 #include "UniformChoiceDistrDecl.h"
+#include "UniformVectorDistrDecl.h"
 // PreDecl Functions
 #include "PrevFuncDecl.h"
 // BuiltinFunction Interface
@@ -44,6 +45,7 @@ public:
   static const MultivarGaussianDistrDecl multivargaussianDistr;
   static const PoissonDistrDecl poissonDistr;
   static const UniformChoiceDistrDecl uniformChoiceDistr;
+  static const UniformVectorDistrDecl uniformVectorDistr;
   // PreDecl Functions
   static const PrevFuncDecl prevFuncDecl;
   
