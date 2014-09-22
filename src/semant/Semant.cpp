@@ -616,6 +616,34 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
 }
 
 std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
+  // Special check for TimeStep: e.g. @1 <=> AT(1)
+  if (expr->getOp() == absyn::AbsynConstant::AT) {
+    if (expr->getLeft() != NULL || expr->getRight() == NULL) {
+      error(expr->line, expr->col, "Invalid/Incomplete Operator for @<AT> Operator!");
+      return std::make_shared<ir::NullSymbol>();
+    }
+    auto arg = transExpr(expr->getRight());
+    if (arg == nullptr || arg->getTyp() != lookupTy(ir::IRConstString::INT)) {
+      error(expr->line, expr->col, "Invalid Argument for @<AT> Operator! The correct format should be <NULL> AT <INT>.");
+      return std::make_shared<ir::NullSymbol>();
+    }
+    if (std::dynamic_pointer_cast<ir::IntLiteral>(arg) != nullptr) {
+      auto val = std::dynamic_pointer_cast<ir::IntLiteral>(arg);
+      auto ret = std::make_shared<ir::TimestepLiteral>(val->getValue());
+      ret->setTyp(lookupTy(ir::IRConstString::TIMESTEP));
+      // TODO: Currently is a Hacking Implementation
+      //     Should Move to Analyser Finally!!!!
+      if (ret->getValue() > model->getTempLimit())
+        model->setTempLimit(ret->getValue());
+      return ret;
+    }
+    else {
+      // In this case, AT just plays the role of type conversion
+      arg->setTyp(lookupTy(ir::IRConstString::TIMESTEP));
+      return arg;
+    }
+  }
+
   auto ret = std::make_shared<ir::OprExpr>(
       OprExpr_convertOpConst(expr->getOp()));
   if (ret->getOp() == ir::IRConstant::NA
