@@ -16,7 +16,7 @@ Expr::Expr(int l, int c) :
 
 Expr::~Expr() {
   for (size_t i = 0; i < args.size(); i++)
-    if (args[i] != nullptr)
+    if (args[i] != NULL)
       delete args[i];
 }
 
@@ -30,6 +30,16 @@ Expr* Expr::get(size_t id) {
 
 size_t Expr::size() {
   return args.size();
+}
+
+void Expr::cloneArgs() {
+  for (size_t i = 0; i < args.size(); ++ i)
+    if (args[i] != NULL)
+      args[i] = args[i]->clone();
+}
+
+void Expr::clearArgs() {
+  args.clear();
 }
 
 }

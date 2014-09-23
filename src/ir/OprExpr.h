@@ -12,7 +12,7 @@ public:
   virtual ~OprExpr();
 
   IRConstant getOp() const;
-  void print(FILE* file, int indent);
+  void print(FILE* file, int indent) const ;
 
 private:
   IRConstant op;

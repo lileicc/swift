@@ -50,5 +50,12 @@ void IfExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+Expr* IfExpr::clone() {
+  IfExpr* ret = new IfExpr(*this);
+  ret->cloneArgs();
+  return ret;
+
+}
+
 }
 } /* namespace swift */

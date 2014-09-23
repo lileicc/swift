@@ -46,5 +46,11 @@ void OpExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+Expr* OpExpr::clone() {
+  OpExpr* ret = new OpExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 } /* namespace swift */

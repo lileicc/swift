@@ -19,6 +19,7 @@ public:
   bool isForall() const;
   bool isExists() const;
   void setCond(std::shared_ptr<Expr> e);
+  virtual void addArg(std::shared_ptr<Expr> e);
   std::shared_ptr<Expr> getCond() const;
 
   void print(FILE* file, int indent) const;

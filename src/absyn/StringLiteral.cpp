@@ -26,5 +26,9 @@ void StringLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(StringLiteral: %s )\n", indent, "", value.c_str());
 }
 
+Expr* StringLiteral::clone() {
+  return new StringLiteral(line, col, value);
+}
+
 }
 }

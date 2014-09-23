@@ -36,8 +36,8 @@ void AircraftSimple::build(){
   #Aircraft ~ Poisson(5);
   */
   {
-    DistrExpr*dis;
-    dis = new DistrExpr(0, 0, Symbol("Poisson"));
+    FuncApp*dis;
+    dis = new FuncApp(0, 0, Symbol("Poisson"));
     dis->add(new IntLiteral(0, 0, 5));
     NumStDecl*num;
     num = new NumStDecl(0, 0, Symbol("Aircraft"), dis);
@@ -47,8 +47,8 @@ void AircraftSimple::build(){
   #Blip(Source=a) ~ Poisson(4);
   */
   {
-    DistrExpr*dis;
-    dis = new DistrExpr(0, 0, Symbol("Poisson"));
+    FuncApp*dis;
+    dis = new FuncApp(0, 0, Symbol("Poisson"));
     dis->add(new IntLiteral(0, 0, 4));
     NumStDecl*num;
     num = new NumStDecl(0, 0, Symbol("Blip"), dis);
@@ -56,14 +56,15 @@ void AircraftSimple::build(){
     blog->add(num);
   }
   /*
-  obs {Blip b} = {b1, b2, b3};
+  obs {b for Blip b} = {b1, b2, b3};
   */
   {
-    CondSet* st = new CondSet(0, 0, VarDecl(0,0,Symbol("Blip"),Symbol("b")));
+    TupleSetExpr* st = new TupleSetExpr(0, 0, std::vector<Expr*>({new FuncApp(0,0,Symbol("b"))}),
+      std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Blip"),Symbol("b")) }), NULL);
     ListSet* lst = new ListSet(0,0);
-    lst->add(new VarRef(0, 0, Symbol("b1")));
-    lst->add(new VarRef(0, 0, Symbol("b2")));
-    lst->add(new VarRef(0, 0, Symbol("b3")));
+    lst->add(new FuncApp(0, 0, Symbol("b1")));
+    lst->add(new FuncApp(0, 0, Symbol("b2")));
+    lst->add(new FuncApp(0, 0, Symbol("b3")));
 //    CardinalityExpr* num = new CardinalityExpr(0, 0, new CondSet(0, 0, VarDecl(0, 0, Symbol("Blip"))));
 //    Evidence* e = new Evidence(0, 0, num, new IntLiteral(0,0,3));
     Evidence* e = new Evidence(0,0,st,lst); // Set Evidence Here!
@@ -71,11 +72,14 @@ void AircraftSimple::build(){
   }
 
   /*
-  query #{Aircraft a};
+  query size({a for Aircraft a});
   */
   {
-    CardinalityExpr* num = new CardinalityExpr(0, 0, new CondSet(0, 0, VarDecl(0, 0, Symbol("Blip"),Symbol("a"))));
-    Query* query = new Query(0,0,num);
+    TupleSetExpr* st = new TupleSetExpr(0, 0, std::vector<Expr*>({ new FuncApp(0, 0, Symbol("a")) }),
+      std::vector<VarDecl>({VarDecl(0,0,Symbol("Aircraft"),Symbol("a"))}),NULL);
+    FuncApp* fun = new FuncApp(0,0,Symbol("size"));
+    fun->add(st);
+    Query* query = new Query(0,0,fun);
     blog->add(query);
   }
 }

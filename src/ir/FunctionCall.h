@@ -43,7 +43,6 @@ public:
   bool isBuiltin() const;
 
 private:
-  IRConstant kind;
   std::shared_ptr<FuncDefn> refer;
 
   // TimeStep Features
@@ -52,6 +51,8 @@ private:
 
   // Builtin Function Refer
   const predecl::PreDecl* builtin;
+
+  IRConstant kind;
 };
 
 }

@@ -24,6 +24,10 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "++"; // increment
   case OpKind::UO_DEC:
     return "--"; // decrement
+  case OpKind::UO_ADDR:
+    return "&"; // address of
+  case OpKind::UO_DEREF:
+    return "*"; // deference of
   case OpKind::UO_NEW:
     return "new "; // new or malloc
   case OpKind::UO_DEL:
@@ -113,6 +117,8 @@ std::pair<int, int> CPPPrinter::OpPrec(code::Expr* expr) {
       return std::make_pair<int, int>(1,0);
   case OpKind::UO_CMPT:
   case OpKind::UO_NEG:
+  case OpKind::UO_ADDR:
+  case OpKind::UO_DEREF:
     return std::make_pair<int, int>(2,1);
   case OpKind::UO_NEW:
   case OpKind::UO_DEL:
@@ -223,9 +229,11 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Dirichlet.h\"\n");
   fprintf(file, "#include \"random/Discrete.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
+  fprintf(file, "#include \"random/Geometric.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
+  fprintf(file, "#include \"random/UniformReal.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
   fprintf(file, "#include \"util/util.h\"\n");
   fprintf(file, "#include \"util/DynamicTable.h\"\n");
@@ -239,6 +247,7 @@ void CPPPrinter::print(code::Code* prog) {
     s->print(this);
   printLine();
 
+  fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
   fprintf(file, "using namespace std;\n");
   fprintf(file, "using namespace swift::random;\n");
 
@@ -360,6 +369,47 @@ void CPPPrinter::print(code::CallExpr* term) {
 
   fprintf(file, "(");
   bool not_first = false;
+  for (auto p : term->getArgs()) {
+    if (not_first)
+      fprintf(file, ",");
+    else
+      not_first = true;
+    p->print(this);
+  }
+  fprintf(file, ")");
+
+  newline = backup;
+  if (backup)
+    fprintf(file, ";");
+  printLine();
+}
+
+void CPPPrinter::print(code::CallTemplateExpr* term) {
+  printIndent();
+  bool backup = newline;
+  newline = false;
+
+  // Note: () operatorƒf
+  auto f_prec = OpPrec(term->getFunc());
+  if (f_prec.first > 1)
+    fprintf(file, "(");
+  term->getFunc()->print(this);
+  if (f_prec.first > 1)
+    fprintf(file, ")");
+
+  bool not_first = false;
+  fprintf(file, "<");
+  for (auto p : term->getTempArgs()) {
+    if (not_first)
+      fprintf(file, ",");
+    else 
+      not_first = true;
+    p->print(this);
+  }
+  fprintf(file, ">");
+
+  fprintf(file, "(");
+  not_first = false;
   for (auto p : term->getArgs()) {
     if (not_first)
       fprintf(file, ",");
@@ -704,6 +754,8 @@ void CPPPrinter::print(code::SwitchStmt* term) {
 void CPPPrinter::print(code::Type* term) {
   // assume newline == false;
   assert(newline == false);
+  if (term->isConst())
+    fprintf(file, "const ");
   if (term->hasScope()) {
     for (auto & nm : term->getScope()) {
       fprintf(file, "%s::", nm.c_str());
@@ -722,6 +774,8 @@ void CPPPrinter::print(code::Type* term) {
   }
   if (term->isRef())
     fprintf(file, "&");
+  if (term->isPtr())
+    fprintf(file, "*");
 }
 
 void CPPPrinter::print(code::VarDecl* term) {
@@ -734,6 +788,15 @@ void CPPPrinter::print(code::VarDecl* term) {
 
   term->getType().print(this);
   fprintf(file, " %s", term->getId().c_str());
+
+  if (term->getArrArgs().size() > 0) {
+    for (auto p : term->getArrArgs()) {
+      fprintf(file, "[");
+      p->print(this);
+      fprintf(file, "]");
+    }
+  }
+
   if (term->getValue() != NULL) {
     fprintf(file, " = ");
     term->getValue()->print(this);

@@ -27,6 +27,7 @@ std::shared_ptr<ir::Expr> BooleanDistrDecl::getNew(
   ret->setArgs(args);
   ret->setTyp(fact->getTy(ir::IRConstString::BOOL));
   ret->processArgRandomness();
+  ret->setRandom(true);
   return ret;
 }
 

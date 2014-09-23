@@ -34,7 +34,7 @@ std::shared_ptr<ir::FuncDefn> Functory::getFunc(const std::string& name,
   fd.setArgs(args);
   auto element = funTable.find(fd.toSignature());
   if (element == funTable.end()) {
-    return NULL;
+    return nullptr;
   }
   return element->second;
 }

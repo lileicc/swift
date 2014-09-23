@@ -45,8 +45,8 @@ void PoissonBall::build(){
   #Ball ~ Poisson(6);
   */
   {
-    DistrExpr*dis;
-    dis = new DistrExpr(0, 0, Symbol("Poisson"));
+    FuncApp*dis;
+    dis = new FuncApp(0, 0, Symbol("Poisson"));
     dis->add(new IntLiteral(0, 0, 6));
     NumStDecl*num;
     num = new NumStDecl(0, 0, Symbol("Ball"), dis);
@@ -56,13 +56,13 @@ void PoissonBall::build(){
   random Color TrueColor(Ball b) ~ Categorical({Blue -> 0.5, Green -> 0.5});
   */
   {
-    DistrExpr*cate;
+    FuncApp*cate;
     {
       MapExpr* mp;
       mp = new MapExpr(0, 0);
-      mp->addMap(new VarRef(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.5));
-      mp->addMap(new VarRef(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.5));
-      cate = new DistrExpr(0, 0, Symbol("Categorical"));
+      mp->addMap(new FuncApp(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.5));
+      mp->addMap(new FuncApp(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.5));
+      cate = new FuncApp(0, 0, Symbol("Categorical"));
       cate->add(mp);
     }
     FuncDecl*fun;
@@ -71,13 +71,15 @@ void PoissonBall::build(){
     blog->add(fun);
   }
   /*
-  random Ball BallDrawn(Draw d) ~UniformChoice({ Ball b });
+  random Ball BallDrawn(Draw d) ~UniformChoice({ b for Ball b });
   */
   {
     SetExpr*st;
-    st = new CondSet(0, 0, VarDecl(0, 0, Symbol("Ball"), Symbol("b")), NULL);
-    DistrExpr*uc;
-    uc = new DistrExpr(0, 0, Symbol("UniformChoice"));
+    st = new TupleSetExpr(0, 0, 
+      std::vector<Expr*>({ new FuncApp(0, 0, Symbol("b")) }),
+      std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Ball"), Symbol("b")) }), NULL);
+    FuncApp*uc;
+    uc = new FuncApp(0, 0, Symbol("UniformChoice"));
     uc->add(st);
     FuncDecl*fun;
     fun = new FuncDecl(0, 0, true, Symbol("Ball"), Symbol("BallDrawn"), uc);
@@ -85,50 +87,48 @@ void PoissonBall::build(){
     blog->add(fun);
   }
   /*
-  random Color ObsColor(Draw d) {
-  if (BallDrawn(d) != null)
-  then ~ TabularCPD({Blue -> ~ Categorical({Blue -> 0.8, Green -> 0.2}),
-  Green -> ~ Categorical({Blue -> 0.2, Green -> 0.8})},
-  TrueColor(BallDrawn(d)))
-  };
+  random Color ObsColor(Draw d) ~
+  if (BallDrawn(d) != null) then 
+    case TrueColor(BallDrawn(d)) in 
+    {Blue -> ~ Categorical({Blue -> 0.8, Green -> 0.2}),
+    Green -> ~ Categorical({Blue -> 0.2, Green -> 0.8})};
   */
   {
     FuncApp* ball_draw;
     ball_draw = new FuncApp(0, 0, Symbol("BallDrawn"));
-    ball_draw->add(new VarRef(0, 0, Symbol("d")));
+    ball_draw->add(new FuncApp(0, 0, Symbol("d")));
     OpExpr* cond;
     cond = new OpExpr(0,0,AbsynConstant::NEQ,ball_draw, new NullLiteral(0,0));
-    DistrExpr*cate = new DistrExpr(0, 0, Symbol("TabularCPD"));;
+    CaseExpr*cas = NULL;
     {
       MapExpr* mp = new MapExpr(0,0);
       {
         MapExpr*sub1 = new MapExpr(0,0);
-        sub1->addMap(new VarRef(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.8));
-        sub1->addMap(new VarRef(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.2));
-        DistrExpr*cate1 = new DistrExpr(0,0,Symbol("Categorical"));
+        sub1->addMap(new FuncApp(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.8));
+        sub1->addMap(new FuncApp(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.2));
+        FuncApp*cate1 = new FuncApp(0,0,Symbol("Categorical"));
         cate1->add(sub1);
 
         MapExpr*sub2 = new MapExpr(0, 0);
-        sub2->addMap(new VarRef(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.2));
-        sub2->addMap(new VarRef(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.8));
-        DistrExpr*cate2 = new DistrExpr(0, 0, Symbol("Categorical"));
+        sub2->addMap(new FuncApp(0, 0, Symbol("Blue")), new DoubleLiteral(0, 0, 0.2));
+        sub2->addMap(new FuncApp(0, 0, Symbol("Green")), new DoubleLiteral(0, 0, 0.8));
+        FuncApp*cate2 = new FuncApp(0, 0, Symbol("Categorical"));
         cate2->add(sub2);
 
-        mp->addMap(new VarRef(0, 0, Symbol("Blue")), cate1);
-        mp->addMap(new VarRef(0, 0, Symbol("Green")), cate2);
+        mp->addMap(new FuncApp(0, 0, Symbol("Blue")), cate1);
+        mp->addMap(new FuncApp(0, 0, Symbol("Green")), cate2);
       }
       FuncApp* ball_draw;
       ball_draw = new FuncApp(0, 0, Symbol("BallDrawn"));
-      ball_draw->add(new VarRef(0, 0, Symbol("d")));
+      ball_draw->add(new FuncApp(0, 0, Symbol("d")));
       FuncApp* true_color;
       true_color = new FuncApp(0, 0, Symbol("TrueColor"));
       true_color->add(ball_draw);
       
-      cate->add(mp);
-      cate->add(true_color);
+      cas = new CaseExpr(0,0,true_color,mp);
     }
     IfExpr* ift;
-    ift = new IfExpr(0,0,cond,cate,NULL);
+    ift = new IfExpr(0,0,cond,cas,NULL);
     FuncDecl*fun;
     fun = new FuncDecl(0, 0, true, Symbol("Color"), Symbol("ObsColor"), ift);
     fun->addArg(VarDecl(0, 0, Symbol("Draw"), Symbol("d")));
@@ -148,20 +148,23 @@ void PoissonBall::build(){
   obs ObsColor(Draw[9]) = Green;
   */
   for (int k = 0; k < 10; ++k) {
-    OpExpr* ball = new OpExpr(0, 0, AbsynConstant::SUB, new VarRef(0, 0, Symbol("Draw")), new IntLiteral(0,0,k));
+    OpExpr* ball = new OpExpr(0, 0, AbsynConstant::SUB, new FuncApp(0, 0, Symbol("Draw")), new IntLiteral(0, 0, k));
     FuncApp* fun = new FuncApp(0, 0, Symbol("ObsColor"));
     fun->add(ball);
-    Evidence* e = new Evidence(0,0,fun,new VarRef(0,0,Symbol(k & 1 ? "Green" : "Blue")));
+    Evidence* e = new Evidence(0, 0, fun, new FuncApp(0, 0, Symbol(k & 1 ? "Green" : "Blue")));
 
     blog->add(e);
   }
 
   /*
-  query #{Ball b};
+  query size({b for Ball b});
   */
   {
-    CondSet* st = new CondSet(0, 0, VarDecl(0, 0, Symbol("Ball"), Symbol("b")), NULL);
-    CardinalityExpr* num = new CardinalityExpr(0, 0, st);
+    TupleSetExpr* st = new TupleSetExpr(0, 0, 
+      std::vector<Expr*>({ new FuncApp(0, 0, Symbol("b")) }),
+      std::vector<VarDecl>({ VarDecl(0, 0, Symbol("Ball"), Symbol("b")) }), NULL);
+    FuncApp* num = new FuncApp(0,0,Symbol("size"));
+    num->add(st);
     Query* query = new Query(0,0,num);
     blog->add(query);
   }

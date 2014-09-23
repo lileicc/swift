@@ -49,7 +49,7 @@ private:
 
   std::shared_ptr<ir::IfThen> transIfThen(absyn::IfExpr* expr);
 
-  std::shared_ptr<ir::Branch> transBranch(absyn::DistrExpr* expr);
+  std::shared_ptr<ir::Branch> transBranch(absyn::CaseExpr* expr);
 
   std::shared_ptr<ir::Clause> transClause(absyn::Expr* expr);
 
@@ -65,19 +65,28 @@ private:
 
   std::shared_ptr<ir::MapExpr> transExpr(absyn::MapExpr* expr);
 
+  std::shared_ptr<ir::CardExpr> processCardExpr(absyn::Expr* expr); // Special Treatment for CardExpr
   std::shared_ptr<ir::CardExpr> transExpr(absyn::CardinalityExpr* expr);
 
   std::shared_ptr<ir::QuantForm> transExpr(absyn::QuantExpr* expr);
 
-  std::shared_ptr<ir::Expr> transExpr(absyn::VarRef* expr);
+  // @Deprecated
+  //std::shared_ptr<ir::Expr> transExpr(absyn::VarRef* expr);
+  std::shared_ptr<ir::Expr> transVarRef(std::string var);
 
-  std::shared_ptr<ir::SetExpr> transExpr(absyn::SetExpr* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::SetExpr* expr);
 
   std::shared_ptr<ir::ListSet> transExpr(absyn::ListSet* expr);
 
   std::shared_ptr<ir::CondSet> transExpr(absyn::CondSet* expr);
 
-  std::shared_ptr<ir::Expr> transExpr(absyn::DistrExpr* expr);
+  std::shared_ptr<ir::Expr> transExpr(absyn::TupleSetExpr* expr);
+
+  // @Deprecated
+  //std::shared_ptr<ir::Expr> transExpr(absyn::DistrExpr* expr);
+  std::shared_ptr<ir::Expr> transDistrb(
+    std::string name, std::vector<std::shared_ptr<ir::Expr>> args,
+    int line = -1, int col = -1);
 
   std::shared_ptr<ir::ConstSymbol> transExpr(absyn::Literal* expr);
 

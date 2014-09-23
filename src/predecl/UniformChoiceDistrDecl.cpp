@@ -26,6 +26,7 @@ std::shared_ptr<ir::Expr> UniformChoiceDistrDecl::getNew(
   ptr->setArgs(args);
   ptr->setTyp(ty->getRefer());
   ptr->processArgRandomness();
+  ptr->setRandom(true);
   return ptr;
 }
 

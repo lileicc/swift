@@ -41,7 +41,7 @@ int DistinctDecl::getLen(int k) {
 void DistinctDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s(DistinctDecl:\n", indent, "");
   fprintf(file, "%*s:type %s\n", indent + 2, "", typ.getValue().c_str());
-  fprintf(file, "%*s:var (:\n", indent + 2, "");
+  fprintf(file, "%*s:var\n", indent + 2, "");
   for (size_t i = 0; i < var.size(); i++)
     fprintf(file, "%*s(: %s %d )\n", indent + 4, "", var[i].getValue().c_str(),
         len[i]);

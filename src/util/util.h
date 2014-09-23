@@ -7,10 +7,13 @@
 //
 //
 
+#pragma once
+
+#include <cstring>
 #include <cmath>
 #include <vector>
 #include <functional>
-#pragma once
+#include "../random/Multinomial.h"
 
 // computing log( exp(a) + exp(b) )
 // NOTE this function cannot handle infinity
@@ -83,6 +86,20 @@ std::vector<int> _filter(std::vector<int>::iterator st, std::vector<int>::iterat
 }
 
 /*
+ * apply function for list of elements
+ * Input : a list of input elements and a function to apply
+ * Output : a sorted list (namely set) of output of the function
+ */
+template<class ret_T, class in_T>
+std::vector<ret_T> _apply(std::vector<in_T> args, std::function<ret_T(in_T)> fun) {
+  std::vector<ret_T>ret;
+  for(auto &u : args)
+    ret.push_back(fun(u));
+  sort(ret.begin(), ret.end());
+  return ret;
+}
+
+/*
  * Count the number of filtered elements
  * Note: For the Range Version, please refer to std::count()
  */
@@ -116,3 +133,49 @@ bool _exists(int n, std::function<bool(int)> fun) {
     if (fun(i)) return true;
   return false;
 }
+
+/*
+ * Resample Function
+ * For Particle Filtering
+ *   Using Multinomial Distribution
+ * >> Input Arguments:
+ *    > template: Dependency, SampleN, class name for static memorization, class name for temporal memorization
+ *    > arguments: weight, {static memorization and ptr}, {temporal memorization, ptr and backup ptr}
+ */
+template<int Dependency, int SampleN, class stat_T, class temp_T>
+void resample(
+  double* weight, 
+  stat_T stat_memo[SampleN], stat_T* ptr_stat_memo[SampleN], 
+  temp_T temp_memo[Dependency][SampleN], temp_T* ptr_temp_memo[Dependency][SampleN], temp_T* backup_ptr[Dependency][SampleN]) {
+  swift::random::Multinomial dist;
+  dist.init(weight, weight + SampleN);
+  std::vector<int> candidate = dist.gen(SampleN);
+  for(int i = 0; i < SampleN; ++ i) {
+    int pos = candidate[i];
+    // Swap Static States
+    ptr_stat_memo[i] = stat_memo + pos;
+    for(int j = 0; j < Dependency; ++ j)
+      backup_ptr[j][i] = ptr_temp_memo[j][pos];
+  }
+  
+  std::memcpy(ptr_temp_memo, backup_ptr, sizeof(temp_T*) * Dependency * SampleN);
+}
+
+/*
+ * Pointer Copy function
+ * For Particle Filtering
+ * >> Input Arguments:
+ *    > ptr: array containing pointers
+ *    > state: array that ptr points to
+ * >> Usage:
+ *    > make sure ptr[i] points to state[i]
+ */
+template<class State>
+void pointer_copy(State** ptr, State* state, int N) {
+  for(int i=0;i<N;++i)
+    ptr[i] = state + i;
+}
+
+// Internal Function for TimeStep Operation
+inline unsigned prev(unsigned u) {return u - 1;}
+inline unsigned prev(unsigned u, int t) {return u - t;}

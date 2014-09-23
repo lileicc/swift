@@ -3,10 +3,13 @@
  *
  *  Created on: Nov 2, 2013
  *      Author: leili
+ * 
+ * Issue: @MarkovOrder created on Jul 17, 2014 by yiwu
  */
 
 #include "Semant.h"
 
+#include<iostream>
 #include <memory>
 #include <utility>
 #include <set>
@@ -243,22 +246,39 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::Expr *expr) {
     return (ret = transExpr((absyn::OpExpr*) expr));
   if (dynamic_cast<absyn::FuncApp*>(expr) != nullptr)
     return (ret = transExpr((absyn::FuncApp*) expr));
-  if (dynamic_cast<absyn::DistrExpr*>(expr) != nullptr)
-    return (ret = transExpr((absyn::DistrExpr*) expr));
   if (dynamic_cast<absyn::MapExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::MapExpr*) expr));
   if (dynamic_cast<absyn::CardinalityExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::CardinalityExpr*) expr));
   if (dynamic_cast<absyn::QuantExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::QuantExpr*) expr));
-  if (dynamic_cast<absyn::VarRef*>(expr) != nullptr)
-    return (ret = transExpr((absyn::VarRef*) expr));
   if (dynamic_cast<absyn::SetExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::SetExpr*) expr));
   if (dynamic_cast<absyn::Literal*>(expr) != nullptr)
     return (ret = transExpr((absyn::Literal*) expr));
   if (dynamic_cast<absyn::ArrayExpr*>(expr) != nullptr)
     return (ret = transExpr((absyn::ArrayExpr*) expr));
+
+  if (dynamic_cast<absyn::DistrExpr*>(expr) != nullptr) {
+    //@Deprecated
+    warning(expr->line, expr->col, "Parsing expression to <DistrExpr> in Absyn should be deprecated! FuncApp is recommended!");
+    absyn::FuncApp* funcapp = new absyn::FuncApp(expr->line, expr->col, ((absyn::DistrExpr*)expr)->getDistrName());
+    for (size_t i = 0; i < expr->size(); ++ i)
+      funcapp->add(expr->get(i));
+    ret = transExpr(funcapp);
+
+    // delete extra pointer
+    funcapp->clearArgs();
+    delete funcapp;
+
+    return ret;
+  }
+  if (dynamic_cast<absyn::VarRef*>(expr) != nullptr) {
+    //@Deprecated
+    warning(expr->line, expr->col, "Parsing expression to <VarRef> in Absyn should be deprecated! FuncApp is recommended!");
+    ret = transVarRef(((absyn::VarRef*) expr)->getVar().getValue());
+    if (ret != nullptr) return ret;
+  }
   error(expr->line, expr->col, "Semant Error! Illegal Expression!");
   return ret;
 }
@@ -292,10 +312,10 @@ std::shared_ptr<ir::IfThen> Semant::transIfThen(absyn::IfExpr* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
+std::shared_ptr<ir::Branch> Semant::transBranch(absyn::CaseExpr* expr) {
   std::shared_ptr<ir::Branch> ptr(new ir::Branch());
-  if (expr->size() != 2 || dynamic_cast<absyn::MapExpr*>(expr->get(0)) == NULL) {
-    error(expr->line, expr->col, "Arguments Format Error for < TabularCPD >!");
+  if (expr->getTest() == NULL || expr->getMap() == NULL) {
+    error(expr->line, expr->col, "Arguments Format Error for < CaseExpr >!");
     return ptr;
   }
   /*
@@ -303,7 +323,7 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
    *   since arguments of MapExpr are all Expr
    *   while for Branch, arguments could be clauses
    */
-  absyn::MapExpr* mp = (absyn::MapExpr*) (expr->get(0));
+  absyn::MapExpr* mp = (absyn::MapExpr*) (expr->getMap());
   // Similar Type Checking Process to transExpr(MapExpr)
   const ir::Ty* fromTy = NULL;
   const ir::Ty* toTy = NULL;
@@ -312,7 +332,7 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
     std::shared_ptr<ir::Clause> clause = transClause(mp->getTo(i));
     if (dynamic_cast<ir::ConstSymbol*>(symbol.get()) == NULL) {
       error(expr->line, expr->col,
-          "From Terms of the MapExpr in < TabularCPD > must be constant symbols!");
+          "From Terms of the MapExpr in < CaseExpr > must be constant symbols!");
       return ptr;
     }
     if (symbol->getTyp() != NULL) {
@@ -355,9 +375,9 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
     if (b->getTyp() == NULL)
       b->setTyp(toTy);
   ptr->setTyp(toTy);
-  ptr->setVar(transExpr(expr->get(1)));
+  ptr->setVar(transExpr(expr->getTest()));
   if (ptr->getVar()->getTyp() != fromTy) {
-    error(expr->line, expr->col, "Argument types do not match!");
+    error(expr->line, expr->col, "Argument types do not match for < CaseExpr >!");
     return ptr;
   }
 
@@ -373,9 +393,8 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::DistrExpr* expr) {
 std::shared_ptr<ir::Clause> Semant::transClause(absyn::Expr* expr) {
   if (dynamic_cast<absyn::IfExpr*>(expr) != NULL)
     return transIfThen((absyn::IfExpr*) expr);
-  if (dynamic_cast<absyn::DistrExpr*>(expr) != NULL
-      && ((absyn::DistrExpr*) expr)->getDistrName().getValue() == "TabularCPD")
-    return transBranch((absyn::DistrExpr*) expr);
+  if (dynamic_cast<absyn::CaseExpr*>(expr) != NULL)
+    return transBranch((absyn::CaseExpr*) expr);
   return transExpr(expr);
 }
 
@@ -532,6 +551,10 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
     return lookupTy(IRConstString::BOOL);
     // Numerical Operator
   case IRConstant::MOD:
+    // Special Check for TimeStep (MOD)
+    if (arg[0]->getTyp() == arg[1]->getTyp()
+      && arg[0]->getTyp() == lookupTy(ir::IRConstString::TIMESTEP))
+      return arg[0]->getTyp();
     if (arg[0]->getTyp() != arg[1]->getTyp()
         || arg[0]->getTyp() != lookupTy(IRConstString::INT))
       return NULL;
@@ -544,6 +567,10 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
   case IRConstant::MINUS:
   case IRConstant::MUL:
   case IRConstant::DIV:
+    // Special Check for TimeStep (PLUS, MINUS, MUL, DIV)
+    if (arg[0]->getTyp() == arg[1]->getTyp()
+        && arg[0]->getTyp() == lookupTy(ir::IRConstString::TIMESTEP))
+        return arg[0]->getTyp();
   case IRConstant::POWER:
     if (arg[0]->getTyp() != arg[1]->getTyp()
         || !OprExpr_isNumerical(arg[0]->getTyp()))
@@ -586,9 +613,15 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
   //         Replace OprExpr with a InstSymbolRef
   // Note: isRandom() == false
   if (ret->getOp()
-      == ir::IRConstant::SUB&& (dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL
+      == ir::IRConstant::SUB 
+      && ((dynamic_cast<absyn::FuncApp*>(expr->getLeft())) != NULL || (dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL) 
+      // Although VarRef is deprecated, we did the checking here!
       && (dynamic_cast<absyn::IntLiteral*>(expr->getRight())) != NULL) {
-    std::string var = ((absyn::VarRef*) (expr->getLeft()))->getVar().getValue();
+    std::string var;
+    if ((dynamic_cast<absyn::VarRef*>(expr->getLeft())) != NULL)
+      var = ((absyn::VarRef*) (expr->getLeft()))->getVar().getValue();
+    else
+      var = ((absyn::FuncApp*) (expr->getLeft()))->getFuncName().getValue();
     int k = ((absyn::IntLiteral*) (expr->getRight()))->getValue();
     if (k >= 0) {
       auto sym = tyFactory.getInstSymbol(arrayRefToString(var, k));
@@ -612,6 +645,17 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
   if (ret->getTyp() == NULL) {
     error(expr->line, expr->col, "Error Type Matching for OprExpr!");
   }
+  /*
+   * TODO: Add crucial check for Markov Order! Now it is a hack!! (@MarkovOrder)
+   *   we only check the case of:
+   *    MINUS-EXPR: (A) - @k
+   *      k will be the markov order
+   */
+  if (ret->getTyp() == lookupTy(ir::IRConstString::TIMESTEP)
+      && ret->getOp() == ir::IRConstant::MINUS && ret->getArgs().size() == 2
+      && std::dynamic_pointer_cast<ir::TimestepLiteral>(ret->get(1)) != nullptr)
+      model->updateMarkovOrder(std::dynamic_pointer_cast<ir::TimestepLiteral>(ret->get(1))->getValue());
+
   // Randomness Checking
   for (auto a : ret->getArgs())
     if (a->isRandom()) {
@@ -631,15 +675,41 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
     decl.push_back(std::make_shared<ir::VarDecl>(args.back()->getTyp(), ""));
   }
 
-  // Check Builtin Functions
+  if (args.size() == 0) {
+    // Single Variable Reference
+    std::shared_ptr<ir::Expr> varRef = transVarRef(func);
+    if (varRef != nullptr) return varRef;
+  }
+
+  //TODO: Think more about size()  @sizefunction
+  // Currently a hack for size()
+  if (expr->getFuncName().getValue() == "size") {
+    if (expr->size() != 1) {
+      error(expr->line, expr->col, "size() only accept exactly one argument!");
+      return processCardExpr(NULL);
+    } else
+      return processCardExpr(expr->get(0));
+  }
+
+  // Check Builtin Functions and Distributions
   //   Note: Especially for Prev()!!!!
   auto fc = predeclFactory.getDecl(func);
   if (fc != nullptr) {
+
     auto ptr = fc->getNew(args, &tyFactory);
     if (ptr == nullptr) {
-      warning(expr->line, expr->col, "Function < " + func + " > is Built-in! Type Checking Error for Built-in Function!");
+      warning(expr->line, expr->col, "Function/Distribution < " + func + " > is Built-in! Type Checking Error for Built-in Function/Distribution!");
     }
     else {
+      // TODO: here is a hack!!!! Better Checking for Markov Order (@MarkovOrder)
+      // Special Check : (hack, @MarkovOrder)
+      //   when ptr is Prev(t, k) then k will become the markov order!
+      if (std::dynamic_pointer_cast<ir::FunctionCall>(ptr) != nullptr) {
+        auto ref = std::dynamic_pointer_cast<ir::FunctionCall>(ptr);
+        if (ref->isBuiltin() && ref->getBuiltinRefer()->getName() == "prev") {
+          model->updateMarkovOrder(std::dynamic_pointer_cast<ir::IntLiteral>(ref->get(0))->getValue());
+        }
+      }
       return ptr;
     }
   }
@@ -661,28 +731,44 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
 
   auto ptr = std::make_shared<ir::FunctionCall>(functory.getFunc(func, decl));
 
-  if (ptr->getRefer() == NULL) {
-    error(expr->line, expr->col,
-        "Error on Function Call! No Such Function < " + func + " >.");
-    return ptr;
+  if (ptr->getRefer() == nullptr) {
+    // No Corresponding Function found!
+    //  assume it is a distribution
+    return transDistrb(func, args, expr->line, expr->col);
   }
 
   // Type Checking
   ptr->setTyp(ptr->getRefer()->getRetTyp());
   ptr->setArgs(args);
 
-  // Special Check for Temporal FunctionCall
-  if (ptr->getRefer()->isTemporal())
-    ptr->processTemporal(tyFactory.getTimestepTy());
-
   // Random Checking
   ptr->setRandom(ptr->getRefer()->isRand());
-  for (auto a: args)
+  for (auto a : args)
     if (a->isRandom()) {
       ptr->setRandom(true);
       break;
     }
+
+  // Special Check for Temporal FunctionCall
+  if (ptr->getRefer()->isTemporal())
+    ptr->processTemporal(tyFactory.getTimestepTy());
   return ptr;
+}
+
+std::shared_ptr<ir::CardExpr> Semant::processCardExpr(absyn::Expr* expr) {
+  std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
+  cd->setTyp(lookupTy(ir::IRConstString::INT));
+  std::shared_ptr<ir::Expr> b = transExpr(expr);
+  std::shared_ptr<ir::SetExpr> st = std::dynamic_pointer_cast<ir::SetExpr>(b);
+  if (st == nullptr) {
+    error(expr->line, expr->col,
+      "Invalid Cardinality Expression! Body must be a SetExpr!");
+    return cd;
+  }
+  cd->setBody(st);
+  // randomness checking
+  cd->setRandom(st->isRandom());
+  return cd;
 }
 
 std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
@@ -692,17 +778,7 @@ std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
     error(expr->line, expr->col, "Invalid Cardinality Expression!");
     return cd;
   }
-  std::shared_ptr<ir::Expr> b = transExpr(expr->get(0));
-  std::shared_ptr<ir::SetExpr> st = std::dynamic_pointer_cast<ir::SetExpr>(b);
-  if (st == nullptr) {
-    error(expr->line, expr->col,
-        "Invalid Cardinality Expression! Body must be a SetExpr!");
-    return cd;
-  }
-  cd->setBody(st);
-  // randomness checking
-  cd->setRandom(st->isRandom());
-  return cd;
+  return processCardExpr(expr->get(0));
 }
 
 std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
@@ -719,7 +795,8 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   // Add Local Variable
   local_var[ptr->getVar()->getVarName()].push(ptr->getVar());
 
-  ptr->addArg(transExpr(expr->getCond()));
+  ptr->setCond(transExpr(expr->getCond()));
+
   if (ptr->get(0)->getTyp() != lookupTy(ir::IRConstString::BOOL)) {
     error(expr->line, expr->col,
         "Condition in Quant Form must return boolean value!");
@@ -736,9 +813,8 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
+std::shared_ptr<ir::Expr> Semant::transVarRef(std::string var) {
   // 3 cases: local variable, voidfunccall, const symbol
-  std::string var = expr->getVar().getValue();
   if (local_var.count(var) != 0) {
     // Local Variable
     std::shared_ptr<ir::VarRefer> ret = std::make_shared<ir::VarRefer>(
@@ -765,11 +841,12 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::VarRef* expr) {
     ret->setTyp(lookupNameTy(sym->getRefer()->getName()));
     return ret; // randomness = false;
   }
-  error(expr->line, expr->col, "Illegal Symbol Reference of < " + var + " >!");
-  return std::make_shared<ir::Expr>();
+  return nullptr;
 }
 
-std::shared_ptr<ir::SetExpr> Semant::transExpr(absyn::SetExpr* expr) {
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::SetExpr* expr) {
+  if (dynamic_cast<absyn::TupleSetExpr*>(expr) != NULL)
+    return transExpr((absyn::TupleSetExpr*) expr);
   if (dynamic_cast<absyn::CondSet*>(expr) != NULL)
     return transExpr((absyn::CondSet*) expr);
   if (dynamic_cast<absyn::ListSet*>(expr) != NULL)
@@ -831,7 +908,7 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
     if (it->second.empty())
       local_var.erase(it);
   }
-  auto ptr = std::make_shared<ir::CondSet>(var, e);
+  auto ptr = std::make_shared<ir::CondSet>(var, nullptr, e);
 
   if (e != nullptr && e->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
     error(expr->line, expr->col,
@@ -846,21 +923,77 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::Expr> Semant::transExpr(absyn::DistrExpr* expr) {
-  // TODO: add type checking for predecl distribution
-  std::string name = expr->getDistrName().getValue();
-  const predecl::PreDecl* distr = predeclFactory.getDecl(name);
-  // parse arguments of distribution
-  std::vector<std::shared_ptr<ir::Expr>> args;
-  for (size_t i = 0; i < expr->size(); ++i) {
-    auto ag = transExpr(expr->get(i));
-    if (ag)
-      args.push_back(ag);
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
+  if (expr->getVarDecls().size() != expr->getExps().size()) {
+    error(expr->line, expr->col, "The length of Expr List does not match the length of VarDecl List for < TupleSetExpr >");
   }
+  if (expr->getVarDecls().size() == 0) {
+    error(expr->line, expr->col, "< TupleSetExpr > should contain at least one variable!");
+    return std::shared_ptr<ir::CondSet>(new ir::CondSet(nullptr,nullptr));
+  }
+  if (expr->getVarDecls().size() > 1) {
+    warning(expr->line,expr->col,"We now only suppor < TupleSetExpr > with one variable! By default we will only pick the first variable.");
+    // TODO:
+    // @TupleSetExpr
+    // To support general TupleSetExpr
+  }
+
+  std::shared_ptr<ir::VarDecl> var = transVarDecl(expr->getVarDecl(0));
+
+  // Add Local Variable
+  if (var->getTyp() != NULL
+    && var->getVarName().size() > 0)
+    local_var[var->getVarName()].push(var);
+  std::shared_ptr<ir::Expr> cond =
+    expr->getCond() == NULL ? nullptr : transExpr(expr->getCond());
+  std::shared_ptr<ir::Expr> func = 
+    expr->getExp(0) == NULL ? nullptr : transExpr(expr->getExp(0));
+  // Remove Local Variable
+  if (var->getTyp() != NULL
+    && var->getVarName().size() > 0) {
+    auto it = local_var.find(var->getVarName());
+    it->second.pop();
+    if (it->second.empty())
+      local_var.erase(it);
+  }
+
+  // Process Expression applied on variable defined in the setExpr
+  if (std::dynamic_pointer_cast<ir::ConstSymbol>(func) != nullptr) {
+    return func;
+  }
+  if (std::dynamic_pointer_cast<ir::VarRefer>(func) != nullptr) { // just normal condset
+    auto v = std::dynamic_pointer_cast<ir::VarRefer>(func);
+    if (v->getRefer().get() == var.get())
+      func = nullptr;
+  }
+
+  auto ptr = std::make_shared<ir::CondSet>(var, func, cond);
+
+  if (cond != nullptr && cond->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
+    error(expr->line, expr->col,
+      "Condition of the set must return Boolean Value!");
+  }
+
+  if (func == nullptr)
+    ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(var->getTyp())));
+  else
+    ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(func->getTyp())));
+
+  // randomness checking
+  // TODO: to check randomness in special cases
+  ptr->setRandom(true);
+  return ptr;
+}
+
+std::shared_ptr<ir::Expr> Semant::transDistrb(
+  std::string name, std::vector<std::shared_ptr<ir::Expr>> args,
+  int line, int col) {
+  // TODO: add type checking for predecl distribution
+  const predecl::PreDecl* distr = predeclFactory.getDecl(name);
   
   if (distr == NULL) {
     // not predeclared distribution
-    warning(expr->line, expr->col, "<" + name + "> customized distribution assumed! No type checking will be performed!");
+    warning(line, col, "No function defined for <" + name + ">! Customized distribution assumed! No type checking will be performed!");
     
     auto dist = std::make_shared<ir::Distribution>(name);
     dist->setArgs(args);
@@ -871,11 +1004,10 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::DistrExpr* expr) {
 
   auto ret = distr->getNew(args, &tyFactory);
   if (ret == nullptr) {
-    error(expr->line, expr->col,
+    error(line, col,
         "Type Checking failed for <" + name + "> distribution!");
     return std::make_shared<ir::Distribution>(name, distr);
   }
-  ret->setRandom(true);
   return ret;
 }
 
@@ -911,9 +1043,8 @@ std::shared_ptr<ir::ConstSymbol> Semant::transExpr(absyn::Literal* expr) {
     return ret;
   }
   if (dynamic_cast<absyn::TimeStampLiteral*>(expr) != NULL) {
-    auto ret = std::make_shared<ir::TimestepLiteral>((dynamic_cast<absyn::TimeStampLiteral*>(expr))->getValue());
-    ret->setTyp(lookupNameTy(ir::IRConstString::TIMESTEP));
-    
+    std::shared_ptr<ir::TimestepLiteral> ret = std::make_shared<ir::TimestepLiteral>((dynamic_cast<absyn::TimeStampLiteral*>(expr))->getValue());
+    ret->setTyp(lookupTy(ir::IRConstString::TIMESTEP));
     // TODO: Currently is a Hacking Implementation
     //     Should Move to Analyser Finally!!!!
     if (ret->getValue() > model->getTempLimit())
@@ -1153,7 +1284,7 @@ bool Semant::isCardAll(std::shared_ptr<ir::Expr> ptr) {
   if (st == nullptr) {
     return false;
   }
-  return st->getCond() == nullptr;
+  return st->getCond() == nullptr; // Nothing to do with func!
 }
 
 void Semant::error(int line, int col, std::string info) {

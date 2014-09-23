@@ -11,7 +11,7 @@ public:
   virtual ~TimestepLiteral();
 
   unsigned getValue() const;
-  void print(FILE* file, int indent);
+  void print(FILE* file, int indent) const ;
 private:
   unsigned value;
 };
