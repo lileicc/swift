@@ -21,6 +21,15 @@ SRC=src/absyn/*.cpp \
   src/parse/lexer.cpp
 YACCDIR=lib/byacc-20130925
 
+help:
+	@echo 'Makefile for swift compiler                                            '
+	@echo '                                                                       '
+	@echo 'Usage:                                                                 '
+	@echo '   make compile                     compile the whole project          '
+	@echo '   make genparser                   re-generate the parser             '
+	@echo '   ./run-target.sh [model name]     swift compile and run the model    '
+	@echo '                                                                       '
+
 compile: $(SRC)
 	$(CXX) $(CXX_CFLAGS) $(SRC) -o $(EXEC)
 	
