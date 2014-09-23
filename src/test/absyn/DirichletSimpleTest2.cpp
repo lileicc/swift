@@ -15,7 +15,7 @@ BlogProgram* DirichletSimpleTest2::getRoot() {
 }
 
 /*
-random Real[] w ~ Dirichlet([1.0, 2.0, 3.0]);
+random RealMatrix w ~ Dirichlet([1.0, 2.0, 3.0]);
 random Integer x ~ Discrete(w);
 query x;
 */

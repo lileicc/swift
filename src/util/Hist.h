@@ -130,7 +130,7 @@ private:
       right_bound = std::max(right_bound, p);
     }
     else {
-      k = std::floor((p - lo) / det);
+      k = (int)std::floor((p - lo) / det);
     }
     if (isLogarithm) bucket[k] = logsum(bucket[k], w);
     else bucket[k] += w;

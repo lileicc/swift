@@ -40,13 +40,13 @@ void Semant::process(absyn::BlogProgram* prog) {
   processDeclarations(prog);
   processBodies(prog);
   // add TypeDomains to model
-  for (auto p : tyFactory.getAllTyTable())
+  for (auto&p : tyFactory.getAllTyTable())
     if (p.second->getTyp() == ir::IRConstant::NAMETY)
       model->addTypeDomain(
           std::shared_ptr<ir::TypeDomain>(
               ((const ir::NameTy*) p.second)->getRefer()));
   // Add Functions
-  for (auto p : functory.getAllFuncList())
+  for (auto&p : functory.getAllFuncList())
     model->addFunction(std::shared_ptr<ir::FuncDefn>(p));
 }
 
@@ -55,7 +55,7 @@ void Semant::processDeclarations(absyn::BlogProgram* prog) {
   absyn::DistinctDecl* dd;
   absyn::FuncDecl* fd;
   absyn::OriginDecl* od;
-  for (auto st : prog->getAll()) {
+  for (auto&st : prog->getAll()) {
     td = dynamic_cast<absyn::TypDecl*>(st);
     if (td != NULL) { // it is type declaration
       transTyDecl(td);
@@ -64,7 +64,7 @@ void Semant::processDeclarations(absyn::BlogProgram* prog) {
   }
 
   // Note: We assume that function name cannot be the same as type name
-  for (auto st : prog->getAll()) {
+  for (auto&st : prog->getAll()) {
     fd = dynamic_cast<absyn::FuncDecl*>(st);
     if (fd != NULL) { // it is function declaration
       transFuncDecl(fd);
@@ -79,7 +79,7 @@ void Semant::processDeclarations(absyn::BlogProgram* prog) {
   }
 
   // Note: We assume that distinct name cannot be the same as function name or type name
-  for (auto st : prog->getAll()) {
+  for (auto&st : prog->getAll()) {
     dd = dynamic_cast<absyn::DistinctDecl*>(st);
     if (dd != NULL) { // it is distinct declaration
       transDistinctDecl(dd);
@@ -94,7 +94,7 @@ void Semant::processBodies(absyn::BlogProgram* prog) {
   absyn::NumStDecl* nd;
   absyn::Evidence* ne;
   absyn::Query* nq;
-  for (auto st : prog->getAll()) {
+  for (auto&st : prog->getAll()) {
     fd = dynamic_cast<absyn::FuncDecl*>(st);
     if (fd != NULL) { // it is function declaration
       transFuncBody(fd);
@@ -195,7 +195,7 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
   }
   // Function can contain at most one Timestep argument
   int timestep_count = 0;
-  for (auto v : vds) {
+  for (auto&v : vds) {
     if (v->getTyp() == tyFactory.getTimestepTy())
       ++ timestep_count;
   }
@@ -314,6 +314,26 @@ std::shared_ptr<ir::IfThen> Semant::transIfThen(absyn::IfExpr* expr) {
   return ptr;
 }
 
+int Semant::checkBranchArg(std::shared_ptr<ir::Expr> e) {
+  auto dbl = lookupTy(ir::IRConstString::DOUBLE);
+  if (e->getTyp() == dbl)
+    return -1;
+  if (std::dynamic_pointer_cast<ir::ConstSymbol>(e) != nullptr) {
+    return 1;
+  }
+  if (std::dynamic_pointer_cast<ir::ArrayExpr>(e) != nullptr) {
+    auto arr = std::dynamic_pointer_cast<ir::ArrayExpr>(e);
+    for (size_t i = 0; i < arr->argSize(); ++i) {
+      if (std::dynamic_pointer_cast<ir::ConstSymbol>(arr->get(i)) == nullptr)
+        return -1;
+      if (arr->get(i)->getTyp() == dbl)
+        return -1;
+    }
+    return arr->argSize();
+  }
+  return -1;
+}
+
 std::shared_ptr<ir::Branch> Semant::transBranch(absyn::CaseExpr* expr) {
   std::shared_ptr<ir::Branch> ptr(new ir::Branch());
   if (expr->getTest() == NULL || expr->getMap() == NULL) {
@@ -328,21 +348,35 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::CaseExpr* expr) {
   absyn::MapExpr* mp = (absyn::MapExpr*) (expr->getMap());
   // Similar Type Checking Process to transExpr(MapExpr)
   const ir::Ty* fromTy = NULL;
+  int n_from_args = -1; // indicate the number of elements to pass to the case expr
   const ir::Ty* toTy = NULL;
   for (size_t i = 0; i < mp->mapSize(); i++) {
     std::shared_ptr<ir::Expr> symbol = transExpr(mp->getFrom(i));
     std::shared_ptr<ir::Clause> clause = transClause(mp->getTo(i));
-    if (dynamic_cast<ir::ConstSymbol*>(symbol.get()) == NULL) {
-      error(expr->line, expr->col,
-          "From Terms of the MapExpr in < CaseExpr > must be constant symbols!");
+    // Support for multicase expression
+    //  i.e. case [A,B] in {[true,false]->1, [true,true]->0}
+    // symbol could be constSymbol(except Real) and Array of ConstSymbol(except Real)
+    int cur_from_args = checkBranchArg(symbol);
+    if (cur_from_args < 0) {
+      error(mp->getFrom(i)->line, mp->getFrom(i)->col,
+        "Illegal From Arguments in the Map of the < CaseExpr >!\
+        The type must be [ConstSymbol (except Real) | Array of ConstSymbol (except Real)].");
       return ptr;
+    }
+    if (n_from_args < 0) n_from_args = cur_from_args;
+    else {
+      if (n_from_args != cur_from_args) {
+        error(mp->getFrom(i)->line, mp->getFrom(i)->col,
+          "All the FROM arguments in the Map of the < CaseExpr > must have the SAME Dimension!");
+        return ptr;
+      }
     }
     if (symbol->getTyp() != NULL) {
       if (fromTy == NULL)
         fromTy = symbol->getTyp();
       else {
         if (fromTy != symbol->getTyp()) {
-          error(mp->line, mp->col,
+          error(mp->getFrom(i)->line, mp->getFrom(i)->col,
               "From Terms of MapExpr must have the same type!");
           return ptr;
         }
@@ -353,38 +387,50 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::CaseExpr* expr) {
         toTy = clause->getTyp();
       else {
         if (toTy != clause->getTyp()) {
-          error(mp->line, mp->col,
+          error(mp->getTo(i)->line, mp->getTo(i)->col,
               "To Terms of MapExpr must have the same type!");
           return ptr;
         }
       }
     }
     // Add a new Branch
-    ptr->addBranch(std::dynamic_pointer_cast<ir::ConstSymbol>(symbol), clause);
+    ptr->addBranch(symbol, clause);
   }
   if (fromTy == NULL) {
-    error(expr->line, expr->col, "Type of From terms cannot be confirmed!");
+    error(mp->line, mp->col, "Type of *From* terms cannot be determined!");
     return ptr;
   }
   if (toTy == NULL) {
-    warning(expr->line, expr->col, "Type of To terms cannot be confirmed!");
+    warning(mp->line, mp->col, "Type of *To* terms cannot be determined!");
   }
   // Fill the type field of NullExpr
-  for (auto c : ptr->getConds())
+  for (auto&c : ptr->getConds())
     if (c->getTyp() == NULL)
       c->setTyp(fromTy);
-  for (auto b : ptr->getBranches())
+  for (auto&b : ptr->getBranches())
     if (b->getTyp() == NULL)
       b->setTyp(toTy);
   ptr->setTyp(toTy);
   ptr->setVar(transExpr(expr->getTest()));
   if (ptr->getVar()->getTyp() != fromTy) {
-    error(expr->line, expr->col, "Argument types do not match for < CaseExpr >!");
+    error(expr->getTest()->line, expr->getTest()->col, 
+      "The type of *Test Var* does not match the from Type of the Map in < CaseExpr >!");
     return ptr;
+  }
+  if (n_from_args > 1) {
+    if (std::dynamic_pointer_cast<ir::ArrayExpr>(ptr->getVar()) == nullptr
+      || ptr->getVar()->argSize() != n_from_args) {
+      error(expr->getTest()->line, expr->getTest()->col,
+        "The Dimension of *Test Var* differs from the From Type of the Map in < CaseExpr >!");
+      return ptr;
+    }
+    ptr->setArgDim(n_from_args);
   }
 
   // Randomness Checking
-  for (auto b : ptr->getBranches())
+  if (ptr->getVar()->isRandom())
+    ptr->setRandom(true);
+  for (auto&b : ptr->getBranches())
     if (b->isRandom()) {
       ptr->setRandom(true);
       break;
@@ -723,7 +769,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
       model->updateMarkovOrder(std::dynamic_pointer_cast<ir::TimestepLiteral>(ret->get(1))->getValue());
 
   // Randomness Checking
-  for (auto a : ret->getArgs())
+  for (auto&a : ret->getArgs())
     if (a->isRandom()) {
       ret->setRandom(true);
       break;
@@ -809,7 +855,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
 
   // Random Checking
   ptr->setRandom(ptr->getRefer()->isRand());
-  for (auto a : args)
+  for (auto&a : args)
     if (a->isRandom()) {
       ptr->setRandom(true);
       break;
@@ -949,7 +995,7 @@ std::shared_ptr<ir::ListSet> Semant::transExpr(absyn::ListSet* expr) {
   // Note: when base == NULL, this is an empty set
   ptr->setTyp(tyFactory.getUpdateTy(new ir::SetTy(base)));
   // randomness checking
-  for (auto a : ptr->getArgs())
+  for (auto&a : ptr->getArgs())
     if (a->isRandom()) {
       ptr->setRandom(true);
       break;
@@ -1237,7 +1283,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
   }
 
   // randomness
-  for (auto a: ret->getArgs())
+  for (auto&a: ret->getArgs())
     if (a->isRandom()) {
       ret->setRandom(true);
       break;
@@ -1255,7 +1301,7 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
   std::shared_ptr<ir::FuncDefn> fun = functory.getFunc(name, vds);
   if (fun != NULL) {
     // Add Local Variables
-    for (auto v : fun->getArgs())
+    for (auto&v : fun->getArgs())
       local_var[v->getVarName()].push(v);
     // Add Temporal Variables
     if (fun->isTemporal())
@@ -1308,7 +1354,7 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
 
     // if it is random, then need to add the link from arg --> thisfunction
     if (fun->isRand()) {
-      for (auto arg : fun->getArgs()) {
+      for (auto&arg : fun->getArgs()) {
         auto nty = dynamic_cast<const ir::NameTy*>(arg->getTyp());
         if (nty)
           nty->getRefer()->addReferFun(std::shared_ptr<ir::FuncDefn>(fun));
@@ -1323,7 +1369,7 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
         local_var.erase(it);
     }
     // Remove Local Variables
-    for (auto v : fun->getArgs()) {
+    for (auto&v : fun->getArgs()) {
       auto it = local_var.find(v->getVarName());
       it->second.pop();
       if (it->second.empty())
@@ -1383,11 +1429,11 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
   }
 
   // Add Local Variable
-  for (auto v : numst->getAllVars())
+  for (auto&v : numst->getAllVars())
     local_var[v->getVarName()].push(v);
   numst->setBody(transClause(nd->getExpr()));
 
-  for (auto v : numst->getAllVars()) {
+  for (auto&v : numst->getAllVars()) {
     auto it = local_var.find(v->getVarName());
     it->second.pop();
     if (it->second.empty())

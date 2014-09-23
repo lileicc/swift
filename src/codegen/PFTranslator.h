@@ -153,12 +153,15 @@ protected:
   code::Stmt* transClause(std::shared_ptr<ir::Clause> clause,
       std::string retvar, std::string valuevar = std::string());
   /**
-   * translate a Branch in ir to a statement in code,
-   * retvar is for return variable
-   * if valuevar is nonempty, then it will calculate weight instead of sampling
-   */
+  * translate a Branch in ir to a statement in code,
+  * retvar is for return variable
+  * if valuevar is nonempty, then it will calculate weight instead of sampling
+  *   >> Special Note: different translation for *Multi-Case Expr*
+  */
+  code::Stmt* transMultiCaseBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
+    std::string valuevar = std::string());
   code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
-      std::string valuevar = std::string());
+    std::string valuevar = std::string());
   /**
    * translate a IfThen in ir to a statement in code,
    * retvar is for return variable

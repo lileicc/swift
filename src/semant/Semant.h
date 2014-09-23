@@ -49,6 +49,16 @@ private:
 
   std::shared_ptr<ir::IfThen> transIfThen(absyn::IfExpr* expr);
 
+  /*
+    In order to support multi-case expression
+    this function to verify if e could be a valid *FROM* argument in the map of the case expr
+    this function will return -1 if it is not valid
+    other wise it will return the total number of elements contained in e
+    i.e.  [true,false] --> 2   [1.0,"hello"] --> -1  [Blue,Red,Green] --> 3
+          [1,"hello"] --> -1 ([..] is an Array, the elements should have the same type)
+  */
+  int checkBranchArg(std::shared_ptr<ir::Expr> e);
+
   std::shared_ptr<ir::Branch> transBranch(absyn::CaseExpr* expr);
 
   std::shared_ptr<ir::Clause> transClause(absyn::Expr* expr);

@@ -147,7 +147,10 @@ protected:
    * translate a Branch in ir to a statement in code,
    * retvar is for return variable
    * if valuevar is nonempty, then it will calculate weight instead of sampling
+   *   >> Special Note: different translation for *Multi-Case Expr*
    */
+  code::Stmt* transMultiCaseBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
+    std::string valuevar = std::string());
   code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
       std::string valuevar = std::string());
   /**
@@ -516,6 +519,11 @@ protected:
    * type for the random engine
    */
   static const code::Type RANDOM_ENGINE_TYPE;
+
+  /**
+   * Name of the Map in Multi-Case Expr
+   */
+  static const std::string MULTI_CASE_MAP_NAME;
 
   static bool COMPUTE_LIKELIHOOD_IN_LOG;
 

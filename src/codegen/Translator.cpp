@@ -76,6 +76,8 @@ const std::string Translator::MAIN_NAMESPACE_NAME = "swift";
 const std::string Translator::MAIN_INIT_FUN_NAME = "init";
 const std::string Translator::MAIN_FUN_NAME = "main";
 const std::string Translator::LOCAL_NUM_SAMPLE_ARG_NAME = "n";
+const std::string Translator::MULTI_CASE_MAP_NAME = "_multicase_idx";
+
 // randomness
 const std::string Translator::RANDOM_DEVICE_VAR_NAME = "__random_device";
 const code::Type Translator::RANDOM_ENGINE_TYPE("default_random_engine");
@@ -296,7 +298,7 @@ void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
             std::vector<code::Expr*>(
                 { new code::IntegerLiteral((int) len) })));
     for (size_t k = 0; k < numstlen; k++) {
-      // suppoert multiple number statements
+      // support multiple number statements
       std::string localnumvarname = numvar + std::to_string(k);
       st = new code::DeclStmt(
           new code::VarDecl(fun, localnumvarname, INT_TYPE));
@@ -612,9 +614,47 @@ std::vector<code::ParamVarDecl*> Translator::transParamVarDecls(
   return vds;
 }
 
+code::Stmt* Translator::transMultiCaseBranch(std::shared_ptr<ir::Branch> br,
+  std::string retvar,
+  std::string valuevar) {
+  std::string mpName = MULTI_CASE_MAP_NAME + std::to_string((size_t)(br.get()));
+  auto var = br->getVar();
+  if (valuevar.size() == 0) {
+    // getter function: need to register a const map for indexing
+    code::Type baseTy = mapIRTypeToCodeType(var->getTyp(), false, false);
+    // Construct the corresponding MapInit Expr
+    auto mex = std::make_shared<ir::MapExpr>();
+    mex->setFromTyp(br->getCond(0)->getTyp());
+    mex->setToTyp(br->getBranch(0)->getTyp());
+    for (size_t i = 0; i < br->getConds().size(); ++i) {
+      mex->addMap(br->getCond(i), std::make_shared<ir::IntLiteral>(i));
+    }
+    code::FieldDecl::createFieldDecl(
+      coreCls, mpName, code::Type(MAP_BASE_TYPE, std::vector<code::Type>({baseTy, INT_TYPE}),false,false,true),
+      transMapExpr(mex));
+  }
+  auto iter = new code::CallExpr(
+    new code::BinaryOperator(
+      new code::Identifier(mpName),new code::Identifier("find"),code::OpKind::BO_FIELD),
+      { transExpr(var) });
+  auto indx = new code::BinaryOperator(iter, new code::Identifier("second"), code::OpKind::BO_POINTER);
+  code::SwitchStmt* sst = new code::SwitchStmt(indx);
+  code::CaseStmt* cst;
+  for (size_t i = 0; i < br->size(); i++) {
+    cst = new code::CaseStmt(new code::IntegerLiteral(i),
+      transClause(br->getBranch(i), retvar, valuevar));
+    sst->addStmt(cst);
+    sst->addStmt(new code::BreakStmt());
+  }
+  return sst;
+}
+
 code::Stmt* Translator::transBranch(std::shared_ptr<ir::Branch> br,
                                        std::string retvar,
                                        std::string valuevar) {
+  if (br->getArgDim() > 1)
+    return transMultiCaseBranch(br, retvar, valuevar); // Special Multi-Case Expr
+
   code::SwitchStmt* sst = new code::SwitchStmt(transExpr(br->getVar()));
   code::CaseStmt* cst;
   for (size_t i = 0; i < br->size(); i++) {
@@ -1517,6 +1557,8 @@ code::Expr* Translator::transConstSymbol(
       std::dynamic_pointer_cast<ir::NullSymbol>(cs);
   if (nl) {
     // TODO change the translation of null
+    if (nl->getTyp() != NULL && nl->getTyp()->getTyp() == ir::IRConstant::STRING)
+      return new code::StringLiteral("<NULL>");
     return new code::IntegerLiteral(NULLSYMBOL_VALUE);
   }
   std::shared_ptr<ir::StringLiteral> sl = std::dynamic_pointer_cast<
