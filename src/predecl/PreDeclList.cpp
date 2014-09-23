@@ -55,6 +55,8 @@ const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "no
 const std::vector<std::string> PreDeclList::matMatFuncList{ "trans", "transpose", "chol", "inv", "pinv", "sum", "diag" };
 // matrix initialization functions
 const std::vector<std::string> PreDeclList::matInitFuncList{ "eye", "zeros", "ones" };
+// matrix stacking functions
+const std::vector<std::string> PreDeclList::matStackFuncList{ "vstack", "hstack" };
 
 std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::initFuncStore() {
   std::map<std::string, std::shared_ptr<PreDecl>> ret;
@@ -66,6 +68,8 @@ std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::initFuncStore() {
     ret[s] = std::make_shared<MatrixMatrixFuncDecl>(s);
   for (auto& s : matInitFuncList)
     ret[s] = std::make_shared<MatrixInitFuncDecl>(s);
+  for (auto& s : matStackFuncList)
+    ret[s] = std::make_shared<MatrixStackFuncDecl>(s);
   return ret;
 }
 
