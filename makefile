@@ -23,7 +23,7 @@ SRC=src/absyn/*.cpp \
 YACCDIR=lib/byacc-20130925
 
 compile: $(SRC)
-	$(CXX) $(CXX_CFLAGS) $(SRC) $(LIB_FLAGS) -o $(EXEC) 
+	$(CXX) $(CXX_CFLAGS) $(SRC) -o $(EXEC) $(LIB_FLAGS)
 	
 genparser: byacc
 	cd src/parse; flex -olexer.cpp blog.flex; ../../$(YACCDIR)/yacc -v -d -o parser.cpp blog.yacc
