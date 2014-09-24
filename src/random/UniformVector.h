@@ -11,26 +11,25 @@
 #include "SwiftDistribution.h"
 
 #include "armadillo"
-using namespace arma;
 
 namespace swift {
 namespace random {
 
-class UniformVector: public swift::random::SwiftDistribution<mat> {
+class UniformVector: public swift::random::SwiftDistribution<arma::mat> {
 public:
   UniformVector();
   virtual ~UniformVector();
-  void init(mat box);
-  void init(mat lo, mat hi);
-  mat gen();
-  double likeli(const mat& x);
-  double loglikeli(const mat& x);
+  void init(arma::mat box);
+  void init(arma::mat lo, arma::mat hi);
+  arma::mat gen();
+  double likeli(const arma::mat& x);
+  double loglikeli(const arma::mat& x);
 private:
   std::vector<std::uniform_real_distribution<double>> dists;
   std::vector<double> a;
   std::vector<double> b;
   double prod, logprod;
-  mat retvec;
+  arma::mat retvec;
 };
 
 } /* namespace random */

@@ -19,7 +19,7 @@ UniformVector::UniformVector() :prod(1), logprod(0) {
 UniformVector::~UniformVector() {
 }
 
-void UniformVector::init(mat lo, mat hi) {
+void UniformVector::init(arma::mat lo, arma::mat hi) {
   assert(lo.n_elem == hi.n_elem);
   int n = lo.n_elem;
   for (int i = 0; i < n; ++i) {
@@ -32,7 +32,7 @@ void UniformVector::init(mat lo, mat hi) {
   retvec.reshape(n, 1);
 }
 
-void UniformVector::init(mat box) {
+void UniformVector::init(arma::mat box) {
   assert(box.n_cols == 2);
   int n = box.n_rows;
   for (int i = 0; i < n; ++i) {
@@ -45,14 +45,14 @@ void UniformVector::init(mat box) {
   retvec.reshape(n, 1);
 }
 
-mat UniformVector::gen() {
+arma::mat UniformVector::gen() {
   for (size_t i = 0; i < dists.size(); ++i) {
     retvec[i] = dists[i](engine);
   }
   return retvec;
 }
 
-double UniformVector::likeli(const mat& x) {
+double UniformVector::likeli(const arma::mat& x) {
   if (x.n_elem != dists.size()) return 0;
   for (size_t i = 0; i < a.size(); ++i) {
     if (x[i] < a[i] - 1e12 || x[i] > b[i] + 1e-12)
@@ -61,7 +61,7 @@ double UniformVector::likeli(const mat& x) {
   return prod;
 }
 
-double UniformVector::loglikeli(const mat& x) {
+double UniformVector::loglikeli(const arma::mat& x) {
   if (x.n_elem != dists.size()) return -INFINITY;
   for (size_t i = 0; i < a.size(); ++i) {
     if (x[i] < a[i] - 1e12 || x[i] > b[i] + 1e-12)

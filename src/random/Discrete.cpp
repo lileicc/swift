@@ -32,7 +32,7 @@ void Discrete::init(std::vector<double> wei) {
   dist = std::discrete_distribution<int>(weights.begin(), weights.end());
 }
 
-void Discrete::init(mat wei) {
+void Discrete::init(arma::mat wei) {
   std::vector<double> w;
   for (size_t i = 0; i < wei.n_elem; ++ i)
     w.push_back(wei[i]);
