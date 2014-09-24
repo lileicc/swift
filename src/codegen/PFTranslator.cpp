@@ -6,6 +6,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include "../predecl/PreDecl.h"
 
 #include "PFTranslator.h"
@@ -13,7 +14,7 @@
 namespace swift {
 namespace codegen {
 
-const int PFTranslator::TOTAL_NUM_PARTICLES = 50000;
+const int PFTranslator::TOTAL_NUM_PARTICLES = Translator::TOTAL_NUM_SAMPLES;
 
 const std::string PFTranslator::StaticClsName = "BLOG_Static_State";
 const std::string PFTranslator::TemporalClsName = "BLOG_Temporal_State";
@@ -91,6 +92,11 @@ bool PFTranslator::isTemporalType(code::Type ty) {
   return ty.getName() == ir::IRConstString::TIMESTEP;
 }
 
+// Special Utils for Liu-West Filter
+std::set<std::string> PFTranslator::obsFuncStore = std::set<std::string>();
+const std::string PFTranslator::DOUBLE_PERTURB_FUN_NAME = "__perturb";
+const std::string PFTranslator::MATRIX_PERTURB_FUN_NAME = "__perturb_matrix";
+
 /////////////// END of Util Functions ///////////////////
 
 PFTranslator::PFTranslator() {
@@ -100,7 +106,13 @@ PFTranslator::PFTranslator() {
   coreTemporalClsClear = NULL;
 }
 
-void PFTranslator::translate(swift::ir::BlogModel* model) {
+void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
+  this->model = model;
+
+  // Special Check for Matrix Usage
+  if (model->isUseMatrix())
+    prog->addOption("matrix");
+
   ModelDependency = model->getMarkovOrder();
   ModelTimeLimit = model->getTempLimit();
 
@@ -148,6 +160,11 @@ void PFTranslator::translate(swift::ir::BlogModel* model) {
   // translate type and distinct symbols;
   for (auto ty : model->getTypes())
     transTypeDomain(ty);
+
+  // Check Constant Values
+  constValTable.clear();
+  for (auto fun : model->getFixFuncs())
+    checkConstValue(fun);
 
   // translate fixed function
   for (auto fun : model->getFixFuncs())
@@ -212,6 +229,7 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
         weight[cur_loop]=local_weight;
       }
       resample(...);
+      (optional) [pertubations ... ]
     }
   */
   // body of cur_t for-loop
@@ -262,7 +280,48 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
       new code::Identifier(DEPEND_NUM_VAE_NAME), new code::Identifier(PARTICLE_NUM_VAR_NAME)}),
     std::vector<code::Expr*>({
       new code::Identifier(GLOBAL_WEIGHT_VARNAME), new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
-      new code::Identifier(TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_BACKUP_VAR_NAME)})));
+      new code::Identifier(TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_BACKUP_VAR_NAME)}))
+  );
+
+  // Perturbation for Liu-West Filter
+  for (auto& func : model->getRandFuncs()) {
+    if (func->isTemporal() || obsFuncStore.count(func->getName()) > 0) continue;
+    std::string perturb_fun = "";
+    if (func->getRetTyp()->getTyp() == ir::IRConstant::DOUBLE)
+      perturb_fun = DOUBLE_PERTURB_FUN_NAME;
+    else
+    if (func->getRetTyp()->getTyp() == ir::IRConstant::MATRIX)
+      perturb_fun = MATRIX_PERTURB_FUN_NAME;
+    if (perturb_fun.size() == 0) continue; // we can only perturb matrix/double variables
+
+    // TODO: currently perturbation is a hack implementation!!!!!  @Issue
+    if (func->argSize() > 2) {
+      std::cerr << "[PFTranslator] warning: currently perturbation for liu-west filter \
+                   only supports random variables with no more than 2 arguments.  " <<
+                   "< " << func->getName() << " >" << std::endl;
+      continue;
+    }
+    bool pb_ok = true; 
+    for (size_t i = 0; i < func->argSize() && pb_ok; ++i) {
+      auto ty = dynamic_cast<const ir::NameTy*>(func->getArg(i)->getTyp());
+      if (ty == NULL || ty->getRefer()->getNumberStmtSize() > 0) {
+        pb_ok = false;
+        std::cerr << "[PFTranslator] warning: currently perturbation for liu-west filter \
+                                        only supports random variables with Name Type without number statement. " <<
+                                        "< " << func->getName() << " ( arg#"<< i << ") >" << std::endl;
+        break;
+      }
+    }
+    if (!pb_ok) continue;
+
+    // Call Perturbation Method
+    if (func->argSize() > 0)
+      perturb_fun += "_dim" + std::to_string(func->argSize());
+    body_time->addStmt(new code::CallExpr(
+      new code::Identifier(perturb_fun),
+      std::vector<code::Expr*>({ new code::Identifier(func->getName()) }))
+    );
+  }
   return fun;
   //TODO adding other algorithms
 }
@@ -475,7 +534,8 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   // Optimization for Vector/Map/Set Return
   if (valuetype.getName() == ARRAY_BASE_TYPE.getName()
     || valuetype.getName() == MAP_BASE_TYPE.getName()
-    || valuetype.getName() == SET_BASE_TYPE.getName())
+    || valuetype.getName() == SET_BASE_TYPE.getName()
+    || valuetype.getName() == MATRIX_TYPE.getName())
     valuetype.setRef(true);
 
   // define getter function :::==> __get_value()
@@ -622,6 +682,15 @@ code::FunctionDecl* PFTranslator::transFixedFun(
   const std::string & name = fd->getName();
   std::string fixedfunname = getFixedFunName(name);
   code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+
+  // special check to translate to const value instead of a function
+  if (fd->argSize() == 0 && constValTable.count(fixedfunname) > 0) {
+    code::FieldDecl::createFieldDecl(
+      coreCls, fixedfunname, code::Type(fd->getRetTyp()->toString(), false, false, true),
+      transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody())));
+    return NULL;
+  }
+
   // adding method declaration in the main class
   code::FunctionDecl* fixedfun = code::FunctionDecl::createFunctionDecl(
     coreNs, fixedfunname, valuetype);
@@ -675,6 +744,41 @@ std::vector<code::ParamVarDecl*> PFTranslator::transParamVarDecls(
   return vds;
 }
 
+code::Stmt* PFTranslator::transMultiCaseBranch(std::shared_ptr<ir::Branch> br,
+  std::string retvar,
+  std::string valuevar) {
+  std::string mpName = MULTI_CASE_MAP_NAME + std::to_string((size_t)(br.get()));
+  auto var = br->getVar();
+  if (valuevar.size() == 0) {
+    // getter function: need to register a const map for indexing
+    code::Type baseTy = mapIRTypeToCodeType(var->getTyp(), false, false);
+    // Construct the corresponding MapInit Expr
+    auto mex = std::make_shared<ir::MapExpr>();
+    mex->setFromTyp(br->getCond(0)->getTyp());
+    mex->setToTyp(br->getBranch(0)->getTyp());
+    for (size_t i = 0; i < br->getConds().size(); ++i) {
+      mex->addMap(br->getCond(i), std::make_shared<ir::IntLiteral>(i));
+    }
+    code::VarDecl::createVarDecl(
+      coreNs, mpName, code::Type(MAP_BASE_TYPE, std::vector<code::Type>({ baseTy, INT_TYPE }), false, false, true),
+      transMapExpr(mex));
+  }
+  auto iter = new code::CallExpr(
+    new code::BinaryOperator(
+    new code::Identifier(mpName), new code::Identifier("find"), code::OpKind::BO_FIELD),
+    { transExpr(var) });
+  auto indx = new code::BinaryOperator(iter, new code::Identifier("second"), code::OpKind::BO_POINTER);
+  code::SwitchStmt* sst = new code::SwitchStmt(indx);
+  code::CaseStmt* cst;
+  for (size_t i = 0; i < br->size(); i++) {
+    cst = new code::CaseStmt(new code::IntegerLiteral(i),
+      transClause(br->getBranch(i), retvar, valuevar));
+    sst->addStmt(cst);
+    sst->addStmt(new code::BreakStmt());
+  }
+  return sst;
+}
+
 code::Stmt* PFTranslator::transBranch(std::shared_ptr<ir::Branch> br,
                                        std::string retvar,
                                        std::string valuevar) {
@@ -703,11 +807,16 @@ code::Stmt* PFTranslator::transIfThen(std::shared_ptr<ir::IfThen> ith,
 code::Expr* PFTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
                                      std::string valuevar) {
   std::vector<code::Expr*> args;
-  for (size_t k = 0; k < expr->argSize(); k++) {
-    args.push_back(transExpr(expr->get(k)));
-  }
   bool used = false;
   code::Expr * res = nullptr;
+  // Special Check for MatrixExpr
+  if (std::dynamic_pointer_cast<ir::MatrixExpr>(expr) != nullptr)
+    res = transMatrixExpr(std::dynamic_pointer_cast<ir::MatrixExpr>(expr));
+  else {
+    for (size_t k = 0; k < expr->argSize(); k++) {
+      args.push_back(transExpr(expr->get(k)));
+    }
+  }
   // warning::: better to put the above code in separate function
 
   // translate distribution expression
@@ -997,10 +1106,16 @@ code::Expr* PFTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       kind = code::OpKind::BO_GT;
       break;
     case ir::IRConstant::PLUS:
-      kind = code::OpKind::BO_PLUS;
+      if (args.size() == 1)
+        kind = code::OpKind::UO_PLUS;
+      else
+        kind = code::OpKind::BO_PLUS;
       break;
     case ir::IRConstant::MINUS:
-      kind = code::OpKind::BO_MINUS;
+      if (args.size() == 1)
+        kind = code::OpKind::UO_MINUS;
+      else
+        kind = code::OpKind::BO_MINUS;
       break;
     case ir::IRConstant::MUL:
       kind = code::OpKind::BO_MUL;
@@ -1027,17 +1142,37 @@ code::Expr* PFTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       assert(false);  // not supported yet
       break;
     case ir::IRConstant::SUB:
-      assert(false);  // not supported yet
+    {
+      // Special Check for Matrix Computation
+      //   (A*B)[2] is not allowed! have to convert to mat(A*B)[2]
+      code::Expr* base = args[0];
+      if(opr->get(0)->getTyp()->getTyp()==ir::IRConstant::MATRIX) {
+        if (std::dynamic_pointer_cast<ir::OprExpr>(opr->get(0)) != nullptr) {
+          base = new code::CallClassConstructor(MATRIX_TYPE, std::vector<code::Expr*>{base});
+        }
+      }
+      return new code::ArraySubscriptExpr(base, args[1]);
+    }
+      break;
+    case ir::IRConstant::PARENTHESES:
+    {
+      code::Expr* base = args[0];
+      args.erase(args.begin());
+      if (opr->get(0)->getTyp()->getTyp() == ir::IRConstant::MATRIX
+        && std::dynamic_pointer_cast<ir::OprExpr>(opr->get(0)) != nullptr)
+        base = new code::CallClassConstructor(MATRIX_TYPE, std::vector<code::Expr*>{ base });
+      return new code::CallExpr(base, args);
+    }
       break;
     default:
       assert(false);
       break;
   }
   // Unary Operator: Left is nullptr
-  if (kind == code::OpKind::UO_NEG)
-    return new code::BinaryOperator(nullptr, args[0], kind);
+  if (kind == code::OpKind::UO_NEG || kind == code::OpKind::UO_PLUS || kind == code::OpKind::UO_MINUS)
+    return new code::BinaryOperator(NULL, args[0], kind);
   // Normal Operator
-  return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : nullptr,
+  return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : NULL,
                                   kind);
 }
 
@@ -1045,6 +1180,47 @@ code::Expr* PFTranslator::transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
   std::vector<code::Expr*> args) {
   std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
   return new code::CallClassConstructor(mapIRTypeToCodeType(opr->getTyp()),sub);
+}
+
+code::Expr* PFTranslator::transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat) {
+  /*
+  Construction of Matrix
+  1. construct a row vector
+  2. construct a col vector
+  3. construct a fixed 2-D real matrix
+  4. construct a general 2-D real matrix
+  */
+  std::vector<code::Expr*> args;
+  if (mat->isColVec() || mat->isRowVec()) { // row vector / col vector, which could be constructed via vector directly
+    for (size_t i = 0; i < mat->argSize(); ++i)
+      args.push_back(transExpr(mat->get(i)));
+    code::Type matTy = (mat->isColVec() ? MATRIX_COL_VECTOR_TYPE : MATRIX_ROW_VECTOR_TYPE);
+    std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
+    code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE, sub);
+    return new code::CallClassConstructor(matTy, std::vector<code::Expr*>{ container });
+  }
+  // general cases for matrix
+  //    matrixExpr = arrays of row matrixExpr
+  size_t row = mat->argSize();
+  size_t col = 0;
+  for (size_t i = 0; i < mat->argSize(); ++i) {
+    if (mat->get(i)->argSize() > col)
+      col = mat->get(i)->argSize();
+  }
+  for (size_t i = 0; i < mat->argSize(); ++i) {
+    std::shared_ptr<ir::Expr> row = mat->get(i);
+    for (size_t j = 0; j < row->argSize(); ++j) {
+      args.push_back(transExpr(row->get(j)));
+    }
+    for (size_t j = row->argSize(); j < col; ++j) {
+      args.push_back(new code::IntegerLiteral(0));
+    }
+  }
+  code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE,
+    std::vector<code::Expr*>{new code::ListInitExpr(args)});
+  code::Expr* func = new code::CallExpr(new code::Identifier(TO_MATRIX_FUN_NAME),
+    std::vector<code::Expr*>{container, new code::IntegerLiteral((int)row), new code::IntegerLiteral((int)col)});
+  return func;
 }
 
 code::Expr* PFTranslator::transDistribution(
@@ -1352,6 +1528,14 @@ void PFTranslator::transEvidence(code::CompoundStmt* fun,
   // check whether left is a function application variable
   std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
       ir::FunctionCall>(left);
+
+  // Update the random functions associated with observations
+  if (leftexp != nullptr) {
+    if (leftexp->getRefer()->isRand()) {
+      obsFuncStore.insert(leftexp->getRefer()->getName());
+    }
+  }
+
   if (leftexp && transFuncApp) {
     // left side of the evidence is a function application
     std::string blogfunname = leftexp->getRefer()->getName();  // the function name in blog model
@@ -1596,6 +1780,8 @@ code::Expr* PFTranslator::transConstSymbol(
       std::dynamic_pointer_cast<ir::NullSymbol>(cs);
   if (nl) {
     // TODO change the translation of null
+    if (nl->getTyp() != NULL && nl->getTyp()->getTyp() == ir::IRConstant::STRING)
+      return new code::StringLiteral("<NULL>");
     return new code::IntegerLiteral(NULLSYMBOL_VALUE);
   }
   std::shared_ptr<ir::StringLiteral> sl = std::dynamic_pointer_cast<
@@ -1621,6 +1807,10 @@ code::Expr* PFTranslator::transFunctionCall(
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     case ir::IRConstant::FIXED:
       getterfunname = getFixedFunName(fc->getRefer()->getName());
+      if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
+        // This fixed function is actually a constant variable
+        return new code::Identifier(getterfunname);
+      }
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     default:
       return nullptr;

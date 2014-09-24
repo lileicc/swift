@@ -20,6 +20,10 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "~"; // complement
   case OpKind::UO_NEG:
     return "!"; // negate
+  case OpKind::UO_PLUS:
+    return "+"; // unary plus
+  case OpKind::UO_MINUS:
+    return "-"; // unary minus
   case OpKind::UO_INC:
     return "++"; // increment
   case OpKind::UO_DEC:
@@ -117,6 +121,8 @@ std::pair<int, int> CPPPrinter::OpPrec(code::Expr* expr) {
       return std::make_pair<int, int>(1,0);
   case OpKind::UO_CMPT:
   case OpKind::UO_NEG:
+  case OpKind::UO_PLUS:
+  case OpKind::UO_MINUS:
   case OpKind::UO_ADDR:
   case OpKind::UO_DEREF:
     return std::make_pair<int, int>(2,1);
@@ -226,8 +232,6 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Beta.h\"\n");
   fprintf(file, "#include \"random/BooleanDistrib.h\"\n");
   fprintf(file, "#include \"random/Categorical.h\"\n");
-  fprintf(file, "#include \"random/Dirichlet.h\"\n");
-  fprintf(file, "#include \"random/Discrete.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
   fprintf(file, "#include \"random/Geometric.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
@@ -246,6 +250,23 @@ void CPPPrinter::print(code::Code* prog) {
   for (auto s : prog->getAllMacros())
     s->print(this);
   printLine();
+
+  // Check for Special Printing Option 
+  for (auto s : prog->getAllOptions())
+    if (s == "matrix") {
+      // Support Matrix
+      fprintf(file, "\n// Matrix Library included\n");
+      fprintf(file, "#include \"armadillo\"\n");
+      fprintf(file, "#include \"random/Dirichlet.h\"\n");
+      fprintf(file, "#include \"random/Discrete.h\"\n");
+      fprintf(file, "#include \"random/MultivarGaussian.h\"\n");
+      fprintf(file, "#include \"random/UniformVector.h\"\n");
+      fprintf(file, "#include \"util/Hist_matrix.h\"\n");
+      fprintf(file, "#include \"util/util_matrix.h\"\n");
+      fprintf(file, "#define transpose trans\n");
+      fprintf(file, "#define diag diagmat\n");
+      fprintf(file, "using namespace arma;\n\n");
+    }
 
   fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
   fprintf(file, "using namespace std;\n");

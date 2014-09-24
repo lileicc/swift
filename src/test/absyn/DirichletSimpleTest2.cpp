@@ -15,7 +15,7 @@ BlogProgram* DirichletSimpleTest2::getRoot() {
 }
 
 /*
-random Real[] w ~ Dirichlet([1.0, 2.0, 3.0]);
+random RealMatrix w ~ Dirichlet([1.0, 2.0, 3.0]);
 random Integer x ~ Discrete(w);
 query x;
 */
@@ -24,7 +24,7 @@ void DirichletSimpleTest2::build(){
   BlogProgram *blog = new BlogProgram(0, 0);
   root = blog;
   /*
-  random Real[] w ~ Dirichlet([1.0, 2.0, 3.0]);
+  random RealMatrix w ~ Dirichlet([1.0, 2.0, 3.0]);
   */
   {
     ArrayExpr* arr = new ArrayExpr(0, 0, 1);
@@ -33,7 +33,7 @@ void DirichletSimpleTest2::build(){
     arr->add(new DoubleLiteral(0, 0, 3.0));
     FuncApp *dis = new FuncApp(0, 0, Symbol("Dirichlet"));
     dis->add(arr);
-    FuncDecl *fd = new FuncDecl(0, 0, true, Ty(Symbol("Real"),1), Symbol("w"), dis);
+    FuncDecl *fd = new FuncDecl(0, 0, true, Symbol("RealMatrix"), Symbol("w"), dis);
     blog->add(fd);
   }
   /*

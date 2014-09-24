@@ -101,6 +101,7 @@ private:
   static const ir::Ty DOUBLE_TY;
   static const ir::Ty STRING_TY;
   static const ir::Ty TIMESTEP_TY;
+  static const ir::Ty MATRIX_TY;
   static const ir::Ty NA_TY;
 };
 

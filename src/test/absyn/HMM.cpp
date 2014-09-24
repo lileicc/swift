@@ -61,7 +61,8 @@ void HMM::build(){
     Expr *cond, *thn, *els;
     { // Cond
       OpExpr *eq = new OpExpr(0, 0, AbsynConstant::EQ,
-        new FuncApp(0, 0, Symbol("t")), new TimeStampLiteral(0, 0, 0));
+        new FuncApp(0, 0, Symbol("t")),
+        new OpExpr(0, 0, AbsynConstant::AT, NULL, new IntLiteral(0, 0, 0)));
 
       cond = eq;
     }
@@ -185,23 +186,23 @@ void HMM::build(){
     FuncApp *o;
     Evidence *obs;
     o = new FuncApp(0, 0, Symbol("O"));
-    o->add(new TimeStampLiteral(0,0,0));
+    o->add(new OpExpr(0, 0, AbsynConstant::AT, NULL, new IntLiteral(0, 0, 0)));
     obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultC")));
     blog->add(obs);
     o = new FuncApp(0, 0, Symbol("O"));
-    o->add(new TimeStampLiteral(0, 0, 1));
+    o->add(new OpExpr(0, 0, AbsynConstant::AT, NULL, new IntLiteral(0, 0, 1)));
     obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultA")));
     blog->add(obs);
     o = new FuncApp(0, 0, Symbol("O"));
-    o->add(new TimeStampLiteral(0, 0, 2));
+    o->add(new OpExpr(0, 0, AbsynConstant::AT, NULL, new IntLiteral(0, 0, 2)));
     obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultA")));
     blog->add(obs);
     o = new FuncApp(0, 0, Symbol("O"));
-    o->add(new TimeStampLiteral(0, 0, 3));
+    o->add(new OpExpr(0, 0, AbsynConstant::AT, NULL, new IntLiteral(0, 0, 3)));
     obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultA")));
     blog->add(obs);
     o = new FuncApp(0, 0, Symbol("O"));
-    o->add(new TimeStampLiteral(0, 0, 4));
+    o->add(new OpExpr(0, 0, AbsynConstant::AT, NULL, new IntLiteral(0, 0, 4)));
     obs = new Evidence(0, 0, o, new FuncApp(0, 0, Symbol("ResultG")));
     blog->add(obs);
   }
@@ -216,7 +217,7 @@ void HMM::build(){
   {
     for (int i = 0; i <= 5; ++i) {
       FuncApp *fun_S = new FuncApp(0, 0, Symbol("S"));
-      fun_S->add(new TimeStampLiteral(0,0,i));
+      fun_S->add(new OpExpr(0, 0, AbsynConstant::AT, NULL, new IntLiteral(0, 0, i)));
       blog->add(new Query(0,0,fun_S));
     }
   }

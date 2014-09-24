@@ -9,6 +9,7 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <set>
 #include "../ir/IRHeader.h"
 #include "../code/Code.h"
 #include "../util/Configuration.h"
@@ -32,10 +33,11 @@ class Translator {
 public:
   Translator();
   virtual ~Translator();
-  virtual void translate(swift::ir::BlogModel* model);
+  virtual void translate(std::shared_ptr<ir::BlogModel> model);
   code::Code* getResult();
 
 protected:
+  std::shared_ptr<ir::BlogModel> model;
 
   /**
    * declare a named type
@@ -91,6 +93,15 @@ protected:
   virtual code::FunctionDecl* transSampleAlg();
 
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
+
+  /**
+   * Given a fixed function, check whether it is corresponding to a constant value
+   * If so, add to constValTable
+   *   i.e. fixed Real x = 1.0;
+   *         x here is a constant value rather than a function
+   */
+  void checkConstValue(std::shared_ptr<ir::FuncDefn> fd);
+
   /**
    * translate blog function
    */
@@ -137,7 +148,10 @@ protected:
    * translate a Branch in ir to a statement in code,
    * retvar is for return variable
    * if valuevar is nonempty, then it will calculate weight instead of sampling
+   *   >> Special Note: different translation for *Multi-Case Expr*
    */
+  code::Stmt* transMultiCaseBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
+    std::string valuevar = std::string());
   code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
       std::string valuevar = std::string());
   /**
@@ -167,6 +181,11 @@ protected:
    */
   code::Expr* transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
     std::vector<code::Expr*> args);
+
+  /**
+  * translate the matrix construction expression
+  */
+  code::Expr* transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat);
 
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
@@ -282,6 +301,13 @@ protected:
   static const code::Type BOOL_TYPE;
 
   static const code::Type VOID_TYPE;
+
+  static const code::Type MATRIX_TYPE;
+  static const code::Type MATRIX_REF_TYPE;
+  static const code::Type MATRIX_CONST_TYPE;
+  static const code::Type MATRIX_ROW_VECTOR_TYPE;
+  static const code::Type MATRIX_COL_VECTOR_TYPE;
+  static const code::Type MATRIX_CONTAINER_TYPE;
 
   static const code::Type ARRAY_BASE_TYPE;
 
@@ -404,6 +430,9 @@ protected:
   // function name for internal exists operator with range input: std::any_of() in <algorithm>
   static const std::string EXISTS_RANGE_NAME;
 
+  // Builtin Functions for Matrix Initialization
+  static const std::string TO_MATRIX_FUN_NAME;
+
   /**
    * method name for vector.resize()
    */
@@ -492,9 +521,16 @@ protected:
    */
   static const code::Type RANDOM_ENGINE_TYPE;
 
+  /**
+   * Name of the Map in Multi-Case Expr
+   */
+  static const std::string MULTI_CASE_MAP_NAME;
+
   static bool COMPUTE_LIKELIHOOD_IN_LOG;
 
   static swift::Configuration* config;
+
+  std::set<std::string> constValTable;
 
   /**
 * give the name of the type,

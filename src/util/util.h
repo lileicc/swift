@@ -13,7 +13,35 @@
 #include <cmath>
 #include <vector>
 #include <functional>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
 #include "../random/Multinomial.h"
+
+namespace swift {
+
+// Type Conversion Functions
+//  convert to Int
+template<class T>
+inline int toInt(const T& a) {return (int) a;}
+template<>
+inline int toInt<std::string>(const std::string& a) {
+  int ret = 0;
+  std::stringstream ss(a);
+  ss >> ret;
+  return ret;
+}
+//   convert to Double
+template<class T>
+inline double toReal(const T& a) { return (double)a; }
+template<>
+inline double toReal<std::string>(const std::string& a) {
+  double ret = 0;
+  std::stringstream ss(a);
+  ss >> ret;
+  return ret;
+}
 
 // computing log( exp(a) + exp(b) )
 // NOTE this function cannot handle infinity
@@ -179,3 +207,79 @@ void pointer_copy(State** ptr, State* state, int N) {
 // Internal Function for TimeStep Operation
 inline unsigned prev(unsigned u) {return u - 1;}
 inline unsigned prev(unsigned u, int t) {return u - t;}
+
+///////// Utils for Perturbation in Liu-West Filter /////////
+// Perturbation for Double variable #func#
+#define __perturb(func) {\
+  double mean, stddev, new_val, old_val; \
+  mean = 0; stddev = 0; \
+  for (int i = 0; i<SampleN; ++i)\
+    mean += ptr_stat_memo[i]->value_##func; \
+    mean /= SampleN; \
+    for (int i = 0; i<SampleN; ++i) {\
+      double det = ptr_stat_memo[i]->value_##func - mean; \
+      stddev += det * det; \
+    }\
+    stddev = sqrt(stddev / SampleN); \
+    for (int i = 0; i<SampleN; ++i) {\
+    old_val = ptr_stat_memo[i]->value_##func; \
+    new_val = rho * old_val + (1 - rho) * mean + \
+    sqrt(1 - rho * rho) * stddev * gauss.gen(); \
+    ptr_stat_memo[i]->value_##func = new_val; \
+  }\
+}
+// Perturbation for matrix variable #func#
+#define __perturb_matrix(func) {\
+  int _n_rows = ptr_stat_memo[0]->value_##func.n_rows; \
+  int _n_cols = ptr_stat_memo[0]->value_##func.n_cols; \
+  mat mean, stddev, new_val, old_val; \
+  mean = zeros(_n_rows, _n_cols); stddev = zeros(_n_rows, _n_cols); \
+  for (int i = 0; i<SampleN; ++i)\
+    mean += ptr_stat_memo[i]->value_##func; \
+  mean /= (double)SampleN; \
+  for (int i = 0; i<SampleN; ++i)\
+    stddev += (ptr_stat_memo[i]->value_##func - mean) % \
+      (ptr_stat_memo[i]->value_##func - mean); \
+  stddev /= (double)SampleN\
+  stddev = sqrt(stddev); \
+  for (int i = 0; i<SampleN; ++i) { \
+    old_val = ptr_stat_memo[i]->value_##func; \
+    new_val = rho * old_val + (1 - rho) * mean + \
+    sqrt(1 - rho * rho) * (stddev % randn(_n, _m)); \
+    ptr_stat_memo[i]->value_##func = new_val; \
+  }\
+}
+// Perturbation for MultiDimensional Random Function
+//    --> currently only support at most 2D random var
+#define __perturb_dim1(func) {\
+  int _n = ptr_stat_memo[0]->value_##func .size(); \
+  for (int _i = 0; _i < _n; ++_i) {\
+    __perturb(##func [_i]); \
+  }\
+}
+#define __perturb_dim2(func) {\
+  int _n = ptr_stat_memo[0]->value_##func.size(); \
+  int _m = ptr_stat_memo[0]->value_##func [0].size(); \
+  for (int _i = 0; _i < _n; ++_i) {\
+    for (int _j = 0; _j < _m; ++_j) {\
+      __perturb(##func [_i][_j]); \
+    }\
+  }\
+}
+#define __perturb_matrix_dim1(func) {\
+  int _n = ptr_stat_memo[0]->value_##func .size(); \
+  for (int _i = 0; _i < _n; ++_i) {\
+    __perturb_matrix(##func [_i]); \
+  }\
+}
+#define __perturb_matrix_dim2(func) {\
+  int _n = ptr_stat_memo[0]->value_##func.size(); \
+  int _m = ptr_stat_memo[0]->value_##func [0].size(); \
+  for (int _i = 0; _i < _n; ++_i) {\
+    for (int _j = 0; _j < _m; ++_j) {\
+      __perturb_matrix(##func [_i][_j]); \
+    }\
+  }\
+}
+
+}

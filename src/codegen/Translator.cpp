@@ -36,6 +36,14 @@ const code::Type Translator::STRING_TYPE("string");
 const code::Type Translator::TIMESTEP_TYPE("unsigned");
 const code::Type Translator::BOOL_TYPE("bool");
 const code::Type Translator::VOID_TYPE("void");
+
+const code::Type Translator::MATRIX_TYPE("mat");
+const code::Type Translator::MATRIX_REF_TYPE("mat", true);
+const code::Type Translator::MATRIX_CONST_TYPE("mat", false, false, true);
+const code::Type Translator::MATRIX_ROW_VECTOR_TYPE("rowvec");
+const code::Type Translator::MATRIX_COL_VECTOR_TYPE("vec");
+const code::Type Translator::MATRIX_CONTAINER_TYPE("vector<double>");
+
 // TODO: This could be potentially replaced by array
 const code::Type Translator::ARRAY_BASE_TYPE("vector");
 const code::Type Translator::MAP_BASE_TYPE("map");
@@ -50,8 +58,8 @@ const std::string Translator::DISTRIBUTION_LOGLIKELI_FUN_NAME = "loglikeli";
 const std::string Translator::CURRENT_SAMPLE_NUM_VARNAME = "_cur_loop";
 const std::string Translator::WEIGHT_VAR_REF_NAME = "__local_weight";
 const std::string Translator::GLOBAL_WEIGHT_VARNAME = "_weight";
-const std::string Translator::VALUE_VAR_REF_NAME = "__value";
-const std::string Translator::VALUE_ARG_NAME = "__value_arg";
+const std::string Translator::VALUE_VAR_REF_NAME = "__retvalue";
+const std::string Translator::VALUE_ARG_NAME = "__retvalue_arg";
 const std::string Translator::MARK_VAR_REF_NAME = "__mark";
 const std::string Translator::HISTOGRAM_CLASS_NAME = "Hist";
 const std::string Translator::HISTOGRAM_ADD_METHOD_NAME = "add";
@@ -68,6 +76,8 @@ const std::string Translator::MAIN_NAMESPACE_NAME = "swift";
 const std::string Translator::MAIN_INIT_FUN_NAME = "init";
 const std::string Translator::MAIN_FUN_NAME = "main";
 const std::string Translator::LOCAL_NUM_SAMPLE_ARG_NAME = "n";
+const std::string Translator::MULTI_CASE_MAP_NAME = "_multicase_idx";
+
 // randomness
 const std::string Translator::RANDOM_DEVICE_VAR_NAME = "__random_device";
 const code::Type Translator::RANDOM_ENGINE_TYPE("default_random_engine");
@@ -92,6 +102,9 @@ const std::string Translator::FORALL_RANGE_NAME = "std::all_of";
 const std::string Translator::EXISTS_NAME = "_exists";
 const std::string Translator::EXISTS_RANGE_NAME = "std::any_of";
 
+// internal predefined functions for Matrix
+const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
+
 Translator::Translator() {
   useTag = false;
   prog = new code::Code();
@@ -110,7 +123,13 @@ Translator::~Translator() {
     delete prog;
 }
 
-void Translator::translate(swift::ir::BlogModel* model) {
+void Translator::translate(std::shared_ptr<ir::BlogModel> model) {
+  this->model = model;
+
+  // Special Check for Matrix Usage
+  if (model->isUseMatrix())
+    prog->addOption("matrix");
+
   if (coreCls == NULL) {
     coreCls = code::ClassDecl::createClassDecl(coreNs, model->getName());
     createInit();
@@ -119,6 +138,11 @@ void Translator::translate(swift::ir::BlogModel* model) {
   // translate type and distinct symbols;
   for (auto ty : model->getTypes())
     transTypeDomain(ty);
+
+  // Check Constant Values
+  constValTable.clear();
+  for (auto fun : model->getFixFuncs())
+    checkConstValue(fun);
 
   // translate fixed function
   for (auto fun : model->getFixFuncs())
@@ -276,7 +300,7 @@ void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
             std::vector<code::Expr*>(
                 { new code::IntegerLiteral((int) len) })));
     for (size_t k = 0; k < numstlen; k++) {
-      // suppoert multiple number statements
+      // support multiple number statements
       std::string localnumvarname = numvar + std::to_string(k);
       st = new code::DeclStmt(
           new code::VarDecl(fun, localnumvarname, INT_TYPE));
@@ -395,7 +419,8 @@ code::FunctionDecl* Translator::transGetterFun(
   // Optimization for Vector/Map/Set Return
   if (valuetype.getName() == ARRAY_BASE_TYPE.getName()
     || valuetype.getName() == MAP_BASE_TYPE.getName()
-    || valuetype.getName() == SET_BASE_TYPE.getName())
+    || valuetype.getName() == SET_BASE_TYPE.getName()
+    || valuetype.getName() == MATRIX_TYPE.getName())
     valuetype.setRef(true);
 
   // define getter function :::==> __get_value()
@@ -514,11 +539,27 @@ code::FunctionDecl* Translator::transSetterFun(
   return setterfun;
 }
 
+void Translator::checkConstValue(std::shared_ptr<ir::FuncDefn> fd) {
+  if (fd->isFixed() && fd->argSize() == 0 &&
+    std::dynamic_pointer_cast<ir::Expr>(fd->getBody()) != nullptr) {
+    constValTable.insert(getFixedFunName(fd->getName()));
+  }
+}
+
 code::FunctionDecl* Translator::transFixedFun(
   std::shared_ptr<ir::FuncDefn> fd) {
   const std::string & name = fd->getName();
   std::string fixedfunname = getFixedFunName(name);
   code::Type valuetype = mapIRTypeToCodeType(fd->getRetTyp());
+
+  // special check to translate to const value instead of a function
+  if (fd->argSize() == 0 && constValTable.count(fixedfunname) > 0) {
+    code::FieldDecl::createFieldDecl(
+      coreCls, fixedfunname, code::Type(fd->getRetTyp()->toString(),false,false,true),
+      transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody())));
+    return NULL;
+  }
+
   // adding method declaration in the main class
   code::FunctionDecl* fixedfun = code::FunctionDecl::createFunctionDecl(
     coreCls, fixedfunname, valuetype);
@@ -575,9 +616,47 @@ std::vector<code::ParamVarDecl*> Translator::transParamVarDecls(
   return vds;
 }
 
+code::Stmt* Translator::transMultiCaseBranch(std::shared_ptr<ir::Branch> br,
+  std::string retvar,
+  std::string valuevar) {
+  std::string mpName = MULTI_CASE_MAP_NAME + std::to_string((size_t)(br.get()));
+  auto var = br->getVar();
+  if (valuevar.size() == 0) {
+    // getter function: need to register a const map for indexing
+    code::Type baseTy = mapIRTypeToCodeType(var->getTyp(), false, false);
+    // Construct the corresponding MapInit Expr
+    auto mex = std::make_shared<ir::MapExpr>();
+    mex->setFromTyp(br->getCond(0)->getTyp());
+    mex->setToTyp(br->getBranch(0)->getTyp());
+    for (size_t i = 0; i < br->getConds().size(); ++i) {
+      mex->addMap(br->getCond(i), std::make_shared<ir::IntLiteral>(i));
+    }
+    code::FieldDecl::createFieldDecl(
+      coreCls, mpName, code::Type(MAP_BASE_TYPE, std::vector<code::Type>({baseTy, INT_TYPE}),false,false,true),
+      transMapExpr(mex));
+  }
+  auto iter = new code::CallExpr(
+    new code::BinaryOperator(
+      new code::Identifier(mpName),new code::Identifier("find"),code::OpKind::BO_FIELD),
+      { transExpr(var) });
+  auto indx = new code::BinaryOperator(iter, new code::Identifier("second"), code::OpKind::BO_POINTER);
+  code::SwitchStmt* sst = new code::SwitchStmt(indx);
+  code::CaseStmt* cst;
+  for (size_t i = 0; i < br->size(); i++) {
+    cst = new code::CaseStmt(new code::IntegerLiteral(i),
+      transClause(br->getBranch(i), retvar, valuevar));
+    sst->addStmt(cst);
+    sst->addStmt(new code::BreakStmt());
+  }
+  return sst;
+}
+
 code::Stmt* Translator::transBranch(std::shared_ptr<ir::Branch> br,
                                        std::string retvar,
                                        std::string valuevar) {
+  if (br->getArgDim() > 1)
+    return transMultiCaseBranch(br, retvar, valuevar); // Special Multi-Case Expr
+
   code::SwitchStmt* sst = new code::SwitchStmt(transExpr(br->getVar()));
   code::CaseStmt* cst;
   for (size_t i = 0; i < br->size(); i++) {
@@ -603,11 +682,16 @@ code::Stmt* Translator::transIfThen(std::shared_ptr<ir::IfThen> ith,
 code::Expr* Translator::transExpr(std::shared_ptr<ir::Expr> expr,
                                      std::string valuevar) {
   std::vector<code::Expr*> args;
-  for (size_t k = 0; k < expr->argSize(); k++) {
-    args.push_back(transExpr(expr->get(k)));
-  }
   bool used = false;
   code::Expr * res = nullptr;
+  // Special Check for MatrixExpr
+  if (std::dynamic_pointer_cast<ir::MatrixExpr>(expr) != nullptr)
+    res = transMatrixExpr(std::dynamic_pointer_cast<ir::MatrixExpr>(expr));
+  else {
+    for (size_t k = 0; k < expr->argSize(); k++) {
+      args.push_back(transExpr(expr->get(k)));
+    }
+  }
   // warning::: better to put the above code in separate function
 
   // translate distribution expression
@@ -894,10 +978,16 @@ code::Expr* Translator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       kind = code::OpKind::BO_GT;
       break;
     case ir::IRConstant::PLUS:
-      kind = code::OpKind::BO_PLUS;
+      if (args.size() == 1)
+        kind = code::OpKind::UO_PLUS;
+      else
+        kind = code::OpKind::BO_PLUS;
       break;
     case ir::IRConstant::MINUS:
-      kind = code::OpKind::BO_MINUS;
+      if (args.size() == 1) 
+        kind = code::OpKind::UO_MINUS;
+      else
+        kind = code::OpKind::BO_MINUS;
       break;
     case ir::IRConstant::MUL:
       kind = code::OpKind::BO_MUL;
@@ -924,17 +1014,37 @@ code::Expr* Translator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       assert(false);  // not supported yet
       break;
     case ir::IRConstant::SUB:
-      assert(false);  // not supported yet
+    {
+      // Special Check for Matrix Computation
+      //   (A*B)[2] is not allowed! have to convert to mat(A*B)[2]
+      code::Expr* base = args[0];
+      if(opr->get(0)->getTyp()->getTyp()==ir::IRConstant::MATRIX) {
+        if (std::dynamic_pointer_cast<ir::OprExpr>(opr->get(0)) != nullptr) {
+          base = new code::CallClassConstructor(MATRIX_TYPE, std::vector<code::Expr*>{base});
+        }
+      }
+      return new code::ArraySubscriptExpr(base, args[1]);
+    }
+      break;
+    case ir::IRConstant::PARENTHESES:
+    {
+      code::Expr* base = args[0];
+      args.erase(args.begin());
+      if (opr->get(0)->getTyp()->getTyp() == ir::IRConstant::MATRIX
+        && std::dynamic_pointer_cast<ir::OprExpr>(opr->get(0)) != nullptr)
+        base = new code::CallClassConstructor(MATRIX_TYPE, std::vector<code::Expr*>{ base });
+      return new code::CallExpr(base, args);
+    }
       break;
     default:
       assert(false);
       break;
   }
   // Unary Operator: Left is nullptr
-  if (kind == code::OpKind::UO_NEG)
-    return new code::BinaryOperator(nullptr, args[0], kind);
+  if (kind == code::OpKind::UO_NEG || kind == code::OpKind::UO_PLUS || kind == code::OpKind::UO_MINUS)
+    return new code::BinaryOperator(NULL, args[0], kind);
   // Normal Operator
-  return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : nullptr,
+  return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : NULL,
                                   kind);
 }
 
@@ -942,6 +1052,47 @@ code::Expr* Translator::transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
   std::vector<code::Expr*> args) {
   std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
   return new code::CallClassConstructor(mapIRTypeToCodeType(opr->getTyp()),sub);
+}
+
+code::Expr* Translator::transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat) {
+  /*
+    Construction of Matrix
+    1. construct a row vector
+    2. construct a col vector
+    3. construct a fixed 2-D real matrix
+    4. construct a general 2-D real matrix
+  */
+  std::vector<code::Expr*> args;
+  if (mat->isColVec() || mat->isRowVec()) { // row vector / col vector, which could be constructed via vector directly
+    for (size_t i = 0; i < mat->argSize(); ++ i)
+      args.push_back(transExpr(mat->get(i)));
+    code::Type matTy = (mat->isColVec() ? MATRIX_COL_VECTOR_TYPE : MATRIX_ROW_VECTOR_TYPE);
+    std::vector<code::Expr*> sub{ new code::ListInitExpr(args) };
+    code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE, sub);
+    return new code::CallClassConstructor(matTy, std::vector<code::Expr*>{ container });
+  }
+  // general cases for matrix
+  //    matrixExpr = arrays of row matrixExpr
+  size_t row = mat->argSize();
+  size_t col = 0;
+  for (size_t i = 0; i < mat->argSize(); ++i) {
+    if (mat->get(i)->argSize() > col)
+      col = mat->get(i)->argSize();
+  }
+  for (size_t i = 0; i < mat->argSize(); ++i) {
+    std::shared_ptr<ir::Expr> row = mat->get(i);
+    for (size_t j = 0; j < row->argSize(); ++j) {
+      args.push_back(transExpr(row->get(j)));
+    }
+    for (size_t j = row->argSize(); j < col; ++j) {
+      args.push_back(new code::IntegerLiteral(0));
+    }
+  }
+  code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE, 
+    std::vector<code::Expr*>{new code::ListInitExpr(args)});
+  code::Expr* func = new code::CallExpr(new code::Identifier(TO_MATRIX_FUN_NAME),
+    std::vector<code::Expr*>{container, new code::IntegerLiteral((int)row), new code::IntegerLiteral((int)col)});
+  return func;
 }
 
 code::Expr* Translator::transDistribution(
@@ -1361,7 +1512,8 @@ code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool is
     case ir::IRConstant::DOUBLE:
     case ir::IRConstant::STRING:
     case ir::IRConstant::TIMESTEP:
-      return code::Type(ty->toString(), isRef);
+    case ir::IRConstant::MATRIX:
+      return code::Type(ty->toString(), isRef, isPtr);
     case ir::IRConstant::ARRAY: {
       auto arr = dynamic_cast<const ir::ArrayTy*>(ty);
       std::vector<code::Type> args;
@@ -1413,6 +1565,8 @@ code::Expr* Translator::transConstSymbol(
       std::dynamic_pointer_cast<ir::NullSymbol>(cs);
   if (nl) {
     // TODO change the translation of null
+    if (nl->getTyp() != NULL && nl->getTyp()->getTyp() == ir::IRConstant::STRING)
+      return new code::StringLiteral("<NULL>");
     return new code::IntegerLiteral(NULLSYMBOL_VALUE);
   }
   std::shared_ptr<ir::StringLiteral> sl = std::dynamic_pointer_cast<
@@ -1438,6 +1592,10 @@ code::Expr* Translator::transFunctionCall(
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     case ir::IRConstant::FIXED:
       getterfunname = getFixedFunName(fc->getRefer()->getName());
+      if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
+        // This fixed function is actually a constant variable
+        return new code::Identifier(getterfunname);
+      }
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     default:
       return nullptr;

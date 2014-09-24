@@ -8,6 +8,8 @@
 #pragma once
 
 #include "Translator.h"
+#include <memory>
+#include <set>
 
 namespace swift {
 namespace codegen {
@@ -15,7 +17,7 @@ namespace codegen {
 class PFTranslator: public swift::codegen::Translator {
 public:
   PFTranslator();
-  void translate(swift::ir::BlogModel* model);
+  void translate(std::shared_ptr<swift::ir::BlogModel> model);
   code::Code* getResult();
   
 protected:
@@ -152,12 +154,15 @@ protected:
   code::Stmt* transClause(std::shared_ptr<ir::Clause> clause,
       std::string retvar, std::string valuevar = std::string());
   /**
-   * translate a Branch in ir to a statement in code,
-   * retvar is for return variable
-   * if valuevar is nonempty, then it will calculate weight instead of sampling
-   */
+  * translate a Branch in ir to a statement in code,
+  * retvar is for return variable
+  * if valuevar is nonempty, then it will calculate weight instead of sampling
+  *   >> Special Note: different translation for *Multi-Case Expr*
+  */
+  code::Stmt* transMultiCaseBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
+    std::string valuevar = std::string());
   code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
-      std::string valuevar = std::string());
+    std::string valuevar = std::string());
   /**
    * translate a IfThen in ir to a statement in code,
    * retvar is for return variable
@@ -185,6 +190,11 @@ protected:
    */
   code::Expr* transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
     std::vector<code::Expr*> args);
+
+  /**
+  * translate the matrix construction expression
+  */
+  code::Expr* transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat);
 
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
@@ -289,6 +299,12 @@ protected:
       bool isVarDefined = false, bool isLess = true);
   static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
   static bool isTemporalType(code::Type ty);
+
+  // Utils for Liu-West Filter
+  // Record all the random function names accociated with at least *ONE* observation
+  static std::set<std::string> obsFuncStore;
+  static const std::string DOUBLE_PERTURB_FUN_NAME;
+  static const std::string MATRIX_PERTURB_FUN_NAME;
 };
 
 } /* namespace codegen */

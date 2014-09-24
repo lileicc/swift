@@ -13,6 +13,9 @@
 #include <vector>
 #include "SwiftDistribution.h"
 
+#include "armadillo"
+using namespace arma;
+
 namespace swift {
 namespace random {
 
@@ -21,6 +24,7 @@ public:
   Discrete();
   ~Discrete();
   void init(std::vector<double> wei);
+  void init(mat wei);
   int gen();
   template<typename _RD>
   int gen(_RD& rd);

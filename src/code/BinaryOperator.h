@@ -23,6 +23,8 @@ enum class OpKind {
   UO_ARRAY_DEL, // delete[] array
   UO_ADDR, // address of (&) ; C++ only
   UO_DEREF, // dereference (*); C++ only
+  UO_PLUS, // unary plus
+  UO_MINUS, // unary minus
   // Binary Operator
   BO_ASSIGN, // Assignment
   BO_FIELD, // reference to a field

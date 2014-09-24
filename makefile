@@ -2,6 +2,7 @@ MAIN=swift
 
 CXX=g++
 CXX_CFLAGS=-std=c++11 -Wall
+LIB_FLAGS=-larmadillo
 EXEC=$(MAIN)
 SRC=src/absyn/*.cpp \
   src/analyzer/*.cpp \
@@ -31,7 +32,7 @@ help:
 	@echo '                                                                       '
 
 compile: $(SRC)
-	$(CXX) $(CXX_CFLAGS) $(SRC) -o $(EXEC)
+	$(CXX) $(CXX_CFLAGS) $(SRC) -o $(EXEC) $(LIB_FLAGS)
 	
 genparser: byacc
 	cd src/parse; flex -olexer.cpp blog.flex; ../../$(YACCDIR)/yacc -v -d -o parser.cpp blog.yacc

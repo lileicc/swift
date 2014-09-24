@@ -25,7 +25,7 @@ public:
   Semant();
   ~Semant();
   void process(absyn::BlogProgram* prog);
-  ir::BlogModel* getModel();
+  std::shared_ptr<ir::BlogModel> getModel();
   bool Okay();
 private:
   /**
@@ -48,6 +48,16 @@ private:
   std::shared_ptr<ir::Expr> transExpr(absyn::Expr* expr);
 
   std::shared_ptr<ir::IfThen> transIfThen(absyn::IfExpr* expr);
+
+  /*
+    In order to support multi-case expression
+    this function to verify if e could be a valid *FROM* argument in the map of the case expr
+    this function will return -1 if it is not valid
+    other wise it will return the total number of elements contained in e
+    i.e.  [true,false] --> 2   [1.0,"hello"] --> -1  [Blue,Red,Green] --> 3
+          [1,"hello"] --> -1 ([..] is an Array, the elements should have the same type)
+  */
+  int checkBranchArg(std::shared_ptr<ir::Expr> e);
 
   std::shared_ptr<ir::Branch> transBranch(absyn::CaseExpr* expr);
 
@@ -167,6 +177,17 @@ private:
   // Check whether an expr is : #TypeDomain
   static bool isCardAll(std::shared_ptr<ir::Expr> ptr);
 
+  // Check whether type A is a subType of type B
+  bool isSubType(const ir::Ty* A, const ir::Ty* B);
+  
+  /* 
+    return the super type of A and B
+      -> if A is subtype of B, return B;
+      -> if B is subtype of A, return A;
+      -> otherwise, return NULL
+  */
+  const ir::Ty* getSuperType(const ir::Ty*A, const ir::Ty* B);
+
   void error(int line, int col, std::string info);
   void warning(int line, int col, std::string info);
 
@@ -174,7 +195,7 @@ private:
   fabrica::Functory functory;
   fabrica::PreDeclFactory predeclFactory;
   msg::ErrorMsg errorMsg;
-  ir::BlogModel* model;
+  std::shared_ptr<ir::BlogModel> model;
 
   //stack used to store local variable
   std::map<std::string, std::stack<std::shared_ptr<ir::VarDecl> > > local_var;

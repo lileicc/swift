@@ -31,15 +31,56 @@ const GammaDistrDecl PreDeclList::gammaDistr =
 const GaussianDistrDecl PreDeclList::gaussianDistr =
     GaussianDistrDecl();
 
+const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
+    MultivarGaussianDistrDecl();
+
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
 
+const UniformVectorDistrDecl PreDeclList::uniformVectorDistr =
+    UniformVectorDistrDecl();
 
 // PreDecl Functions
-
+const LoadRealMatrixFuncDecl PreDeclList::loadRealMatrixFuncDecl =
+    LoadRealMatrixFuncDecl();
 const PrevFuncDecl PreDeclList::prevFuncDecl = 
     PrevFuncDecl();
+const ToIntFuncDecl PreDeclList::toIntFuncDecl =
+    ToIntFuncDecl();
+const ToRealFuncDecl PreDeclList::toRealFuncDecl =
+    ToRealFuncDecl();
 
+// Functions using Builtin Function Interface
+
+// general math function: both for real and matrix
+const std::vector<std::string> PreDeclList::mathFuncList{ "abs", "exp", "log", "sqrt", "round", "floor", "ceil", "tan", "sin", "cos" };
+// function from matrix to real
+const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "norm", "cond"};
+const MatrixRealFuncDecl PreDeclList::asScalarFuncDecl =
+    MatrixRealFuncDecl("as_scalar");
+// function from matrix to matrix
+const std::vector<std::string> PreDeclList::matMatFuncList{ "trans", "transpose", "chol", "inv", "pinv", "sum", "diag" };
+// matrix initialization functions
+const std::vector<std::string> PreDeclList::matInitFuncList{ "eye", "zeros", "ones" };
+// matrix stacking functions
+const std::vector<std::string> PreDeclList::matStackFuncList{ "vstack", "hstack" };
+
+std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::initFuncStore() {
+  std::map<std::string, std::shared_ptr<PreDecl>> ret;
+  for (auto& s : mathFuncList)
+    ret[s] = std::make_shared<MathFuncDecl>(s);
+  for (auto& s : matRealFuncList)
+    ret[s] = std::make_shared<MatrixRealFuncDecl>(s);
+  for (auto& s : matMatFuncList)
+    ret[s] = std::make_shared<MatrixMatrixFuncDecl>(s);
+  for (auto& s : matInitFuncList)
+    ret[s] = std::make_shared<MatrixInitFuncDecl>(s);
+  for (auto& s : matStackFuncList)
+    ret[s] = std::make_shared<MatrixStackFuncDecl>(s);
+  return ret;
+}
+
+const std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::funcStore = PreDeclList::initFuncStore();
 
 PreDeclList::PreDeclList() {
 }
