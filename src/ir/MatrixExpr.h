@@ -17,8 +17,8 @@ public:
   bool isColVec();
 
 private:
-  bool flag_rowvec;
   bool flag_colvec;
+  bool flag_rowvec;
 };
 
 }

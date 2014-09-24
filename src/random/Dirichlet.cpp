@@ -34,9 +34,9 @@ void Dirichlet::init(std::vector<double> alpha) {
   log_coef += std::lgamma(alpha_sum);
 }
 
-void Dirichlet::init(mat alpha) {
-  std::vector<double> vec;
-  for (int i = 0; i < alpha.n_elem; ++ i)
+void Dirichlet::init(arma::mat alpha) {
+  std::vector<double> vec(alpha.n_elem);
+  for (size_t i = 0; i < alpha.n_elem; ++ i)
     vec.push_back(alpha[i]);
   init(vec);
 }
@@ -52,7 +52,7 @@ void Dirichlet::init(int n_param, ...) {
   init(vec_args);
 }
 
-mat Dirichlet::gen() {
+arma::mat Dirichlet::gen() {
   int i = 0;
   double sum = 0;
   for(auto dist: dist_alpha) {
@@ -62,7 +62,7 @@ mat Dirichlet::gen() {
   return arr;
 }
 
-double Dirichlet::likeli(const mat& x) {
+double Dirichlet::likeli(const arma::mat& x) {
   if(x.n_elem != alpha.size()) return 0;
   double ret = coef;
   for(size_t i = 0; i < alpha.size(); ++ i)
@@ -70,7 +70,7 @@ double Dirichlet::likeli(const mat& x) {
   return ret;
 }
 
-double Dirichlet::loglikeli(const mat& x) {
+double Dirichlet::loglikeli(const arma::mat& x) {
   if(x.n_elem != alpha.size()) return - INFINITY;
   double ret = log_coef;
   for(size_t i = 0; i < alpha.size(); ++ i)

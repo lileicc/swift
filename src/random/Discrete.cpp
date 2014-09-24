@@ -34,7 +34,7 @@ void Discrete::init(std::vector<double> wei) {
 
 void Discrete::init(mat wei) {
   std::vector<double> w;
-  for (int i = 0; i < wei.n_elem; ++ i)
+  for (size_t i = 0; i < wei.n_elem; ++ i)
     w.push_back(wei[i]);
   init(w);
 }
