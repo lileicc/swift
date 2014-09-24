@@ -33,12 +33,21 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::uniformVectorDistr;
 
   // Predecl Functions
+  decls[predecl::PreDeclList::loadRealMatrixFuncDecl.getName()] =
+    &predecl::PreDeclList::loadRealMatrixFuncDecl;
   decls[predecl::PreDeclList::prevFuncDecl.getName()] =
     &predecl::PreDeclList::prevFuncDecl;
+  decls[predecl::PreDeclList::toIntFuncDecl.getName()] =
+    &predecl::PreDeclList::toIntFuncDecl;
+  decls[predecl::PreDeclList::toRealFuncDecl.getName()] =
+    &predecl::PreDeclList::toRealFuncDecl;
 
   // Add Builtin Function using Function Interface
   for (auto& s : predecl::PreDeclList::funcStore)
     decls[s.first] = s.second.get();
+  // Special Matrix Builtin Function
+  decls[predecl::PreDeclList::asScalarFuncDecl.getName()] =
+    &predecl::PreDeclList::asScalarFuncDecl;
 }
 
 PreDeclFactory::~PreDeclFactory() {

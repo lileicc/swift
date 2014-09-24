@@ -15,6 +15,7 @@
 #include <set>
 
 #include "../ir/IRHeader.h"
+#include "../predecl/PreDeclList.h"
 
 namespace swift {
 namespace semant {
@@ -1324,16 +1325,11 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
               The computation result of the body is a RealMatrix.
               However, the declaration of the function is Real.
               We assume that the return value will always become a 1x1 RealMatrix. A warnning will be raised.
-              e.g. Real fun() = A * B ===> Real fun() = (A * B)[0]
-            */ 
-            auto mat = std::make_shared<ir::OprExpr>(ir::IRConstant::SUB);
-            mat->setTyp(lookupTy(ir::IRConstString::DOUBLE));
-            mat->setRandom(body->isRandom());
-            mat->addArg(body);
-            auto lit = std::make_shared<ir::IntLiteral>(0);
-            lit->setRandom(false);
-            lit->setTyp(lookupTy(ir::IRConstString::INT));
-            mat->addArg(lit);
+              e.g. Real fun() = A * B ===> Real fun() = as_scalar(A * B)
+            */
+            std::vector<std::shared_ptr<ir::Expr> > args;
+            args.push_back(body);
+            auto mat = predecl::PreDeclList::asScalarFuncDecl.getNew(args, &tyFactory);
             fun->setBody(mat);
             warning(fd->line, fd->col, "The return type of the body is RealMatrix. But the Declared Type is Real! The first element of the result matrix will be returned.");
             special_case = true;

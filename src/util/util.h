@@ -13,9 +13,35 @@
 #include <cmath>
 #include <vector>
 #include <functional>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <cstdio>
 #include "../random/Multinomial.h"
 
 namespace swift {
+
+// Type Conversion Functions
+//  convert to Int
+template<class T>
+inline int toInt(const T& a) {return (int) a;}
+template<>
+inline int toInt<std::string>(const std::string& a) {
+  int ret = 0;
+  std::stringstream ss(a);
+  ss >> ret;
+  return ret;
+}
+//   convert to Double
+template<class T>
+inline double toReal(const T& a) { return (double)a; }
+template<>
+inline double toReal<std::string>(const std::string& a) {
+  double ret = 0;
+  std::stringstream ss(a);
+  ss >> ret;
+  return ret;
+}
 
 // computing log( exp(a) + exp(b) )
 // NOTE this function cannot handle infinity

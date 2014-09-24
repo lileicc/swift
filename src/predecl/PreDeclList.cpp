@@ -41,16 +41,23 @@ const UniformVectorDistrDecl PreDeclList::uniformVectorDistr =
     UniformVectorDistrDecl();
 
 // PreDecl Functions
-
+const LoadRealMatrixFuncDecl PreDeclList::loadRealMatrixFuncDecl =
+    LoadRealMatrixFuncDecl();
 const PrevFuncDecl PreDeclList::prevFuncDecl = 
     PrevFuncDecl();
+const ToIntFuncDecl PreDeclList::toIntFuncDecl =
+    ToIntFuncDecl();
+const ToRealFuncDecl PreDeclList::toRealFuncDecl =
+    ToRealFuncDecl();
 
 // Functions using Builtin Function Interface
 
 // general math function: both for real and matrix
 const std::vector<std::string> PreDeclList::mathFuncList{ "abs", "exp", "log", "sqrt", "round", "floor", "ceil", "tan", "sin", "cos" };
 // function from matrix to real
-const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "norm", "cond", "as_scalar" };
+const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "norm", "cond"};
+const MatrixRealFuncDecl PreDeclList::asScalarFuncDecl =
+    MatrixRealFuncDecl("as_scalar");
 // function from matrix to matrix
 const std::vector<std::string> PreDeclList::matMatFuncList{ "trans", "transpose", "chol", "inv", "pinv", "sum", "diag" };
 // matrix initialization functions

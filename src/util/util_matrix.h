@@ -10,11 +10,17 @@
 
 #pragma once
 
+#include <iostream>
+#include <cstdio>
 #include <cstring>
+#include <cstdlib>
 #include <cmath>
 #include <vector>
+#include <string>
+#include <unordered_map>
+#include <memory>
 #include <functional>
-#include <iostream>
+#include <cstdarg>
 
 #include "armadillo"
 
@@ -66,5 +72,29 @@ mat vstack(int n_param, ...) {
   }
   va_end(args);
   return ret;
+}
+
+
+mat loadRealMatrix(std::string filename, int x1 = -1, int x2 = -1, int y1 = -1, int y2 = -1) {
+  static std::unordered_map<std::string, std::shared_ptr<mat> > matStore;
+  std::shared_ptr<mat> ret;
+  if (matStore.count(filename) > 0) {
+    ret = matStore[filename];
+  }
+  else {
+    ret = std::make_shared<mat>();
+    if (!ret->load(filename.c_str())) {
+      std::cerr << "[ Run-Time Error ] >> Matrix Loading Failure on < " + filename + " >!"<<std::endl;
+      std::exit(0);
+    }
+    matStore[filename] = ret;
+  }
+  if (x1 < 0)
+    return *(ret.get());
+  if (x2 < 0)
+    return ret->row(x1);
+  if (y1 < 0 || y2 < 0)
+    return ret->rows(x1, x2);
+  return ret->submat(x1, y1, x2, y2);
 }
 }
