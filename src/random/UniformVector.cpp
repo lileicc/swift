@@ -29,7 +29,7 @@ void UniformVector::init(arma::mat lo, arma::mat hi) {
     a.push_back(lo[i]);
     b.push_back(hi[i]);
   }
-  retvec.reshape(n, 1);
+  retvec.set_size(n, 1);
 }
 
 void UniformVector::init(arma::mat box) {
@@ -42,7 +42,7 @@ void UniformVector::init(arma::mat box) {
     a.push_back(box(i,0));
     b.push_back(box(i,1));
   }
-  retvec.reshape(n, 1);
+  retvec.set_size(n, 1);
 }
 
 arma::mat UniformVector::gen() {
