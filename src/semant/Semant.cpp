@@ -615,11 +615,27 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
       return NULL;
     return arg[0]->getTyp();
   case IRConstant::PLUS:
+    // Special case for positive sign: i.e. +1
+    if (arg.size() == 1) {
+      if (arg[0]->getTyp() == lookupTy(IRConstString::INT)
+        || arg[0]->getTyp() == lookupTy(IRConstString::DOUBLE))
+        return arg[0]->getTyp();
+      else
+        return NULL;
+    }
     // Special Case for String Concatenation
     if (arg[0]->getTyp() == arg[1]->getTyp()
         && arg[0]->getTyp() == lookupTy(IRConstString::STRING))
       return arg[0]->getTyp();
   case IRConstant::MINUS:
+    // Special case for minus sign: i.e. -1.0
+    if (arg.size() == 1) {
+      if (arg[0]->getTyp() == lookupTy(IRConstString::INT)
+        || arg[0]->getTyp() == lookupTy(IRConstString::DOUBLE))
+        return arg[0]->getTyp();
+      else
+        return NULL;
+    }
   case IRConstant::MUL:
   case IRConstant::DIV:
     // Special Check for TimeStep (PLUS, MINUS, MUL, DIV)
@@ -728,6 +744,9 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
 
   // Unary Operator
   if (ret->getOp() == ir::IRConstant::NOT) {
+    ret->addArg(transExpr(expr->getRight()));
+  } else 
+  if ((ret->getOp() == ir::IRConstant::PLUS || ret->getOp() == ir::IRConstant::MINUS) && expr->getLeft() == NULL) {
     ret->addArg(transExpr(expr->getRight()));
   } else {
     ret->addArg(transExpr(expr->getLeft()));

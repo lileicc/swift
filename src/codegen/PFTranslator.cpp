@@ -1163,10 +1163,12 @@ code::Expr* PFTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       break;
   }
   // Unary Operator: Left is nullptr
-  if (kind == code::OpKind::UO_NEG)
-    return new code::BinaryOperator(nullptr, args[0], kind);
+  if (kind == code::OpKind::UO_NEG
+    || (kind == code::OpKind::BO_PLUS && args.size() == 1)
+    || (kind == code::OpKind::BO_MINUS && args.size() == 1))
+    return new code::BinaryOperator(NULL, args[0], kind);
   // Normal Operator
-  return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : nullptr,
+  return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : NULL,
                                   kind);
 }
 
