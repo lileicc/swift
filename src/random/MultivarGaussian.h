@@ -10,25 +10,24 @@
 #include "SwiftDistribution.h"
 
 #include "armadillo"
-using namespace arma;
 
 namespace swift {
 namespace random {
 
-class MultivarGaussian: public swift::random::SwiftDistribution<mat> {
+class MultivarGaussian: public swift::random::SwiftDistribution<arma::mat> {
 public:
   MultivarGaussian();
   virtual ~MultivarGaussian();
-  void init(mat mean, mat cov);
-  mat gen();
-  double likeli(const mat& x);
-  double loglikeli(const mat& x);
+  void init(arma::mat mean, arma::mat cov);
+  arma::mat gen();
+  double likeli(const arma::mat& x);
+  double loglikeli(const arma::mat& x);
 private:
   std::normal_distribution<double> dist;
-  mat mean, cov;
-  mat A; // transpose of Cholesky Decomposition: A * A' = cov
-  mat c; // a temporary colvec used to compute samples : sample = mean + A * c
-  mat inv_cov; // inverse of the covariance matrix to compute cpd
+  arma::mat mean, cov;
+  arma::mat A; // transpose of Cholesky Decomposition: A * A' = cov
+  arma::mat c; // a temporary colvec used to compute samples : sample = mean + A * c
+  arma::mat inv_cov; // inverse of the covariance matrix to compute cpd
   int k; // dimension of the vector
   double det_cov, coef, log_coef;
 };

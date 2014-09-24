@@ -12,25 +12,24 @@
 #include "SwiftDistribution.h"
 
 #include "armadillo"
-using namespace arma;
 
 namespace swift {
 namespace random {
 
-class Dirichlet: public swift::random::SwiftDistribution<mat> {
+class Dirichlet: public swift::random::SwiftDistribution<arma::mat> {
 public:
   Dirichlet();
   virtual ~Dirichlet();
-  void init(mat alpha);
+  void init(arma::mat alpha);
   void init(std::vector<double> alpha);
   void init(int n_param, ...);
-  mat gen();
-  double likeli(const mat& x);
-  double loglikeli(const mat& x);
+  arma::mat gen();
+  double likeli(const arma::mat& x);
+  double loglikeli(const arma::mat& x);
 private:
   std::vector<std::gamma_distribution<double> > dist_alpha;
   std::vector<double> alpha;
-  mat arr;
+  arma::mat arr;
   double coef, log_coef;
 };
 

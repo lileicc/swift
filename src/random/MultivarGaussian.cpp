@@ -18,7 +18,7 @@ MultivarGaussian::MultivarGaussian() {
 MultivarGaussian::~MultivarGaussian() {
 }
 
-void MultivarGaussian::init(mat _mean, mat _cov) {
+void MultivarGaussian::init(arma::mat _mean, arma::mat _cov) {
   mean = _mean;
   cov = _cov;
   // Dimension Check
@@ -38,19 +38,19 @@ void MultivarGaussian::init(mat _mean, mat _cov) {
   log_coef = -k * 0.5 * std::log(2.0 * PI) - 0.5 * std::log(det_cov);
 }
 
-mat MultivarGaussian::gen() {
+arma::mat MultivarGaussian::gen() {
   c.imbue([&]() { return dist(engine); });
   return mean + A * c;
 }
 
-double MultivarGaussian::likeli(const mat& x) {
-  mat v(x - mean);
+double MultivarGaussian::likeli(const arma::mat& x) {
+  arma::mat v(x - mean);
   double rat = as_scalar(trans(v) * inv_cov * v);
   return coef * std::exp(-0.5 * rat);
 }
 
-double MultivarGaussian::loglikeli(const mat& x) {
-  mat v(x - mean);
+double MultivarGaussian::loglikeli(const arma::mat& x) {
+  arma::mat v(x - mean);
   double rat = as_scalar(trans(v) * inv_cov * v);
   return log_coef - 0.5 * rat;
 }
