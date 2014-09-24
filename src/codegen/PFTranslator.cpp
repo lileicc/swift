@@ -13,7 +13,7 @@
 namespace swift {
 namespace codegen {
 
-const int PFTranslator::TOTAL_NUM_PARTICLES = 50000;
+const int PFTranslator::TOTAL_NUM_PARTICLES = Translator::TOTAL_NUM_SAMPLES;
 
 const std::string PFTranslator::StaticClsName = "BLOG_Static_State";
 const std::string PFTranslator::TemporalClsName = "BLOG_Temporal_State";
