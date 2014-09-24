@@ -98,12 +98,17 @@ public:
   void print() {
     if (isLogarithm) sum_wei = exp(sum_wei);
     mat mean = sum / sum_wei;
-    mat var = 0;
-    for (auto& it : table)
-      var += (isLogarithm ? exp(it.second) : it.second) * ((it.first - mean) * trans(it.first - mean));
+    mat cov = mean, var = mean;
+    cov.zeros(); var.zeros();
+    for (auto& it : table) {
+      cov += (isLogarithm ? exp(it.second) : it.second) * ((it.first - mean) * trans(it.first - mean));
+      var += (isLogarithm ? exp(it.second) : it.second) * ((it.first - mean) % (it.first - mean));
+    }
+    cov /= sum_wei;
     var /= sum_wei;
     mean.print("Mean : ");
-    var.print("Variance : ");
+    var.print( "Var  : ");
+    cov.print( "Cov  : ");
   }
 
   void debug() {
