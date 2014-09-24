@@ -20,6 +20,10 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "~"; // complement
   case OpKind::UO_NEG:
     return "!"; // negate
+  case OpKind::UO_PLUS:
+    return "+"; // unary plus
+  case OpKind::UO_MINUS:
+    return "-"; // unary minus
   case OpKind::UO_INC:
     return "++"; // increment
   case OpKind::UO_DEC:
@@ -117,6 +121,8 @@ std::pair<int, int> CPPPrinter::OpPrec(code::Expr* expr) {
       return std::make_pair<int, int>(1,0);
   case OpKind::UO_CMPT:
   case OpKind::UO_NEG:
+  case OpKind::UO_PLUS:
+  case OpKind::UO_MINUS:
   case OpKind::UO_ADDR:
   case OpKind::UO_DEREF:
     return std::make_pair<int, int>(2,1);

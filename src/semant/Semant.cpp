@@ -713,7 +713,10 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
       || (ret->getOp() == ir::IRConstant::NOT
           && (expr->getLeft() != NULL || expr->getRight() == NULL))
       || (ret->getOp() != ir::IRConstant::NOT
-          && (expr->getLeft() == NULL || expr->getRight() == NULL))) {
+          && expr->getRight() == NULL)
+      || (ret->getOp() != ir::IRConstant::NOT
+          && ret->getOp() != ir::IRConstant::PLUS && ret->getOp() != ir::IRConstant::MINUS
+          && expr->getLeft() == NULL)) {
     error(expr->line, expr->col, "Invalid/Incomplete Operator for OprExpr!");
     return ret;
   }

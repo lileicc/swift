@@ -1106,10 +1106,16 @@ code::Expr* PFTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       kind = code::OpKind::BO_GT;
       break;
     case ir::IRConstant::PLUS:
-      kind = code::OpKind::BO_PLUS;
+      if (args.size() == 1)
+        kind = code::OpKind::UO_PLUS;
+      else
+        kind = code::OpKind::BO_PLUS;
       break;
     case ir::IRConstant::MINUS:
-      kind = code::OpKind::BO_MINUS;
+      if (args.size() == 1)
+        kind = code::OpKind::UO_MINUS;
+      else
+        kind = code::OpKind::BO_MINUS;
       break;
     case ir::IRConstant::MUL:
       kind = code::OpKind::BO_MUL;
@@ -1163,9 +1169,7 @@ code::Expr* PFTranslator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       break;
   }
   // Unary Operator: Left is nullptr
-  if (kind == code::OpKind::UO_NEG
-    || (kind == code::OpKind::BO_PLUS && args.size() == 1)
-    || (kind == code::OpKind::BO_MINUS && args.size() == 1))
+  if (kind == code::OpKind::UO_NEG || kind == code::OpKind::UO_PLUS || kind == code::OpKind::UO_MINUS)
     return new code::BinaryOperator(NULL, args[0], kind);
   // Normal Operator
   return new code::BinaryOperator(args[0], args.size() > 1 ? args[1] : NULL,
