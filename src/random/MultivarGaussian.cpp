@@ -18,9 +18,9 @@ MultivarGaussian::MultivarGaussian() {
 MultivarGaussian::~MultivarGaussian() {
 }
 
-void MultivarGaussian::init(mat mean, mat cov) {
-  this->mean = mean;
-  this->cov = cov;
+void MultivarGaussian::init(mat _mean, mat _cov) {
+  mean = _mean;
+  cov = _cov;
   // Dimension Check
   if (mean.n_rows == 1)
     mean = trans(mean);
