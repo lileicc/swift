@@ -9,6 +9,7 @@
 
 #include "Translator.h"
 #include <memory>
+#include <set>
 
 namespace swift {
 namespace codegen {
@@ -298,6 +299,12 @@ protected:
       bool isVarDefined = false, bool isLess = true);
   static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
   static bool isTemporalType(code::Type ty);
+
+  // Utils for Liu-West Filter
+  // Record all the random function names accociated with at least *ONE* observation
+  static std::set<std::string> obsFuncStore;
+  static const std::string DOUBLE_PERTURB_FUN_NAME;
+  static const std::string MATRIX_PERTURB_FUN_NAME;
 };
 
 } /* namespace codegen */

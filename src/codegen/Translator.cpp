@@ -124,6 +124,8 @@ Translator::~Translator() {
 }
 
 void Translator::translate(std::shared_ptr<ir::BlogModel> model) {
+  this->model = model;
+
   // Special Check for Matrix Usage
   if (model->isUseMatrix())
     prog->addOption("matrix");

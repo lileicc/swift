@@ -6,6 +6,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include "../predecl/PreDecl.h"
 
 #include "PFTranslator.h"
@@ -91,6 +92,11 @@ bool PFTranslator::isTemporalType(code::Type ty) {
   return ty.getName() == ir::IRConstString::TIMESTEP;
 }
 
+// Special Utils for Liu-West Filter
+std::set<std::string> PFTranslator::obsFuncStore = std::set<std::string>();
+const std::string PFTranslator::DOUBLE_PERTURB_FUN_NAME = "__perturb";
+const std::string PFTranslator::MATRIX_PERTURB_FUN_NAME = "__perturb_matrix";
+
 /////////////// END of Util Functions ///////////////////
 
 PFTranslator::PFTranslator() {
@@ -101,6 +107,8 @@ PFTranslator::PFTranslator() {
 }
 
 void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
+  this->model = model;
+
   // Special Check for Matrix Usage
   if (model->isUseMatrix())
     prog->addOption("matrix");
@@ -221,6 +229,7 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
         weight[cur_loop]=local_weight;
       }
       resample(...);
+      (optional) [pertubations ... ]
     }
   */
   // body of cur_t for-loop
@@ -271,7 +280,48 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
       new code::Identifier(DEPEND_NUM_VAE_NAME), new code::Identifier(PARTICLE_NUM_VAR_NAME)}),
     std::vector<code::Expr*>({
       new code::Identifier(GLOBAL_WEIGHT_VARNAME), new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
-      new code::Identifier(TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_BACKUP_VAR_NAME)})));
+      new code::Identifier(TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_BACKUP_VAR_NAME)}))
+  );
+
+  // Perturbation for Liu-West Filter
+  for (auto& func : model->getRandFuncs()) {
+    if (func->isTemporal() || obsFuncStore.count(func->getName()) > 0) continue;
+    std::string perturb_fun = "";
+    if (func->getRetTyp()->getTyp() == ir::IRConstant::DOUBLE)
+      perturb_fun = DOUBLE_PERTURB_FUN_NAME;
+    else
+    if (func->getRetTyp()->getTyp() == ir::IRConstant::MATRIX)
+      perturb_fun = MATRIX_PERTURB_FUN_NAME;
+    if (perturb_fun.size() == 0) continue; // we can only perturb matrix/double variables
+
+    // TODO: currently perturbation is a hack implementation!!!!!  @Issue
+    if (func->argSize() > 2) {
+      std::cerr << "[PFTranslator] warning: currently perturbation for liu-west filter \
+                   only supports random variables with no more than 2 arguments.  " <<
+                   "< " << func->getName() << " >" << std::endl;
+      continue;
+    }
+    bool pb_ok = true; 
+    for (size_t i = 0; i < func->argSize() && pb_ok; ++i) {
+      auto ty = dynamic_cast<const ir::NameTy*>(func->getArg(i)->getTyp());
+      if (ty == NULL || ty->getRefer()->getNumberStmtSize() > 0) {
+        pb_ok = false;
+        std::cerr << "[PFTranslator] warning: currently perturbation for liu-west filter \
+                                        only supports random variables with Name Type without number statement. " <<
+                                        "< " << func->getName() << " ( arg#"<< i << ") >" << std::endl;
+        break;
+      }
+    }
+    if (!pb_ok) continue;
+
+    // Call Perturbation Method
+    if (func->argSize() > 0)
+      perturb_fun += "_dim" + std::to_string(func->argSize());
+    body_time->addStmt(new code::CallExpr(
+      new code::Identifier(perturb_fun),
+      std::vector<code::Expr*>({ new code::Identifier(func->getName()) }))
+    );
+  }
   return fun;
   //TODO adding other algorithms
 }
@@ -1472,6 +1522,14 @@ void PFTranslator::transEvidence(code::CompoundStmt* fun,
   // check whether left is a function application variable
   std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
       ir::FunctionCall>(left);
+
+  // Update the random functions associated with observations
+  if (leftexp != nullptr) {
+    if (leftexp->getRefer()->isRand()) {
+      obsFuncStore.insert(leftexp->getRefer()->getName());
+    }
+  }
+
   if (leftexp && transFuncApp) {
     // left side of the evidence is a function application
     std::string blogfunname = leftexp->getRefer()->getName();  // the function name in blog model

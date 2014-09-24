@@ -37,6 +37,7 @@ public:
   code::Code* getResult();
 
 protected:
+  std::shared_ptr<ir::BlogModel> model;
 
   /**
    * declare a named type
