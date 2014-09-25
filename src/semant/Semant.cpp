@@ -1502,6 +1502,20 @@ void Semant::transEvidence(absyn::Evidence* ne) {
         "Evidence format not correct! We assume < FunctionCall | #TypeName = Non-Random Expr >!");
     return; // TODO: build internal function to avoid this
   }
+  // Temporal Evidence Checking
+  // TODO: currently we only allowed temporal evidence with timestep = TS_Literal
+  //    --> to support arbitrary timestep argument in future
+  if (std::dynamic_pointer_cast<ir::FunctionCall>(lhs) != nullptr) {
+    auto func = std::dynamic_pointer_cast<ir::FunctionCall>(lhs);
+    if (func->isTemporal()) {
+      if (std::dynamic_pointer_cast<ir::TimestepLiteral>(func->getTemporalArg()) == nullptr) {
+        error(ne->line, ne->col,
+          "Illegal Timestep Argument in the left hand side!\
+           We currently only accept fixed timestep as argument in temporal evidence.");
+        return ;
+      }
+    }
+  }
   model->addEvidence(
       std::make_shared<ir::Evidence>(lhs, rhs));
 }
@@ -1514,8 +1528,19 @@ void Semant::transQuery(absyn::Query* nq) {
     TODO: check if we need to build a internal Void Function Call to represent this expr
       */
     model->addQuery(std::make_shared<ir::Query>(ptr, true));
-  } else // Special Case: function call
+  }
+  else {// Special Case: function call
+    auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(ptr);
+    if (fun->isTemporal()) {
+      if (std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg()) == nullptr) {
+        error(nq->line, nq->col,
+          "Illegal Timestep Argument in query expression!\
+                     We currently only accept fixed timestep as argument for temporal variables.");
+        return;
+      }
+    }
     model->addQuery(std::make_shared<ir::Query>(ptr));
+  }
 }
 
 const ir::Ty* Semant::transTy(const absyn::Ty& typ) {

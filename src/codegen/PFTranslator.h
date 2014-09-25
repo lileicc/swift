@@ -72,6 +72,24 @@ protected:
   static const std::string PF_RESAMPLE_FUN_NAME;
   static const std::string PF_COPY_PTR_FUN_NAME;
 
+  // Variable Name to store all evidences
+  static const std::string TMP_EVI_STORE_NAME;
+  static const code::Type TMP_EVI_STORE_TYPE;
+  static const std::string TMP_EVI_INIT_FUNC_NAME;
+  code::FunctionDecl* tempEvidenceInit;
+  // Variable Name to store all queries
+  static const std::string TMP_QUERY_STORE_NAME;
+  static const code::Type TMP_QUERY_STORE_TYPE;
+  static const std::string TMP_QUERY_INIT_FUNC_NAME;
+  code::FunctionDecl* tempQueryInit;
+  // Variable Name to store all prints
+  static const std::string TMP_PRINT_STORE_NAME;
+  static const code::Type TMP_PRINT_STORE_TYPE;
+  static const std::string TMP_PRINT_INIT_FUNC_NAME;
+  code::FunctionDecl* tempPrintInit;
+  // Util Method to Check whether the function pointer is null
+  static const std::string FUNC_EMPTY_METHOD_NAME;
+
   /**
    * declare a named type
    * it will create class definition for this type, and one field "name" (std::string)
@@ -228,7 +246,8 @@ protected:
    *  @param context within which the translated statment will reside
    *  @param evid    ir evidence declaration
    */
-  void transEvidence(code::CompoundStmt* fun,
+  void transEvidence(std::vector<std::vector<code::Stmt*> >&setterFuncs,
+      std::vector<std::vector<code::Stmt*> >&likeliFuncs,
       std::shared_ptr<ir::Evidence> evid, bool transFuncApp = true);
 
   /**
@@ -243,8 +262,9 @@ protected:
   /**
    * translate n-th query
    */
-  void transQuery(code::CompoundStmt* cmp, std::shared_ptr<ir::Query> qr,
-      int n);
+  void transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs,
+      std::vector<std::vector<code::Stmt*> >& printFuncs, 
+      std::shared_ptr<ir::Query> qr, int n);
   /**
    * create reference to blog function value
    */
@@ -299,6 +319,7 @@ protected:
       bool isVarDefined = false, bool isLess = true);
   static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
   static bool isTemporalType(code::Type ty);
+  static code::Expr* tempTableEntryRefer(std::string table, int ts = -1, bool emptyMethod = false);
 
   // Utils for Liu-West Filter
   // Record all the random function names accociated with at least *ONE* observation
