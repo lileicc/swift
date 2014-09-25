@@ -100,7 +100,9 @@ public:
   }
   ;
 
-  void print() {
+  void print(std::string str = std::string()) {
+    if(str.size() > 0)
+      printf(">> query : %s\n", str.c_str());
     if (isLogarithm) sum_wei = exp(sum_wei);
     mat mean = sum / sum_wei;
     mat cov = mean, var = mean;
@@ -114,6 +116,8 @@ public:
     mean.print("Mean : ");
     var.print( "Var  : ");
     cov.print( "Cov  : ");
+    
+    clear();
   }
 
   void debug() {

@@ -21,6 +21,7 @@ template<class T>
 class Hist {
 private:
   std::map<T, double> table;
+  std::map<T, double> normmap;
   const bool isLogarithm;
 public:
   void clear() {
@@ -80,8 +81,8 @@ public:
     return w;
   }
 
-  std::map<T, double> getNormalizedResult() {
-    std::map<T, double> normmap;
+  std::map<T, double>& getNormalizedResult() {
+    normmap.clear();
     double w = getTotalWeight();
     for (auto & it : table) {
       if (isLogarithm)
@@ -93,11 +94,15 @@ public:
   }
   ;
 
-  void print() {
-    for (auto& it : getNormalizedResult()) {
+  void print(std::string str = std::string()) {
+    if(str.size() > 0)
+      printf(">> query : %s\n", str.c_str());
+    getNormalizedResult();
+    for (auto& it : normmap) {
       printf("%s -> %s\n", std::to_string(it.first).c_str(),
           std::to_string(it.second).c_str());
     }
+    clear();
   }
 
   void debug() {
@@ -222,7 +227,9 @@ public:
     return sum_wei;
   }
 
-  void print() {
+  void print(std::string str = std::string()) {
+    if(str.size() > 0)
+      printf(">> query : %s\n", str.c_str());
     if (isLogarithm) sum_wei = std::exp(sum_wei);
     double mean = sum / sum_wei;
     double mean_sqr = sum_sqr / sum_wei;
@@ -239,6 +246,7 @@ public:
       printf("%c%lf, %lf] -> %.5lf\n", (i == 0 ? '[' : '('), (i == 0 ? left_bound : cur), (i == n - 1 ? right_bound : cur + det), bucket[i]);
       cur += det;
     }
+    clear();
   }
 
   void debug() {
