@@ -21,6 +21,7 @@
 #include "ToIntFuncDecl.h"
 #include "ToRealFuncDecl.h"
 #include "ToMatrixFuncDecl.h"
+#include "ToStringFuncDecl.h"
 // BuiltinFunction Interface
 #include "MathFuncDecl.h"
 #include "MatrixConstructFuncDecl.h"
@@ -65,6 +66,7 @@ public:
   static const ToIntFuncDecl toIntFuncDecl;
   static const ToRealFuncDecl toRealFuncDecl;
   static const ToMatrixFuncDecl toMatrixFuncDecl;
+  static const ToStringFuncDecl toStringFuncDecl;
   
   // Functions using Builtin Function Interface
   static const std::map<std::string, std::shared_ptr<PreDecl>> funcStore; // used to store builtin functions using function interface

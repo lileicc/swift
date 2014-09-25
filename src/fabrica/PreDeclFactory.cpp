@@ -47,6 +47,8 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::toRealFuncDecl;
   decls[predecl::PreDeclList::toMatrixFuncDecl.getName()] =
     &predecl::PreDeclList::toMatrixFuncDecl;
+  decls[predecl::PreDeclList::toStringFuncDecl.getName()] =
+    &predecl::PreDeclList::toStringFuncDecl;
 
   // Special Commonly used Predecl Functions
   decls[predecl::PreDeclList::onesFuncDecl.getName()] =

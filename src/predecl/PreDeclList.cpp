@@ -57,6 +57,8 @@ const ToRealFuncDecl PreDeclList::toRealFuncDecl =
     ToRealFuncDecl();
 const ToMatrixFuncDecl PreDeclList::toMatrixFuncDecl =
     ToMatrixFuncDecl();
+const ToStringFuncDecl PreDeclList::toStringFuncDecl =
+    ToStringFuncDecl();
 
 // Functions using Builtin Function Interface
 
