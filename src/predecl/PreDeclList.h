@@ -22,9 +22,10 @@
 #include "ToRealFuncDecl.h"
 // BuiltinFunction Interface
 #include "MathFuncDecl.h"
+#include "MatrixConstructFuncDecl.h"
 #include "MatrixMatrixFuncDecl.h"
 #include "MatrixRealFuncDecl.h"
-#include "MatrixInitFuncDecl.h"
+#include "MatrixIntFuncDecl.h"
 #include "MatrixStackFuncDecl.h"
 #include "MatrixSubsetFuncDecl.h"
 #include "SetFuncDecl.h"
@@ -66,9 +67,10 @@ public:
   // Functions using Builtin Function Interface
   static const std::map<std::string, std::shared_ptr<PreDecl>> funcStore; // used to store builtin functions using function interface
   static const std::vector<std::string> mathFuncList;
+  static const std::vector<std::string> matConstructFuncList;
   static const std::vector<std::string> matRealFuncList;
+  static const std::vector<std::string> matIntFuncList;
   static const std::vector<std::string> matMatFuncList;
-  static const std::vector<std::string> matInitFuncList;
   static const std::vector<std::string> matStackFuncList;
   static const MatrixRealFuncDecl asScalarFuncDecl; // Special Usage of as_scalar
 

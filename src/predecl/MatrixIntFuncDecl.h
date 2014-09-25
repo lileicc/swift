@@ -1,5 +1,5 @@
 /*
-  Interface for matrix initialization functions
+  Interface for all matrix functions whose return value is Real
 */
 
 #pragma once
@@ -8,10 +8,10 @@
 namespace swift {
 namespace predecl {
 
-class MatrixInitFuncDecl: public swift::predecl::PreDecl {
+class MatrixIntFuncDecl: public swift::predecl::PreDecl {
 public:
-  MatrixInitFuncDecl(std::string name);
-  virtual ~MatrixInitFuncDecl();
+  MatrixIntFuncDecl(std::string name);
+  virtual ~MatrixIntFuncDecl();
 
   virtual std::shared_ptr<ir::Expr>
   getNew(std::vector<std::shared_ptr<ir::Expr>>& args,
