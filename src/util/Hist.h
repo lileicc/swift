@@ -220,7 +220,7 @@ public:
       for (auto& it : normmap) {
         printf("%s -> %.8lf\n", 
           (it.first >= 0 && it.first < inst_n
-          ? instances->at(it.first) : typeName + "(#" + std::to_string(it.first) + ")"),
+          ? instances->at(it.first) : typeName + "(#" + std::to_string(it.first) + ")").c_str(),
           it.second);
       }
     }
