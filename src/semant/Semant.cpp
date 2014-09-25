@@ -420,7 +420,7 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::CaseExpr* expr) {
   }
   if (n_from_args > 1) {
     if (std::dynamic_pointer_cast<ir::ArrayExpr>(ptr->getVar()) == nullptr
-      || ptr->getVar()->argSize() != n_from_args) {
+      || (int)ptr->getVar()->argSize() != n_from_args) {
       error(expr->getTest()->line, expr->getTest()->col,
         "The Dimension of *Test Var* differs from the From Type of the Map in < CaseExpr >!");
       return ptr;

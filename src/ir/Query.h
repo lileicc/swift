@@ -27,8 +27,8 @@ private:
   //   >> Special: [ FunctionCall | #TypeName ]
   //   >> General: Any Other Expr
   std::shared_ptr<Expr> var;
-  bool general;
   std::string strExpr;
+  bool general;
 };
 
 }

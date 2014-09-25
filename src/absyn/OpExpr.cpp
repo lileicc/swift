@@ -67,6 +67,7 @@ std::string OpExpr::toString() {
   case AbsynConstant::IMPLY: opr = "->"; break;
   case AbsynConstant::SUB: opr = "["; break;
   case AbsynConstant::AT: opr = "@"; break;
+  default: opr = "?"; break;
   }
   std::string ret;
   if (getLeft() != NULL) ret += getLeft()->toString();
