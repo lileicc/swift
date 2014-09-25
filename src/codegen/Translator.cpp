@@ -46,6 +46,7 @@ const code::Type Translator::MATRIX_CONTAINER_TYPE("vector<double>");
 
 // TODO: This could be potentially replaced by array
 const code::Type Translator::ARRAY_BASE_TYPE("vector");
+const code::Type Translator::ARRAY_STRING_CONST_TYPE("vector<string>",false,false,true);
 const code::Type Translator::MAP_BASE_TYPE("map");
 const code::Type Translator::SET_BASE_TYPE("set");
 const std::string Translator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
@@ -228,6 +229,15 @@ code::FunctionDecl* Translator::transSampleAlg() {
 
 void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   const std::string& name = td->getName();
+  // create a vector containing all the names of its distinct instances
+  if (td->getInstNames().size() > 0) {
+    std::string arrName = getInstanceStringArrayName(name);
+    std::vector<code::Expr*> names;
+    for (auto& n : td->getInstNames())
+      names.push_back(new code::StringLiteral(n));
+    coreNs->addDecl(new code::VarDecl(coreNs, arrName, ARRAY_STRING_CONST_TYPE,
+                                      new code::ListInitExpr(names)));
+  }
   // create a class for this declared type
   // and declare a vector to hold all instance in this type
   TYPEDEFN blogtypedefn = DECLARE_TYPE(name);
@@ -1478,12 +1488,22 @@ void Translator::transAllQuery(
 
 void Translator::transQuery(code::FunctionDecl* fun,
                                std::shared_ptr<ir::Query> qr, int n) {
+  // Register Printing Hist Class
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+  std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) };
+  if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
+    auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
+    std::string tyName = ty->getRefer()->getName();
+    initArgs.push_back(new code::StringLiteral(tyName));
+    if (ty->getRefer()->getInstNames().size() > 0) {
+      initArgs.push_back(new code::BinaryOperator(NULL,
+        new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+    }
+  }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
           mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
-      std::vector<code::Expr*>(
-          { new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) }));
+          initArgs);
   code::FieldDecl::createFieldDecl(
       coreCls, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
@@ -1496,10 +1516,11 @@ void Translator::transQuery(code::FunctionDecl* fun,
       code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
                                        args));
   // add print this result in print()
-  // :::=> answer_id.print();
+  // :::=> answer_id.print("query expr");
   coreClsPrint->addStmt(
       code::CallExpr::createMethodCall(answervarname,
-                                       HISTOGRAM_PRINT_METHOD_NAME));
+                                       HISTOGRAM_PRINT_METHOD_NAME,
+                                       std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
 }
 
 code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool isPtr) {

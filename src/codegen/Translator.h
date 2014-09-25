@@ -311,6 +311,8 @@ protected:
 
   static const code::Type ARRAY_BASE_TYPE;
 
+  static const code::Type ARRAY_STRING_CONST_TYPE;
+
   static const code::Type MAP_BASE_TYPE;
 
   static const code::Type SET_BASE_TYPE;
@@ -602,6 +604,14 @@ std::string getValueVarName(std::string name) {
 */
 std::string getInstanceArrayName(std::string name) {
   return "__instance_" + name;
+}
+
+/**
+* given the type name,
+* return the variable name to store all the strings referring to the names of the distinct objects
+*/
+std::string getInstanceStringArrayName(std::string name) {
+  return "__vecstr_instance_" + name;
 }
 
 };

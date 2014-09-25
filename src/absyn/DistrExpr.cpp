@@ -33,6 +33,20 @@ void DistrExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string DistrExpr::toString() {
+  std::string ret = distr.getValue();
+  if (args.size() > 0) {
+    ret += "(";
+    for (size_t i = 0; i < args.size(); ++i) {
+      if (i > 0) ret += ", ";
+      if (args[i] != NULL)
+        ret += args[i]->toString();
+    }
+    ret += ")";
+  }
+  return ret;
+}
+
 Expr* DistrExpr::clone() {
   DistrExpr* ret = new DistrExpr(*this);
   ret->cloneArgs();

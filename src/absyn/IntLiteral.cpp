@@ -26,6 +26,10 @@ void IntLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(IntLiteral: %d )\n", indent, "", value);
 }
 
+std::string IntLiteral::toString() {
+  return std::to_string(value);
+}
+
 Expr* IntLiteral::clone() {
   return new IntLiteral(line, col, value);
 }

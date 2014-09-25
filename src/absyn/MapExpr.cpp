@@ -46,6 +46,19 @@ void MapExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string MapExpr::toString() {
+  std::string ret = "{";
+  for (size_t i = 0; i < mapSize(); ++i) {
+    if (i > 0) ret += ", ";
+    if (getFrom(i) != NULL)
+      ret += getFrom(i)->toString();
+    ret += " -> ";
+    if (getTo(i) != NULL)
+      ret += getTo(i)->toString();
+  }
+  return ret + "}";
+}
+
 Expr* MapExpr::clone() {
   MapExpr* ret = new MapExpr(*this);
   ret->cloneArgs();

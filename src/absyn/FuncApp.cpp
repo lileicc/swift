@@ -33,6 +33,20 @@ void FuncApp::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string FuncApp::toString() {
+  std::string ret = func.getValue();
+  if (args.size() > 0) {
+    ret.push_back('(');
+    for (size_t i = 0; i < args.size(); ++i) {
+      if (i > 0) ret += ", ";
+      if (args[i] != NULL)
+        ret += args[i]->toString();
+    }
+    ret.push_back(')');
+  }
+  return ret;
+}
+
 Expr* FuncApp::clone() {
   FuncApp* ret = new FuncApp(*this);
   ret->cloneArgs();

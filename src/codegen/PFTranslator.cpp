@@ -356,6 +356,15 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
 
 void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   const std::string& name = td->getName();
+  // create a vector containing all the names of its distinct instances
+  if (td->getInstNames().size() > 0) {
+    std::string arrName = getInstanceStringArrayName(name);
+    std::vector<code::Expr*> names;
+    for (auto& n : td->getInstNames())
+      names.push_back(new code::StringLiteral(n));
+    coreNs->addDecl(new code::VarDecl(coreNs, arrName, ARRAY_STRING_CONST_TYPE, 
+                                      new code::ListInitExpr(names)));
+  }
   // create a class for this declared type
   // and declare a vector to hold all instance in this type
   TYPEDEFN blogtypedefn = DECLARE_TYPE(name);
@@ -1821,7 +1830,7 @@ void PFTranslator::transAllQuery(
   *   _answer.add(....);
   *  };
   *  printTable[0] = [&]() {
-  *    _answer_0.print(); ...
+  *    _answer_0.print("query expr"); ...
   *  };
   */
   for (size_t i = 0; i < queryFuncs.size(); ++i) {
@@ -1849,11 +1858,20 @@ void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs
                                std::shared_ptr<ir::Query> qr, int n) {
   // Register Printer Class
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+  std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) };
+  if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
+    auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
+    std::string tyName = ty->getRefer()->getName();
+    initArgs.push_back(new code::StringLiteral(tyName));
+    if (ty->getRefer()->getInstNames().size() > 0) {
+      initArgs.push_back(new code::BinaryOperator(NULL,
+        new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+    }
+  }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
           mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
-      std::vector<code::Expr*>(
-          { new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) }));
+          initArgs);
   code::VarDecl::createVarDecl(
       coreNs, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
@@ -1878,10 +1896,11 @@ void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs
     args));
   
   // add print this result in print()
-  // :::=> answer_id.print();
+  // :::=> answer_id.print("query expr");
   printFuncs[id].push_back(
       code::CallExpr::createMethodCall(answervarname,
-                                       HISTOGRAM_PRINT_METHOD_NAME));
+                                       HISTOGRAM_PRINT_METHOD_NAME,
+                                       std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
 }
 
 code::Expr* PFTranslator::transConstSymbol(

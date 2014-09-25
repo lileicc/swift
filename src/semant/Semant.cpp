@@ -1527,7 +1527,7 @@ void Semant::transQuery(absyn::Query* nq) {
     /* General Case: Arbitrary Expr
     TODO: check if we need to build a internal Void Function Call to represent this expr
       */
-    model->addQuery(std::make_shared<ir::Query>(ptr, true));
+    model->addQuery(std::make_shared<ir::Query>(ptr, nq->getExpr()->toString(), true));
   }
   else {// Special Case: function call
     auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(ptr);
@@ -1539,7 +1539,7 @@ void Semant::transQuery(absyn::Query* nq) {
         return;
       }
     }
-    model->addQuery(std::make_shared<ir::Query>(ptr));
+    model->addQuery(std::make_shared<ir::Query>(ptr, nq->getExpr()->toString()));
   }
 }
 

@@ -113,6 +113,133 @@ public:
   }
 };
 
+// Special Hist for int, Especially for Typed Object
+template<>
+class Hist<int> {
+private:
+  std::map<int, double> table;
+  std::map<int, double> normmap;
+  const bool isLogarithm;
+  bool isTyped;
+  int inst_n;
+  const std::vector<std::string>* instances;
+  std::string typeName;
+public:
+  void clear() {
+    table.clear();
+    typeName.clear();
+    instances = NULL;
+    inst_n = 0;
+    isTyped = false;
+  }
+
+  Hist(bool isLogarithm = true) :
+      isLogarithm(isLogarithm), isTyped(false) {
+    clear();
+  };
+
+  Hist(bool isLogarithm, std::string _type, const std::vector<std::string>* _inst = NULL)
+    :isLogarithm(isLogarithm){
+    clear();
+    if (_type.size() > 0) {
+      typeName = _type;
+      instances = _inst;
+      isTyped = true;
+      if (_inst == NULL) inst_n = 0;
+      else inst_n = _inst->size();
+    }
+  }
+
+  virtual ~Hist() {
+  }
+  ;
+
+  void add(int element, double weight) {
+    if (table.find(element) != table.end()) {
+      if (isLogarithm) {
+        if (weight > -INFINITY)
+          table[element] = logsum(weight, table[element]);
+      }
+      else {
+        if (weight > 0)
+          table[element] += weight;
+      }
+    }
+    else {
+      if (isLogarithm) {
+        if (weight > -INFINITY)
+          table[element] = weight;
+      }
+      else {
+        if (weight > 0)
+          table[element] = weight;
+      }
+    }
+  };
+
+  std::map<int, double> & getResult() {
+    return table;
+  };
+
+  double getTotalWeight() {
+    double w = 0;
+    auto it = table.begin();
+    if (it == table.end()) {
+      return 0;
+    }
+    w = it->second;
+    it++;
+    for (; it != table.end(); it++) {
+      if (isLogarithm) {
+        w = logsum(w, it->second);
+      } else {
+        w += it->second;
+      }
+    }
+    return w;
+  }
+
+  std::map<int, double>& getNormalizedResult() {
+    normmap.clear();
+    double w = getTotalWeight();
+    for (auto & it : table) {
+      if (isLogarithm)
+        normmap[it.first] = std::exp(it.second - w);
+      else
+        normmap[it.first] = it.second / w;
+    }
+    return normmap;
+  }
+  ;
+
+  void print(std::string str = std::string()) {
+    if(str.size() > 0)
+      printf(">> query : %s\n", str.c_str());
+    getNormalizedResult();
+    if (isTyped) { // typed object
+      for (auto& it : normmap) {
+        printf("%s -> %.8lf\n", 
+          (it.first >= 0 && it.first < inst_n
+          ? instances->at(it.first) : typeName + "(#" + std::to_string(it.first) + ")"),
+          it.second);
+      }
+    }
+    else { // normal int
+      for (auto& it : normmap) {
+        printf("%d -> %.8lf\n",it.first, it.second);
+      }
+    }
+    clear();
+  }
+
+  void debug() {
+    for (auto& it : getResult()) {
+      fprintf(stderr, "%s -> %s\n", std::to_string(it.first).c_str(),
+          std::to_string(isLogarithm ? std::exp(it.second) : it.second).c_str());
+    }
+  }
+};
+
 // Special Hist for Real
 template<>
 class Hist<double> {

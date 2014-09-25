@@ -27,6 +27,10 @@ void BoolLiteral::print(FILE* file, int indent) {
       (value ? "true" : "false"));
 }
 
+std::string BoolLiteral::toString() {
+  return value ? "true" : "false";
+}
+
 Expr* BoolLiteral::clone() {
   return new BoolLiteral(line, col, value);
 }
