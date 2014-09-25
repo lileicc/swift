@@ -73,7 +73,7 @@ inline mat _to_matrix(const std::vector<std::vector<T>>& val) {
 template<class T>
 inline mat _to_matrix(const std::vector<T>& val) {
   int n = val.size();
-  if (row == 0)return mat();
+  if (n == 0)return mat();
   mat ret(1, n);
   for (size_t i = 0; i < val.size(); ++ i)
     ret[i] = (double)val[i];
