@@ -1335,8 +1335,28 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
     if (fun->getBody()->getTyp() == NULL)
       fun->getBody()->setTyp(rettyp);
     else {
+      bool special_case = true;
+      auto mat_ty = lookupTy(ir::IRConstString::MATRIX);
+      if (fun->getRetTyp() == mat_ty && fun->getBody()->getTyp() != mat_ty) {
+        if (std::dynamic_pointer_cast<ir::Expr>(fun->getBody()) == nullptr) {
+          special_case = false;
+        }
+        else {
+          auto body = std::dynamic_pointer_cast<ir::Expr>(fun->getBody());
+          std::vector<std::shared_ptr<ir::Expr>> args{ body };
+          auto expr = predecl::PreDeclList::toMatrixFuncDecl.getNew(args, &tyFactory);
+          if (expr == nullptr)
+            special_case = false;
+          else {
+            fun->setBody(expr);
+            warning(fd->line, fd->col, "The return type does not match the Declared Type <RealMatrix>! \
+                                       A internal type conversion to RealMatrix is added!");
+          }
+        }
+      }
+      else
       if (!isSubType(fun->getBody()->getTyp(), rettyp)) { // Type Checking Failed!
-        bool special_case = false;
+        special_case = false;
         // Special Case checking for Real func() = RealMatrix * RealMatrix
         // We only raise a warning and return the first element of the result matrix
         if (rettyp == lookupTy(ir::IRConstString::DOUBLE)
@@ -1357,11 +1377,11 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
             special_case = true;
           }
         }
-        if (!special_case) {
-          fprintf(stderr, "func<%s> rettyp = %s  bodytyp = %s\n", fun->getName().c_str(), fun->getRetTyp()->toString().c_str(),
-            fun->getBody()->getTyp()->toString().c_str());
-          error(fd->line, fd->col, "The type of the function body does not match its declaration!");
-        }
+      }
+      if (!special_case) {
+        fprintf(stderr, "func<%s> rettyp = %s  bodytyp = %s\n", fun->getName().c_str(), fun->getRetTyp()->toString().c_str(),
+          fun->getBody()->getTyp()->toString().c_str());
+        error(fd->line, fd->col, "The type of the function body does not match its declaration!");
       }
     }
 

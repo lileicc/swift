@@ -55,17 +55,21 @@ const ToIntFuncDecl PreDeclList::toIntFuncDecl =
     ToIntFuncDecl();
 const ToRealFuncDecl PreDeclList::toRealFuncDecl =
     ToRealFuncDecl();
+const ToMatrixFuncDecl PreDeclList::toMatrixFuncDecl =
+    ToMatrixFuncDecl();
 
 // Functions using Builtin Function Interface
 
 // general math function: both for real and matrix
 const std::vector<std::string> PreDeclList::mathFuncList{ "abs", "exp", "log", "sqrt", "round", "floor", "ceil", "tan", "sin", "cos" };
 // matrix initialization functions
-const std::vector<std::string> PreDeclList::matConstructFuncList{ "eye", "zeros", "ones" };
+const std::vector<std::string> PreDeclList::matConstructFuncList{ "eye", "zeros" };
+const MatrixConstructFuncDecl PreDeclList::onesFuncDecl =
+    MatrixConstructFuncDecl("ones"); // Should be mannually register in PredeclFunctory
 // function from matrix to real
 const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "norm", "cond", "log_det"};
 const MatrixRealFuncDecl PreDeclList::asScalarFuncDecl =
-    MatrixRealFuncDecl("as_scalar");
+    MatrixRealFuncDecl("as_scalar"); // Should be mannually register in PredeclFunctory
 // function from matrix to int
 const std::vector<std::string> PreDeclList::matIntFuncList{ "numRows", "numCols", "rank" };
 // function from matrix to matrix
@@ -87,6 +91,7 @@ std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::initFuncStore() {
     ret[s] = std::make_shared<MatrixMatrixFuncDecl>(s);
   for (auto& s : matStackFuncList)
     ret[s] = std::make_shared<MatrixStackFuncDecl>(s);
+
   // Matrix Subset Functions
   ret["getrow"] = std::make_shared<MatrixSubsetFuncDecl>("_mat_getrow", 1);
   ret["getcol"] = std::make_shared<MatrixSubsetFuncDecl>("_mat_getcol", 1);

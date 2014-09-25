@@ -45,13 +45,18 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::toIntFuncDecl;
   decls[predecl::PreDeclList::toRealFuncDecl.getName()] =
     &predecl::PreDeclList::toRealFuncDecl;
+  decls[predecl::PreDeclList::toMatrixFuncDecl.getName()] =
+    &predecl::PreDeclList::toMatrixFuncDecl;
+
+  // Special Commonly used Predecl Functions
+  decls[predecl::PreDeclList::onesFuncDecl.getName()] =
+    &predecl::PreDeclList::onesFuncDecl;
+  decls[predecl::PreDeclList::asScalarFuncDecl.getName()] =
+    &predecl::PreDeclList::asScalarFuncDecl;
 
   // Add Builtin Function using Function Interface
   for (auto& s : predecl::PreDeclList::funcStore)
     decls[s.first] = s.second.get();
-  // Special Matrix Builtin Function
-  decls[predecl::PreDeclList::asScalarFuncDecl.getName()] =
-    &predecl::PreDeclList::asScalarFuncDecl;
 }
 
 PreDeclFactory::~PreDeclFactory() {

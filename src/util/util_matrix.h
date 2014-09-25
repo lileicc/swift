@@ -48,13 +48,15 @@ inline mat _mat_submat(const mat&m, int r1, int c1, int r2, int c2) {
   return m.submat(r1,c1,r2,c2);
 }
 
+
 // convert a vector containing all the elements to a row x col matrix
 inline mat _to_matrix(const std::vector<double>& val, int row, int col) {
   return mat(val.data(), row, col);
 }
 
 // convert a vector<vector> to a real matrix
-inline mat _to_matrix(const std::vector<std::vector<double>>& val) {
+template<class T>
+inline mat _to_matrix(const std::vector<std::vector<T>>& val) {
   int row = val.size();
   if (row == 0)return mat();
   int col = val[0].size();
@@ -63,8 +65,24 @@ inline mat _to_matrix(const std::vector<std::vector<double>>& val) {
   mat ret(row, col);
   for (int i = 0; i < row; ++ i)
     for (int j = 0; j < col; ++ j)
-      ret(i, j) = val[i][j];
+      ret(i, j) = (double)val[i][j];
   return ret;
+}
+
+// convert a general vector<> to a real rowvec
+template<class T>
+inline mat _to_matrix(const std::vector<T>& val) {
+  int n = val.size();
+  if (row == 0)return mat();
+  mat ret(1, n);
+  for (size_t i = 0; i < val.size(); ++ i)
+    ret[i] = (double)val[i];
+  return ret;
+}
+
+// construct a matrix from a string
+inline mat _to_matrix(const std::string& str) {
+  return mat(str);
 }
 
 
