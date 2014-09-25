@@ -23,8 +23,13 @@ private:
   std::map<T, double> table;
   const bool isLogarithm;
 public:
+  void clear() {
+    table.clear();
+  }
+
   Hist(bool isLogarithm = true) :
       isLogarithm(isLogarithm) {
+    clear();
   }
   ;
   virtual ~Hist() {
@@ -155,14 +160,20 @@ private:
       build_bucket();
   }
 public:
-  Hist(bool isLogarithm = true, int bucket_n = 10) :
-    isLogarithm(isLogarithm) {
-    sum = sum_wei = 0;
+  void clear(int bucket_n = 10) {
+    sum = sum_wei = sum_sqr = 0;
+    bucket.clear();
     bucket.resize(bucket_n);
+    table.clear();
     n = bucket_n;
     lo = 1e100;
     hi = -1e100;
     bucketFixed = false;
+  }
+
+  Hist(bool isLogarithm = true, int bucket_n = 10) :
+    isLogarithm(isLogarithm) {
+    clear(bucket_n);
   }
   ;
   virtual ~Hist() {

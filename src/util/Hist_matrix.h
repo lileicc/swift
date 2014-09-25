@@ -28,10 +28,15 @@ private:
   double sum_wei;
   bool init_flag;
 public:
-  Hist(bool isLogarithm = true) :
-    isLogarithm(isLogarithm) {
+  void clear() {
     sum_wei = 0;
     init_flag = false;
+    table.clear();
+  }
+
+  Hist(bool isLogarithm = true) :
+    isLogarithm(isLogarithm) {
+    clear();
   }
   ;
   virtual ~Hist() {
