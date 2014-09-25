@@ -28,6 +28,26 @@ using namespace arma;
 
 namespace swift {
 
+#define _predecl_colsum(a) (arma::sum(a,0))
+#define _predecl_rowsum(a) (arma::sum(a,1))
+
+// get submatrix from a large matrix
+inline mat _mat_getrow(const mat& m, int r) {
+  return m.row(r);
+}
+inline mat _mat_getcol(const mat& m, int c) {
+  return m.col(c);
+}
+inline mat _mat_getrows(const mat&m, int r1, int r2) {
+  return m.rows(r1, r2);
+}
+inline mat _mat_getcols(const mat&m, int c1, int c2) {
+  return m.cols(c1, c2);
+}
+inline mat _mat_submat(const mat&m, int r1, int c1, int r2, int c2) {
+  return m.submat(r1,c1,r2,c2);
+}
+
 // convert a vector containing all the elements to a row x col matrix
 inline mat _to_matrix(const std::vector<double>& val, int row, int col) {
   return mat(val.data(), row, col);

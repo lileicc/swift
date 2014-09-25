@@ -12,6 +12,8 @@
 #include "MultivarGaussianDistrDecl.h"
 #include "PoissonDistrDecl.h"
 #include "UniformChoiceDistrDecl.h"
+#include "UniformIntDistrDecl.h"
+#include "UniformRealDistrDecl.h"
 #include "UniformVectorDistrDecl.h"
 // PreDecl Functions
 #include "LoadRealMatrixFuncDecl.h"
@@ -24,6 +26,8 @@
 #include "MatrixRealFuncDecl.h"
 #include "MatrixInitFuncDecl.h"
 #include "MatrixStackFuncDecl.h"
+#include "MatrixSubsetFuncDecl.h"
+#include "SetFuncDecl.h"
 
 #include <vector>
 #include <string>
@@ -50,6 +54,8 @@ public:
   static const MultivarGaussianDistrDecl multivargaussianDistr;
   static const PoissonDistrDecl poissonDistr;
   static const UniformChoiceDistrDecl uniformChoiceDistr;
+  static const UniformIntDistrDecl uniformIntDistr;
+  static const UniformRealDistrDecl uniformRealDistr;
   static const UniformVectorDistrDecl uniformVectorDistr;
   // PreDecl Functions
   static const LoadRealMatrixFuncDecl loadRealMatrixFuncDecl;

@@ -37,6 +37,12 @@ const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
 
+const UniformIntDistrDecl PreDeclList::uniformIntDistr =
+    UniformIntDistrDecl();
+
+const UniformRealDistrDecl PreDeclList::uniformRealDistr =
+    UniformRealDistrDecl();
+
 const UniformVectorDistrDecl PreDeclList::uniformVectorDistr =
     UniformVectorDistrDecl();
 
@@ -59,7 +65,7 @@ const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "no
 const MatrixRealFuncDecl PreDeclList::asScalarFuncDecl =
     MatrixRealFuncDecl("as_scalar");
 // function from matrix to matrix
-const std::vector<std::string> PreDeclList::matMatFuncList{ "trans", "transpose", "chol", "inv", "pinv", "sum", "diag" };
+const std::vector<std::string> PreDeclList::matMatFuncList{ "trans", "chol", "inv", "pinv", "diagmat" };
 // matrix initialization functions
 const std::vector<std::string> PreDeclList::matInitFuncList{ "eye", "zeros", "ones" };
 // matrix stacking functions
@@ -77,6 +83,25 @@ std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::initFuncStore() {
     ret[s] = std::make_shared<MatrixInitFuncDecl>(s);
   for (auto& s : matStackFuncList)
     ret[s] = std::make_shared<MatrixStackFuncDecl>(s);
+  // Matrix Subset Functions
+  ret["getrow"] = std::make_shared<MatrixSubsetFuncDecl>("_mat_getrow", 1);
+  ret["getcol"] = std::make_shared<MatrixSubsetFuncDecl>("_mat_getcol", 1);
+  ret["getrows"] = std::make_shared<MatrixSubsetFuncDecl>("_mat_getrows", 2);
+  ret["getcols"] = std::make_shared<MatrixSubsetFuncDecl>("_mat_getcols", 2);
+  ret["submat"] = std::make_shared<MatrixSubsetFuncDecl>("_mat_submat", 4);
+  ret["repmat"] = std::make_shared<MatrixSubsetFuncDecl>("repmat", 2);
+
+  // Set Functions
+  ret["sum"] = std::make_shared<SetFuncDecl>("_set_sum");
+  ret["min"] = std::make_shared<SetFuncDecl>("_set_min");
+  ret["max"] = std::make_shared<SetFuncDecl>("_set_max");
+
+  // Special Functions with Different Names
+  ret["transpose"] = ret["trans"];
+  ret["diag"] = ret["diagmat"];
+  ret["colsum"] = std::make_shared<MatrixMatrixFuncDecl>("_predecl_colsum");
+  ret["rowsum"] = std::make_shared<MatrixMatrixFuncDecl>("_predecl_rowsum");
+  ret["matsum"] = std::make_shared<MatrixRealFuncDecl>("accu");
   return ret;
 }
 

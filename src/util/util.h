@@ -91,6 +91,50 @@ std::vector<int> _gen_full(int n) {
 }
 
 /*
+* An accumlate function over a set
+*  Input: a vector
+*  return: the sum of all elements in the vector
+*/
+template<class T>
+T _set_sum(const std::vector<T>& st) {
+  if (st.size() == 0) return T(0);
+  T ret = st[0];
+  for (size_t i = 1; i < st.size(); ++ i)
+    ret += st[i];
+  return ret;
+}
+
+/*
+* An function for minimum value over a set
+*  Input: a vector
+*  return: the minimum value of all elements in the vector
+*/
+template<class T>
+T _set_min(const std::vector<T>& st) {
+  if (st.size() == 0) return T(0);
+  T ret = st[0];
+  for (size_t i = 1; i < st.size(); ++i) {
+    if (st[i] < ret) ret = st;
+  }
+  return ret;
+}
+
+/*
+* An function for maximum value over a set
+*  Input: a vector
+*  return: the maximum value of all elements in the vector
+*/
+template<class T>
+T _set_max(const std::vector<T>& st) {
+  if (st.size() == 0) return T(0);
+  T ret = st[0];
+  for (size_t i = 1; i < st.size(); ++i) {
+    if (st[i] > ret) ret = st;
+  }
+  return ret;
+}
+
+/*
  * A filter function
  *  Input: a size <n>, and a condition function <fun>
  *  return: a vector containing all the integer k from 0 to n-1, such that fun(k) is true
