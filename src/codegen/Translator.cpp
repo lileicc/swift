@@ -33,6 +33,7 @@ const code::Type Translator::DOUBLE_REF_TYPE("double", true);
 const code::Type Translator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {
                                                        DOUBLE_TYPE });
 const code::Type Translator::STRING_TYPE("string");
+const code::Type Translator::CHAR_TYPE("char");
 const code::Type Translator::TIMESTEP_TYPE("unsigned");
 const code::Type Translator::BOOL_TYPE("bool");
 const code::Type Translator::VOID_TYPE("void");
@@ -1529,6 +1530,7 @@ code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool is
   ///    Note: in IR, the type->toString() will return the corresponding C++ translation of that type
   switch (ty->getTyp()) {
     case ir::IRConstant::BOOL:
+      return code::Type(CHAR_TYPE.getName(), isRef, isPtr); // Special Treatment for Bool in C++
     case ir::IRConstant::INT:
     case ir::IRConstant::DOUBLE:
     case ir::IRConstant::STRING:

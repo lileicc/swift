@@ -266,7 +266,7 @@ void CPPPrinter::print(code::Code* prog) {
       fprintf(file, "using namespace arma;\n\n");
     }
 
-  fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
+  //fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
   fprintf(file, "using namespace std;\n");
   fprintf(file, "using namespace swift::random;\n");
 

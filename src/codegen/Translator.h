@@ -296,6 +296,8 @@ protected:
 
   static const code::Type STRING_TYPE;
 
+  static const code::Type CHAR_TYPE;
+
   static const code::Type TIMESTEP_TYPE;
 
   static const code::Type BOOL_TYPE;
