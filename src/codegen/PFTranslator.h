@@ -87,8 +87,6 @@ protected:
   static const code::Type TMP_PRINT_STORE_TYPE;
   static const std::string TMP_PRINT_INIT_FUNC_NAME;
   code::FunctionDecl* tempPrintInit;
-  // Util Method to Check whether the function pointer is null
-  static const std::string FUNC_EMPTY_METHOD_NAME;
 
   /**
    * declare a named type
@@ -319,7 +317,7 @@ protected:
       bool isVarDefined = false, bool isLess = true);
   static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
   static bool isTemporalType(code::Type ty);
-  static code::Expr* tempTableEntryRefer(std::string table, int ts = -1, bool emptyMethod = false);
+  static code::Expr* tempTableEntryRefer(std::string table, int ts = -1);
 
   // Utils for Liu-West Filter
   // Record all the random function names accociated with at least *ONE* observation

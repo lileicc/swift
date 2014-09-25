@@ -52,7 +52,6 @@ const std::string PFTranslator::TMP_QUERY_INIT_FUNC_NAME = "setup_temporal_queri
 const std::string PFTranslator::TMP_PRINT_STORE_NAME = "_printTable";
 const code::Type PFTranslator::TMP_PRINT_STORE_TYPE("std::function<void(void)>");
 const std::string PFTranslator::TMP_PRINT_INIT_FUNC_NAME = "setup_temporal_prints";
-const std::string PFTranslator::FUNC_EMPTY_METHOD_NAME = "_Empty";
 
 ///////////////////////////////////////////////////////////////
 //  Util Functions for Particle Filtering
@@ -104,16 +103,14 @@ bool PFTranslator::isTemporalType(code::Type ty) {
 }
 
 /*
- * ==> table[ts]._Empty()
+ * ==> table[ts]
  */
-code::Expr* PFTranslator::tempTableEntryRefer(std::string table, int ts, bool emptyMethod) {
+code::Expr* PFTranslator::tempTableEntryRefer(std::string table, int ts) {
   code::Expr* ind;
   if (ts < 0) ind = new code::Identifier(CUR_TIMESTEP_VAR_NAME);
   else ind = new code::IntegerLiteral(ts);
   code::Expr* entry = new code::ArraySubscriptExpr(new code::Identifier(table), ind);
-  if (!emptyMethod) return entry;
-  code::Expr* meth = new code::BinaryOperator(entry, new code::Identifier(FUNC_EMPTY_METHOD_NAME), code::OpKind::BO_FIELD);
-  return new code::CallExpr(meth);
+  return entry;
 }
 
 // Special Utils for Liu-West Filter
@@ -1672,7 +1669,7 @@ void PFTranslator::transAllEvidence(
   main_fun->addStmt(new code::BinaryOperator(
     new code::Identifier(WEIGHT_VAR_REF_NAME),
     new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
-  code::BinaryOperator* cond = new code::BinaryOperator(NULL, tempTableEntryRefer(TMP_EVI_STORE_NAME,-1,true), code::OpKind::UO_NEG);
+  code::BinaryOperator* cond = new code::BinaryOperator(NULL, tempTableEntryRefer(TMP_EVI_STORE_NAME,-1), code::OpKind::UO_NEG);
   code::CallExpr* eviCall = new code::CallExpr(tempTableEntryRefer(TMP_EVI_STORE_NAME),
     std::vector<code::Expr*> {new code::Identifier(WEIGHT_VAR_REF_NAME)});
   code::IfStmt* ifstmt = new code::IfStmt(cond, new code::ReturnStmt(eviCall));
@@ -1756,7 +1753,7 @@ void PFTranslator::transAllQuery(
   code::FunctionDecl* main_fun = code::FunctionDecl::createFunctionDecl(
     coreNs, QUERY_EVALUATE_FUN_NAME, VOID_TYPE, true);
   main_fun->setParams(std::vector<code::ParamVarDecl*>{new code::ParamVarDecl(main_fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)});
-  code::BinaryOperator* cond = new code::BinaryOperator(NULL, tempTableEntryRefer(TMP_QUERY_STORE_NAME, -1, true), code::OpKind::UO_NEG);
+  code::BinaryOperator* cond = new code::BinaryOperator(NULL, tempTableEntryRefer(TMP_QUERY_STORE_NAME, -1), code::OpKind::UO_NEG);
   code::CallExpr* queryCall = new code::CallExpr(tempTableEntryRefer(TMP_QUERY_STORE_NAME),
     std::vector<code::Expr*> {new code::Identifier(WEIGHT_VAR_REF_NAME)});
   code::IfStmt* ifstmt = new code::IfStmt(cond, queryCall);
@@ -1774,7 +1771,7 @@ void PFTranslator::transAllQuery(
   */
   coreClsPrint = code::FunctionDecl::createFunctionDecl(
     coreNs, ANSWER_PRINT_METHOD_NAME, VOID_TYPE, true);
-  code::BinaryOperator* prtcond = new code::BinaryOperator(NULL, tempTableEntryRefer(TMP_PRINT_STORE_NAME, -1, true), code::OpKind::UO_NEG);
+  code::BinaryOperator* prtcond = new code::BinaryOperator(NULL, tempTableEntryRefer(TMP_PRINT_STORE_NAME, -1), code::OpKind::UO_NEG);
   code::CallExpr* prtCall = new code::CallExpr(tempTableEntryRefer(TMP_PRINT_STORE_NAME));
   code::CompoundStmt* cmp = new code::CompoundStmt();
 
