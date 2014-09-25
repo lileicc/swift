@@ -218,7 +218,7 @@ double randn() {
 
 ///////// Utils for Perturbation in Liu-West Filter /////////
 // Perturbation for Double variable #func#
-#define rho (0.95)
+#define rho (0.97)
 
 #define __perturb(func) {\
   double mean, stddev, new_val, old_val; \
