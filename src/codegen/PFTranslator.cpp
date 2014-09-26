@@ -1658,7 +1658,7 @@ void PFTranslator::transAllEvidence(
   bool _set_evidence(double& __local_weight)
   {
   __local_weight=1.0000000;
-  if (!evidenceTable[_cur_time]._Empty())
+  if (evidenceTable[_cur_time])
   return evidenceTable[_cur_time](__local_weight);
   return true;
   }
@@ -1669,7 +1669,7 @@ void PFTranslator::transAllEvidence(
   main_fun->addStmt(new code::BinaryOperator(
     new code::Identifier(WEIGHT_VAR_REF_NAME),
     new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
-  code::BinaryOperator* cond = new code::BinaryOperator(NULL, tempTableEntryRefer(TMP_EVI_STORE_NAME,-1), code::OpKind::UO_NEG);
+  code::Expr* cond = tempTableEntryRefer(TMP_EVI_STORE_NAME, -1);
   code::CallExpr* eviCall = new code::CallExpr(tempTableEntryRefer(TMP_EVI_STORE_NAME),
     std::vector<code::Expr*> {new code::Identifier(WEIGHT_VAR_REF_NAME)});
   code::IfStmt* ifstmt = new code::IfStmt(cond, new code::ReturnStmt(eviCall));
@@ -1746,14 +1746,14 @@ void PFTranslator::transAllQuery(
   ==>
   inline void _evaluate_query(double __local_weight)
   {
-    if (!queryTable[_cur_time]._Empty())
+    if (queryTable[_cur_time])
       queryTable[_cur_time](__local_weight);
   }
   */
   code::FunctionDecl* main_fun = code::FunctionDecl::createFunctionDecl(
     coreNs, QUERY_EVALUATE_FUN_NAME, VOID_TYPE, true);
   main_fun->setParams(std::vector<code::ParamVarDecl*>{new code::ParamVarDecl(main_fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)});
-  code::BinaryOperator* cond = new code::BinaryOperator(NULL, tempTableEntryRefer(TMP_QUERY_STORE_NAME, -1), code::OpKind::UO_NEG);
+  code::Expr* cond = tempTableEntryRefer(TMP_QUERY_STORE_NAME, -1);
   code::CallExpr* queryCall = new code::CallExpr(tempTableEntryRefer(TMP_QUERY_STORE_NAME),
     std::vector<code::Expr*> {new code::Identifier(WEIGHT_VAR_REF_NAME)});
   code::IfStmt* ifstmt = new code::IfStmt(cond, queryCall);
@@ -1763,7 +1763,7 @@ void PFTranslator::transAllQuery(
   also generate main answer_print function
   ==>
   void print() {
-    if (!printTable[_cur_time]._Empty()) {
+    if (printTable[_cur_time]) {
       printf("++++++++++++++++ TimeStep @%d ++++++++++++++++\n", _cur_time);
       printTable[_cur_time]();
     }
@@ -1771,7 +1771,7 @@ void PFTranslator::transAllQuery(
   */
   coreClsPrint = code::FunctionDecl::createFunctionDecl(
     coreNs, ANSWER_PRINT_METHOD_NAME, VOID_TYPE, true);
-  code::BinaryOperator* prtcond = new code::BinaryOperator(NULL, tempTableEntryRefer(TMP_PRINT_STORE_NAME, -1), code::OpKind::UO_NEG);
+  code::Expr* prtcond = tempTableEntryRefer(TMP_PRINT_STORE_NAME, -1);
   code::CallExpr* prtCall = new code::CallExpr(tempTableEntryRefer(TMP_PRINT_STORE_NAME));
   code::CompoundStmt* cmp = new code::CompoundStmt();
 
