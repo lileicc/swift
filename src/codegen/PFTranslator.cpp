@@ -1875,7 +1875,7 @@ void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs
           mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
       initvalue);
   // The timestep this query should be processed
-  int id = 0;
+  int id = model->getTempLimit();
   auto var = qr->getVar();
   if (std::dynamic_pointer_cast<ir::FunctionCall>(var) != nullptr) {
     auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(var);
