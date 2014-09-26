@@ -280,8 +280,11 @@ private:
     right_bound = hi;
     det = (hi - lo) / n;
     bucketFixed = true;
+    bucket.resize(n);
+    fill(bucket.begin(), bucket.end(), 0);
     for (auto& p : table)
       add_to_bucket(p.first, p.second);
+    table.clear();
   }
 
   inline void add_normal(double p, double w) {
@@ -292,10 +295,9 @@ private:
       build_bucket();
   }
 public:
-  void clear(int bucket_n = 10) {
+  void clear(int bucket_n = 20) {
     sum = sum_wei = sum_sqr = 0;
     bucket.clear();
-    bucket.resize(bucket_n);
     table.clear();
     n = bucket_n;
     lo = 1e100;
@@ -303,7 +305,7 @@ public:
     bucketFixed = false;
   }
 
-  Hist(bool isLogarithm = true, int bucket_n = 10) :
+  Hist(bool isLogarithm = true, int bucket_n = 20) :
     isLogarithm(isLogarithm) {
     clear(bucket_n);
   }
@@ -313,18 +315,15 @@ public:
   ;
 
   void setBucket(int bucket_n, double _lo, double _hi) {
-    bucket.resize(n = bucket_n);
-    left_bound = lo = _lo;
-    right_bound = hi = _hi;
-    det = (hi - lo) / n;
-    bucketFixed = true;
+    n = bucket_n;
+    lo = _lo; hi = _hi;
+    build_bucket();
   }
 
   void setBucket(int bucket_n) {
-    bucket.resize(n = bucket_n);
-    lo = 1e100;
-    hi = -1e100;
-    bucketFixed = false;
+    if(!bucketFixed) {
+      n = bucket_n;
+    }
   }
 
   void add(double element, double weight) {
@@ -360,7 +359,7 @@ public:
     if (isLogarithm) sum_wei = std::exp(sum_wei);
     double mean = sum / sum_wei;
     double mean_sqr = sum_sqr / sum_wei;
-    double var = mean * mean - mean_sqr;
+    double var = mean_sqr - mean * mean;
     printf("Mean = %.5lf   Var = %.5lf\n", mean, var);
     if (!bucketFixed)
       build_bucket();

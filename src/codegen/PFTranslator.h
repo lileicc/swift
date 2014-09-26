@@ -55,7 +55,6 @@ protected:
   // Types for Memorization Data Structure
   static const TYPE STAT_MEMO_TYPE;
   static const TYPE REF_STAT_MEMO_TYPE;
-  static const TYPE PTR_STAT_MEMO_TYPE;
   static const TYPE TEMP_MEMO_TYPE;
   static const TYPE REF_TEMP_MEMO_TYPE;
   static const TYPE PTR_TEMP_MEMO_TYPE;

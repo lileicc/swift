@@ -29,7 +29,6 @@ const std::string PFTranslator::PTR_TEMP_MEMO_VAR_NAME = "_ptr_temp_memo";
 const std::string PFTranslator::PTR_BACKUP_VAR_NAME = "_ptr_backup";
 const TYPE PFTranslator::STAT_MEMO_TYPE = code::Type(StaticClsName,false,false);
 const TYPE PFTranslator::REF_STAT_MEMO_TYPE = code::Type(StaticClsName, true, false);
-const TYPE PFTranslator::PTR_STAT_MEMO_TYPE = code::Type(StaticClsName, false, true);
 const TYPE PFTranslator::TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, false);
 const TYPE PFTranslator::REF_TEMP_MEMO_TYPE = code::Type(TemporalClsName, true, false);
 const TYPE PFTranslator::PTR_TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, true);
@@ -58,9 +57,8 @@ const std::string PFTranslator::TMP_PRINT_INIT_FUNC_NAME = "setup_temporal_print
 ///////////////////////////////////////////////////////////////
 code::Stmt* PFTranslator::referStaticStateStmt(code::DeclContext* context) {
   return new code::DeclStmt(new code::VarDecl(context, CUR_STATE_VAR_NAME, REF_STAT_MEMO_TYPE,
-    new code::BinaryOperator(NULL,
-      new code::ArraySubscriptExpr(new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
-                                   new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),code::OpKind::UO_DEREF)));
+      new code::ArraySubscriptExpr(new code::Identifier(STAT_MEMO_VAR_NAME),
+                                   new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME))));
 }
 
 code::Stmt* PFTranslator::referTempStateStmt(code::DeclContext* context, std::string tempArg) {
@@ -161,12 +159,12 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
     // Basic Memorization Data Structure for variables
     code::VarDecl::createVarDecl(coreNs, STAT_MEMO_VAR_NAME, 
       std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), STAT_MEMO_TYPE);
+    code::VarDecl::createVarDecl(coreNs, PTR_STAT_MEMO_VAR_NAME,
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), STAT_MEMO_TYPE);
     code::VarDecl::createVarDecl(coreNs, TEMP_MEMO_VAR_NAME,
       std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME), 
                           new code::Identifier(PARTICLE_NUM_VAR_NAME) }), TEMP_MEMO_TYPE);
     // Pointer to Memorization Data Structures
-    code::VarDecl::createVarDecl(coreNs, PTR_STAT_MEMO_VAR_NAME,
-      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_STAT_MEMO_TYPE);
     code::VarDecl::createVarDecl(coreNs, PTR_TEMP_MEMO_VAR_NAME,
       std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME), 
                           new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_TEMP_MEMO_TYPE);
@@ -232,12 +230,6 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
     code::CallExpr::createMethodCall(
       new code::ArraySubscriptExpr(new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
       MAIN_INIT_FUN_NAME),true));
-  // :::=> pointer_copy(ptr_stat_memo, stat_memo, SampleN);
-  fun->addStmt(new code::CallExpr(new code::Identifier(PF_COPY_PTR_FUN_NAME),
-    std::vector<code::Expr*>({
-      new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
-      new code::Identifier(STAT_MEMO_VAR_NAME),
-      new code::Identifier(PARTICLE_NUM_VAR_NAME)})));
   
   /*
     :::=>
@@ -590,12 +582,22 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
                      MARK_VAR_REF_NAME);
   // now translating::: if (markvar == current sample num) then return value;
-  std::string flagVarName = (isTemp ? fd->getTemporalArg()->getVarName() : CURRENT_SAMPLE_NUM_VARNAME);
-  st = new code::IfStmt(
+  if (isTemp) {
+    std::string flagVarName = fd->getTemporalArg()->getVarName();
+    st = new code::IfStmt(
       new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
-                               createVarPlusDetExpr(flagVarName, 1), // Mark Current TimeStep if Temporal
-                               code::OpKind::BO_EQU),
+      createVarPlusDetExpr(flagVarName, 1), // Mark Current TimeStep if Temporal
+      code::OpKind::BO_EQU),
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)), NULL);
+  }
+  else {
+    /// ::: if (markvar > 0) then return value;
+    st = new code::IfStmt(
+      new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
+      new code::IntegerLiteral(0),
+      code::OpKind::BO_GT),
+      new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)), NULL);
+  }
   getterfun->addStmt(st);
   // now should sample
   //now translate actual sampling part
@@ -603,10 +605,13 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   // now return the value
   // mark the variable first
   // ::: => markvar = cur_loop
+  code::Expr* flagVar = (isTemp ? createVarPlusDetExpr(fd->getTemporalArg()->getVarName(), 1)
+                                  : new code::IntegerLiteral(1));
   st = new code::BinaryOperator(
-      new code::Identifier(MARK_VAR_REF_NAME),
-      createVarPlusDetExpr(flagVarName, 1),
-      code::OpKind::BO_ASSIGN);
+       new code::Identifier(MARK_VAR_REF_NAME),
+       flagVar,
+       code::OpKind::BO_ASSIGN);
+  
   getterfun->addStmt(st);
   // special treatment for bool
   if (valuetype == BOOL_TYPE) {
@@ -672,7 +677,7 @@ code::FunctionDecl* PFTranslator::transSetterFun(
   std::string setterfunname = getSetterFunName(name);
   // adding setter method declaration in the main class
   code::FunctionDecl* setterfun = code::FunctionDecl::createFunctionDecl(
-      coreNs, setterfunname, DOUBLE_TYPE); // Globally defined
+      coreNs, setterfunname, VOID_TYPE); // Globally defined
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
       setterfun, fd);
   declared_funs[setterfun->getName()] = setterfun;
@@ -692,10 +697,11 @@ code::FunctionDecl* PFTranslator::transSetterFun(
       new code::ParamVarDecl(setterfun, VALUE_ARG_NAME, valuetype));
   setterfun->setParams(args_with_value);
 
-  std::string flagVarName = (isTemp ? fd->getTemporalArg()->getVarName() : CURRENT_SAMPLE_NUM_VARNAME);
+  code::Expr* flagVar = (isTemp ? createVarPlusDetExpr(fd->getTemporalArg()->getVarName(),1) 
+                                  : new code::IntegerLiteral(1));
   st = new code::BinaryOperator(
       new code::Identifier(MARK_VAR_REF_NAME),
-      createVarPlusDetExpr(flagVarName, 1), // when temporal, mark by timestep
+      flagVar, // when temporal, mark by timestep
       code::OpKind::BO_ASSIGN);
   setterfun->addStmt(st);
   // :::==> value_var = value_arg
@@ -705,9 +711,6 @@ code::FunctionDecl* PFTranslator::transSetterFun(
   for (auto a : fd->getArgs()) {
     args_ref.push_back(new code::Identifier(a->getVarName()));
   }
-  st = new code::ReturnStmt(
-      new code::CallExpr(new code::Identifier(likelifunname), args_ref));
-  setterfun->addStmt(st);
   return setterfun;
 }
 
@@ -1875,7 +1878,7 @@ void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs
           mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
       initvalue);
   // The timestep this query should be processed
-  int id = model->getTempLimit();
+  int id = 0;
   auto var = qr->getVar();
   if (std::dynamic_pointer_cast<ir::FunctionCall>(var) != nullptr) {
     auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(var);
@@ -1883,6 +1886,10 @@ void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs
       // Assume that the Timestep for each query is a fixed value
       //  >> This should be checked in Semant
       id = std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg())->getValue();
+    }
+    else {
+      if (!fun->isTemporal())
+        id = model->getTempLimit();
     }
   }
 
