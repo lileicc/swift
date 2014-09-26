@@ -564,7 +564,7 @@ operation_expr:
   
 unary_operation_expr:
     MINUS_ expression
-    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, new IntLiteral(curr_line, curr_col, 0), $2); } %prec UMINUS
+    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, nullptr, $2); } %prec UMINUS
   | NOT_ expression
     {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::NOT, NULL, $2); } 
   | AT_ expression

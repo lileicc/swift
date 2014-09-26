@@ -1811,7 +1811,7 @@ case 103:
 break;
 case 104:
 #line 567 "blog.yacc"
-	{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, new IntLiteral(curr_line, curr_col, 0), yystack.l_mark[0].exp); }
+	{yyval.exp = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, nullptr, yystack.l_mark[0].exp); }
 break;
 case 105:
 #line 569 "blog.yacc"
