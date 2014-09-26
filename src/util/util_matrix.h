@@ -21,6 +21,7 @@
 #include <memory>
 #include <functional>
 #include <cstdarg>
+#include <initializer_list>
 
 #include "armadillo"
 
@@ -87,28 +88,30 @@ inline mat _to_matrix(const std::string& str) {
 
 
 // horizontally stack all the matrix/col vector
-mat hstack(int n_param, ...) {
-  va_list args;
-  va_start(args, n_param);
+mat hstack(std::initializer_list<mat> mat_list) {
   mat ret;
-  for (int i = 0; i < n_param; ++i) {
-    if (i == 0) ret = va_arg(args, mat);
-    else ret = join_horiz(ret, va_arg(args, mat));
+  bool flag = false;
+  for (auto& m : mat_list) {
+    if (!flag) {
+      flag = true;
+      ret = m;
+    } else
+      ret = join_horiz(ret, m);
   }
-  va_end(args);
   return ret;
 }
 
 // vertically stack all the matrix/row vector
-mat vstack(int n_param, ...) {
-  va_list args;
-  va_start(args, n_param);
+mat vstack(std::initializer_list<mat> mat_list) {
   mat ret;
-  for (int i = 0; i < n_param; ++i) {
-    if (i == 0) ret = va_arg(args, mat);
-    else ret = join_vert(ret, va_arg(args, mat));
+  bool flag=false;
+  for (auto& m : mat_list) {
+    if (!flag) {
+      flag = true;
+      ret = m;
+    } else
+      ret = join_vert(ret, m);
   }
-  va_end(args);
   return ret;
 }
 
