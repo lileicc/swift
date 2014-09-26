@@ -360,7 +360,7 @@ public:
     double mean = sum / sum_wei;
     double mean_sqr = sum_sqr / sum_wei;
     double var = mean_sqr - mean * mean;
-    printf("Mean = %.5lf   Var = %.5lf\n", mean, var);
+    printf("Mean = %.8lf   Var = %.8lf\n", mean, var);
     if (!bucketFixed)
       build_bucket();
     double cur = lo;
@@ -369,7 +369,7 @@ public:
         bucket[i] = std::exp(bucket[i] - sum_wei);
       else
         bucket[i] /= sum_wei;
-      printf("%c%lf, %lf] -> %.5lf\n", (i == 0 ? '[' : '('), (i == 0 ? left_bound : cur), (i == n - 1 ? right_bound : cur + det), bucket[i]);
+      printf("%c%lf, %lf] -> %.8lf\n", (i == 0 ? '[' : '('), (i == 0 ? left_bound : cur), (i == n - 1 ? right_bound : cur + det), bucket[i]);
       cur += det;
     }
     clear();
