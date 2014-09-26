@@ -17,7 +17,7 @@ std::shared_ptr<ir::Expr> MatrixSubsetFuncDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking
-  if (args.size() != n_args + 1)
+  if ((int)args.size() != n_args + 1)
     return nullptr;
   for (auto& a : args) {
     if (a == nullptr || a->getTyp() == NULL)
