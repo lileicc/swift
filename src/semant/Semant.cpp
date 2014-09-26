@@ -765,7 +765,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
       && std::dynamic_pointer_cast<ir::OprExpr>(ret->get(0)) != nullptr) {
       auto left_sub = std::dynamic_pointer_cast<ir::OprExpr>(ret->get(0));
       if (left_sub->getOp() == ir::IRConstant::SUB
-        && left_sub->get(0)->getTyp() == lookupTy(ir::IRConstString::MATRIX)) { // Here is the Case!
+        && left_sub->get(0)->getTyp() != NULL 
+        && left_sub->get(0)->getTyp()->getTyp() == ir::IRConstant::MATRIX) { // Here is the Case!
         std::vector<std::shared_ptr<ir::Expr>> args;
         args.push_back(left_sub->get(0));
         args.push_back(left_sub->get(1));
@@ -845,6 +846,11 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
           model->updateMarkovOrder(std::dynamic_pointer_cast<ir::IntLiteral>(ref->get(0))->getValue());
         }
       }
+
+      // Special Checking: Usage of Matrix
+      if (ptr->getTyp() != NULL && ptr->getTyp()->getTyp() == ir::IRConstant::MATRIX)
+        lookupTy(ir::IRConstString::MATRIX);
+
       return ptr;
     }
   }
@@ -1336,8 +1342,9 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
       fun->getBody()->setTyp(rettyp);
     else {
       bool special_case = true;
-      auto mat_ty = lookupTy(ir::IRConstString::MATRIX);
-      if (fun->getRetTyp() == mat_ty && fun->getBody()->getTyp() != mat_ty) {
+      if (fun->getRetTyp() != NULL 
+          && fun->getRetTyp()->getTyp() == ir::IRConstant::MATRIX
+          && fun->getBody()->getTyp()->getTyp() != ir::IRConstant::MATRIX) {
         if (std::dynamic_pointer_cast<ir::Expr>(fun->getBody()) == nullptr) {
           special_case = false;
         }
@@ -1360,7 +1367,7 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
         // Special Case checking for Real func() = RealMatrix * RealMatrix
         // We only raise a warning and return the first element of the result matrix
         if (rettyp == lookupTy(ir::IRConstString::DOUBLE)
-          && fun->getBody()->getTyp() == lookupTy(ir::IRConstString::MATRIX)) {
+          && fun->getBody()->getTyp()->getTyp() == ir::IRConstant::MATRIX) {
           auto body = std::dynamic_pointer_cast<ir::Expr>(fun->getBody());
           if (body != nullptr && std::dynamic_pointer_cast<ir::MatrixExpr>(body) == nullptr) {
             /*
