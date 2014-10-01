@@ -12,7 +12,7 @@ namespace swift {
 namespace random {
 
 Gaussian::Gaussian() :
-    mean(0.0), stddev(1.0) {
+    dist(0.0, 1.0), mean(0.0), stddev(1.0) {
 }
 
 Gaussian::~Gaussian() {
@@ -24,11 +24,10 @@ void Gaussian::init(double mean, double var) {
   coef = 1.0 / (stddev * std::sqrt(PI * 2));
   log_coef = - std::log(stddev * std::sqrt(PI * 2));
   scale = - 1.0 / (2 * stddev * stddev);
-  dist = std::normal_distribution<double>(mean, stddev);
 }
 
 double Gaussian::gen() {
-  return dist(engine);
+  return dist(engine) * stddev + mean;
 }
 
 double Gaussian::likeli(const double& x) {

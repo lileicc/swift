@@ -24,6 +24,7 @@ private:
   std::uniform_real_distribution<double> dist;
   double a;
   double b;
+  double scale;
 };
 
 } /* namespace random */

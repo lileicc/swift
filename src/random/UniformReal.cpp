@@ -12,7 +12,7 @@ namespace swift {
 namespace random {
 
 UniformReal::UniformReal() :
-    a(0), b(0) {
+    dist(0.0,1.0), a(0), b(0) {
 }
 
 UniformReal::~UniformReal() {
@@ -22,19 +22,19 @@ void UniformReal::init(double a, double b) {
   if (a > b) std::swap(a, b);
   this->a = a;
   this->b = b;
-  dist = std::uniform_real_distribution<double>(a, b);
+  scale = b - a;
 }
 
 double UniformReal::gen() {
-  return dist(engine);
+  return dist(engine) * scale + a;
 }
 
 double UniformReal::likeli(const double& x) {
-  return ((x >= a) && (x <= b)) ? 1.0 / (b - a) : 0;
+  return ((x >= a) && (x <= b)) ? 1.0 / scale : 0;
 }
 
 double UniformReal::loglikeli(const double& x) {
-  return ((x >= a) && (x <= b)) ? -std::log(b - a) : - INFINITY;
+  return ((x >= a) && (x <= b)) ? -std::log(scale) : - INFINITY;
 }
 
 } /* namespace random */

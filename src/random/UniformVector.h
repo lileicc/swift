@@ -25,7 +25,7 @@ public:
   double likeli(const arma::mat& x);
   double loglikeli(const arma::mat& x);
 private:
-  std::vector<std::uniform_real_distribution<double>> dists;
+  std::uniform_real_distribution<double> dist;
   std::vector<double> a;
   std::vector<double> b;
   double prod, logprod;

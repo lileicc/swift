@@ -12,7 +12,8 @@
 namespace swift {
 namespace random {
 
-MultivarGaussian::MultivarGaussian() {
+MultivarGaussian::MultivarGaussian()
+  : dist(0.0,1.0) {
 }
 
 MultivarGaussian::~MultivarGaussian() {
@@ -28,7 +29,6 @@ void MultivarGaussian::init(arma::mat _mean, arma::mat _cov) {
   assert(mean.n_rows == cov.n_rows && cov.n_cols == cov.n_rows);
   c.set_size(mean.n_rows, mean.n_cols);
   A = arma::trans(arma::chol(cov));
-  dist = std::normal_distribution<double>(0, 1);
 
   // Variables for computing cpd
   k = mean.n_rows;

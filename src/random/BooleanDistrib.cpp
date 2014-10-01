@@ -12,7 +12,7 @@ namespace swift {
 namespace random {
 
 BooleanDistrib::BooleanDistrib() :
-    p(0), logp(0), log1_p(0) {
+    dist(0.0, 1.0), p(0), logp(0), log1_p(0) {
 }
 
 BooleanDistrib::~BooleanDistrib() {
@@ -24,11 +24,10 @@ void BooleanDistrib::init(double p) {
   this->p = p;
   logp = std::log(p);
   log1_p = std::log(1-p);
-  dist = std::bernoulli_distribution(p);
 }
 
 bool BooleanDistrib::gen() {
-  return dist(engine);
+  return dist(engine) < p;
 }
 
 double BooleanDistrib::likeli(const bool& x) {

@@ -12,7 +12,7 @@ namespace swift {
 namespace random {
 
 Bernoulli::Bernoulli() :
-    p(0) {
+    dist(0.0,1.0), p(0) {
 }
 
 Bernoulli::~Bernoulli() {
@@ -24,11 +24,10 @@ void Bernoulli::init(double p) {
   this->p = p;
   logp = std::log(p);
   log1_p = std::log(1-p);
-  dist = std::bernoulli_distribution(p);
 }
 
 int Bernoulli::gen() {
-  return dist(engine);
+  return dist(engine) < p;
 }
 
 double Bernoulli::likeli(const int& x) {
