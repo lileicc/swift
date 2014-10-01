@@ -21,7 +21,7 @@ public:
   double likeli(const bool& x);
   double loglikeli(const bool& x);
 private:
-  std::uniform_real_distribution dist;
+  std::uniform_real_distribution<double> dist;
   double p;
   double logp;
   double log1_p;
