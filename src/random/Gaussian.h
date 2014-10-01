@@ -24,6 +24,8 @@ private:
   std::normal_distribution<double> dist;
   double mean, stddev;
   double coef, log_coef, scale;
+  bool is_expcoef_ok, is_logcoef_ok;
+  const double sqrt_2PI;
 };
 
 } /* namespace random */
