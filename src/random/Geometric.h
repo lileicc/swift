@@ -24,6 +24,7 @@ private:
   std::geometric_distribution<int> dist;
   double p, q;
   double logp, logq;
+  bool is_loglike_ok, is_dist_ok;
 };
 
 } /* namespace random */

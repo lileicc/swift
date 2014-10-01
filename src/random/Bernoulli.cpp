@@ -12,7 +12,9 @@ namespace swift {
 namespace random {
 
 Bernoulli::Bernoulli() :
-    dist(0.0,1.0), p(0) {
+    dist(0.0,1.0), p(0.5), 
+    logp(std::log(0.5)), log1_p(std::log(0.5)), 
+    is_loglike_ok(true) {
 }
 
 Bernoulli::~Bernoulli() {
@@ -21,9 +23,10 @@ Bernoulli::~Bernoulli() {
 void Bernoulli::init(double p) {
   if(p < 0) p = 0;
   if(p > 1) p = 1;
-  this->p = p;
-  logp = std::log(p);
-  log1_p = std::log(1-p);
+  if (p != this->p) {
+    this->p = p;
+    is_loglike_ok = false;
+  }
 }
 
 int Bernoulli::gen() {
@@ -35,6 +38,11 @@ double Bernoulli::likeli(const int& x) {
 }
 
 double Bernoulli::loglikeli(const int& x) {
+  if (!is_loglike_ok) {
+    logp = std::log(p);
+    log1_p = std::log(1 - p);
+    is_loglike_ok = true;
+  }
   return x ? logp : log1_p;
 }
 

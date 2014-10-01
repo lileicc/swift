@@ -24,7 +24,8 @@ private:
   std::uniform_real_distribution<double> dist;
   double a;
   double b;
-  double scale;
+  double scale, logscale;
+  bool is_logscale_ok;
 };
 
 } /* namespace random */

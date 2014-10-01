@@ -25,6 +25,7 @@ private:
   double p;
   double logp;
   double log1_p;
+  bool is_loglike_ok;
 };
 
 } /* namespace random */
