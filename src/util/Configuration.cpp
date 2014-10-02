@@ -38,7 +38,12 @@ void Configuration::setValue(std::string name, _T value) {
 }
 
 template<>
-void Configuration::setValue(std::string name, std::string value) {
+void Configuration::setValue<std::string>(std::string name, std::string value) {
+  property[name] = value;
+}
+
+template<>
+void Configuration::setValue<const char*>(std::string name, const char* value) {
   property[name] = value;
 }
 
