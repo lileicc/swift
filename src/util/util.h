@@ -45,16 +45,13 @@ inline double toReal<std::string>(const std::string& a) {
 }
 
 // convert to String
-std::string toString(bool v) {
-  return v ? "true" : "false";
-}
-
-//@ISSUE
-// Note that in swift, we do not provide char character currently
-//  and we also treat boolean as char
-std::string toString(char v) {
-  return v ? "true" : "false";
-}
+template<class T>
+inline std::string toString(const T& a) { return std::to_string(a); }
+template<>
+inline std::string toString<bool>(const bool&a) {return a ? "true" : "false";}
+// @ISSUE: Currently we do not support char and treat boolean as char
+template<>
+inline std::string toString<char>(const char&a) { return a ? "true" : "false"; }
 
 // computing log( exp(a) + exp(b) )
 // NOTE this function cannot handle infinity
