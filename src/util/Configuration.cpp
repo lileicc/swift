@@ -37,6 +37,11 @@ void Configuration::setValue(std::string name, _T value) {
   property[name] = std::to_string(value);
 }
 
+template<>
+void Configuration::setValue(std::string name, std::string value) {
+  property[name] = value;
+}
+
 std::string Configuration::getValue(std::string name) {
   auto x = property.find(name);
   if (x == property.end())

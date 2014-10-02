@@ -48,6 +48,8 @@ inline double toReal<std::string>(const std::string& a) {
 template<class T>
 inline std::string toString(const T& a) { return std::to_string(a); }
 template<>
+inline std::string toString<std::string>(const std::string& a) { return a; }
+template<>
 inline std::string toString<bool>(const bool&a) {return a ? "true" : "false";}
 // @ISSUE: Currently we do not support char and treat boolean as char
 template<>
