@@ -7,12 +7,15 @@
 
 #include "Configuration.h"
 
+#include<iostream>
+
+
 namespace swift {
 
 Configuration* Configuration::config = NULL;
 
 Configuration::Configuration() {
-  setValue("COMPUTE_LIKELIHOOD_IN_LOG", "true");
+  setValue("COMPUTE_LIKELIHOOD_IN_LOG", true);
 }
 
 Configuration* Configuration::getConfiguration() {
@@ -37,14 +40,16 @@ void Configuration::setValue(std::string name, _T value) {
   property[name] = std::to_string(value);
 }
 
-template<>
-void Configuration::setValue<std::string>(std::string name, std::string value) {
+void Configuration::setValue(std::string name, std::string value) {
   property[name] = value;
 }
 
-template<>
-void Configuration::setValue<const char*>(std::string name, const char* value) {
-  property[name] = value;
+void Configuration::setValue(std::string name, const char* value) {
+  property[name] = std::string(value);
+}
+
+void Configuration::setValue(std::string name, bool value) {
+  property[name] = (value ? "true": "false");
 }
 
 std::string Configuration::getValue(std::string name) {

@@ -16,10 +16,9 @@ public:
   static Configuration* getConfiguration();
   template<typename _T>
   void setValue(std::string name, _T value);
-  template<>
-  void setValue<std::string>(std::string name, std::string value);
-  template<>
-  void setValue<const char*>(std::string name, const char* value);
+  void setValue(std::string name, std::string value);
+  void setValue(std::string name, const char* value);
+  void setValue(std::string name, bool value);
   std::string getValue(std::string name);
   bool getBoolValue(std::string name);
   int getIntValue(std::string name);
