@@ -56,6 +56,10 @@ PreDeclFactory::PreDeclFactory() {
   decls[predecl::PreDeclList::asScalarFuncDecl.getName()] =
     &predecl::PreDeclList::asScalarFuncDecl;
 
+  // Different Names Referring to the Same Function/Distribution
+  decls["toString"] = &predecl::PreDeclList::toStringFuncDecl;
+  decls["UnivarGaussian"] = &predecl::PreDeclList::gaussianDistr;
+
   // Add Builtin Function using Function Interface
   for (auto& s : predecl::PreDeclList::funcStore)
     decls[s.first] = s.second.get();

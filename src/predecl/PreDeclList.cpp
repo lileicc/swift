@@ -114,6 +114,7 @@ std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::initFuncStore() {
   ret["colsum"] = std::make_shared<MatrixMatrixFuncDecl>("_predecl_colsum");
   ret["rowsum"] = std::make_shared<MatrixMatrixFuncDecl>("_predecl_rowsum");
   ret["matsum"] = std::make_shared<MatrixRealFuncDecl>("accu");
+
   return ret;
 }
 
