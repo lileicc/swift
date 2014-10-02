@@ -69,6 +69,7 @@ protected:
 
   // Util Functions for Particle Filtering in Util.h
   static const std::string PF_RESAMPLE_FUN_NAME;
+  static const std::string PF_NORMALIZE_LOGWEI_FUN_NAME;
   static const std::string PF_COPY_PTR_FUN_NAME;
 
   // Variable Name to store all evidences

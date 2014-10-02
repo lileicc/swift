@@ -207,9 +207,21 @@ bool _exists(int n, std::function<bool(int)> fun) {
 }
 
 /*
+ * Normalize Log-Weights
+ *  For Particle Filtering
+ */
+template<int SampleN>
+void normalizeLogWeights(double *weight) {
+  double maxval = *max_element(weight, weight + SampleN);
+  double* endptr = weight + SampleN;
+  for (; weight != endptr; ++weight) {
+    *weight = std::exp(*weight - maxval);
+  }
+}
+
+/*
  * Resample Function
- * For Particle Filtering
- *   Using Multinomial Distribution
+ *  For Particle Filtering
  * >> Input Arguments:
  *    > template: SampleN, Dependency, class name for static memorization, class name for temporal memorization
  *    > arguments: weight, {static memorization and ptr}, {temporal ptr and backup ptr}

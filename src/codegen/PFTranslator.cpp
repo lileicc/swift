@@ -40,6 +40,7 @@ const std::string PFTranslator::TMP_LOOP_VAR_NAME = "_i";
 const std::string PFTranslator::TMP_LOCAL_TS_INDEX_VAR_NAME = "_tmp_idx";
 // Special Util Funciton for PF
 const std::string PFTranslator::PF_RESAMPLE_FUN_NAME = "resample";
+const std::string PFTranslator::PF_NORMALIZE_LOGWEI_FUN_NAME = "normalizeLogWeights";
 const std::string PFTranslator::PF_COPY_PTR_FUN_NAME = "pointer_copy";
 // Special Util data structure for PF to store temporal evidence/query/print
 const std::string PFTranslator::TMP_EVI_STORE_NAME = "_evidenceTable";
@@ -245,6 +246,7 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
         weight[cur_loop]=local_weight;
       }
       print();
+      (optional, if compute in log_likeli) normalizeLogWeights<SampleN>(weight);
       resample(...);
       (optional) [pertubations ... ]
     }
@@ -291,6 +293,18 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
   
   // :::==> print();
   body_time->addStmt(new code::CallExpr(new code::Identifier(ANSWER_PRINT_METHOD_NAME)));
+
+  if (COMPUTE_LIKELIHOOD_IN_LOG) {
+    /*
+     * :::=>
+     *  normalizeLogWeights<SampleN>(weight);
+     */
+    body_time->addStmt(
+      new code::CallTemplateExpr(
+        new code::Identifier(PF_NORMALIZE_LOGWEI_FUN_NAME),
+        std::vector<code::Expr*>({new code::Identifier(PARTICLE_NUM_VAR_NAME)}),
+        std::vector<code::Expr*>({new code::Identifier(GLOBAL_WEIGHT_VARNAME)})));
+  }
 
   /* :::=> 
     resample<SampleN,Dependency,Static_State,Temp_State>(
