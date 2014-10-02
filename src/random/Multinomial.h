@@ -11,6 +11,9 @@
 #include <vector>
 #include "SwiftDistribution.h"
 
+#include "armadillo"
+using namespace arma;
+
 namespace swift {
 namespace random {
 
@@ -18,9 +21,10 @@ class Multinomial: public swift::random::SwiftDistribution<int > {
 public:
   Multinomial();
   virtual ~Multinomial();
-  void init(std::vector<double> wei);
-  void init(double* wei, int n);
-  void init(double* begin, double* end);
+  void init(const std::vector<double>& wei);
+  void init(const double* wei, int n);
+  void init(const double* begin, const double* end);
+  void init(const arma::mat& wei);
   int gen();
   std::vector<int> gen(int n);
   double likeli(const int& x);
@@ -30,6 +34,9 @@ public:
 private:
   std::uniform_real_distribution<double> dist;
   std::vector<double> weight;
+  std::vector<double> log_weight;
+  double sum_wei;
+  std::vector<bool> is_logwei_ok;
 };
 
 } /* namespace random */
