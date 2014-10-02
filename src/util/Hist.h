@@ -328,8 +328,9 @@ public:
 
   void add(double element, double weight) {
     if (isLogarithm) {
-      sum += element * std::exp(weight);
-      sum_sqr += element * element * std::exp(weight);
+      double norm_wei = std::exp(weight);
+      sum += element * norm_wei;
+      sum_sqr += element * element * norm_wei;
       sum_wei = logsum(sum_wei, weight);
     }
     else {
@@ -356,6 +357,7 @@ public:
   void print(std::string str = std::string()) {
     if(str.size() > 0)
       printf(">> query : %s\n", str.c_str());
+    double logsum_wei = sum_wei;
     if (isLogarithm) sum_wei = std::exp(sum_wei);
     double mean = sum / sum_wei;
     double mean_sqr = sum_sqr / sum_wei;
@@ -366,7 +368,7 @@ public:
     double cur = lo;
     for (int i = 0; i < n; ++i) {
       if (isLogarithm)
-        bucket[i] = std::exp(bucket[i] - sum_wei);
+        bucket[i] = std::exp(bucket[i] - logsum_wei);
       else
         bucket[i] /= sum_wei;
       printf("%c%lf, %lf] -> %.8lf\n", (i == 0 ? '[' : '('), (i == 0 ? left_bound : cur), (i == n - 1 ? right_bound : cur + det), bucket[i]);

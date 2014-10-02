@@ -223,7 +223,7 @@ bool _exists(int n, std::function<bool(int)> fun) {
  */
 template<int SampleN>
 void normalizeLogWeights(double *weight) {
-  double maxval = *max_element(weight, weight + SampleN);
+  double maxval = *std::max_element(weight, weight + SampleN);
   double* endptr = weight + SampleN;
   for (; weight != endptr; ++weight) {
     *weight = std::exp(*weight - maxval);

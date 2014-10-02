@@ -46,7 +46,7 @@ public:
   void add(mat element, double weight) {
     mat cur;
     if (isLogarithm) {
-      cur = element * exp(weight);
+      cur = element * std::exp(weight);
       sum_wei = logsum(sum_wei, weight);
     }
     else {
@@ -92,7 +92,7 @@ public:
     double w = getTotalWeight();
     for (auto & it : table) {
       if (isLogarithm)
-        it.second = exp(it.second - w);
+        it.second = std::exp(it.second - w);
       else
         it.second = it.second / w;
     }
@@ -103,7 +103,7 @@ public:
   void print(std::string str = std::string()) {
     if(str.size() > 0)
       printf(">> query : %s\n", str.c_str());
-    if (isLogarithm) sum_wei = exp(sum_wei);
+    if (isLogarithm) sum_wei = std::exp(sum_wei);
     mat mean = sum / sum_wei;
     mat cov = mean, var = mean;
     cov.zeros(); var.zeros();
