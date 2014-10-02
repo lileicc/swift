@@ -65,10 +65,13 @@ code::Stmt* PFTranslator::referTempStateStmt(code::DeclContext* context, std::st
   code::Expr* TS_loc = new code::BinaryOperator(
     new code::Identifier(tempArg), new code::Identifier(DEPEND_NUM_VAE_NAME), code::OpKind::BO_MOD);
   return new code::DeclStmt(new code::VarDecl(context, CUR_STATE_VAR_NAME, REF_TEMP_MEMO_TYPE,
-    new code::BinaryOperator(NULL,
+    new code::BinaryOperator(
+      NULL,
       new code::ArraySubscriptExpr(
-        new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME),TS_loc),
-        new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)), code::OpKind::UO_DEREF)));
+        new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), 
+                                   new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
+        TS_loc),
+      code::OpKind::UO_DEREF)));
 }
 
 code::Expr* PFTranslator::referVarFromState(code::Expr* var) {
@@ -151,10 +154,10 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
     /*
     translated code for basic data structures looks like:
       Static_State stat_memo[SampleN];
-      Temp_State temp_memo[Dependency][SampleN];
+      Temp_State temp_memo[SampleN][Dependency];
       Static_State* ptr_stat_memo[SampleN];
-      Temp_State* ptr_temp_memo[Dependency][SampleN];
-      Temp_State* backup_ptr[Dependency][SampleN];
+      Temp_State* ptr_temp_memo[SampleN][Dependency];
+      Temp_State* backup_ptr[SampleN][Dependency];
     */
     // Basic Memorization Data Structure for variables
     code::VarDecl::createVarDecl(coreNs, STAT_MEMO_VAR_NAME, 
@@ -162,15 +165,15 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
     code::VarDecl::createVarDecl(coreNs, PTR_STAT_MEMO_VAR_NAME,
       std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), STAT_MEMO_TYPE);
     code::VarDecl::createVarDecl(coreNs, TEMP_MEMO_VAR_NAME,
-      std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME), 
-                          new code::Identifier(PARTICLE_NUM_VAR_NAME) }), TEMP_MEMO_TYPE);
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME), 
+                          new code::Identifier(DEPEND_NUM_VAE_NAME) }), TEMP_MEMO_TYPE);
     // Pointer to Memorization Data Structures
     code::VarDecl::createVarDecl(coreNs, PTR_TEMP_MEMO_VAR_NAME,
-      std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME), 
-                          new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_TEMP_MEMO_TYPE);
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME),
+                          new code::Identifier(DEPEND_NUM_VAE_NAME) }), PTR_TEMP_MEMO_TYPE);
     code::VarDecl::createVarDecl(coreNs, PTR_BACKUP_VAR_NAME,
-      std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME),
-                          new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_TEMP_MEMO_TYPE);
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME),
+                          new code::Identifier(DEPEND_NUM_VAE_NAME)}), PTR_TEMP_MEMO_TYPE);
 
     // create Init Method
     createInit();
@@ -255,14 +258,17 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
       new code::VarDecl(NULL,TMP_LOCAL_TS_INDEX_VAR_NAME,INT_TYPE,
         new code::BinaryOperator(new code::Identifier(CUR_TIMESTEP_VAR_NAME),
                                  new code::Identifier(DEPEND_NUM_VAE_NAME),code::OpKind::BO_MOD))));
-  // :::=> copy_pointer(ptr_temp_memo[ind_t], temp_memo[ind_t], ParticleN);
-  body_time->addStmt(new code::CallExpr(new code::Identifier(PF_COPY_PTR_FUN_NAME),
+  // :::=> pointer_copy<_ParticleN_,_DependN_>(_tmp_idx,_ptr_temp_memo,_temp_memo);
+  body_time->addStmt(new code::CallTemplateExpr(new code::Identifier(PF_COPY_PTR_FUN_NAME),
+    std::vector<code::Expr*>({ 
+      new code::Identifier(PARTICLE_NUM_VAR_NAME), 
+      new code::Identifier(DEPEND_NUM_VAE_NAME)
+    }),
     std::vector<code::Expr*>({
-      new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME),
-                                   new code::Identifier(TMP_LOCAL_TS_INDEX_VAR_NAME)),
-      new code::ArraySubscriptExpr(new code::Identifier(TEMP_MEMO_VAR_NAME),
-                                   new code::Identifier(TMP_LOCAL_TS_INDEX_VAR_NAME)),
-      new code::Identifier(PARTICLE_NUM_VAR_NAME)})));
+      new code::Identifier(TMP_LOCAL_TS_INDEX_VAR_NAME),
+      new code::Identifier(PTR_TEMP_MEMO_VAR_NAME),
+      new code::Identifier(TEMP_MEMO_VAR_NAME)
+    })));
   // body of cur_loop for-loop
   code::CompoundStmt* body_loop = new code::CompoundStmt();
   body_time->addStmt(createForeachLoop(CURRENT_SAMPLE_NUM_VARNAME, PARTICLE_NUM_VAR_NAME, body_loop, true));
@@ -287,17 +293,19 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
   body_time->addStmt(new code::CallExpr(new code::Identifier(ANSWER_PRINT_METHOD_NAME)));
 
   /* :::=> 
-    resample<Dependency,SampleN,Static_State,Temp_State>(
+    resample<SampleN,Dependency,Static_State,Temp_State>(
       weight, stat_memo, ptr_stat_memo,
-      temp_memo, ptr_temp_memo, backup_ptr);
+      ptr_temp_memo, backup_ptr);
   */
   body_time->addStmt(new code::CallTemplateExpr(
     new code::Identifier(PF_RESAMPLE_FUN_NAME),
     std::vector<code::Expr*>({
-      new code::Identifier(DEPEND_NUM_VAE_NAME), new code::Identifier(PARTICLE_NUM_VAR_NAME)}),
+      new code::Identifier(PARTICLE_NUM_VAR_NAME),
+      new code::Identifier(DEPEND_NUM_VAE_NAME)}),
     std::vector<code::Expr*>({
-      new code::Identifier(GLOBAL_WEIGHT_VARNAME), new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
-      new code::Identifier(TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_BACKUP_VAR_NAME)}))
+      new code::Identifier(GLOBAL_WEIGHT_VARNAME), 
+      new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
+      new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_BACKUP_VAR_NAME)}))
   );
 
   // Perturbation for Liu-West Filter

@@ -18,7 +18,7 @@
 #include <sstream>
 #include <cstdio>
 #include <random>
-#include "../random/Multinomial.h"
+#include <array>
 
 namespace swift {
 
@@ -211,49 +211,58 @@ bool _exists(int n, std::function<bool(int)> fun) {
  * For Particle Filtering
  *   Using Multinomial Distribution
  * >> Input Arguments:
- *    > template: Dependency, SampleN, class name for static memorization, class name for temporal memorization
- *    > arguments: weight, {static memorization and ptr}, {temporal memorization, ptr and backup ptr}
+ *    > template: SampleN, Dependency, class name for static memorization, class name for temporal memorization
+ *    > arguments: weight, {static memorization and ptr}, {temporal ptr and backup ptr}
  */
-template<int Dependency, int SampleN, class stat_T, class temp_T>
+template<int SampleN, int Dependency, class stat_T, class temp_T>
 void resample(
-  double* weight, 
-  stat_T stat_memo[SampleN], stat_T ptr_stat_memo[SampleN], 
-  temp_T temp_memo[Dependency][SampleN], temp_T* ptr_temp_memo[Dependency][SampleN], temp_T* backup_ptr[Dependency][SampleN]) {
-  swift::random::Multinomial dist;
-  dist.init(weight, weight + SampleN);
-  std::vector<int> candidate = dist.gen(SampleN);
-  for(int i = 0; i < SampleN; ++ i) {
-    int pos = candidate[i];
-    // Swap Static States
-    ptr_stat_memo[i] = stat_memo[pos];
-    for(int j = 0; j < Dependency; ++ j)
-      backup_ptr[j][i] = ptr_temp_memo[j][pos];
+  double* weight,
+  stat_T stat_memo[SampleN], stat_T ptr_stat_memo[SampleN],
+  temp_T* ptr_temp_memo[SampleN][Dependency], temp_T* backup_ptr[SampleN][Dependency]) {
+  static std::array<double,SampleN> tar;
+  static std::uniform_real_distribution<double> dist(0, 1);
+  static std::default_random_engine gen;
+
+  for (int i = 1; i<SampleN; ++i) {
+    weight[i] += weight[i - 1];
   }
-  
-  std::memcpy(ptr_temp_memo, backup_ptr, sizeof(temp_T*) * Dependency * SampleN);
-  std::memcpy(stat_memo, ptr_stat_memo, sizeof(stat_T) * SampleN);
+  double sum_wei = weight[SampleN - 1];
+  for (int i = 0; i<SampleN; ++i)
+    tar[i] = dist(gen)*sum_wei;
+
+  std::sort(tar.begin(), tar.end());
+
+  int pos = 0;
+  for (int i = 0; i < SampleN; ++i) {
+    for (; weight[pos]<tar[i]; ++pos);
+    ptr_stat_memo[i] = stat_memo[pos];
+    memcpy(backup_ptr[i], ptr_temp_memo[pos], sizeof(temp_T*)* Dependency);
+  }
+  std::memcpy(ptr_temp_memo, backup_ptr, sizeof(temp_T*)* Dependency * SampleN);
+  std::memcpy(stat_memo, ptr_stat_memo, sizeof(stat_T)* SampleN);
 }
 
 /*
  * Pointer Copy function
  * For Particle Filtering
  * >> Input Arguments:
- *    > ptr: array containing pointers
- *    > state: array that ptr points to
+ *    > t: current time step
+ *    > ptr: pointers
+ *    > state: memorization data structure
  * >> Usage:
- *    > make sure ptr[i] points to state[i]
+ *    > make sure ptr[i][t] points to state[i][t]
  */
-template<class State>
-void pointer_copy(State** ptr, State* state, int N) {
-  for(int i=0;i<N;++i)
-    ptr[i] = state + i;
+template<int SampleN, int Dependency, class State>
+void pointer_copy(int t, State* ptr[SampleN][Dependency], State state[SampleN][Dependency]) {
+  for (int i = 0; i<SampleN; ++i)
+    ptr[i][t] = state[i] + t;
 }
 
 // Internal Function for TimeStep Operation
 inline unsigned prev(unsigned u) {return u - 1;}
 inline unsigned prev(unsigned u, int t) {return u - t;}
 
-double randn() {
+inline double randn() {
   static std::default_random_engine generator;
   static std::normal_distribution<double> stdnorm(0, 1);
   return stdnorm(generator);
