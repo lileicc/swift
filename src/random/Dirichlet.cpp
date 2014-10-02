@@ -11,7 +11,7 @@
 namespace swift {
 namespace random {
 
-Dirichlet::Dirichlet() :
+Dirichlet::Dirichlet()
   is_coef_ok(false), is_logcoef_ok(false),
   is_dist_ok(false) {
 }

@@ -11,25 +11,32 @@
 namespace swift {
 namespace random {
 
-Discrete::Discrete()
-  :is_dist_ok(false) {
+Discrete::Discrete() {
 }
 
 Discrete::~Discrete() {
 }
 
-void Discrete::init(const std::vector<double>& wei) {
+void Discrete::init(std::vector<double> wei) {
   weights = wei;
-  is_dist_ok = false;
-  is_logwei_ok.clear();
+  log_weights.clear();
+  for (auto w : weights) {
+    log_weights.push_back(std::log(w));
+  }
+  /*
+   Note: In VS2013, we have to rewrite the last line with the following code
+
+  auto lis = std::initializer_list<double>(weights.data(), weights.data() + weights.size());
+  dist = std::discrete_distribution<int>(lis);
+   */
+  dist = std::discrete_distribution<int>(weights.begin(), weights.end());
 }
 
-void Discrete::init(const arma::mat& wei) {
-  weights.resize(wei.n_elem);
+void Discrete::init(arma::mat wei) {
+  std::vector<double> w;
   for (size_t i = 0; i < wei.n_elem; ++ i)
-    weights[i] = wei[i];
-  is_dist_ok = false;
-  is_logwei_ok.clear();
+    w.push_back(wei[i]);
+  init(w);
 }
 
 template<typename _RD>
@@ -38,16 +45,6 @@ int Discrete::gen(_RD& rd) {
 }
 
 int Discrete::gen() {
-  if(!is_dist_ok) {
-    /*
-     Note: In VS2013, we have to rewrite the last line with the following code
-  
-    auto lis = std::initializer_list<double>(weights.data(), weights.data() + weights.size());
-    dist = std::discrete_distribution<int>(lis);
-    */ 
-    dist = std::discrete_distribution<int>(weights.begin(), weights.end());
-    is_dist_ok = true;
-  }
   return gen(engine);
 //  //custom implementation 
 //  double u = (double)rand() / RAND_MAX;
@@ -68,17 +65,9 @@ double Discrete::likeli(const int& x) {
 
 double Discrete::loglikeli(const int& x) {
   // todo: check -infinity!!!
-  if (x >= 0 && x < weights.size()) {
-    if(is_logwei_ok.size() == 0) {
-      is_logwei_ok.resize(weights.size());
-      log_weights.resize(weights.size());
-    }
-    if(!is_logwei_ok[x]) {
-      log_weights[x] = std::log(weights[x]);
-      is_logwei_ok[x]=true;
-    }
+  if (x >= 0 && x < weights.size())
     return log_weights[x];
-  } else
+  else
     return - INFINITY;
 }
 

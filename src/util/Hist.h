@@ -281,7 +281,7 @@ private:
     det = (hi - lo) / n;
     bucketFixed = true;
     bucket.resize(n);
-    std::fill(bucket.begin(), bucket.end(), 0);
+    fill(bucket.begin(), bucket.end(), 0);
     for (auto& p : table)
       add_to_bucket(p.first, p.second);
     table.clear();

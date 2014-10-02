@@ -259,7 +259,6 @@ void CPPPrinter::print(code::Code* prog) {
       fprintf(file, "#include \"armadillo\"\n");
       fprintf(file, "#include \"random/Dirichlet.h\"\n");
       fprintf(file, "#include \"random/Discrete.h\"\n");
-      fprintf(file, "#include \"random/Multinomial.h\"\n");
       fprintf(file, "#include \"random/MultivarGaussian.h\"\n");
       fprintf(file, "#include \"random/UniformVector.h\"\n");
       fprintf(file, "#include \"util/Hist_matrix.h\"\n");
