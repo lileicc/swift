@@ -11,7 +11,9 @@
 namespace swift {
 namespace random {
 
-Dirichlet::Dirichlet() {
+Dirichlet::Dirichlet()
+  is_coef_ok(false), is_logcoef_ok(false),
+  is_dist_ok(false) {
 }
 
 Dirichlet::~Dirichlet() {
@@ -19,19 +21,9 @@ Dirichlet::~Dirichlet() {
 
 void Dirichlet::init(std::vector<double> alpha) {
   this->alpha = alpha;
-  arr.reshape(1, (int)alpha.size());
-  dist_alpha.clear();
-  double alpha_sum = 0;
-  coef = 1;
-  log_coef = 0;
-  for(auto a: alpha) {
-  	dist_alpha.push_back(std::gamma_distribution<double>(a));
-  	alpha_sum += a;
-  	coef *= 1.0 / std::tgamma(a);
-  	log_coef -= std::lgamma(a);
-  }
-  coef *= std::tgamma(alpha_sum);
-  log_coef += std::lgamma(alpha_sum);
+  is_dist_ok = false;
+  is_coef_ok = false;
+  is_logcoef_ok = false;
 }
 
 void Dirichlet::init(arma::mat alpha) {
@@ -53,6 +45,15 @@ void Dirichlet::init(int n_param, ...) {
 }
 
 arma::mat Dirichlet::gen() {
+  if(!is_dist_ok){
+    arr.reshape(1, (int)alpha.size());
+    dist_alpha.resize(alpha.size());
+    auto iter = dist_alpha.begin();
+    for(auto&a:alpha) {
+      *iter++ = std::gamma_distribution<double>(a);
+    }
+    is_dist_ok = true;
+  }
   int i = 0;
   double sum = 0;
   for(auto dist: dist_alpha) {
@@ -64,6 +65,16 @@ arma::mat Dirichlet::gen() {
 
 double Dirichlet::likeli(const arma::mat& x) {
   if(x.n_elem != alpha.size()) return 0;
+  if(!is_coef_ok) {
+    double alpha_sum = 0;
+    coef = 1;
+    for(auto& a: alpha) {
+    	alpha_sum += a;
+    	coef *= 1.0/std::tgamma(a);
+    }
+    coef *= std::tgamma(alpha_sum);
+    is_coef_ok = true;
+  }
   double ret = coef;
   for(size_t i = 0; i < alpha.size(); ++ i)
     ret*= pow(x[i], alpha[i] - 1.0);
@@ -72,6 +83,16 @@ double Dirichlet::likeli(const arma::mat& x) {
 
 double Dirichlet::loglikeli(const arma::mat& x) {
   if(x.n_elem != alpha.size()) return - INFINITY;
+  if(!is_logcoef_ok) {
+    double alpha_sum = 0;
+    log_coef = 0;
+    for(auto a: alpha) {
+    	alpha_sum += a;
+    	log_coef -= std::lgamma(a);
+    }
+    log_coef += std::lgamma(alpha_sum);
+    is_logcoef_ok = true;
+  }
   double ret = log_coef;
   for(size_t i = 0; i < alpha.size(); ++ i)
     ret += (alpha[i] - 1.0) * x[i];

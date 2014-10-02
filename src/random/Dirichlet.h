@@ -31,6 +31,7 @@ private:
   std::vector<double> alpha;
   arma::mat arr;
   double coef, log_coef;
+  bool is_coef_ok, is_logcoef_ok, is_dist_ok;
 };
 
 } /* namespace random */
