@@ -12,7 +12,7 @@ namespace swift {
 Configuration* Configuration::config = NULL;
 
 Configuration::Configuration() {
-  setValue("COMPUTE_LIKELIHOOD_IN_LOG", true);
+  setValue("COMPUTE_LIKELIHOOD_IN_LOG", "true");
 }
 
 Configuration* Configuration::getConfiguration() {
