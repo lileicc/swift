@@ -32,6 +32,24 @@ namespace swift {
 #define _predecl_colsum(a) (arma::sum(a,0))
 #define _predecl_rowsum(a) (arma::sum(a,1))
 
+// Special Case for toInt
+template<>
+inline int toInt<arma::mat>(const arma::mat& a) {
+  return a[0];
+}
+
+// Special Case for toReal
+template<>
+inline double toReal<arma::mat>(const arma::mat& a) {
+  return a[0];
+}
+
+// Get number of rows of a matrix
+inline int getRows(const arma::mat& a) { return a.n_rows; }
+// Get number of columns of a matrix
+inline int getCols(const arma::mat& a) { return a.n_cols; }
+
+
 // get submatrix from a large matrix
 inline mat _mat_getrow(const mat& m, int r) {
   return m.row(r);
@@ -101,6 +119,16 @@ mat hstack(std::initializer_list<mat> mat_list) {
   return ret;
 }
 
+// horizontally stack all the double scalars
+mat hstack(std::initializer_list<double> val_list) {
+  rowvec ret(val_list.size());
+  int i=0;
+  for (auto& m : val_list) {
+    ret[i++] = m;
+  }
+  return ret;
+}
+
 // vertically stack all the matrix/row vector
 mat vstack(std::initializer_list<mat> mat_list) {
   mat ret;
@@ -111,6 +139,16 @@ mat vstack(std::initializer_list<mat> mat_list) {
       ret = m;
     } else
       ret = join_vert(ret, m);
+  }
+  return ret;
+}
+
+// vertically stack all the double scalars
+mat vstack(std::initializer_list<double> val_list) {
+  vec ret(val_list.size());
+  int i = 0;
+  for (auto& v : val_list) {
+    ret[i++] = v;
   }
   return ret;
 }
