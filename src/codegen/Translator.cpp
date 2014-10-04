@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include "../predecl/PreDecl.h"
+#include "../predecl/MatrixStackFuncDecl.h"
 
 #include "Translator.h"
 
@@ -68,7 +69,7 @@ const std::string Translator::HISTOGRAM_ADD_METHOD_NAME = "add";
 const std::string Translator::HISTOGRAM_PRINT_METHOD_NAME = "print";
 const std::string Translator::LOG_EQUAL_FUN_NAME = "logEqual";
 const std::string Translator::ISFINITE_FUN_NAME = "isfinite";
-const std::string Translator::NEG_INFINITE_NAME = "-INFINITE";
+const std::string Translator::NEG_INFINITE_NAME = "-INFINITY";
 const std::string Translator::ANSWER_VAR_NAME_PREFIX = "_answer_";
 const std::string Translator::ANSWER_PRINT_METHOD_NAME = "print";
 const std::string Translator::MAIN_DEBUG_METHOD_NAME = "debug";
@@ -1450,19 +1451,15 @@ void Translator::transAllEvidence(
       coreCls, SET_EVIDENCE_FUN_NAME, BOOL_TYPE);
   fun->setParams(std::vector<code::ParamVarDecl*>{new code::ParamVarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_REF_TYPE)});
 
-  code::Expr* res;
-  if (COMPUTE_LIKELIHOOD_IN_LOG)
-    res = new code::Identifier(NEG_INFINITE_NAME);
-  else
-    res = new code::IntegerLiteral(0);
-  fun->addStmt(new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), res, code::OpKind::BO_ASSIGN));
+  fun->addStmt(new code::BinaryOperator(
+    new code::Identifier(WEIGHT_VAR_REF_NAME),
+    new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
+
   for (auto evid : evids) {
     // Firstly Translate all rejection sampling stmts
     transEvidence(fun, evid, false);
   }
-  fun->addStmt(new code::BinaryOperator(
-    new code::Identifier(WEIGHT_VAR_REF_NAME),
-    new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
+  
   for (auto evid : evids) {
     // Firstly Translate all likelihood weighing stmts
     transEvidence(fun, evid, true);
@@ -1607,6 +1604,11 @@ code::Expr* Translator::transFunctionCall(
   std::string getterfunname;
   // Special Check for builtin functions
   if (fc->isBuiltin()) {
+    // Special Check for vstack and hstack
+    if (dynamic_cast<const predecl::MatrixStackFuncDecl*>(fc->getBuiltinRefer()) != NULL) {
+      auto lst = new code::ListInitExpr(args);
+      return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), std::vector<code::Expr*>{lst});
+    }
     return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
   }
   switch (fc->getKind()) {

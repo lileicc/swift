@@ -19,19 +19,27 @@ std::shared_ptr<ir::Expr> MatrixStackFuncDecl::getNew(
     fabrica::TypeFactory* fact) const {
   // Type Checking
   auto mtrx = fact->getTy(ir::IRConstString::MATRIX);
+  auto dbl_ty = fact->getTy(ir::IRConstString::DOUBLE);
+  auto int_ty = fact->getTy(ir::IRConstString::INT);
+  bool has_matrix = false, has_double = false;
   for (auto& a : args) {
-    if (a == nullptr || a->getTyp() != mtrx)
+    if (a == nullptr)
+      return nullptr;
+    if (a->getTyp() == mtrx) {
+      if (has_double) return nullptr;
+      has_matrix = true;
+    } else
+    if (a->getTyp() == dbl_ty || a->getTyp() == int_ty) {
+      if (has_matrix) return nullptr;
+      has_double = true;
+    } else 
       return nullptr;
   }
   if (args.size() < 1) return nullptr;
-  if (args.size() == 1) return args[0];
+  if (args.size() == 1 && has_matrix) return args[0];
 
   auto func = std::make_shared<ir::FunctionCall>(this);
 
-  auto arg_n = std::make_shared<ir::IntLiteral>(args.size());
-  // Note: we need to set ret type for the new argument
-  arg_n->setTyp(fact->getTy(ir::IRConstString::INT));
-  args.insert(args.begin(), arg_n);
   func->setArgs(args);
 
   // check randomness

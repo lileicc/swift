@@ -30,7 +30,7 @@ fixed Real scale(Real k) = transpose(A) * A * k;
 random RealMatrix C ~ MultivarGaussian(B,W);
 random RealMatrix D ~ MultivarGaussian([3.0;3.0;3.0],W);
 
-obs D = [2.0;2.0;2.0];
+obs D = vstack(2,2,2);
 
 query scale(1.5);
 query C[0];
@@ -137,16 +137,14 @@ void MatrixTest::build(){
     blog->add(fd);
   }
   /*
-  obs D = [2.0;2.0;2.0];
+  obs D = vstack(2,2,2);
   */
   {
-    ArrayExpr* mat = new ArrayExpr(0, 0, 2);
+    FuncApp* vs = new FuncApp(0, 0, Symbol("vstack"));
     for (int i = 0; i < 3; ++i) {
-      ArrayExpr* row = new ArrayExpr(0, 0, 1);
-      row->add(new DoubleLiteral(0, 0, 2));
-      mat->add(row);
+      vs->add(new IntLiteral(0,0,2));
     }
-    Evidence* obs = new Evidence(0, 0, new FuncApp(0, 0, Symbol("D")), mat);
+    Evidence* obs = new Evidence(0, 0, new FuncApp(0, 0, Symbol("D")), vs);
     blog->add(obs);
   }
   /*

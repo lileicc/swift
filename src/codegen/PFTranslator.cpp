@@ -8,6 +8,7 @@
 #include <cassert>
 #include <iostream>
 #include "../predecl/PreDecl.h"
+#include "../predecl/MatrixStackFuncDecl.h"
 
 #include "PFTranslator.h"
 
@@ -1979,6 +1980,11 @@ code::Expr* PFTranslator::transFunctionCall(
   std::string getterfunname;
   // Special Check for builtin functions
   if (fc->isBuiltin()) {
+    // Special Check for vstack and hstack
+    if (dynamic_cast<const predecl::MatrixStackFuncDecl*>(fc->getBuiltinRefer()) != NULL) {
+      auto lst = new code::ListInitExpr(args);
+      return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), std::vector<code::Expr*>{lst});
+    }
     return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
   }
   switch (fc->getKind()) {
