@@ -1009,7 +1009,7 @@ static const char *yyrule[] = {
 "expression : operation_expr",
 "expression : literal",
 "expression : function_call",
-"expression : list_construct_expression",
+"expression : list_expr",
 "expression : map_construct_expression",
 "expression : quantified_formula",
 "expression : set_expr",
@@ -1056,8 +1056,8 @@ static const char *yyrule[] = {
 "expression_list : expression_list COMMA expression",
 "expression_list : expression_list extra_commas expression",
 "expression_list : expression",
-"list_construct_expression : LBRACKET opt_expression_list RBRACKET",
-"list_construct_expression : LBRACKET semi_colon_separated_expression_list RBRACKET",
+"list_expr : LBRACKET opt_expression_list RBRACKET",
+"list_expr : LBRACKET semi_colon_separated_expression_list RBRACKET",
 "semi_colon_separated_expression_list : expression_list SEMI semi_colon_separated_expression_list",
 "semi_colon_separated_expression_list : expression_list SEMI expression_list",
 "map_construct_expression : LBRACE expression_pair_list RBRACE",
@@ -1117,7 +1117,7 @@ typedef struct {
 } YYSTACKDATA;
 /* variables for the parser stack */
 static YYSTACKDATA yystack;
-#line 787 "blog.yacc"
+#line 791 "blog.yacc"
 
 
 
@@ -1958,22 +1958,26 @@ case 124:
 break;
 case 125:
 #line 657 "blog.yacc"
-	{ }
+	{ yyval.exp = new ArrayExpr(curr_line, curr_col);
+      for (size_t i = 0; i < yystack.l_mark[-1].explst->size(); i++ ) {
+         yyval.exp->add((*yystack.l_mark[-1].explst)[i]);
+      }
+    }
 break;
 case 126:
-#line 658 "blog.yacc"
-	{ }
+#line 662 "blog.yacc"
+	{ yyerror("semi colon separated list init expression not supported yet"); }
 break;
 case 127:
-#line 663 "blog.yacc"
+#line 667 "blog.yacc"
 	{ }
 break;
 case 128:
-#line 664 "blog.yacc"
+#line 668 "blog.yacc"
 	{ }
 break;
 case 129:
-#line 668 "blog.yacc"
+#line 672 "blog.yacc"
 	{ 
     /*$$ = $2; */
     yyval.mapexp = new MapExpr(curr_line, curr_col);
@@ -1985,46 +1989,46 @@ case 129:
   }
 break;
 case 130:
-#line 681 "blog.yacc"
+#line 685 "blog.yacc"
 	{ 
       yyval.exptuplst = yystack.l_mark[-4].exptuplst;
       yyval.exptuplst->push_back(make_tuple(yystack.l_mark[-2].exp, yystack.l_mark[0].exp));
     }
 break;
 case 131:
-#line 686 "blog.yacc"
+#line 690 "blog.yacc"
 	{ 
       yyval.exptuplst = new vector<tuple<Expr*, Expr*>>();
       yyval.exptuplst->push_back(make_tuple(yystack.l_mark[-2].exp, yystack.l_mark[0].exp));
     }
 break;
 case 132:
-#line 694 "blog.yacc"
+#line 698 "blog.yacc"
 	{ yyval.cardexp = new CardinalityExpr(curr_line, curr_col, (Expr*)yystack.l_mark[0].setexp); }
 break;
 case 133:
-#line 696 "blog.yacc"
+#line 700 "blog.yacc"
 	{ 
       VarDecl var(curr_line, curr_col, *yystack.l_mark[0].typ);
       yyval.cardexp = new CardinalityExpr(curr_line, curr_col, new CondSet(curr_line, curr_col, var));
   }
 break;
 case 134:
-#line 701 "blog.yacc"
+#line 705 "blog.yacc"
 	{
     yyerror("expecting number expression here.");
   }
 break;
 case 135:
-#line 708 "blog.yacc"
+#line 712 "blog.yacc"
 	{yyval.setexp = yystack.l_mark[0].setexp; }
 break;
 case 136:
-#line 709 "blog.yacc"
+#line 713 "blog.yacc"
 	{yyval.setexp = yystack.l_mark[0].setexp; }
 break;
 case 137:
-#line 714 "blog.yacc"
+#line 718 "blog.yacc"
 	{
       yyval.setexp = new ListSet(curr_line, curr_col);
       for(size_t i = 0; i < yystack.l_mark[-1].explst->size(); i++){
@@ -2034,19 +2038,19 @@ case 137:
     }
 break;
 case 138:
-#line 725 "blog.yacc"
+#line 729 "blog.yacc"
 	{
       yyval.compexp[0] = yystack.l_mark[-4].explst; yyval.compexp[1] = yystack.l_mark[-2].varlist; yyval.compexp[2] = yystack.l_mark[0].exp;
     }
 break;
 case 139:
-#line 729 "blog.yacc"
+#line 733 "blog.yacc"
 	{
       yyval.compexp[0] = yystack.l_mark[-2].explst; yyval.compexp[1] = yystack.l_mark[0].varlist; yyval.compexp[2] = NULL;
     }
 break;
 case 140:
-#line 738 "blog.yacc"
+#line 742 "blog.yacc"
 	{ 
     if (yystack.l_mark[-1].compexp != NULL){
       yyval.setexp = new TupleSetExpr(curr_line, curr_col, *((vector<Expr*>*)yystack.l_mark[-1].compexp[0]), *((vector<VarDecl>*)yystack.l_mark[-1].compexp[1]), (Expr*)yystack.l_mark[-1].compexp[2]); 
@@ -2059,48 +2063,48 @@ case 140:
   }
 break;
 case 141:
-#line 751 "blog.yacc"
+#line 755 "blog.yacc"
 	{yyval.stmt = yystack.l_mark[0].stmt; }
 break;
 case 142:
-#line 753 "blog.yacc"
+#line 757 "blog.yacc"
 	{
     yyerror("incorrect obs statement");
   }
 break;
 case 143:
-#line 759 "blog.yacc"
+#line 763 "blog.yacc"
 	{yyval.stmt = yystack.l_mark[0].stmt; }
 break;
 case 144:
-#line 764 "blog.yacc"
+#line 768 "blog.yacc"
 	{
     yyval.stmt = new Evidence(curr_line, curr_col, yystack.l_mark[-2].exp, yystack.l_mark[0].exp); 
   }
 break;
 case 145:
-#line 768 "blog.yacc"
+#line 772 "blog.yacc"
 	{
     yyerror("incorrect lefthand expression in evidence");
   }
 break;
 case 146:
-#line 772 "blog.yacc"
+#line 776 "blog.yacc"
 	{
     yyerror("incorrect righthand expression in evidence");
   }
 break;
 case 147:
-#line 779 "blog.yacc"
+#line 783 "blog.yacc"
 	{ yyval.stmt = new Query(curr_line, curr_col, yystack.l_mark[0].exp); }
 break;
 case 148:
-#line 781 "blog.yacc"
+#line 785 "blog.yacc"
 	{
     yyerror("invalid query");
   }
 break;
-#line 2103 "parser.cpp"
+#line 2107 "parser.cpp"
     }
     yystack.s_mark -= yym;
     yystate = *yystack.s_mark;

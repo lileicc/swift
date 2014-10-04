@@ -159,7 +159,7 @@ BlogProgram* parse(const char* inp) {
 %type <distdec> distinct_decl;
 %type <stmt> evidence value_evidence;
 %type <exp> expression literal operation_expr unary_operation_expr
-  quantified_formula function_call list_construct_expression
+  quantified_formula function_call list_expr
   if_expr case_expr;
 %type <compexp> comprehension_expr;
 %type <cardexp> number_expr;
@@ -512,7 +512,7 @@ expression:
     operation_expr {$$ = $1;}
   | literal {$$ = $1;}
   | function_call {$$ = $1;}
-  | list_construct_expression {$$ = $1;}
+  | list_expr {$$ = $1;}
   | map_construct_expression {$$ = $1;}
   | quantified_formula { $$ = $1; }
   | set_expr { $$ = $1; }
@@ -652,10 +652,14 @@ expression_list:
     }
   ;
   
-//TODO: ExprList  
-list_construct_expression:
-    LBRACKET opt_expression_list RBRACKET { }
-  | LBRACKET semi_colon_separated_expression_list RBRACKET { }
+list_expr:
+    LBRACKET opt_expression_list RBRACKET
+    { $$ = new ArrayExpr(curr_line, curr_col);
+      for (size_t i = 0; i < $2->size(); i++ ) {
+         $$->add((*$2)[i]);
+      }
+    }
+| LBRACKET semi_colon_separated_expression_list RBRACKET { yyerror("semi colon separated list init expression not supported yet"); }
   ;
   
 //TODO: ExprList  
