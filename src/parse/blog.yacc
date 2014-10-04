@@ -171,7 +171,7 @@ BlogProgram* parse(const char* inp) {
 %type <explst> semi_colon_separated_expression_list
   opt_expression_list expression_list;
 %type <exptuplst> expression_pair_list;
-%type <typ> type;
+%type <typ> type, array_type;
 //%type <ast> opt_parenthesized_type_lst, type_lst // Not Used
 %type <varlist> type_var_lst;
 %type <varlist> opt_parenthesized_type_var_lst;
@@ -180,7 +180,7 @@ BlogProgram* parse(const char* inp) {
 %type <symbintpair> id_or_subid;
 %type <symbintvect> id_or_subid_list;
 %type <vardec> var_decl;
-%type <sval> refer_name;
+%type <sval> refer_name, array_type_or_sub;
 
 %left THEN EXISTS_ FORALL_
 %nonassoc EQ_ DISTRIB
@@ -254,6 +254,18 @@ type_decl:
 
 type:
     refer_name { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
+  | array_type { $$ = $1; }
+  ;
+
+array_type_or_sub : refer_name LBRACKET
+    { $$ = $1; }
+;
+
+array_type : array_type_or_sub RBRACKET
+    { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue()), 1); }
+  | array_type LBRACKET RBRACKET
+    { $1->setDim($1->getDim() + 1);
+      $$ = $1; }
   ;
 
 opt_parenthesized_type_var_lst:

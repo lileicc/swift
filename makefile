@@ -22,6 +22,7 @@ SRC=src/absyn/*.cpp \
   src/parse/lexer.cpp
 YACCDIR=lib/byacc-20130925
 
+
 help:
 	@echo 'Makefile for swift compiler                                            '
 	@echo '                                                                       '
@@ -34,8 +35,8 @@ help:
 compile: $(SRC)
 	$(CXX) $(CXX_CFLAGS) $(SRC) -o $(EXEC) $(LIB_FLAGS)
 	
-genparser: byacc
+genparser: $(YACCDIR)/yacc
 	cd src/parse; flex -olexer.cpp blog.flex; ../../$(YACCDIR)/yacc -v -d -o parser.cpp blog.yacc
 
-byacc:
-	cd $(YACCDIR); make
+$(YACCDIR)/yacc:
+	cd $(YACCDIR); ./configure; make
