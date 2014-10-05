@@ -25,7 +25,7 @@ fixed RealMatrix A = [x,y,z];
 fixed RealMatrix B = [x;y;z];
 fixed RealMatrix W = [1,0.0,0;0.0,1,0;0.0,0,1];
 
-fixed Real scale(Real k) = transpose(A) * A * k;
+fixed Real scale(Real k) = A * transpose(A) * k;
 
 random RealMatrix C ~ MultivarGaussian(B,W);
 random RealMatrix D ~ MultivarGaussian([3.0;3.0;3.0],W);
@@ -99,12 +99,12 @@ void MatrixTest::build(){
     blog->add(fd);
   }
   /*
-  fixed Real scale(Real k) = transpose(A) * A * k;
+  fixed Real scale(Real k) = A * transpose(A) * k;
   */
   {
     FuncApp* trs = new FuncApp(0, 0, Symbol("transpose"));
     trs->add(new FuncApp(0, 0, Symbol("A")));
-    OpExpr* sub = new OpExpr(0, 0, AbsynConstant::MUL, trs, new FuncApp(0, 0, Symbol("A")));
+    OpExpr* sub = new OpExpr(0, 0, AbsynConstant::MUL, new FuncApp(0, 0, Symbol("A")), trs);
     OpExpr* expr = new OpExpr(0, 0, AbsynConstant::MUL, sub, new FuncApp(0, 0, Symbol("k")));
     FuncDecl *fd = new FuncDecl(0, 0, false, Symbol("Real"), Symbol("scale"), expr);
     fd->addArg(VarDecl(0, 0, Symbol("Real"), Symbol("k")));

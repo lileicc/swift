@@ -1374,13 +1374,13 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
               The computation result of the body is a RealMatrix.
               However, the declaration of the function is Real.
               We assume that the return value will always become a 1x1 RealMatrix. A warnning will be raised.
-              e.g. Real fun() = A * B ===> Real fun() = as_scalar(A * B)
+              e.g. Real fun() = A * B ===> Real fun() = as_scalar(A*B)
             */
-            std::vector<std::shared_ptr<ir::Expr> > args;
-            args.push_back(body);
-            auto mat = predecl::PreDeclList::asScalarFuncDecl.getNew(args, &tyFactory);
-            fun->setBody(mat);
-            warning(fd->line, fd->col, "The return type of the body is RealMatrix. But the Declared Type is Real! The first element of the result matrix will be returned.");
+            std::vector<std::shared_ptr<ir::Expr>> vec; vec.push_back(body);
+            auto scalar = predecl::PreDeclList::asScalarFuncDecl.getNew(vec, &tyFactory);
+            fun->setBody(scalar);
+            warning(fd->line, fd->col, "The return type of the body is RealMatrix. But the Declared Type is Real!"
+                                       " A internal type conversion will be applied! if the matrix is not a scalar, a run-time error will occur.");
             special_case = true;
           }
         }
