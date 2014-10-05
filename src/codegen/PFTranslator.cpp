@@ -417,8 +417,11 @@ void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
                                new code::IntegerLiteral(-1),
                                code::OpKind::BO_ASSIGN)); // in StaticMemo
   // create ensure_num function
+  // TODO: yiwu Oct.5.2014
+  //   ---> currently a hack. Since we do not allow temporal numberstatement in TimeSeries Model!
+  //          So ensure function always locates in the static state
   code::FunctionDecl* ensureFun = code::FunctionDecl::createFunctionDecl(
-      coreNs, getEnsureFunName(numvar), VOID_TYPE, true); // function is always Globally defined
+      coreStaticCls, getEnsureFunName(numvar), VOID_TYPE, true);
   declared_funs[ensureFun->getName()] = ensureFun;
   // add in the init function to call this ensure_fun
   // :::=> ensure_numvar();
