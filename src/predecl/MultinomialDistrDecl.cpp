@@ -17,22 +17,25 @@ std::shared_ptr<ir::Expr> MultinomialDistrDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking
-  if (args.size() < 1)
+  if (args.size() < 2)
     return nullptr;
 
-  // Two Kinds of Accepted Arguments
-  //   1. vector<double>
-  //   2. all double type
-  //   3. matrix
+  // accepted arguments
+  //   1. int, vector<double>
+  //   2. int, all double type
+  //   3. int, matrix
   // check vector<double>
   auto dbl = fact->getTy(ir::IRConstString::DOUBLE);
   auto ary_dbl = fact->getUpdateTy(new ir::ArrayTy(dbl, 1));
   auto int_ty = fact->getTy(ir::IRConstString::INT);
   auto ary_int = fact->getUpdateTy(new ir::ArrayTy(int_ty, 1));
   auto mtrx = fact->getTy(ir::IRConstString::MATRIX);
-  if (args.size() == 1 && 
-      (args[0]->getTyp() == ary_dbl || args[0]->getTyp() == mtrx)) {
+  if (args[0]->getTyp() != int_ty)
+    return nullptr;
+  if (args.size() == 2 && 
+      (args[1]->getTyp() == ary_dbl || args[1]->getTyp() == mtrx)) {
     auto ret = std::make_shared<ir::Distribution>(this->getName(), this);
+    swap(args[0], args[1]); // convert to (matrix, int);
     ret->setArgs(args);
     ret->setTyp(ary_int);
     ret->processArgRandomness();
@@ -42,8 +45,8 @@ std::shared_ptr<ir::Expr> MultinomialDistrDecl::getNew(
   
   // check all double arguments
   bool okay = true;
-  for (auto a : args) {
-    if (a->getTyp() != dbl) {
+  for (size_t i = 1; i < args.size(); ++ i) {
+    if (args[i]->getTyp() != dbl) {
       okay = false;
       break;
     }

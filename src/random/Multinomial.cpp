@@ -18,14 +18,16 @@ Multinomial::Multinomial() : dist(0, 1.0) {
 Multinomial::~Multinomial() {
 }
 
+// Make sure that the second argument is the number of samples to generate
 void Multinomial::init(int n, ...) {
   double val;
   va_list vl;
-  va_start(vl,n);
+  va_start(vl, n);
+  k = va_arg(vl, int); --n;
   weight.resize(n);
-  for (int i=0;i<n;i++) {
-    weight[i]=va_arg(vl,double);
-    if(i>0) weight[i] += weight[i - 1];
+  for (int i = 0; i<n; i++) {
+    weight[i] = va_arg(vl, double);
+    if (i>0) weight[i] += weight[i - 1];
   }
   va_end(vl);
   sum_wei = weight.back();
@@ -34,7 +36,17 @@ void Multinomial::init(int n, ...) {
 
 void Multinomial::init(const std::vector<double>& wei) {
   weight = wei;
+  k = wei.size();
   for (size_t i = 1; i < weight.size(); ++ i)
+    weight[i] += weight[i - 1];
+  sum_wei = weight.back();
+  is_logwei_ok.clear();
+}
+
+void Multinomial::init(const std::vector<double>& wei, int k) {
+  weight = wei;
+  this->k = k;
+  for (size_t i = 1; i < weight.size(); ++i)
     weight[i] += weight[i - 1];
   sum_wei = weight.back();
   is_logwei_ok.clear();
@@ -49,6 +61,7 @@ void Multinomial::init(const double* begin, const double* end) {
   sum_wei = 0;
   for (const double* ptr = begin; ptr != end; ++ ptr)
     weight.push_back(sum_wei += *ptr);
+  k = weight.size();
   is_logwei_ok.clear();
 }
 
@@ -56,8 +69,13 @@ void Multinomial::init(const arma::mat& wei) {
   init(wei.memptr(), wei.memptr() + wei.n_elem);
 }
 
+void Multinomial::init(const arma::mat& wei, int k) {
+  init(wei.memptr(), wei.memptr() + wei.n_elem);
+  this->k = k;
+}
+
 std::vector<int> Multinomial::gen() {
-  return gen(weight.size());
+  return gen(k);
 }
 
 std::vector<int> Multinomial::gen(int n) {
@@ -102,3 +120,4 @@ double Multinomial::loglikeli(const std::vector<int>& x) {
 
 } /* namespace random */
 } /* namespace swift */
+
