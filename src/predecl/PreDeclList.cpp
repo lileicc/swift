@@ -34,6 +34,9 @@ const GaussianDistrDecl PreDeclList::gaussianDistr =
 const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
     MultivarGaussianDistrDecl();
 
+const MultinomialDistrDecl PreDeclList::multinomialDistr =
+    MultinomialDistrDecl();
+
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
 

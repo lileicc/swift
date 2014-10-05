@@ -1,0 +1,67 @@
+#include "MultinomialDistrDecl.h"
+
+#include "../ir/ArrayTy.h"
+#include "../ir/DoubleLiteral.h"
+#include "../ir/IntLiteral.h"
+
+namespace swift {
+namespace predecl {
+MultinomialDistrDecl::MultinomialDistrDecl() :
+    PreDecl(std::string("Multinomial")) {
+}
+
+MultinomialDistrDecl::~MultinomialDistrDecl() {
+}
+
+std::shared_ptr<ir::Expr> MultinomialDistrDecl::getNew(
+    std::vector<std::shared_ptr<ir::Expr>>& args,
+    fabrica::TypeFactory* fact) const {
+  // Type Checking
+  if (args.size() < 1)
+    return nullptr;
+
+  // Two Kinds of Accepted Arguments
+  //   1. vector<double>
+  //   2. all double type
+  //   3. matrix
+  // check vector<double>
+  auto dbl = fact->getTy(ir::IRConstString::DOUBLE);
+  auto ary_dbl = fact->getUpdateTy(new ir::ArrayTy(dbl, 1));
+  auto int_ty = fact->getTy(ir::IRConstString::INT);
+  auto ary_int = fact->getUpdateTy(new ir::ArrayTy(int_ty, 1));
+  auto mtrx = fact->getTy(ir::IRConstString::MATRIX);
+  if (args.size() == 1 && 
+      (args[0]->getTyp() == ary_dbl || args[0]->getTyp() == mtrx)) {
+    auto ret = std::make_shared<ir::Distribution>(this->getName(), this);
+    ret->setArgs(args);
+    ret->setTyp(ary_int);
+    ret->processArgRandomness();
+    ret->setRandom(true);
+    return ret;
+  }
+  
+  // check all double arguments
+  bool okay = true;
+  for (auto a : args) {
+    if (a->getTyp() != dbl) {
+      okay = false;
+      break;
+    }
+  }
+  if (okay) {
+    auto ret = std::make_shared<ir::Distribution>(this->getName(), this);
+    auto arg_n = std::make_shared<ir::IntLiteral>(args.size());
+    // Note: we need to set ret type for the new argument
+    arg_n->setTyp(fact->getTy(ir::IRConstString::INT));
+    args.insert(args.begin(), arg_n);
+    ret->setArgs(args);
+    ret->setTyp(ary_int);
+    ret->processArgRandomness();
+    ret->setRandom(true);
+    return ret;
+  }
+  return nullptr;
+}
+
+}
+}

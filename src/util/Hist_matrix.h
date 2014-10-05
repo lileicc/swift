@@ -122,7 +122,7 @@ public:
 
   void debug() {
     for (auto& it : getResult()) {
-      it.first.print(cerr, "weight = " + std::to_string(isLogarithm ? exp(it.second) : it.second) + " :");
+      it.first.print(cerr, "weight = " + toString(isLogarithm ? exp(it.second) : it.second) + " :");
     }
   }
 };

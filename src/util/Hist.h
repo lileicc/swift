@@ -99,16 +99,16 @@ public:
       printf(">> query : %s\n", str.c_str());
     getNormalizedResult();
     for (auto& it : normmap) {
-      printf("%s -> %s\n", std::to_string(it.first).c_str(),
-          std::to_string(it.second).c_str());
+      printf("%s -> %s\n", toString(it.first).c_str(),
+          toString(it.second).c_str());
     }
     clear();
   }
 
   void debug() {
     for (auto& it : getResult()) {
-      fprintf(stderr, "%s -> %s\n", std::to_string(it.first).c_str(),
-          std::to_string(isLogarithm ? std::exp(it.second) : it.second).c_str());
+      fprintf(stderr, "%s -> %s\n", toString(it.first).c_str(),
+          toString(isLogarithm ? std::exp(it.second) : it.second).c_str());
     }
   }
 };
@@ -220,7 +220,7 @@ public:
       for (auto& it : normmap) {
         printf("%s -> %.8lf\n", 
           (it.first >= 0 && it.first < inst_n
-          ? instances->at(it.first) : typeName + "(#" + std::to_string(it.first) + ")").c_str(),
+          ? instances->at(it.first) : typeName + "(#" + toString(it.first) + ")").c_str(),
           it.second);
       }
     }
@@ -234,8 +234,8 @@ public:
 
   void debug() {
     for (auto& it : getResult()) {
-      fprintf(stderr, "%s -> %s\n", std::to_string(it.first).c_str(),
-          std::to_string(isLogarithm ? std::exp(it.second) : it.second).c_str());
+      fprintf(stderr, "%s -> %s\n", toString(it.first).c_str(),
+          toString(isLogarithm ? std::exp(it.second) : it.second).c_str());
     }
   }
 };
@@ -380,8 +380,8 @@ public:
   void debug() {
     std::sort(table.begin(), table.end());
     for (auto& it : table) {
-      fprintf(stderr, "%s -> %s\n", std::to_string(it.first).c_str(),
-        std::to_string(isLogarithm ? std::exp(it.second) : it.second).c_str());
+      fprintf(stderr, "%s -> %s\n", toString(it.first).c_str(),
+        toString(isLogarithm ? std::exp(it.second) : it.second).c_str());
     }
   }
 };

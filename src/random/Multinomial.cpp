@@ -18,6 +18,20 @@ Multinomial::Multinomial() : dist(0, 1.0) {
 Multinomial::~Multinomial() {
 }
 
+void Multinomial::init(int n, ...) {
+  double val;
+  va_list vl;
+  va_start(vl,n);
+  weight.resize(n);
+  for (int i=0;i<n;i++) {
+    weight[i]=va_arg(vl,double);
+    if(i>0) weight[i] += weight[i - 1];
+  }
+  va_end(vl);
+  sum_wei = weight.back();
+  is_logwei_ok.clear();
+}
+
 void Multinomial::init(const std::vector<double>& wei) {
   weight = wei;
   for (size_t i = 1; i < weight.size(); ++ i)
@@ -42,9 +56,8 @@ void Multinomial::init(const arma::mat& wei) {
   init(wei.memptr(), wei.memptr() + wei.n_elem);
 }
 
-int Multinomial::gen() {
-  return std::lower_bound(weight.begin(), weight.end(), dist(engine) * sum_wei)
-              - weight.begin();
+std::vector<int> Multinomial::gen() {
+  return gen(weight.size());
 }
 
 std::vector<int> Multinomial::gen(int n) {
@@ -61,33 +74,13 @@ std::vector<int> Multinomial::gen(int n) {
   return ret;
 }
 
-double Multinomial::likeli(const int& x) {
-  if (x == 0) return weight[x];
-  if (x >= weight.size()) return 0;
-  return weight[x] - weight[x - 1];
-}
-
-double Multinomial::loglikeli(const int& x) {
-  if(is_logwei_ok.size() == 0) {
-    is_logwei_ok.resize(weight.size());
-    log_weight.resize(weight.size());
-  }
-  if(is_logwei_ok[x])
-    return log_weight[x];
-  else {
-    is_logwei_ok[x] = true;
-    return (log_weight[x] = 
-            std::log(x == 0 ? weight[0] 
-                    : weight[x] - weight[x-1]));
-  }
-}
-
 double Multinomial::likeli(const std::vector<int>& x) {
   double ret = 1;
   for (auto& v : x) 
-    ret *= likeli(v);
+    ret *= (!v ? weight[0] : weight[v] - weight[v - 1]);
   return ret;
 }
+
 double Multinomial::loglikeli(const std::vector<int>& x) {
   if(is_logwei_ok.size() == 0) {
     is_logwei_ok.resize(x.size());

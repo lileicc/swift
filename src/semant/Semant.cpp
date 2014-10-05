@@ -607,9 +607,8 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
     // Numerical Operator
   case IRConstant::MOD:
     // Special Check for TimeStep (MOD)
-    if (isSubType(arg[0]->getTyp(), arg[1]->getTyp())
-      && arg[0]->getTyp() == lookupTy(ir::IRConstString::TIMESTEP))
-      return arg[0]->getTyp();
+    if (getSuperType(arg[0]->getTyp(), arg[1]->getTyp()) == lookupTy(ir::IRConstString::TIMESTEP))
+      return lookupTy(ir::IRConstString::TIMESTEP);
     if (arg[0]->getTyp() != arg[1]->getTyp() // For MOD, current everything should be INT
         || arg[0]->getTyp() != lookupTy(IRConstString::INT))
       return NULL;
@@ -659,7 +658,7 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
     // Address Operator
   case IRConstant::SUB: {
     if (arg[0]->getTyp() == NULL) return NULL;
-    if (arg[1]->getTyp() != tyFactory.getTy(ir::IRConstString::INT)
+    if (arg[1]->getTyp() != lookupTy(ir::IRConstString::INT)
         || (arg[0]->getTyp()->getTyp() != ir::IRConstant::ARRAY
             && arg[0]->getTyp()->getTyp() != ir::IRConstant::MATRIX))
       return NULL;
@@ -778,8 +777,9 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
       }
     }
 
-    if (!isGetMatrixEntry)
+    if (!isGetMatrixEntry) {
       error(expr->line, expr->col, "Error Type Matching for OprExpr!");
+    }
   }
   /*
    * TODO: Add crucial check for Markov Order! Now it is a hack!! (@MarkovOrder)
@@ -1225,7 +1225,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
       if (okay) {
         std::shared_ptr<ir::MatrixExpr> mat_ret = std::make_shared<ir::MatrixExpr>();
         mat_ret->setArgs(ret->getArgs());
-        mat_ret->setTyp(mat_ty);
+        mat_ret->setTyp(lookupTy(ir::IRConstString::MATRIX));
         mat_ret->setRowVecFlag(true);
         mat_ret->setColVecFlag(ret->argSize() == 1);
         ret=mat_ret;

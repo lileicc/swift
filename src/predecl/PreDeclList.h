@@ -10,6 +10,7 @@
 #include "GammaDistrDecl.h"
 #include "GaussianDistrDecl.h"
 #include "MultivarGaussianDistrDecl.h"
+#include "MultinomialDistrDecl.h"
 #include "PoissonDistrDecl.h"
 #include "UniformChoiceDistrDecl.h"
 #include "UniformIntDistrDecl.h"
@@ -55,6 +56,7 @@ public:
   static const GammaDistrDecl gammaDistr;
   static const GaussianDistrDecl gaussianDistr;
   static const MultivarGaussianDistrDecl multivargaussianDistr;
+  static const MultinomialDistrDecl multinomialDistr;
   static const PoissonDistrDecl poissonDistr;
   static const UniformChoiceDistrDecl uniformChoiceDistr;
   static const UniformIntDistrDecl uniformIntDistr;

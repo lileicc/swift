@@ -54,6 +54,16 @@ inline std::string toString<bool>(const bool&a) {return a ? "true" : "false";}
 // @ISSUE: Currently we do not support char and treat boolean as char
 template<>
 inline std::string toString<char>(const char&a) { return a ? "true" : "false"; }
+template<>
+inline std::string toString(const std::vector<int>& v) {
+  std::string ret = "Array[";
+  for (size_t i = 0; i < v.size(); ++i) {
+    if (i) ret.push_back(',');
+    ret += std::to_string(v[i]);
+  }
+  ret.push_back(']');
+  return ret;
+}
 
 // computing log( exp(a) + exp(b) )
 // NOTE this function cannot handle infinity

@@ -745,8 +745,8 @@ code::FunctionDecl* PFTranslator::transFixedFun(
 
   // special check to translate to const value instead of a function
   if (fd->argSize() == 0 && constValTable.count(fixedfunname) > 0) {
-    code::FieldDecl::createFieldDecl(
-      coreCls, fixedfunname, code::Type(fd->getRetTyp()->toString(), false, false, true),
+    code::FieldDecl::createVarDecl(
+      coreNs, fixedfunname, code::Type(fd->getRetTyp()->toString(), false, false, true),
       transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody())));
     return NULL;
   }
