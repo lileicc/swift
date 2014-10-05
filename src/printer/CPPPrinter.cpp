@@ -538,8 +538,12 @@ void CPPPrinter::print(code::FieldDecl* term) {
 void CPPPrinter::print(code::FloatingLiteral* term) {
   printIndent();
   // Special Case!
-  //   Here we keep 7 digits after decimal point
-  fprintf(file, "%.7lf", term->getVal());
+  //   Generally Here we keep 8 digits after decimal point
+  if (term->getVal() < 1e-6) 
+    fprintf(file, "%s", std::to_string(term->getVal()));
+  else {
+    fprintf(file, "%.8lf", term->getVal());
+  }
   if (newline)
     fprintf(file, ";");
   printLine();

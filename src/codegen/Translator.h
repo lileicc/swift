@@ -532,6 +532,8 @@ protected:
 
   static bool COMPUTE_LIKELIHOOD_IN_LOG;
 
+  static const double ZERO_EPS;
+
   static swift::Configuration* config;
 
   std::set<std::string> constValTable;

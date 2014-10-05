@@ -976,7 +976,13 @@ code::Expr* PFTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
 
   // Special check when a branch returns a fixed expression rather than a distribution
   if (valuevar.size() > 0) {
-    res = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_EQU);
+    if (expr->getTyp() != NULL && expr->getTyp()->getTyp() == ir::IRConstant::MATRIX) {
+      // cannot use EQU. Instead, we need to apply norm here
+      auto diff = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_MINUS);
+      auto mat_norm = new code::CallExpr(new code::Identifier("norm"), std::vector<code::Expr*>{diff});
+      res = new code::BinaryOperator(mat_norm, new code::FloatingLiteral(ZERO_EPS), code::OpKind::BO_LEQ);
+    } else
+      res = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_EQU);
   }
 
   // TODO translate other expression
@@ -1530,9 +1536,11 @@ void PFTranslator::addFieldForFunVar(
       if (cls == coreTemporalCls) { // init temporal MEMO
         ensureFun->addStmt(createForeachLoop(TMP_LOOP_VAR_NAME,DEPEND_NUM_VAE_NAME,
           code::CallExpr::createMethodCall(
-          new code::ArraySubscriptExpr(
-                  new code::ArraySubscriptExpr(new code::Identifier(TEMP_MEMO_VAR_NAME), new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
-                  new code::Identifier(TMP_LOOP_VAR_NAME)),
+          new code::BinaryOperator(
+            new code::ArraySubscriptExpr(
+                    new code::ArraySubscriptExpr(new code::Identifier(TEMP_MEMO_VAR_NAME), new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
+                    new code::Identifier(TMP_LOOP_VAR_NAME)),
+            new code::Identifier(varname),code::OpKind::BO_FIELD),
           DYNAMICTABLE_RESIZE_METHOD_NAME,
           std::vector<code::Expr*>({new code::IntegerLiteral((int) id), new code::Identifier(numvarname_for_arg)}))));
       }
