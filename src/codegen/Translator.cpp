@@ -577,9 +577,16 @@ code::FunctionDecl* Translator::transFixedFun(
     coreCls, fixedfunname, valuetype);
   fixedfun->setParams(transParamVarDecls(fixedfun, fd->getArgs()));
   declared_funs[fixedfun->getName()] = fixedfun;
-  // translate the Clause and calculate weight
-  fixedfun->addStmt(
-    transClause(fd->getBody(),""));
+
+  if (std::dynamic_pointer_cast<ir::Expr>(fd->getBody()) != nullptr) {
+    fixedfun->addStmt(new code::ReturnStmt(transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody()))));
+  }
+  else {
+    code::VarDecl::createVarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()));
+    fixedfun->addStmt(
+      transClause(fd->getBody(), VALUE_VAR_REF_NAME));
+    fixedfun->addStmt(new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
+  }
   return fixedfun;
 }
 
@@ -923,7 +930,12 @@ code::Expr* Translator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
     func->addStmt(new code::ReturnStmt(transExpr(condset->getFunc())));
     args.push_back(func);
 
-    return new code::CallExpr(new code::Identifier(APPLY_FUNC_NAME), args);
+    // firstly return-type, then input-type
+    return new code::CallTemplateExpr(new code::Identifier(APPLY_FUNC_NAME),
+      std::vector<code::Expr*>{
+      new code::Identifier(mapIRTypeToCodeType(condset->getFunc()->getTyp()).getName()),
+        new code::Identifier(mapIRTypeToCodeType(condset->getVar()->getTyp()).getName())},
+        args);
   }
 }
 
