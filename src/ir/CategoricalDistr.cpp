@@ -44,9 +44,9 @@ const std::vector<std::shared_ptr<ConstSymbol> >& CategoricalDistr::getSymbols()
 void CategoricalDistr::print(FILE* file, int indent) const {
   fprintf(file, "%*sCategoricalDistr:\n", indent, "");
   for (size_t i = 0; i < size(); i++) {
-    fprintf(file, "%*ssymbol %lu:\n", indent + 2, "", i);
+    fprintf(file, "%*ssymbol %d:\n", indent + 2, "", (int)i);
     getSymbol(i)->print(file, indent + 4);
-    fprintf(file, "%*sweight %lu: %f\n", indent + 2, "", i, getWeight(i));
+    fprintf(file, "%*sweight %d: %f\n", indent + 2, "", (int)i, getWeight(i));
   }
 }
 
