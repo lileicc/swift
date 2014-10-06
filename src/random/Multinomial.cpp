@@ -83,36 +83,43 @@ std::vector<int> Multinomial::gen(int n) {
   for (int i = 0; i < n; ++ i)
     key.push_back(dist(engine) * sum_wei);
   std::sort(key.begin(), key.end());
-  std::vector<int> ret;
+  std::vector<int> ret(weight.size());
   int ptr = 0;
   for (auto& k : key) {
     while (weight[ptr] < k) ++ ptr;
-    ret.push_back(ptr);
+    ret[ptr] ++;
   }
   return ret;
 }
 
 double Multinomial::likeli(const std::vector<int>& x) {
+  if (x.size() != weight.size()) return 0;
   double ret = 1;
-  for (auto& v : x) 
-    ret *= (!v ? weight[0] : weight[v] - weight[v - 1]);
+  for (size_t i = 0; i < x.size(); ++i) {
+    if (x[i] > 0) {
+      double w = (!i ? weight[0] : weight[i] - weight[i - 1]);
+      ret *= std::pow(w, x[i]);
+    }
+  }
   return ret;
 }
 
 double Multinomial::loglikeli(const std::vector<int>& x) {
+  if (x.size() != weight.size()) return -INFINITY;
   if(is_logwei_ok.size() == 0) {
     is_logwei_ok.resize(x.size());
     log_weight.resize(x.size());
   }
   double ret = 0;
-  for(auto& v : x) {
-    if(is_logwei_ok[v])
-      ret += log_weight[v];
+  for(size_t i = 0; i < x.size(); ++ i) {
+    if (!x[i]) continue;
+    if(is_logwei_ok[i])
+      ret += log_weight[i] * x[i];
     else {
-      is_logwei_ok[v] = true;
+      is_logwei_ok[i] = true;
       ret += 
-      (log_weight[v] = 
-      std::log(v == 0 ? weight[0] : weight[v] - weight[v-1]));
+      x[i] * (log_weight[i] = 
+      std::log(i == 0 ? weight[0] : weight[i] - weight[i-1]));
     }
   }
   return ret;
