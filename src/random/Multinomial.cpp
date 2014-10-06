@@ -112,7 +112,7 @@ double Multinomial::loglikeli(const std::vector<int>& x) {
   }
   double ret = 0;
   for(size_t i = 0; i < x.size(); ++ i) {
-    if (!x[i]) continue;
+    if (x[i]<=0) continue;
     if(is_logwei_ok[i])
       ret += log_weight[i] * x[i];
     else {
