@@ -540,7 +540,7 @@ void CPPPrinter::print(code::FloatingLiteral* term) {
   // Special Case!
   //   Generally Here we keep 8 digits after decimal point
   if (term->getVal() < 1e-6) 
-    fprintf(file, "%s", std::to_string(term->getVal()));
+    fprintf(file, "%s", std::to_string(term->getVal()).c_str());
   else {
     fprintf(file, "%.8lf", term->getVal());
   }

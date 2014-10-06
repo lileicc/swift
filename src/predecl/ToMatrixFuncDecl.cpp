@@ -11,7 +11,7 @@
 namespace swift {
 namespace predecl {
 ToMatrixFuncDecl::ToMatrixFuncDecl() :
-    PreDecl(std::string("toMatrix")) {
+    PreDecl(std::string("_to_matrix")) {
 }
 
 ToMatrixFuncDecl::~ToMatrixFuncDecl() {

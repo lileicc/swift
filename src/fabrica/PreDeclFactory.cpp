@@ -61,6 +61,7 @@ PreDeclFactory::PreDeclFactory() {
   // Different Names Referring to the Same Function/Distribution
   decls["toString"] = &predecl::PreDeclList::toStringFuncDecl;
   decls["UnivarGaussian"] = &predecl::PreDeclList::gaussianDistr;
+  decls["toMatrix"] = &predecl::PreDeclList::toMatrixFuncDecl;
 
   // Add Builtin Function using Function Interface
   for (auto& s : predecl::PreDeclList::funcStore)

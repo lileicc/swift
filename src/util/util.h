@@ -336,12 +336,12 @@ inline double randn() {
   for (int i = 0; i<_ParticleN_; ++i)\
     stddev += (_stat_memo[i].__value_##func - mean) % \
       (_stat_memo[i].__value_##func - mean); \
-  stddev /= (double) _ParticleN_\
+  stddev /= (double) _ParticleN_;\
   stddev = sqrt(stddev); \
   for (int i = 0; i<_ParticleN_; ++i) { \
     old_val = _stat_memo[i].__value_##func; \
     new_val = rho * old_val + (1 - rho) * mean + \
-    sqrt(1 - rho * rho) * (stddev % randn(_n, _m)); \
+    sqrt(1 - rho * rho) * (stddev % arma::randn(_n_rows, _n_cols)); \
     _stat_memo[i].__value_##func = new_val; \
   }\
 }
