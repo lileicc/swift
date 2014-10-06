@@ -19,12 +19,16 @@ public:
   PFTranslator();
   void translate(std::shared_ptr<swift::ir::BlogModel> model);
   code::Code* getResult();
+  void setParticleNum(int part);
+  void setTimeLimit(int tm);
+  void setDepend(int dep);
   
 protected:
   /**
   * how many particles to sample in total : default parameter for PF
   */
-  static const int TOTAL_NUM_PARTICLES;
+  static const int DEFAULT_TOTAL_NUM_PARTICLES;
+  int particleNum;
 
   // Time Series Features
   int ModelDependency;

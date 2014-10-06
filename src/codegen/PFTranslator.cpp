@@ -15,7 +15,7 @@
 namespace swift {
 namespace codegen {
 
-const int PFTranslator::TOTAL_NUM_PARTICLES = Translator::TOTAL_NUM_SAMPLES;
+const int PFTranslator::DEFAULT_TOTAL_NUM_PARTICLES = Translator::TOTAL_NUM_SAMPLES;
 
 const std::string PFTranslator::StaticClsName = "BLOG_Static_State";
 const std::string PFTranslator::TemporalClsName = "BLOG_Temporal_State";
@@ -121,6 +121,17 @@ std::set<std::string> PFTranslator::obsFuncStore = std::set<std::string>();
 const std::string PFTranslator::DOUBLE_PERTURB_FUN_NAME = "__perturb";
 const std::string PFTranslator::MATRIX_PERTURB_FUN_NAME = "__perturb_matrix";
 
+// Set Parameters
+void PFTranslator::setParticleNum(int part) {
+  particleNum = part;
+}
+void PFTranslator::setTimeLimit(int tm) {
+  ModelTimeLimit = tm;
+}
+void PFTranslator::setDepend(int dep) {
+  ModelDependency = dep;
+}
+
 /////////////// END of Util Functions ///////////////////
 
 PFTranslator::PFTranslator() {
@@ -128,6 +139,9 @@ PFTranslator::PFTranslator() {
   coreStaticCls = NULL;
   coreTemporalCls = NULL;
   coreTemporalClsClear = NULL;
+  particleNum = DEFAULT_TOTAL_NUM_PARTICLES;
+  ModelDependency = 0;
+  ModelTimeLimit = 0;
 }
 
 void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
@@ -137,13 +151,15 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   if (model->isUseMatrix())
     prog->addOption("matrix");
 
-  ModelDependency = model->getMarkovOrder();
-  ModelTimeLimit = model->getTempLimit();
+  if (model->getMarkovOrder() > ModelDependency)
+    ModelDependency = model->getMarkovOrder();
+  if (model->getTempLimit() > (unsigned)ModelTimeLimit)
+    ModelTimeLimit = model->getTempLimit();
 
   if (coreStaticCls == NULL) {
     // add global constant values
     coreNs->addDecl(new code::VarDecl(coreNs,
-      PARTICLE_NUM_VAR_NAME, INT_CONST_TYPE, new code::IntegerLiteral(TOTAL_NUM_PARTICLES)));
+      PARTICLE_NUM_VAR_NAME, INT_CONST_TYPE, new code::IntegerLiteral(particleNum)));
     coreNs->addDecl(new code::VarDecl(coreNs,
       TIMESTEP_LIMIT_VAR_NAME, INT_CONST_TYPE, new code::IntegerLiteral(ModelTimeLimit)));
     coreNs->addDecl(new code::VarDecl(coreNs,
