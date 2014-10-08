@@ -75,7 +75,10 @@ void Multinomial::init(const arma::mat& wei, int k) {
 }
 
 std::vector<int> Multinomial::gen() {
-  return gen(k);
+  if (k > 3 * weight.size())
+    return gen_large(k);
+  else 
+    return gen(k);
 }
 
 std::vector<int> Multinomial::gen(int n) {
@@ -89,6 +92,20 @@ std::vector<int> Multinomial::gen(int n) {
     while (weight[ptr] < k) ++ ptr;
     ret[ptr] ++;
   }
+  return ret;
+}
+
+std::vector<int> Multinomial::gen_large(int n) {
+  std::vector<int> ret(weight.size());
+  int prev_n = 0;
+  double prev_w = 0;
+  int k = weight.size();
+  for (int i = 0; i < k - 1 && prev_n < n; ++i) {
+    std::binomial_distribution<int> binom(n - prev_n, weight[i] / (sum_wei - prev_w));
+    prev_w += weight[i];
+    prev_n += (ret[i] = binom(engine));
+  }
+  ret[k - 1] = n - prev_n;
   return ret;
 }
 

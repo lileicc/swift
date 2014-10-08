@@ -30,6 +30,7 @@ public:
   void init(const std::vector<double>& wei, int k);
   std::vector<int> gen();
   std::vector<int> gen(int n);
+  std::vector<int> gen_large(int n);
   double likeli(const std::vector<int>& x);
   double loglikeli(const std::vector<int>& x);
 private:

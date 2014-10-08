@@ -252,7 +252,6 @@ void resample(
   double* weight,
   stat_T stat_memo[SampleN], stat_T ptr_stat_memo[SampleN],
   temp_T* ptr_temp_memo[SampleN][Dependency], temp_T* backup_ptr[SampleN][Dependency]) {
-  static std::array<double,SampleN> tar;
   static std::uniform_real_distribution<double> dist(0, 1);
   static std::default_random_engine gen;
 
@@ -260,14 +259,15 @@ void resample(
     weight[i] += weight[i - 1];
   }
   double sum_wei = weight[SampleN - 1];
-  for (int i = 0; i<SampleN; ++i)
-    tar[i] = dist(gen)*sum_wei;
-
-  std::sort(tar.begin(), tar.end());
+  double ratio = sum_wei / SampleN;
+  double basis = 0;
+  double tar = 0;
 
   int pos = 0;
   for (int i = 0; i < SampleN; ++i) {
-    for (; weight[pos]<tar[i]; ++pos);
+    tar = basis + dist(gen) * ratio;
+    basis += ratio;
+    for (; weight[pos]<tar; ++pos);
     ptr_stat_memo[i] = stat_memo[pos];
     memcpy(backup_ptr[i], ptr_temp_memo[pos], sizeof(temp_T*)* Dependency);
   }
