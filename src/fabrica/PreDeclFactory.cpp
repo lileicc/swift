@@ -11,6 +11,8 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::bernoulliDistr;
   decls[predecl::PreDeclList::betaDistr.getName()] =
     &predecl::PreDeclList::betaDistr;
+  decls[predecl::PreDeclList::binomialDistr.getName()] =
+    &predecl::PreDeclList::binomialDistr;
   decls[predecl::PreDeclList::booleanDistr.getName()] =
     &predecl::PreDeclList::booleanDistr;
   decls[predecl::PreDeclList::categoricalDistr.getName()] =

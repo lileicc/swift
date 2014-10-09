@@ -230,6 +230,7 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include <utility>\n");
   fprintf(file, "#include \"random/Bernoulli.h\"\n");
   fprintf(file, "#include \"random/Beta.h\"\n");
+  fprintf(file, "#include \"random/Binomial.h\"\n");
   fprintf(file, "#include \"random/BooleanDistrib.h\"\n");
   fprintf(file, "#include \"random/Categorical.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");

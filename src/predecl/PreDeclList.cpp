@@ -11,6 +11,9 @@ const BernoulliDistrDecl PreDeclList::bernoulliDistr =
 const BetaDistrDecl PreDeclList::betaDistr =
     BetaDistrDecl();
 
+const BinomialDistrDecl PreDeclList::binomialDistr =
+    BinomialDistrDecl();
+
 const BooleanDistrDecl PreDeclList::booleanDistr =
     BooleanDistrDecl();
 

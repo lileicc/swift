@@ -3,6 +3,7 @@
 // PreDecl Distributions
 #include "BernoulliDistrDecl.h"
 #include "BetaDistrDecl.h"
+#include "BinomialDistrDecl.h"
 #include "BooleanDistrDecl.h"
 #include "CategoricalDistrDecl.h"
 #include "DirichletDistrDecl.h"
@@ -49,6 +50,7 @@ public:
   // PreDecl Distrbutions
   static const BernoulliDistrDecl bernoulliDistr;
   static const BetaDistrDecl betaDistr;
+  static const BinomialDistrDecl binomialDistr;
   static const BooleanDistrDecl booleanDistr;
   static const CategoricalDistrDecl categoricalDistr;
   static const DirichletDistrDecl dirichletDistr;
