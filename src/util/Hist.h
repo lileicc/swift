@@ -267,8 +267,14 @@ private:
     else {
       k = (int)std::floor((p - lo) / det);
     }
-    if (isLogarithm) bucket[k] = logsum(bucket[k], w);
-    else bucket[k] += w;
+
+    if (isLogarithm) {
+      if (bucket[k] > 1) bucket[k] = w;
+      else bucket[k] = logsum(bucket[k], w);
+    }
+    else {
+      bucket[k] += w;
+    }
   }
 
   void build_bucket() {
@@ -279,7 +285,7 @@ private:
     det = (hi - lo) / n;
     bucketFixed = true;
     bucket.resize(n);
-    std::fill(bucket.begin(), bucket.end(), 0);
+    std::fill(bucket.begin(), bucket.end(), isLogarithm ? 2 : 0);
     for (auto& p : table)
       add_to_bucket(p.first, p.second);
     table.clear();
@@ -320,32 +326,32 @@ public:
   }
 
   void setBucket(int bucket_n) {
-    if(!bucketFixed) {
+    if (!bucketFixed) {
       n = bucket_n;
     }
   }
 
   void add(double element, double weight) {
-    if (init_flag) {
-      if (isLogarithm) {
-        sum_wei = logsum(sum_wei, weight);
-      }
-      else {
-        sum_wei += weight;
-      }
-    }
-    else {
-      init_flag = true;
-      sum_wei = weight;
-    }
     if (isLogarithm) {
       double norm_wei = std::exp(weight);
       sum += element * norm_wei;
       sum_sqr += element * element * norm_wei;
+      if (init_flag)
+        sum_wei = logsum(sum_wei, weight);
+      else {
+        init_flag = true;
+        sum_wei = weight;
+      }
     }
     else {
       sum += element * weight;
       sum_sqr += element * element * weight;
+      if (init_flag)
+        sum_wei += weight;
+      else {
+        init_flag = true;
+        sum_wei = weight;
+      }
     }
     if (bucketFixed)
       add_to_bucket(element, weight);
@@ -364,7 +370,7 @@ public:
   }
 
   void print(std::string str = std::string()) {
-    if(str.size() > 0)
+    if (str.size() > 0)
       printf(">> query : %s\n", str.c_str());
     double logsum_wei = sum_wei;
     if (isLogarithm) sum_wei = std::exp(sum_wei);
@@ -377,7 +383,7 @@ public:
     double cur = lo;
     for (int i = 0; i < n; ++i) {
       if (isLogarithm)
-        bucket[i] = std::exp(bucket[i] - logsum_wei);
+        bucket[i] = (bucket[i] > 1 ? 0 : std::exp(bucket[i] - logsum_wei));
       else
         bucket[i] /= sum_wei;
       printf("%c%lf, %lf] -> %.8lf\n", (i == 0 ? '[' : '('), (i == 0 ? left_bound : cur), (i == n - 1 ? right_bound : cur + det), bucket[i]);

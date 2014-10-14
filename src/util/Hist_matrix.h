@@ -36,8 +36,6 @@ public:
   Hist(bool isLogarithm = true) :
     isLogarithm(isLogarithm) {
     clear();
-    if (isLogarithm) sum_wei = -INFINITY;
-    else sum_wei = 0;
   }
   ;
   virtual ~Hist() {
