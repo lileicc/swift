@@ -41,10 +41,10 @@ public:
     if (it != table.end()) {
       if (isLogarithm) {
         if (weight > -INFINITY)
-          it.second = logsum(weight, it.second);
+          it->second = logsum(weight, it->second);
       } else {
         if (weight > 0)
-          it.second += weight;
+          it->second += weight;
       }
     } else {
       if (isLogarithm) {
@@ -125,7 +125,6 @@ private:
 public:
   void clear() {
     table.clear();
-    normmap.clear();
     typeName.clear();
     instances = NULL;
     inst_n = 0;
@@ -158,11 +157,11 @@ public:
     if (it != table.end()) {
       if (isLogarithm) {
         if (weight > -INFINITY)
-          it.second = logsum(weight, it.second);
+          it->second = logsum(weight, it->second);
       }
       else {
         if (weight > 0)
-          it.second += weight;
+          it->second += weight;
       }
     }
     else {
