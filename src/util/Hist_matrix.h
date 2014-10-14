@@ -117,10 +117,11 @@ public:
     }
     cov /= sum_wei;
     var /= sum_wei;
+#ifndef NO_PRINT
     mean.print("Mean : ");
     var.print( "Var  : ");
     cov.print( "Cov  : ");
-    
+#endif
     clear();
   }
 

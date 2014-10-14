@@ -98,8 +98,10 @@ public:
       printf(">> query : %s\n", str.c_str());
     getNormalizedResult();
     for (auto& it : table) {
+#ifndef NO_PRINT
       printf("%s -> %s\n", toString(it.first).c_str(),
           toString(it.second).c_str());
+#endif
     }
     clear();
   }
