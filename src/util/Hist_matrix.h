@@ -29,7 +29,6 @@ private:
   bool init_flag;
 public:
   void clear() {
-    sum_wei = 0;
     init_flag = false;
     table.clear();
   }
@@ -37,6 +36,8 @@ public:
   Hist(bool isLogarithm = true) :
     isLogarithm(isLogarithm) {
     clear();
+    if (isLogarithm) sum_wei = -INFINITY;
+    else sum_wei = 0;
   }
   ;
   virtual ~Hist() {
@@ -45,6 +46,12 @@ public:
 
   void add(mat element, double weight) {
     mat cur;
+    if (init_flag)
+      sum += cur;
+    else {
+      init_flag = true;
+      sum = cur;
+    }
     if (isLogarithm) {
       cur = element * std::exp(weight);
       sum_wei = logsum(sum_wei, weight);
@@ -52,11 +59,6 @@ public:
     else {
       cur = element * weight;
       sum_wei += weight;
-    }
-    if (init_flag) sum += cur;
-    else {
-      init_flag = true;
-      sum = cur;
     }
 
     table.push_back(std::make_pair(element, weight));

@@ -294,7 +294,7 @@ private:
   }
 public:
   void clear(int bucket_n = 20) {
-    sum = sum_wei = sum_sqr = 0;
+    sum = sum_sqr = 0;
     bucket.clear();
     table.clear();
     n = bucket_n;
@@ -306,6 +306,8 @@ public:
   Hist(bool isLogarithm = true, int bucket_n = 20) :
     isLogarithm(isLogarithm) {
     clear(bucket_n);
+    if (isLogarithm) sum_wei = -INFINITY;
+    else sum_wei = 0;
   }
   ;
   virtual ~Hist() {
