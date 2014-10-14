@@ -218,15 +218,19 @@ public:
     getNormalizedResult();
     if (isTyped) { // typed object
       for (auto& it : table) {
+#ifndef NO_PRINT
         printf("%s -> %.8lf\n", 
           (it.first >= 0 && it.first < inst_n
           ? instances->at(it.first) : typeName + "(#" + toString(it.first) + ")").c_str(),
           it.second);
+#endif
       }
     }
     else { // normal int
       for (auto& it : table) {
+#ifndef NO_PRINT
         printf("%d -> %.8lf\n",it.first, it.second);
+#endif
       }
     }
     clear();
@@ -379,7 +383,9 @@ public:
     double mean = sum / sum_wei;
     double mean_sqr = sum_sqr / sum_wei;
     double var = mean_sqr - mean * mean;
+#ifndef NO_PRINT
     printf("Mean = %.8lf   Var = %.8lf\n", mean, var);
+#endif
     if (!bucketFixed)
       build_bucket();
     double cur = lo;
@@ -388,7 +394,9 @@ public:
         bucket[i] = (bucket[i] > 1 ? 0 : std::exp(bucket[i] - logsum_wei));
       else
         bucket[i] /= sum_wei;
+#ifndef NO_PRINT
       printf("%c%lf, %lf] -> %.8lf\n", (i == 0 ? '[' : '('), (i == 0 ? left_bound : cur), (i == n - 1 ? right_bound : cur + det), bucket[i]);
+#endif
       cur += det;
     }
     clear();
