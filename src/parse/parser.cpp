@@ -80,7 +80,7 @@ BlogProgram* parse(const char* inp) {
   FILE *myfile = fopen(inp, "r");
   /* make sure it is valid:*/
   if (!myfile) {
-    cout << "I can't open input.in" << endl;
+    cout << "I can't open " << inp << endl;
     exit(0);
     /*return -1;*/
   }
