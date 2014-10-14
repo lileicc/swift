@@ -250,7 +250,7 @@ private:
   double sum, sum_sqr, sum_wei;
   double lo, hi, det;
   double left_bound, right_bound;
-  bool bucketFixed;
+  bool bucketFixed, init_flag;
   int n;
 
   inline void add_to_bucket(double p, double w) {
@@ -301,13 +301,12 @@ public:
     lo = 1e100;
     hi = -1e100;
     bucketFixed = false;
+    init_flag = false;
   }
 
   Hist(bool isLogarithm = true, int bucket_n = 20) :
     isLogarithm(isLogarithm) {
     clear(bucket_n);
-    if (isLogarithm) sum_wei = -INFINITY;
-    else sum_wei = 0;
   }
   ;
   virtual ~Hist() {
@@ -327,16 +326,26 @@ public:
   }
 
   void add(double element, double weight) {
+    if (init_flag) {
+      if (isLogarithm) {
+        sum_wei = logsum(sum_wei, weight);
+      }
+      else {
+        sum_wei += weight;
+      }
+    }
+    else {
+      init_flag = true;
+      sum_wei = weight;
+    }
     if (isLogarithm) {
       double norm_wei = std::exp(weight);
       sum += element * norm_wei;
       sum_sqr += element * element * norm_wei;
-      sum_wei = logsum(sum_wei, weight);
     }
     else {
       sum += element * weight;
       sum_sqr += element * element * weight;
-      sum_wei += weight;
     }
     if (bucketFixed)
       add_to_bucket(element, weight);

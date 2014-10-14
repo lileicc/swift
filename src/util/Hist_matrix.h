@@ -46,19 +46,23 @@ public:
 
   void add(mat element, double weight) {
     mat cur;
-    if (init_flag)
+    if (init_flag) {
       sum += cur;
-    else {
+      if (isLogarithm) {
+        sum_wei = logsum(sum_wei, weight);
+      } else {
+        sum_wei += weight;
+      }
+    } else {
       init_flag = true;
       sum = cur;
+      sum_wei = weight;
     }
     if (isLogarithm) {
       cur = element * std::exp(weight);
-      sum_wei = logsum(sum_wei, weight);
     }
     else {
       cur = element * weight;
-      sum_wei += weight;
     }
 
     table.push_back(std::make_pair(element, weight));
