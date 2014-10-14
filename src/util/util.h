@@ -54,7 +54,7 @@ template<>
 inline std::string toString<char>(const char&a) { return a ? "true" : "false"; }
 template<>
 inline std::string toString(const std::vector<int>& v) {
-  std::string ret = "Array[";
+  std::string ret = "[";
   for (size_t i = 0; i < v.size(); ++i) {
     if (i) ret.push_back(',');
     ret.append(std::to_string(v[i]));
