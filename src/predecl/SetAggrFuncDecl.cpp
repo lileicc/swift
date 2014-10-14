@@ -1,4 +1,4 @@
-#include "SetFuncDecl.h"
+#include "SetAggrFuncDecl.h"
 
 #include <vector>
 
@@ -7,14 +7,14 @@
 
 namespace swift {
 namespace predecl {
-SetFuncDecl::SetFuncDecl(std::string name) :
+SetAggrFuncDecl::SetAggrFuncDecl(std::string name) :
     PreDecl(name) {
 }
 
-SetFuncDecl::~SetFuncDecl() {
+SetAggrFuncDecl::~SetAggrFuncDecl() {
 }
 
-std::shared_ptr<ir::Expr> SetFuncDecl::getNew(
+std::shared_ptr<ir::Expr> SetAggrFuncDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking
@@ -24,6 +24,7 @@ std::shared_ptr<ir::Expr> SetFuncDecl::getNew(
   if (arg_ty == NULL) 
     return nullptr;
 
+  // TODO: to support general aggregation function for SetExpr
   auto base_ty = arg_ty->getRefer();
 
   auto func = std::make_shared<ir::FunctionCall>(this);

@@ -9,6 +9,7 @@
 #include <iostream>
 #include "../predecl/PreDecl.h"
 #include "../predecl/MatrixStackFuncDecl.h"
+#include "../predecl/SetAggrFuncDecl.h"
 
 #include "PFTranslator.h"
 
@@ -278,11 +279,13 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
         new code::BinaryOperator(new code::Identifier(CUR_TIMESTEP_VAR_NAME),
                                  new code::Identifier(DEPEND_NUM_VAE_NAME),code::OpKind::BO_MOD))));
   // :::=> pointer_copy<_ParticleN_,_DependN_>(_tmp_idx,_ptr_temp_memo,_temp_memo);
-  body_time->addStmt(new code::CallTemplateExpr(new code::Identifier(PF_COPY_PTR_FUN_NAME),
-    std::vector<code::Expr*>({ 
-      new code::Identifier(PARTICLE_NUM_VAR_NAME), 
-      new code::Identifier(DEPEND_NUM_VAE_NAME)
-    }),
+  body_time->addStmt(new code::CallExpr(
+    new code::TemplateExpr(
+      new code::Identifier(PF_COPY_PTR_FUN_NAME),
+      std::vector<code::Expr*>({ 
+        new code::Identifier(PARTICLE_NUM_VAR_NAME), 
+        new code::Identifier(DEPEND_NUM_VAE_NAME)
+      })),
     std::vector<code::Expr*>({
       new code::Identifier(TMP_LOCAL_TS_INDEX_VAR_NAME),
       new code::Identifier(PTR_TEMP_MEMO_VAR_NAME),
@@ -317,9 +320,10 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
      *  normalizeLogWeights<SampleN>(weight);
      */
     body_time->addStmt(
-      new code::CallTemplateExpr(
-        new code::Identifier(PF_NORMALIZE_LOGWEI_FUN_NAME),
-        std::vector<code::Expr*>({new code::Identifier(PARTICLE_NUM_VAR_NAME)}),
+      new code::CallExpr(
+        new code::TemplateExpr(
+          new code::Identifier(PF_NORMALIZE_LOGWEI_FUN_NAME),
+          std::vector<code::Expr*>({new code::Identifier(PARTICLE_NUM_VAR_NAME)})),
         std::vector<code::Expr*>({new code::Identifier(GLOBAL_WEIGHT_VARNAME)})));
   }
 
@@ -328,11 +332,12 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
       weight, stat_memo, ptr_stat_memo,
       ptr_temp_memo, backup_ptr);
   */
-  body_time->addStmt(new code::CallTemplateExpr(
-    new code::Identifier(PF_RESAMPLE_FUN_NAME),
-    std::vector<code::Expr*>({
-      new code::Identifier(PARTICLE_NUM_VAR_NAME),
-      new code::Identifier(DEPEND_NUM_VAE_NAME)}),
+  body_time->addStmt(new code::CallExpr(
+    new code::TemplateExpr(
+      new code::Identifier(PF_RESAMPLE_FUN_NAME),
+      std::vector<code::Expr*>({
+        new code::Identifier(PARTICLE_NUM_VAR_NAME),
+        new code::Identifier(DEPEND_NUM_VAE_NAME)})),
     std::vector<code::Expr*>({
       new code::Identifier(GLOBAL_WEIGHT_VARNAME), 
       new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
@@ -1105,38 +1110,38 @@ code::Expr* PFTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   std::vector<code::Expr*> args;
   args.push_back(new code::CallExpr(new code::Identifier(getnumvarfunname)));
 
-  code::CallExpr* gen_set = NULL;
-  if (condset->getCond() == nullptr) {
-    gen_set = new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
-  }
-  else {
+  if (condset->getCond() != nullptr) {
     auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
     func->addParam(
       new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
     func->addStmt(new code::ReturnStmt(transExpr(condset->getCond())));
     args.push_back(func);
-
-    gen_set = new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
   }
 
-  if (condset->getFunc() == nullptr) {
-    return gen_set;
-  }
-  else {
-    args.clear();
-    args.push_back(gen_set);
+  if (condset->getFunc() != nullptr) { // applied function associated
     auto func = new code::LambdaExpr(code::LambdaKind::REF, mapIRTypeToCodeType(condset->getFunc()->getTyp()));
     func->addParam(
       new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
     func->addStmt(new code::ReturnStmt(transExpr(condset->getFunc())));
     args.push_back(func);
 
-    // firstly return-type, then input-type
-    return new code::CallTemplateExpr(new code::Identifier(APPLY_FUNC_NAME), 
-      std::vector<code::Expr*>{
-        new code::Identifier(mapIRTypeToCodeType(condset->getFunc()->getTyp()).getName()),
-        new code::Identifier(mapIRTypeToCodeType(condset->getVar()->getTyp()).getName())},
+    // call builtin function: _apply<...>(...)
+    // Note: currently we only support NameTy!
+    return new code::CallExpr(
+      new code::TemplateExpr(
+        new code::Identifier(APPLY_FUNC_NAME),
+        std::vector<code::Expr*>{ new code::Identifier(mapIRTypeToCodeType(condset->getFunc()->getTyp()).getName()) }),
       args);
+  }
+  else { // no applied function, pure condition set
+    if (condset->getCond() == nullptr) { // no condition here
+      // _gen_full(n)
+      return new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
+    }
+    else { // with condition
+      // _filter(n, cond)
+      return new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
+    }
   }
 }
 
@@ -2023,6 +2028,27 @@ code::Expr* PFTranslator::transFunctionCall(
     if (dynamic_cast<const predecl::MatrixStackFuncDecl*>(fc->getBuiltinRefer()) != NULL) {
       auto lst = new code::ListInitExpr(args);
       return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), std::vector<code::Expr*>{lst});
+    }
+    // Special Check for aggregate function
+    if (dynamic_cast<const predecl::SetAggrFuncDecl*>(fc->getBuiltinRefer()) != NULL) {
+      auto setexpr = std::dynamic_pointer_cast<ir::CondSet>(fc->get(0));
+      if (setexpr != nullptr && args.size() == 1 && setexpr->getFunc() != nullptr) {
+        // assert(args.size() == 1);
+        // assert(args[0].size() == 2 + (setexpr->getCond() != nullptr));
+        auto set_gen = args[0];
+        args = set_gen->getArgs();
+        set_gen->clearArgs();
+        delete set_gen;
+      }
+      args.push_back(
+        new code::TemplateExpr(
+          new code::Identifier(fc->getBuiltinRefer()->getName()),
+          std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}));
+      return new code::CallExpr(
+        new code::TemplateExpr(
+          new code::Identifier(AGGREGATE_FUNC_NAME),
+          std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}),
+        args);
     }
     return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
   }

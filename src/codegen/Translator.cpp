@@ -8,6 +8,7 @@
 #include <cassert>
 #include "../predecl/PreDecl.h"
 #include "../predecl/MatrixStackFuncDecl.h"
+#include "../predecl/SetAggrFuncDecl.h"
 
 #include "Translator.h"
 
@@ -96,8 +97,9 @@ const int Translator::TOTAL_NUM_SAMPLES = 1000000;
 // internal predefined functions
 const std::string Translator::GEN_FULL_SET_NAME = "_gen_full";
 const std::string Translator::APPLY_FUNC_NAME = "_apply";
+const std::string Translator::AGGREGATE_FUNC_NAME = "_aggregate";
 const std::string Translator::FILTER_FUNC_NAME = "_filter";
-const std::string Translator::FILTER_RANGE_FUNC_NAME = "_filter";
+const std::string Translator::FILTER_RANGE_FUNC_NAME = "_filter_range";
 const std::string Translator::FILTER_COUNT_NAME = "_count";
 const std::string Translator::FILTER_RANGE_COUNT_NAME = "std::count";
 const std::string Translator::FORALL_NAME = "_forall";
@@ -914,38 +916,38 @@ code::Expr* Translator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   std::vector<code::Expr*> args;
   args.push_back(new code::CallExpr(new code::Identifier(getnumvarfunname)));
 
-  code::CallExpr* gen_set = NULL;
-  if (condset->getCond() == nullptr) {
-    gen_set = new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
-  }
-  else {
+  if (condset->getCond() != nullptr) {
     auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
     func->addParam(
       new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
     func->addStmt(new code::ReturnStmt(transExpr(condset->getCond())));
     args.push_back(func);
-
-    gen_set =  new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
   }
 
-  if (condset->getFunc() == nullptr) {
-    return gen_set;
-  }
-  else {
-    args.clear();
-    args.push_back(gen_set);
+  if (condset->getFunc() != nullptr) { // applied function associated
     auto func = new code::LambdaExpr(code::LambdaKind::REF, mapIRTypeToCodeType(condset->getFunc()->getTyp()));
     func->addParam(
-      new code::ParamVarDecl(func,condset->getVar()->getVarName(),INT_TYPE));
+      new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
     func->addStmt(new code::ReturnStmt(transExpr(condset->getFunc())));
     args.push_back(func);
 
-    // firstly return-type, then input-type
-    return new code::CallTemplateExpr(new code::Identifier(APPLY_FUNC_NAME),
-      std::vector<code::Expr*>{
-      new code::Identifier(mapIRTypeToCodeType(condset->getFunc()->getTyp()).getName()),
-        new code::Identifier(mapIRTypeToCodeType(condset->getVar()->getTyp()).getName())},
-        args);
+    // call builtin function: _apply<...>(...)
+    // Note: currently we only support NameTy!
+    return new code::CallExpr(
+      new code::TemplateExpr(
+        new code::Identifier(APPLY_FUNC_NAME),
+        std::vector<code::Expr*>{ new code::Identifier(mapIRTypeToCodeType(condset->getFunc()->getTyp()).getName()) }),
+      args);
+  }
+  else { // no applied function, pure condition set
+    if (condset->getCond() == nullptr) { // no condition here
+      // _gen_full(n)
+      return new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
+    }
+    else { // with condition
+      // _filter(n, cond)
+      return new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
+    }
   }
 }
 
@@ -1631,6 +1633,28 @@ code::Expr* Translator::transFunctionCall(
       auto lst = new code::ListInitExpr(args);
       return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), std::vector<code::Expr*>{lst});
     }
+    // Special Check for aggregate function
+    if (dynamic_cast<const predecl::SetAggrFuncDecl*>(fc->getBuiltinRefer()) != NULL) {
+      auto setexpr = std::dynamic_pointer_cast<ir::CondSet>(fc->get(0));
+      if (setexpr != nullptr && args.size() == 1 && setexpr->getFunc() != nullptr) {
+        // assert(args.size() == 1);
+        // assert(args[0].size() == 2 + (setexpr->getCond() != nullptr));
+        auto set_gen = args[0];
+        args = set_gen->getArgs();
+        set_gen->clearArgs();
+        delete set_gen;
+      }
+      args.push_back(
+        new code::TemplateExpr(
+          new code::Identifier(fc->getBuiltinRefer()->getName()),
+          std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}));
+      return new code::CallExpr(
+        new code::TemplateExpr(
+          new code::Identifier(AGGREGATE_FUNC_NAME),
+          std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}),
+        args);
+    }
+
     return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
   }
   switch (fc->getKind()) {

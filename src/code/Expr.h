@@ -19,6 +19,7 @@ public:
   virtual ~Expr();
 
   virtual std::vector<code::Expr*>& getArgs();
+  virtual void clearArgs(); // only clear, will not remove the pointers
 
   // For Printer
   virtual void print(printer::Printer* prt) = 0;

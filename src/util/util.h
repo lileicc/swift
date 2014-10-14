@@ -29,8 +29,7 @@ inline int toInt(const T& a) {return (int) a;}
 template<>
 inline int toInt<std::string>(const std::string& a) {
   int ret = 0;
-  std::stringstream ss(a);
-  ss >> ret;
+  std::sscanf(a.c_str(), "%d", &ret);
   return ret;
 }
 //   convert to Double
@@ -39,8 +38,7 @@ inline double toReal(const T& a) { return (double)a; }
 template<>
 inline double toReal<std::string>(const std::string& a) {
   double ret = 0;
-  std::stringstream ss(a);
-  ss >> ret;
+  std::sscanf(a.c_str(), "%lf", &ret);
   return ret;
 }
 
@@ -59,7 +57,7 @@ inline std::string toString(const std::vector<int>& v) {
   std::string ret = "Array[";
   for (size_t i = 0; i < v.size(); ++i) {
     if (i) ret.push_back(',');
-    ret += std::to_string(v[i]);
+    ret.append(std::to_string(v[i]));
   }
   ret.push_back(']');
   return ret;
@@ -112,45 +110,61 @@ std::vector<int> _gen_full(int n) {
 }
 
 /*
-* An accumlate function over a set
-*  Input: a vector
-*  return: the sum of all elements in the vector
+* Allowed Aggregator functions for set aggregation
+*  Input: referenced aggregator and value to aggregate
 */
 template<class T>
-T _set_sum(const std::vector<T>& st) {
-  if (st.size() == 0) return T(0);
-  T ret = st[0];
-  for (size_t i = 1; i < st.size(); ++ i)
-    ret += st[i];
-  return ret;
+void _aggr_sum(T&aggr, const T&k) {
+  aggr+=k;
+}
+
+template<class T>
+void _aggr_min(T&aggr, const T&k) {
+  if (k < aggr) aggr = k;
+}
+
+template<class T>
+void _aggr_max(T&aggr, const T&k) {
+  if (k > aggr) aggr = k;
 }
 
 /*
-* An function for minimum value over a set
-*  Input: a vector
-*  return: the minimum value of all elements in the vector
+* General Aggregation Function for a set/array
+* Input: a set and an aggregation function (and applied function for a TupeSet)
 */
 template<class T>
-T _set_min(const std::vector<T>& st) {
-  if (st.size() == 0) return T(0);
-  T ret = st[0];
-  for (size_t i = 1; i < st.size(); ++i) {
-    if (st[i] < ret) ret = st;
-  }
+T _aggregate(const std::vector<T>& st, std::function<void(T&, const T&)> aggr) {
+  if (st.size() == 0) return T();
+  std::vector<T>::iterator it = st.begin();
+  T ret = *it ++;
+  for (; it != st.end(); it++)
+    aggr(ret, *it);
   return ret;
 }
 
-/*
-* An function for maximum value over a set
-*  Input: a vector
-*  return: the maximum value of all elements in the vector
-*/
 template<class T>
-T _set_max(const std::vector<T>& st) {
-  if (st.size() == 0) return T(0);
-  T ret = st[0];
-  for (size_t i = 1; i < st.size(); ++i) {
-    if (st[i] > ret) ret = st;
+T _aggregate(int n, std::function<T(int)> fun, std::function<void(T&, const T&)> aggr) {
+  if (n == 0) return T();
+  T ret = fun(0);
+  for (int i = 1; i < n; ++ i)
+    aggr(ret, fun(i));
+  return ret;
+}
+
+template<class T>
+T _aggregate(int n, std::function<bool(int)> cond, std::function<T(int)> fun, std::function<void(T&, const T&)> aggr) {
+  if (n == 0) return T();
+  bool flag = false;
+  T ret=T();
+  for (int i = 0; i < n; ++i) {
+    if (cond(i)) {
+      if (flag)
+        aggr(ret,fun(i));
+      else {
+        ret = fun(i);
+        flag=true;
+      }
+    }
   }
   return ret;
 }
@@ -168,14 +182,26 @@ std::vector<int> _filter(int n, std::function<bool (int)> fun) {
 }
 
 /*
- * filter function for range
- * Input : two iterators and a condition
+ * filter function for set
+ * Input : set/array and a condition
  * Output: copies of filted elements in the range
  */
-std::vector<int> _filter(std::vector<int>::iterator st, std::vector<int>::iterator en, std::function<bool(int)> fun) {
+std::vector<int> _filter(const std::vector<int>&st, std::function<bool(int)> cond) {
+  std::vector<int> ret;
+  for (auto& u : st)
+    if (cond(u)) ret.push_back(u);
+  return ret;
+}
+
+/*
+* filter function for range
+* Input : begin and end iterators of a range and a condition
+* Output: copies of filted elements in the range
+*/
+std::vector<int> _filter(std::vector<int>::iterator st, std::vector<int>::iterator en, std::function<bool(int)> cond) {
   std::vector<int> ret;
   for (; st != en; ++ st)
-    if (fun(*st)) ret.push_back(*st);
+    if(cond(*st)) ret.push_back(*st);
   return ret;
 }
 
@@ -189,6 +215,23 @@ std::vector<ret_T> _apply(std::vector<in_T> args, std::function<ret_T(in_T)> fun
   std::vector<ret_T>ret;
   for(auto &u : args)
     ret.push_back(fun(u));
+  return ret;
+}
+
+template<class ret_T>
+std::vector<ret_T> _apply(int n, std::function<ret_T(int)> fun) {
+  std::vector<ret_T>ret(n);
+  for (int i = 0; i < n; ++ i)
+    ret[i] = fun(i);
+  return ret;
+}
+
+template<class ret_T>
+std::vector<ret_T> _apply(int n, std::function<bool(int)> cond, std::function<ret_T(int)> fun) {
+  std::vector<ret_T>ret;
+  for (int i = 0; i < n; ++i)
+    if (cond(i))
+      ret.push_back(fun(i));
   return ret;
 }
 
@@ -379,3 +422,4 @@ inline double randn() {
 }
 
 }
+

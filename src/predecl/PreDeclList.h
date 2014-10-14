@@ -32,7 +32,7 @@
 #include "MatrixIntFuncDecl.h"
 #include "MatrixStackFuncDecl.h"
 #include "MatrixSubsetFuncDecl.h"
-#include "SetFuncDecl.h"
+#include "SetAggrFuncDecl.h"
 
 #include <vector>
 #include <string>

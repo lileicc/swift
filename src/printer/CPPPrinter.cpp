@@ -405,22 +405,22 @@ void CPPPrinter::print(code::CallExpr* term) {
   printLine();
 }
 
-void CPPPrinter::print(code::CallTemplateExpr* term) {
+void CPPPrinter::print(code::TemplateExpr* term) {
   printIndent();
   bool backup = newline;
   newline = false;
 
   // Note: () operatorƒf
-  auto f_prec = OpPrec(term->getFunc());
+  auto f_prec = OpPrec(term->getVar());
   if (f_prec.first > 1)
     fprintf(file, "(");
-  term->getFunc()->print(this);
+  term->getVar()->print(this);
   if (f_prec.first > 1)
     fprintf(file, ")");
 
   bool not_first = false;
   fprintf(file, "<");
-  for (auto p : term->getTempArgs()) {
+  for (auto p : term->getArgs()) {
     if (not_first)
       fprintf(file, ",");
     else 
@@ -428,17 +428,6 @@ void CPPPrinter::print(code::CallTemplateExpr* term) {
     p->print(this);
   }
   fprintf(file, ">");
-
-  fprintf(file, "(");
-  not_first = false;
-  for (auto p : term->getArgs()) {
-    if (not_first)
-      fprintf(file, ",");
-    else
-      not_first = true;
-    p->print(this);
-  }
-  fprintf(file, ")");
 
   newline = backup;
   if (backup)

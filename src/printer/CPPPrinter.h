@@ -30,7 +30,6 @@ public:
   void print(code::BooleanLiteral* term);
   void print(code::BreakStmt* term);
   void print(code::CallExpr* term);
-  void print(code::CallTemplateExpr* term);
   void print(code::CaseStmt* term);
   void print(code::ClassDecl* term);
   void print(code::ClassConstructor* term);
@@ -55,6 +54,7 @@ public:
   void print(code::SpecialMacro* term);
   void print(code::StringLiteral* term);
   void print(code::SwitchStmt* term);
+  void print(code::TemplateExpr* term);
   void print(code::Type* term);
   void print(code::VarDecl* term);
   void print(code::Identifier* term);

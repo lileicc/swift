@@ -4,10 +4,10 @@
 namespace swift {
 namespace predecl {
 
-class SetFuncDecl: public swift::predecl::PreDecl {
+class SetAggrFuncDecl: public swift::predecl::PreDecl {
 public:
-  SetFuncDecl(std::string name);
-  virtual ~SetFuncDecl();
+  SetAggrFuncDecl(std::string name);
+  virtual ~SetAggrFuncDecl();
 
   virtual std::shared_ptr<ir::Expr>
   getNew(std::vector<std::shared_ptr<ir::Expr>>& args,

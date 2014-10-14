@@ -109,9 +109,9 @@ std::map<std::string, std::shared_ptr<PreDecl>> PreDeclList::initFuncStore() {
   ret["repmat"] = std::make_shared<MatrixSubsetFuncDecl>("repmat", 2);
 
   // Set Functions
-  ret["sum"] = std::make_shared<SetFuncDecl>("_set_sum");
-  ret["min"] = std::make_shared<SetFuncDecl>("_set_min");
-  ret["max"] = std::make_shared<SetFuncDecl>("_set_max");
+  ret["sum"] = std::make_shared<SetAggrFuncDecl>("_aggr_sum");
+  ret["min"] = std::make_shared<SetAggrFuncDecl>("_aggr_min");
+  ret["max"] = std::make_shared<SetAggrFuncDecl>("_aggr_max");
 
   // Special Functions with Different Names
   ret["logdet"] = ret["log_det"];

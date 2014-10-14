@@ -15,13 +15,17 @@ Expr::Expr(std::vector<Expr*> args) :
 }
 
 Expr::~Expr() {
-  for (auto a : args)
-    delete a;
+  for (auto& a : args)
+    if(a != NULL) delete a;
   args.clear();
 }
 
 std::vector<code::Expr*>& Expr::getArgs() {
   return args;
+}
+
+void Expr::clearArgs() {
+  args.clear();
 }
 
 } /* namespace code */

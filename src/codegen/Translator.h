@@ -410,10 +410,13 @@ protected:
   // function name for internal apply: _apply() in util.h
   static const std::string APPLY_FUNC_NAME;
 
+  // function name for internal aggregator: _set_aggregate() in util.h
+  static const std::string AGGREGATE_FUNC_NAME;
+
   // function name for internal filter: _filer() in util.h
   static const std::string FILTER_FUNC_NAME;
 
-  // function name for internal filter with range input: _filer() in util.h
+  // function name for internal filter with range input: _filer_range() in util.h
   static const std::string FILTER_RANGE_FUNC_NAME;
 
   // function name for internal filter counter: _count() in util.h
