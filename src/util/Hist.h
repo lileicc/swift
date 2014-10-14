@@ -26,6 +26,7 @@ private:
 public:
   void clear() {
     table.clear();
+    normmap.clear();
   }
 
   Hist(bool isLogarithm = true) :
@@ -127,6 +128,7 @@ private:
 public:
   void clear() {
     table.clear();
+    normmap.clear();
     typeName.clear();
     instances = NULL;
     inst_n = 0;
