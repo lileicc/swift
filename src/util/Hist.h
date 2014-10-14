@@ -21,12 +21,10 @@ template<class T>
 class Hist {
 private:
   std::map<T, double> table;
-  std::map<T, double> normmap;
   const bool isLogarithm;
 public:
   void clear() {
     table.clear();
-    normmap.clear();
   }
 
   Hist(bool isLogarithm = true) :
@@ -39,21 +37,22 @@ public:
   ;
 
   void add(T element, double weight) {
-    if (table.find(element) != table.end()) {
+    auto it = table.find(element);
+    if (it != table.end()) {
       if (isLogarithm) {
         if (weight > -INFINITY)
-          table[element] = logsum(weight, table[element]);
+          it.second = logsum(weight, it.second);
       } else {
         if (weight > 0)
-          table[element] += weight;
+          it.second += weight;
       }
     } else {
       if (isLogarithm) {
         if (weight > -INFINITY)
-          table[element] = weight;
+          table.insert(std::make_pair(element, weight));
       } else {
         if (weight > 0)
-          table[element] = weight;
+          table.insert(std::make_pair(element, weight));
       }
     }
   }
@@ -83,15 +82,14 @@ public:
   }
 
   std::map<T, double>& getNormalizedResult() {
-    normmap.clear();
     double w = getTotalWeight();
     for (auto & it : table) {
       if (isLogarithm)
-        normmap[it.first] = std::exp(it.second - w);
+        it.second = std::exp(it.second - w);
       else
-        normmap[it.first] = it.second / w;
+        it.second /= w;
     }
-    return normmap;
+    return table;
   }
   ;
 
@@ -99,7 +97,7 @@ public:
     if(str.size() > 0)
       printf(">> query : %s\n", str.c_str());
     getNormalizedResult();
-    for (auto& it : normmap) {
+    for (auto& it : table) {
       printf("%s -> %s\n", toString(it.first).c_str(),
           toString(it.second).c_str());
     }
@@ -119,7 +117,6 @@ template<>
 class Hist<int> {
 private:
   std::map<int, double> table;
-  std::map<int, double> normmap;
   const bool isLogarithm;
   bool isTyped;
   int inst_n;
@@ -157,24 +154,25 @@ public:
   ;
 
   void add(int element, double weight) {
-    if (table.find(element) != table.end()) {
+    auto it = table.find(element);
+    if (it != table.end()) {
       if (isLogarithm) {
         if (weight > -INFINITY)
-          table[element] = logsum(weight, table[element]);
+          it.second = logsum(weight, it.second);
       }
       else {
         if (weight > 0)
-          table[element] += weight;
+          it.second += weight;
       }
     }
     else {
       if (isLogarithm) {
         if (weight > -INFINITY)
-          table[element] = weight;
+          table.insert(std::make_pair(element,weight));
       }
       else {
         if (weight > 0)
-          table[element] = weight;
+          table.insert(std::make_pair(element,weight));
       }
     }
   };
@@ -202,15 +200,14 @@ public:
   }
 
   std::map<int, double>& getNormalizedResult() {
-    normmap.clear();
     double w = getTotalWeight();
     for (auto & it : table) {
       if (isLogarithm)
-        normmap[it.first] = std::exp(it.second - w);
+        it.second = std::exp(it.second - w);
       else
-        normmap[it.first] = it.second / w;
+        it.second /= w;
     }
-    return normmap;
+    return table;
   }
   ;
 
@@ -219,7 +216,7 @@ public:
       printf(">> query : %s\n", str.c_str());
     getNormalizedResult();
     if (isTyped) { // typed object
-      for (auto& it : normmap) {
+      for (auto& it : table) {
         printf("%s -> %.8lf\n", 
           (it.first >= 0 && it.first < inst_n
           ? instances->at(it.first) : typeName + "(#" + toString(it.first) + ")").c_str(),
@@ -227,7 +224,7 @@ public:
       }
     }
     else { // normal int
-      for (auto& it : normmap) {
+      for (auto& it : table) {
         printf("%d -> %.8lf\n",it.first, it.second);
       }
     }
