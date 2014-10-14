@@ -135,7 +135,7 @@ void _aggr_max(T&aggr, const T&k) {
 template<class T>
 T _aggregate(const std::vector<T>& st, std::function<void(T&, const T&)> aggr) {
   if (st.size() == 0) return T();
-  std::vector<T>::iterator it = st.begin();
+  auto it = st.begin();
   T ret = *it ++;
   for (; it != st.end(); it++)
     aggr(ret, *it);
