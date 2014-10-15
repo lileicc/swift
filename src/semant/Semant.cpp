@@ -1558,7 +1558,7 @@ void Semant::transQuery(absyn::Query* nq) {
   }
   else {// Special Case: function call
     auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(ptr);
-    if (fun->isTemporal()) {
+    if (fun != nullptr && fun->isTemporal()) {
       if (std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg()) == nullptr) {
         error(nq->line, nq->col,
           "Illegal Timestep Argument in query expression!\

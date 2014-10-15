@@ -31,5 +31,9 @@ void DeclContext::addDecl(Decl* decl) {
   members.push_back(decl);
 }
 
+void DeclContext::addDeclFront(Decl* decl) {
+  members.insert(members.begin(), decl);
+}
+
 } /* namespace code */
 } /* namespace swift */

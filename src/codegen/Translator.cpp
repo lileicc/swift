@@ -242,7 +242,7 @@ void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
     std::vector<code::Expr*> names;
     for (auto& n : td->getInstNames())
       names.push_back(new code::StringLiteral(n));
-    coreNs->addDecl(new code::VarDecl(coreNs, arrName, ARRAY_STRING_CONST_TYPE,
+    coreNs->addDeclFront(new code::VarDecl(coreNs, arrName, ARRAY_STRING_CONST_TYPE,
                                       new code::ListInitExpr(names)));
   }
   // create a class for this declared type
@@ -1758,7 +1758,9 @@ inline STMT Translator::CREATE_INSTANCE(std::string tyname,
     values.insert(values.end(), originvalues.begin(), originvalues.end());
   if (ncopy)
     st = new code::CallExpr(
-        new code::Identifier(APPEND_FUN_NAME),
+        new code::TemplateExpr(
+          new code::Identifier(APPEND_FUN_NAME),
+          std::vector<EXPR>{new code::Identifier(tyname)}),
         std::vector<EXPR>( { new code::Identifier(inst_var_name), ncopy,
             new code::ListInitExpr(values) }));
   else
