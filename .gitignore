@@ -161,3 +161,4 @@ swift.vcxproj.filters
 *.exe
 *.dll
 test_room/*
+/bird/
