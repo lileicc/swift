@@ -176,6 +176,7 @@ T _aggregate(int n, std::function<bool(int)> cond, std::function<T(int)> fun, st
  */
 std::vector<int> _filter(int n, std::function<bool (int)> fun) {
   std::vector<int> ret;
+  ret.reserve(n);
   for (int i=0;i<n;++i)
     if (fun(i)) ret.push_back(i);
   return ret;
@@ -188,6 +189,7 @@ std::vector<int> _filter(int n, std::function<bool (int)> fun) {
  */
 std::vector<int> _filter(const std::vector<int>&st, std::function<bool(int)> cond) {
   std::vector<int> ret;
+  ret.reserve(st.size());
   for (auto& u : st)
     if (cond(u)) ret.push_back(u);
   return ret;
@@ -213,6 +215,7 @@ std::vector<int> _filter(std::vector<int>::iterator st, std::vector<int>::iterat
 template<class ret_T, class in_T>
 std::vector<ret_T> _apply(std::vector<in_T> args, std::function<ret_T(in_T)> fun) {
   std::vector<ret_T>ret;
+  ret.reserve(args.size());
   for(auto &u : args)
     ret.push_back(fun(u));
   return ret;
@@ -229,6 +232,7 @@ std::vector<ret_T> _apply(int n, std::function<ret_T(int)> fun) {
 template<class ret_T>
 std::vector<ret_T> _apply(int n, std::function<bool(int)> cond, std::function<ret_T(int)> fun) {
   std::vector<ret_T>ret;
+  ret.reserve(n);
   for (int i = 0; i < n; ++i)
     if (cond(i))
       ret.push_back(fun(i));
