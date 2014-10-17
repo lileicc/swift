@@ -27,7 +27,7 @@ void Multinomial::init(const std::vector<double>& wei) {
   is_logwei_ok.clear();
 }
 
-void Multinomial::init(const std::vector<double>& wei, int n) {
+void Multinomial::init(int n, const std::vector<double>& wei) {
   this->init(wei);
   this->n = n;
 }
@@ -45,7 +45,7 @@ void Multinomial::init(const arma::mat& wei) {
   init(wei.memptr(), wei.memptr() + wei.n_elem);
 }
 
-void Multinomial::init(const arma::mat& wei, int n) {
+void Multinomial::init(int n, const arma::mat& wei) {
   init(wei.memptr(), wei.memptr() + wei.n_elem);
   this->n = n;
 }
@@ -54,19 +54,31 @@ std::vector<int> Multinomial::gen() {
   if (n > 3 * weight.size())
     return gen_large(n);
   else 
+  if (n * 20 < weight.size())
     return gen_small(n);
+  else
+    return gen_medium(n);
+}
+
+std::vector<int> Multinomial::gen_medium(int n) {
+  tmp_keys.resize(n);
+  for (int i = 0; i < n; ++ i)
+    tmp_keys[i] = dist(engine) * sum_wei;
+  std::sort(tmp_keys.begin(), tmp_keys.end());
+  std::vector<int> ret(weight.size(), 0);
+  int ptr = 0;
+  for (auto& k : tmp_keys) {
+    while (weight[ptr] < k) ++ ptr;
+    ret[ptr] ++;
+  }
+  return ret;
 }
 
 std::vector<int> Multinomial::gen_small(int n) {
-  std::vector<double> key(n);
-  for (int i = 0; i < n; ++ i)
-    key[i] = dist(engine) * sum_wei;
-  std::sort(key.begin(), key.end());
   std::vector<int> ret(weight.size(), 0);
-  int ptr = 0;
-  for (auto& k : key) {
-    while (weight[ptr] < k) ++ ptr;
-    ret[ptr] ++;
+  for(int i=0;i<n;++i){
+    double w = dist(engine) * sum_wei;
+    ret[lower_bound(weight.begin(), weight.end(), w) - weight.begin()] ++;
   }
   return ret;
 }
