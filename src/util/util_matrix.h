@@ -45,9 +45,9 @@ inline double toReal<arma::mat>(const arma::mat& a) {
 }
 
 // Get number of rows of a matrix
-inline int getRows(const arma::mat& a) { return a.n_rows; }
+inline int numrows(const arma::mat& a) { return a.n_rows; }
 // Get number of columns of a matrix
-inline int getCols(const arma::mat& a) { return a.n_cols; }
+inline int numcols(const arma::mat& a) { return a.n_cols; }
 
 
 // get submatrix from a large matrix

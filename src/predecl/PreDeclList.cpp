@@ -79,7 +79,7 @@ const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "no
 const MatrixRealFuncDecl PreDeclList::asScalarFuncDecl =
     MatrixRealFuncDecl("as_scalar"); // Should be mannually register in PredeclFunctory
 // function from matrix to int
-const std::vector<std::string> PreDeclList::matIntFuncList{ "numRows", "numCols", "rank" };
+const std::vector<std::string> PreDeclList::matIntFuncList{ "numrows", "numcols", "rank" };
 // function from matrix to matrix
 const std::vector<std::string> PreDeclList::matMatFuncList{ "trans", "chol", "inv", "pinv", "diagmat" };
 // matrix stacking functions
