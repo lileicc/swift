@@ -1551,7 +1551,7 @@ code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool is
   ///    Note: in IR, the type->toString() will return the corresponding C++ translation of that type
   switch (ty->getTyp()) {
     case ir::IRConstant::BOOL:
-      return code::Type(CHAR_TYPE.getName(), isRef, isPtr); // Special Treatment for Bool in C++
+      return code::Type(BOOL_TYPE.getName(), isRef, isPtr); // Special Treatment for Bool in C++
     case ir::IRConstant::INT:
     case ir::IRConstant::DOUBLE:
     case ir::IRConstant::STRING:
