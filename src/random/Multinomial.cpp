@@ -54,13 +54,10 @@ std::vector<int> Multinomial::gen() {
   if (n > 3 * weight.size())
     return gen_large(n);
   else 
-  if (n * 20 < weight.size())
     return gen_small(n);
-  else
-    return gen_medium(n);
 }
 
-std::vector<int> Multinomial::gen_medium(int n) {
+std::vector<int> Multinomial::gen_small(int n) {
   tmp_keys.resize(n);
   for (int i = 0; i < n; ++ i)
     tmp_keys[i] = dist(engine) * sum_wei;
@@ -70,15 +67,6 @@ std::vector<int> Multinomial::gen_medium(int n) {
   for (auto& k : tmp_keys) {
     while (weight[ptr] < k) ++ ptr;
     ret[ptr] ++;
-  }
-  return ret;
-}
-
-std::vector<int> Multinomial::gen_small(int n) {
-  std::vector<int> ret(weight.size(), 0);
-  for(int i=0;i<n;++i){
-    double w = dist(engine) * sum_wei;
-    ret[lower_bound(weight.begin(), weight.end(), w) - weight.begin()] ++;
   }
   return ret;
 }
