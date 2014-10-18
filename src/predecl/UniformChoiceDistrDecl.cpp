@@ -1,6 +1,7 @@
 #include "UniformChoiceDistrDecl.h"
 #include "../ir/SetTy.h"
 #include "../ir/SetExpr.h"
+#include "../ir/CondSet.h"
 #include "../ir/UniformChoiceDistr.h"
 
 namespace swift {
@@ -23,6 +24,10 @@ std::shared_ptr<ir::Expr> UniformChoiceDistrDecl::getNew(
     return nullptr;
   auto ptr = std::make_shared<ir::UniformChoiceDistr>(e);
   auto ty = (const ir::SetTy*) (e->getTyp());
+  if (ty == NULL) return nullptr;
+  // TODO: internally we only support int/nameTy
+  if (ty->getRefer()->getTyp() != ir::IRConstant::NAMETY)
+    return nullptr;
   ptr->setArgs(args);
   ptr->setTyp(ty->getRefer());
   ptr->processArgRandomness();

@@ -1460,26 +1460,74 @@ code::Expr* PFTranslator::transDistribution(
       if (valuevar.empty()) {
         // Sample value from the distribution
         // define a field in the main class corresponding to the distribution
-        code::VarDecl::createVarDecl(
-            coreNs, distvarname, code::Type(UNIFORM_CHOICE_DISTRIBUTION_NAME));
+        code::FieldDecl::createFieldDecl(
+            coreCls, distvarname, code::Type(UNIFORM_CHOICE_DISTRIBUTION_NAME));
+        // put init function for condition and apply-function
+        code::Expr* paramInit = NULL;
+        if (setexp->getCond() != nullptr) {
+          code::LambdaExpr* cond = new code::LambdaExpr(code::LambdaKind::REF,BOOL_TYPE);
+          cond->addParam(new code::ParamVarDecl(cond, setexp->getVar()->getVarName(), INT_TYPE));
+          cond->addStmt(new code::ReturnStmt(transExpr(setexp->getCond())));
+          code::Expr* initcond = code::CallExpr::createMethodCall(
+            distvarname, "initcond", std::vector<code::Expr*>({
+            cond }));
+          paramInit = initcond;
+        }
+        if (setexp->getFunc() != nullptr) {
+          code::LambdaExpr* app = new code::LambdaExpr(code::LambdaKind::REF, INT_TYPE);
+          app->addParam(new code::ParamVarDecl(app, setexp->getVar()->getVarName(), INT_TYPE));
+          app->addStmt(new code::ReturnStmt(transExpr(setexp->getFunc())));
+          code::Expr* initapp = code::CallExpr::createMethodCall(
+            distvarname, "initapp", std::vector<code::Expr*>({
+            app }));
+          if (paramInit == NULL) paramInit = initapp;
+          else paramInit = new code::BinaryOperator(paramInit, initapp, code::OpKind::BO_COMMA);
+        }
         // put init just before sampling
-        // :::=> dist.init(_filter(...)) or dist.init(_apply(...))
+        // :::=> dist.init(n)
         code::Expr* callinit = code::CallExpr::createMethodCall(
             distvarname, DISTRIBUTION_INIT_FUN_NAME, std::vector<code::Expr*>( {
-                transSetExpr(setexp) }));
+            new code::CallExpr(new code::Identifier(getnumvarfunname)) }));
+        if (paramInit != NULL) {
+          callinit = new code::BinaryOperator(paramInit, callinit, code::OpKind::BO_COMMA);
+        }
         // :::=> dist.gen()
         code::Expr* callgen = code::CallExpr::createMethodCall(
             distvarname, DISTRIBUTION_GEN_FUN_NAME);
         // :::=> dist.init(...), dist.gen()
         return new code::BinaryOperator(callinit, callgen,
-                                        code::OpKind::BO_COMMA);
+            code::OpKind::BO_COMMA);
       } else {
         // calculating likelihood
+        // put init function for condition and apply-function
+        code::Expr* paramInit = NULL;
+        if (setexp->getCond() != nullptr) {
+          code::LambdaExpr* cond = new code::LambdaExpr(code::LambdaKind::REF,BOOL_TYPE);
+          cond->addParam(new code::ParamVarDecl(cond, setexp->getVar()->getVarName(), INT_TYPE));
+          cond->addStmt(new code::ReturnStmt(transExpr(setexp->getCond())));
+          code::Expr* initcond = code::CallExpr::createMethodCall(
+            distvarname, "initcond", std::vector<code::Expr*>({
+            cond }));
+          paramInit = initcond;
+        }
+        if (setexp->getFunc() != nullptr) {
+          code::LambdaExpr* app = new code::LambdaExpr(code::LambdaKind::REF, INT_TYPE);
+          app->addParam(new code::ParamVarDecl(app, setexp->getVar()->getVarName(), INT_TYPE));
+          app->addStmt(new code::ReturnStmt(transExpr(setexp->getFunc())));
+          code::Expr* initapp = code::CallExpr::createMethodCall(
+            distvarname, "initapp", std::vector<code::Expr*>({
+            app }));
+          if (paramInit == NULL) paramInit = initapp;
+          else paramInit = new code::BinaryOperator(paramInit, initapp, code::OpKind::BO_COMMA);
+        }
         // put init just before sampling
-        // :::=> dist.init(_filter(...))
+        // :::=> dist.init(n)
         code::Expr* callinit = code::CallExpr::createMethodCall(
             distvarname, DISTRIBUTION_INIT_FUN_NAME, std::vector<code::Expr*>( {
-                transSetExpr(setexp) }));
+            new code::CallExpr(new code::Identifier(getnumvarfunname)) }));
+        if (paramInit != NULL) {
+          callinit = new code::BinaryOperator(paramInit, callinit, code::OpKind::BO_COMMA);
+        }
         // :::=> dist.loglikeli()
         code::Expr* calllikeli = code::CallExpr::createMethodCall(
             distvarname,
@@ -2001,12 +2049,14 @@ void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs
   }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp()==ir::IRConstant::BOOL ?
+              BOOL_TYPE: mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
   code::VarDecl::createVarDecl(
       coreNs, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp()==ir::IRConstant::BOOL ?
+              BOOL_TYPE: mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
   // The timestep this query should be processed
   int id = 0;
@@ -2048,7 +2098,8 @@ code::Expr* PFTranslator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    return new code::BooleanLiteral(bl->getValue());
+    // TODO: to handle boolean correctly
+    return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
       ir::DoubleLiteral>(cs);

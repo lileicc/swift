@@ -1278,24 +1278,72 @@ code::Expr* Translator::transDistribution(
         // define a field in the main class corresponding to the distribution
         code::FieldDecl::createFieldDecl(
             coreCls, distvarname, code::Type(UNIFORM_CHOICE_DISTRIBUTION_NAME));
+        // put init function for condition and apply-function
+        code::Expr* paramInit = NULL;
+        if (setexp->getCond() != nullptr) {
+          code::LambdaExpr* cond = new code::LambdaExpr(code::LambdaKind::REF,BOOL_TYPE);
+          cond->addParam(new code::ParamVarDecl(cond, setexp->getVar()->getVarName(), INT_TYPE));
+          cond->addStmt(new code::ReturnStmt(transExpr(setexp->getCond())));
+          code::Expr* initcond = code::CallExpr::createMethodCall(
+            distvarname, "initcond", std::vector<code::Expr*>({
+            cond }));
+          paramInit = initcond;
+        }
+        if (setexp->getFunc() != nullptr) {
+          code::LambdaExpr* app = new code::LambdaExpr(code::LambdaKind::REF, INT_TYPE);
+          app->addParam(new code::ParamVarDecl(app, setexp->getVar()->getVarName(), INT_TYPE));
+          app->addStmt(new code::ReturnStmt(transExpr(setexp->getFunc())));
+          code::Expr* initapp = code::CallExpr::createMethodCall(
+            distvarname, "initapp", std::vector<code::Expr*>({
+            app }));
+          if (paramInit == NULL) paramInit = initapp;
+          else paramInit = new code::BinaryOperator(paramInit, initapp, code::OpKind::BO_COMMA);
+        }
         // put init just before sampling
-        // :::=> dist.init(_filter(...)) or dist.init(_apply(...))
+        // :::=> dist.init(n)
         code::Expr* callinit = code::CallExpr::createMethodCall(
             distvarname, DISTRIBUTION_INIT_FUN_NAME, std::vector<code::Expr*>( {
-                transSetExpr(setexp) }));
+            new code::CallExpr(new code::Identifier(getnumvarfunname)) }));
+        if (paramInit != NULL) {
+          callinit = new code::BinaryOperator(paramInit, callinit, code::OpKind::BO_COMMA);
+        }
         // :::=> dist.gen()
         code::Expr* callgen = code::CallExpr::createMethodCall(
             distvarname, DISTRIBUTION_GEN_FUN_NAME);
         // :::=> dist.init(...), dist.gen()
         return new code::BinaryOperator(callinit, callgen,
-                                        code::OpKind::BO_COMMA);
+            code::OpKind::BO_COMMA);
       } else {
         // calculating likelihood
+        // put init function for condition and apply-function
+        code::Expr* paramInit = NULL;
+        if (setexp->getCond() != nullptr) {
+          code::LambdaExpr* cond = new code::LambdaExpr(code::LambdaKind::REF,BOOL_TYPE);
+          cond->addParam(new code::ParamVarDecl(cond, setexp->getVar()->getVarName(), INT_TYPE));
+          cond->addStmt(new code::ReturnStmt(transExpr(setexp->getCond())));
+          code::Expr* initcond = code::CallExpr::createMethodCall(
+            distvarname, "initcond", std::vector<code::Expr*>({
+            cond }));
+          paramInit = initcond;
+        }
+        if (setexp->getFunc() != nullptr) {
+          code::LambdaExpr* app = new code::LambdaExpr(code::LambdaKind::REF, INT_TYPE);
+          app->addParam(new code::ParamVarDecl(app, setexp->getVar()->getVarName(), INT_TYPE));
+          app->addStmt(new code::ReturnStmt(transExpr(setexp->getFunc())));
+          code::Expr* initapp = code::CallExpr::createMethodCall(
+            distvarname, "initapp", std::vector<code::Expr*>({
+            app }));
+          if (paramInit == NULL) paramInit = initapp;
+          else paramInit = new code::BinaryOperator(paramInit, initapp, code::OpKind::BO_COMMA);
+        }
         // put init just before sampling
-        // :::=> dist.init(_filter(...))
+        // :::=> dist.init(n)
         code::Expr* callinit = code::CallExpr::createMethodCall(
             distvarname, DISTRIBUTION_INIT_FUN_NAME, std::vector<code::Expr*>( {
-                transSetExpr(setexp) }));
+            new code::CallExpr(new code::Identifier(getnumvarfunname)) }));
+        if (paramInit != NULL) {
+          callinit = new code::BinaryOperator(paramInit, callinit, code::OpKind::BO_COMMA);
+        }
         // :::=> dist.loglikeli()
         code::Expr* calllikeli = code::CallExpr::createMethodCall(
             distvarname,
@@ -1598,12 +1646,14 @@ void Translator::transQuery(code::FunctionDecl* fun,
   }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp()==ir::IRConstant::BOOL ?
+              BOOL_TYPE: mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
   code::FieldDecl::createFieldDecl(
       coreCls, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp()==ir::IRConstant::BOOL ?
+              BOOL_TYPE: mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
@@ -1636,7 +1686,7 @@ code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool is
   ///    Note: in IR, the type->toString() will return the corresponding C++ translation of that type
   switch (ty->getTyp()) {
     case ir::IRConstant::BOOL:
-      return code::Type(BOOL_TYPE.getName(), isRef, isPtr); // Special Treatment for Bool in C++
+      return code::Type(CHAR_TYPE.getName(), isRef, isPtr); // Special Treatment for Bool in C++
     case ir::IRConstant::INT:
     case ir::IRConstant::DOUBLE:
     case ir::IRConstant::STRING:
@@ -1678,7 +1728,8 @@ code::Expr* Translator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    return new code::BooleanLiteral(bl->getValue());
+    // TODO: to handle BOOLEAN correctly!
+    return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
       ir::DoubleLiteral>(cs);
