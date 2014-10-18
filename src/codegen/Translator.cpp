@@ -38,6 +38,7 @@ const code::Type Translator::STRING_TYPE("string");
 const code::Type Translator::CHAR_TYPE("char");
 const code::Type Translator::TIMESTEP_TYPE("unsigned");
 const code::Type Translator::BOOL_TYPE("bool");
+const code::Type Translator::BOOL_REF_TYPE("bool", true);
 const code::Type Translator::VOID_TYPE("void");
 
 const code::Type Translator::MATRIX_TYPE("mat");
@@ -434,10 +435,7 @@ code::FunctionDecl* Translator::transGetterFun(
 
   // Note: when adding field, refTag MUST be false!
   // Optimization for Vector/Map/Set Return
-  if (valuetype.getName() == ARRAY_BASE_TYPE.getName()
-    || valuetype.getName() == MAP_BASE_TYPE.getName()
-    || valuetype.getName() == SET_BASE_TYPE.getName()
-    || valuetype.getName() == MATRIX_TYPE.getName())
+  if (isObjectType(fd->getRetTyp()))
     valuetype.setRef(true);
 
   // define getter function :::==> __get_value()
@@ -563,6 +561,28 @@ void Translator::checkConstValue(std::shared_ptr<ir::FuncDefn> fd) {
   }
 }
 
+bool Translator::checkFixedFunNeedMemo(std::shared_ptr<ir::FuncDefn> fd, std::vector<int>& dims) {
+  if (!fd->isFixed() || fd->argSize() == 0) return false;
+  dims.clear();
+  if (fd->isTemporal())
+    dims.push_back(model->getMarkovOrder() + 1);
+  for (auto& a : fd->getArgs()) {
+    auto nt = dynamic_cast<const ir::NameTy*>(a->getTyp());
+    if (nt == NULL) {
+      dims.clear();
+      return false;
+    }
+    // Do not allowed Number Statement
+    if (nt->getRefer()->getAllNumberStmt().size() > 0) {
+      dims.clear();
+      return false;
+    }
+    // only distinct objects defined for nameTy
+    dims.push_back(nt->getRefer()->getPreLen());
+  }
+  return true;
+}
+
 code::FunctionDecl* Translator::transFixedFun(
   std::shared_ptr<ir::FuncDefn> fd) {
   const std::string & name = fd->getName();
@@ -571,11 +591,37 @@ code::FunctionDecl* Translator::transFixedFun(
 
   // special check to translate to const value instead of a function
   if (fd->argSize() == 0 && constValTable.count(fixedfunname) > 0) {
+    valuetype.setConst();
     code::FieldDecl::createFieldDecl(
-      coreCls, fixedfunname, code::Type(fd->getRetTyp()->toString(),false,false,true),
+      coreCls, fixedfunname, valuetype,
       transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody())));
     return NULL;
   }
+
+  // Check whether need to do memorization
+  std::vector<int> dims;
+  if (checkFixedFunNeedMemo(fd, dims)) {
+    // register memozization cache
+    std::vector<code::Expr*> args;
+    for (auto&d : dims) {
+      args.push_back(new code::IntegerLiteral(d));
+    }
+    code::FieldDecl::createFieldDecl(
+      coreCls, getValueVarName(fixedfunname),
+      args, valuetype);
+    args.clear(); // Attention: we need to create args twice!
+    for (auto&d : dims) {
+      args.push_back(new code::IntegerLiteral(d));
+    }
+    code::FieldDecl::createFieldDecl(
+      coreCls, getMarkVarName(fixedfunname),
+      args, BOOL_TYPE);
+
+    if (isObjectType(fd->getRetTyp()))
+      valuetype.setRef(true);
+  }
+  else
+    dims.clear();
 
   // adding method declaration in the main class
   code::FunctionDecl* fixedfun = code::FunctionDecl::createFunctionDecl(
@@ -583,15 +629,43 @@ code::FunctionDecl* Translator::transFixedFun(
   fixedfun->setParams(transParamVarDecls(fixedfun, fd->getArgs()));
   declared_funs[fixedfun->getName()] = fixedfun;
 
+  if (dims.size() > 0) { // need memorization
+    code::Type valueRefType = valuetype; 
+    valueRefType.setRef(true);
+    // create mark value
+    addFunValueRefStmt(fixedfun, getMarkVarName(fixedfunname), fixedfun->getParams(), MARK_VAR_REF_NAME, BOOL_REF_TYPE);
+    addFunValueRefStmt(fixedfun, getValueVarName(fixedfunname), fixedfun->getParams(), VALUE_VAR_REF_NAME, valueRefType);
+
+    code::IfStmt* stmt = new code::IfStmt(
+      new code::Identifier(MARK_VAR_REF_NAME),
+      new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
+    fixedfun->addStmt(stmt);
+    fixedfun->addStmt(new code::BinaryOperator(
+      new code::Identifier(MARK_VAR_REF_NAME),new code::BooleanLiteral(true),
+      code::OpKind::BO_ASSIGN));
+  }
+
+  code::Expr* retExpr = NULL;
+  // Normal Fixed Function
   if (std::dynamic_pointer_cast<ir::Expr>(fd->getBody()) != nullptr) {
-    fixedfun->addStmt(new code::ReturnStmt(transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody()))));
+    retExpr = transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody()));
   }
   else {
-    code::VarDecl::createVarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()));
+    if (dims.size() == 0) // did not do memorization
+      code::VarDecl::createVarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()));
     fixedfun->addStmt(
       transClause(fd->getBody(), VALUE_VAR_REF_NAME));
-    fixedfun->addStmt(new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
+    retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
   }
+  // when memorization we need to update the value reference
+  if (dims.size() > 0) {
+    fixedfun->addStmt(
+      new code::BinaryOperator(
+        new code::Identifier(VALUE_VAR_REF_NAME),
+        retExpr, code::OpKind::BO_ASSIGN));
+    retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
+  }
+  fixedfun->addStmt(new code::ReturnStmt(retExpr));
   return fixedfun;
 }
 
@@ -1370,7 +1444,7 @@ void Translator::addFunValueRefStmt(
   // valuevarname[index1][index2]...
   // where the index are corresponding to the arguments
   code::Expr* exp = new code::Identifier(valuevarname);
-  for (auto prm : valueindex) {
+  for (auto& prm : valueindex) {
     exp = new code::ArraySubscriptExpr(exp, new code::Identifier(prm->getId()));
   }
 //  if (valueindex.empty()) {
@@ -1543,6 +1617,17 @@ void Translator::transQuery(code::FunctionDecl* fun,
       code::CallExpr::createMethodCall(answervarname,
                                        HISTOGRAM_PRINT_METHOD_NAME,
                                        std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
+}
+
+bool Translator::isObjectType(const ir::Ty* ty) {
+  if (ty == NULL) return false;
+  if (ty->getTyp() == ir::IRConstant::ARRAY
+    || ty->getTyp() == ir::IRConstant::MAP
+    || ty->getTyp() == ir::IRConstant::SET
+    || ty->getTyp() == ir::IRConstant::STRING
+    || ty->getTyp() == ir::IRConstant::MATRIX)
+    return true;
+  return false;
 }
 
 code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool isPtr) {

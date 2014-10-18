@@ -138,6 +138,12 @@ protected:
   */
   code::FunctionDecl* transFixedFun(std::shared_ptr<ir::FuncDefn> fd);
   /**
+  * Check whether this fixed function needs memorization
+  * @Param fd: fixed function with at least one argument
+  * @Param dims: the dimensions of the pre-allocated memory required for memozation 
+  */
+  bool checkFixedFunNeedMemo(std::shared_ptr<ir::FuncDefn> fd, std::vector<int>& dims);
+  /**
    * translate a clause in ir to a statement in code,
    * retvar is for return variable
    * if valuevar is given, then it will calculate weight instead of sampling
@@ -284,6 +290,7 @@ protected:
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
   static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false, bool isPtr = false); // map ir type to code type
+  static bool isObjectType(const ir::Ty *ty);
 
   static const code::Type INT_TYPE;
   static const code::Type INT_VECTOR_TYPE;
@@ -301,6 +308,7 @@ protected:
   static const code::Type TIMESTEP_TYPE;
 
   static const code::Type BOOL_TYPE;
+  static const code::Type BOOL_REF_TYPE;
 
   static const code::Type VOID_TYPE;
 

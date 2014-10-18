@@ -605,10 +605,7 @@ code::FunctionDecl* PFTranslator::transGetterFun(
 
   // Note: when adding field, refTag MUST be false!
   // Optimization for Vector/Map/Set Return
-  if (valuetype.getName() == ARRAY_BASE_TYPE.getName()
-    || valuetype.getName() == MAP_BASE_TYPE.getName()
-    || valuetype.getName() == SET_BASE_TYPE.getName()
-    || valuetype.getName() == MATRIX_TYPE.getName())
+  if (isObjectType(fd->getRetTyp()))
     valuetype.setRef(true);
 
   // define getter function :::==> __get_value()
@@ -775,21 +772,88 @@ code::FunctionDecl* PFTranslator::transFixedFun(
     return NULL;
   }
 
+  // Check whether need to do memorization
+  std::vector<int> dims;
+  if (checkFixedFunNeedMemo(fd, dims)) {
+    // register memozization cache
+    std::vector<code::Expr*> args;
+    for (auto&d : dims) {
+      args.push_back(new code::IntegerLiteral(d));
+    }
+    code::VarDecl::createVarDecl(
+      coreNs, getValueVarName(fixedfunname),
+      args, valuetype);
+    args.clear(); // Attention: we need to create args twice!
+    for (auto&d : dims) {
+      args.push_back(new code::IntegerLiteral(d));
+    }
+    code::VarDecl::createVarDecl(
+      coreNs, getMarkVarName(fixedfunname),
+      args, BOOL_TYPE);
+
+    if (isObjectType(fd->getRetTyp()))
+      valuetype.setRef(true);
+  }
+  else
+    dims.clear();
+
   // adding method declaration in the main class
   code::FunctionDecl* fixedfun = code::FunctionDecl::createFunctionDecl(
     coreNs, fixedfunname, valuetype);
   fixedfun->setParams(transParamVarDecls(fixedfun, fd));
   declared_funs[fixedfun->getName()] = fixedfun;
   
+  if (dims.size() > 0) { // need memorization
+    code::Expr* tar = NULL;
+    code::Type valueRefType = valuetype;
+    valueRefType.setRef(true);
+    // create mark ref var
+    tar = new code::Identifier(getMarkVarName(fixedfunname));
+    for (auto& prm : fixedfun->getParams()) {
+      code::Expr* sub = new code::Identifier(prm->getId());
+      if (isTemporalType(prm->getType()))
+        sub = new code::BinaryOperator(sub, new code::Identifier(DEPEND_NUM_VAE_NAME), code::OpKind::BO_MOD);
+      tar = new code::ArraySubscriptExpr(tar, sub);
+    }
+    fixedfun->addStmt(new code::DeclStmt(new code::VarDecl(fixedfun,MARK_VAR_REF_NAME,BOOL_REF_TYPE,tar)));
+    // create value ref var
+    tar = new code::Identifier(getValueVarName(fixedfunname));
+    for (auto& prm : fixedfun->getParams()) {
+      code::Expr* sub = new code::Identifier(prm->getId());
+      if (isTemporalType(prm->getType()))
+        sub = new code::BinaryOperator(sub, new code::Identifier(DEPEND_NUM_VAE_NAME), code::OpKind::BO_MOD);
+      tar = new code::ArraySubscriptExpr(tar, sub);
+    }
+    fixedfun->addStmt(new code::DeclStmt(new code::VarDecl(fixedfun, VALUE_VAR_REF_NAME, valueRefType, tar)));
+
+    code::IfStmt* stmt = new code::IfStmt(
+      new code::Identifier(MARK_VAR_REF_NAME),
+      new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
+    fixedfun->addStmt(stmt);
+    fixedfun->addStmt(new code::BinaryOperator(
+      new code::Identifier(MARK_VAR_REF_NAME), new code::BooleanLiteral(true),
+      code::OpKind::BO_ASSIGN));
+  }
+
+  code::Expr* retExpr = NULL;
   if (std::dynamic_pointer_cast<ir::Expr>(fd->getBody()) != nullptr) {
-    fixedfun->addStmt(new code::ReturnStmt(transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody()))));
+    retExpr = transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody()));
   }
   else {
     code::VarDecl::createVarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()));
     fixedfun->addStmt(
       transClause(fd->getBody(), VALUE_VAR_REF_NAME));
-    fixedfun->addStmt(new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
+    retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
   }
+  // when memorization we need to update the value reference
+  if (dims.size() > 0) {
+    fixedfun->addStmt(
+      new code::BinaryOperator(
+      new code::Identifier(VALUE_VAR_REF_NAME),
+      retExpr, code::OpKind::BO_ASSIGN));
+    retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
+  }
+  fixedfun->addStmt(new code::ReturnStmt(retExpr));
   return fixedfun;
 }
 
