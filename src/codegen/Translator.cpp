@@ -1598,12 +1598,14 @@ void Translator::transQuery(code::FunctionDecl* fun,
   }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
   code::FieldDecl::createFieldDecl(
       coreCls, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
@@ -1636,7 +1638,7 @@ code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool is
   ///    Note: in IR, the type->toString() will return the corresponding C++ translation of that type
   switch (ty->getTyp()) {
     case ir::IRConstant::BOOL:
-      return code::Type(BOOL_TYPE.getName(), isRef, isPtr); // Special Treatment for Bool in C++
+      return code::Type(CHAR_TYPE.getName(), isRef, isPtr); // Special Treatment for Bool in C++
     case ir::IRConstant::INT:
     case ir::IRConstant::DOUBLE:
     case ir::IRConstant::STRING:
@@ -1678,7 +1680,8 @@ code::Expr* Translator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    return new code::BooleanLiteral(bl->getValue());
+    // TODO
+    return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
       ir::DoubleLiteral>(cs);

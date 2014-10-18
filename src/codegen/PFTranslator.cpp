@@ -2001,12 +2001,14 @@ void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs
   }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
   code::VarDecl::createVarDecl(
       coreNs, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
   // The timestep this query should be processed
   int id = 0;
@@ -2048,7 +2050,8 @@ code::Expr* PFTranslator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    return new code::BooleanLiteral(bl->getValue());
+    // TODO
+    return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
       ir::DoubleLiteral>(cs);
