@@ -789,7 +789,7 @@ code::FunctionDecl* PFTranslator::transFixedFun(
     }
     code::VarDecl::createVarDecl(
       coreNs, getMarkVarName(fixedfunname),
-      args, BOOL_TYPE);
+      args, fd->isTemporal() ? INT_TYPE : BOOL_TYPE);
 
     if (isObjectType(fd->getRetTyp()))
       valuetype.setRef(true);
@@ -815,7 +815,8 @@ code::FunctionDecl* PFTranslator::transFixedFun(
         sub = new code::BinaryOperator(sub, new code::Identifier(DEPEND_NUM_VAE_NAME), code::OpKind::BO_MOD);
       tar = new code::ArraySubscriptExpr(tar, sub);
     }
-    fixedfun->addStmt(new code::DeclStmt(new code::VarDecl(fixedfun,MARK_VAR_REF_NAME,BOOL_REF_TYPE,tar)));
+    fixedfun->addStmt(new code::DeclStmt(
+      new code::VarDecl(fixedfun,MARK_VAR_REF_NAME,fd->isTemporal() ? INT_REF_TYPE : BOOL_REF_TYPE,tar)));
     // create value ref var
     tar = new code::Identifier(getValueVarName(fixedfunname));
     for (auto& prm : fixedfun->getParams()) {
@@ -826,12 +827,18 @@ code::FunctionDecl* PFTranslator::transFixedFun(
     }
     fixedfun->addStmt(new code::DeclStmt(new code::VarDecl(fixedfun, VALUE_VAR_REF_NAME, valueRefType, tar)));
 
+    code::Expr* cond = new code::Identifier(MARK_VAR_REF_NAME);
+    if (fd->isTemporal()) {
+      // ::==> mark_var == t + 1
+      cond = new code::BinaryOperator(cond, createVarPlusDetExpr(fd->getTemporalArg()->getVarName(), 1), code::OpKind::BO_EQU);
+    }
     code::IfStmt* stmt = new code::IfStmt(
-      new code::Identifier(MARK_VAR_REF_NAME),
+      cond,
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
     fixedfun->addStmt(stmt);
     fixedfun->addStmt(new code::BinaryOperator(
-      new code::Identifier(MARK_VAR_REF_NAME), new code::BooleanLiteral(true),
+      new code::Identifier(MARK_VAR_REF_NAME), 
+      fd->isTemporal() ? createVarPlusDetExpr(fd->getTemporalArg()->getVarName(), 1) : new code::BooleanLiteral(true),
       code::OpKind::BO_ASSIGN));
   }
 
