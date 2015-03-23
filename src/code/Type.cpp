@@ -63,8 +63,8 @@ bool Type::isPtr() const {
   return ptrTag;
 }
 
-void Type::setConst() {
-  this->constTag = true;
+void Type::setConst(bool consTag) {
+  this->constTag = consTag;
 }
 
 bool Type::isConst() const {

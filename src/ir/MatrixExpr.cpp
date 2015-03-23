@@ -37,7 +37,7 @@ void MatrixExpr::print(FILE* file, int indent) const {
     fprintf(file, "  flag = ColVec");
   fprintf(file, "\n");
   for (size_t i = 0; i < argSize(); i++) {
-    fprintf(file, "%*sarg%lu: \n", indent + 2, "", i);
+    fprintf(file, "%*sarg%d: \n", indent + 2, "", (int)i);
     get(i)->print(file, indent + 4);
   }
 }

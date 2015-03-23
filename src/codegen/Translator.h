@@ -138,6 +138,12 @@ protected:
   */
   code::FunctionDecl* transFixedFun(std::shared_ptr<ir::FuncDefn> fd);
   /**
+  * Check whether this fixed function needs memorization
+  * @Param fd: fixed function with at least one argument
+  * @Param dims: the dimensions of the pre-allocated memory required for memozation 
+  */
+  bool checkFixedFunNeedMemo(std::shared_ptr<ir::FuncDefn> fd, std::vector<int>& dims);
+  /**
    * translate a clause in ir to a statement in code,
    * retvar is for return variable
    * if valuevar is given, then it will calculate weight instead of sampling
@@ -284,6 +290,7 @@ protected:
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
   static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false, bool isPtr = false); // map ir type to code type
+  static bool isObjectType(const ir::Ty *ty);
 
   static const code::Type INT_TYPE;
   static const code::Type INT_VECTOR_TYPE;
@@ -296,9 +303,12 @@ protected:
 
   static const code::Type STRING_TYPE;
 
+  static const code::Type CHAR_TYPE;
+
   static const code::Type TIMESTEP_TYPE;
 
   static const code::Type BOOL_TYPE;
+  static const code::Type BOOL_REF_TYPE;
 
   static const code::Type VOID_TYPE;
 
@@ -310,6 +320,8 @@ protected:
   static const code::Type MATRIX_CONTAINER_TYPE;
 
   static const code::Type ARRAY_BASE_TYPE;
+
+  static const code::Type ARRAY_STRING_CONST_TYPE;
 
   static const code::Type MAP_BASE_TYPE;
 
@@ -406,10 +418,13 @@ protected:
   // function name for internal apply: _apply() in util.h
   static const std::string APPLY_FUNC_NAME;
 
+  // function name for internal aggregator: _set_aggregate() in util.h
+  static const std::string AGGREGATE_FUNC_NAME;
+
   // function name for internal filter: _filer() in util.h
   static const std::string FILTER_FUNC_NAME;
 
-  // function name for internal filter with range input: _filer() in util.h
+  // function name for internal filter with range input: _filer_range() in util.h
   static const std::string FILTER_RANGE_FUNC_NAME;
 
   // function name for internal filter counter: _count() in util.h
@@ -528,6 +543,8 @@ protected:
 
   static bool COMPUTE_LIKELIHOOD_IN_LOG;
 
+  static const double ZERO_EPS;
+
   static swift::Configuration* config;
 
   std::set<std::string> constValTable;
@@ -602,6 +619,14 @@ std::string getValueVarName(std::string name) {
 */
 std::string getInstanceArrayName(std::string name) {
   return "__instance_" + name;
+}
+
+/**
+* given the type name,
+* return the variable name to store all the strings referring to the names of the distinct objects
+*/
+std::string getInstanceStringArrayName(std::string name) {
+  return "__vecstr_instance_" + name;
 }
 
 };

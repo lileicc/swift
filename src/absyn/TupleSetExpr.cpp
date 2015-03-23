@@ -68,6 +68,23 @@ void TupleSetExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string TupleSetExpr::toString() {
+  std::string ret = "{";
+  for (size_t i = 0; i < args.size(); ++i) {
+    if (i > 0) ret += ", ";
+    if (args[i] != NULL) ret += args[i]->toString();
+  }
+  ret += " for ";
+  for (size_t i = 0; i < vardecls.size(); ++i) {
+    if (i > 0) ret += ", ";
+    ret += vardecls[i].toString();
+  }
+  if (cond != NULL) {
+    ret += ": " + cond->toString();
+  }
+  return ret + "}";
+}
+
 void TupleSetExpr::cloneArgs() {
   for (size_t i = 0; i < args.size(); ++ i)
     if (args[i] != NULL)

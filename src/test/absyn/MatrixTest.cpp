@@ -25,12 +25,12 @@ fixed RealMatrix A = [x,y,z];
 fixed RealMatrix B = [x;y;z];
 fixed RealMatrix W = [1,0.0,0;0.0,1,0;0.0,0,1];
 
-fixed Real scale(Real k) = transpose(A) * A * k;
+fixed Real scale(Real k) = A * transpose(A) * k;
 
 random RealMatrix C ~ MultivarGaussian(B,W);
 random RealMatrix D ~ MultivarGaussian([3.0;3.0;3.0],W);
 
-obs D = [2.0;2.0;2.0];
+obs D = vstack(2,2,2);
 
 query scale(1.5);
 query C[0];
@@ -99,12 +99,12 @@ void MatrixTest::build(){
     blog->add(fd);
   }
   /*
-  fixed Real scale(Real k) = transpose(A) * A * k;
+  fixed Real scale(Real k) = A * transpose(A) * k;
   */
   {
     FuncApp* trs = new FuncApp(0, 0, Symbol("transpose"));
     trs->add(new FuncApp(0, 0, Symbol("A")));
-    OpExpr* sub = new OpExpr(0, 0, AbsynConstant::MUL, trs, new FuncApp(0, 0, Symbol("A")));
+    OpExpr* sub = new OpExpr(0, 0, AbsynConstant::MUL, new FuncApp(0, 0, Symbol("A")), trs);
     OpExpr* expr = new OpExpr(0, 0, AbsynConstant::MUL, sub, new FuncApp(0, 0, Symbol("k")));
     FuncDecl *fd = new FuncDecl(0, 0, false, Symbol("Real"), Symbol("scale"), expr);
     fd->addArg(VarDecl(0, 0, Symbol("Real"), Symbol("k")));
@@ -137,16 +137,14 @@ void MatrixTest::build(){
     blog->add(fd);
   }
   /*
-  obs D = [2.0;2.0;2.0];
+  obs D = vstack(2,2,2);
   */
   {
-    ArrayExpr* mat = new ArrayExpr(0, 0, 2);
+    FuncApp* vs = new FuncApp(0, 0, Symbol("vstack"));
     for (int i = 0; i < 3; ++i) {
-      ArrayExpr* row = new ArrayExpr(0, 0, 1);
-      row->add(new DoubleLiteral(0, 0, 2));
-      mat->add(row);
+      vs->add(new IntLiteral(0,0,2));
     }
-    Evidence* obs = new Evidence(0, 0, new FuncApp(0, 0, Symbol("D")), mat);
+    Evidence* obs = new Evidence(0, 0, new FuncApp(0, 0, Symbol("D")), vs);
     blog->add(obs);
   }
   /*

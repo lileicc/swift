@@ -19,12 +19,16 @@ public:
   PFTranslator();
   void translate(std::shared_ptr<swift::ir::BlogModel> model);
   code::Code* getResult();
+  void setParticleNum(int part);
+  void setTimeLimit(int tm);
+  void setDepend(int dep);
   
 protected:
   /**
   * how many particles to sample in total : default parameter for PF
   */
-  static const int TOTAL_NUM_PARTICLES;
+  static const int DEFAULT_TOTAL_NUM_PARTICLES;
+  int particleNum;
 
   // Time Series Features
   int ModelDependency;
@@ -55,7 +59,6 @@ protected:
   // Types for Memorization Data Structure
   static const TYPE STAT_MEMO_TYPE;
   static const TYPE REF_STAT_MEMO_TYPE;
-  static const TYPE PTR_STAT_MEMO_TYPE;
   static const TYPE TEMP_MEMO_TYPE;
   static const TYPE REF_TEMP_MEMO_TYPE;
   static const TYPE PTR_TEMP_MEMO_TYPE;
@@ -70,7 +73,24 @@ protected:
 
   // Util Functions for Particle Filtering in Util.h
   static const std::string PF_RESAMPLE_FUN_NAME;
+  static const std::string PF_NORMALIZE_LOGWEI_FUN_NAME;
   static const std::string PF_COPY_PTR_FUN_NAME;
+
+  // Variable Name to store all evidences
+  static const std::string TMP_EVI_STORE_NAME;
+  static const code::Type TMP_EVI_STORE_TYPE;
+  static const std::string TMP_EVI_INIT_FUNC_NAME;
+  code::FunctionDecl* tempEvidenceInit;
+  // Variable Name to store all queries
+  static const std::string TMP_QUERY_STORE_NAME;
+  static const code::Type TMP_QUERY_STORE_TYPE;
+  static const std::string TMP_QUERY_INIT_FUNC_NAME;
+  code::FunctionDecl* tempQueryInit;
+  // Variable Name to store all prints
+  static const std::string TMP_PRINT_STORE_NAME;
+  static const code::Type TMP_PRINT_STORE_TYPE;
+  static const std::string TMP_PRINT_INIT_FUNC_NAME;
+  code::FunctionDecl* tempPrintInit;
 
   /**
    * declare a named type
@@ -228,7 +248,8 @@ protected:
    *  @param context within which the translated statment will reside
    *  @param evid    ir evidence declaration
    */
-  void transEvidence(code::CompoundStmt* fun,
+  void transEvidence(std::vector<std::vector<code::Stmt*> >&setterFuncs,
+      std::vector<std::vector<code::Stmt*> >&likeliFuncs,
       std::shared_ptr<ir::Evidence> evid, bool transFuncApp = true);
 
   /**
@@ -243,8 +264,9 @@ protected:
   /**
    * translate n-th query
    */
-  void transQuery(code::CompoundStmt* cmp, std::shared_ptr<ir::Query> qr,
-      int n);
+  void transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs,
+      std::vector<std::vector<code::Stmt*> >& printFuncs, 
+      std::shared_ptr<ir::Query> qr, int n);
   /**
    * create reference to blog function value
    */
@@ -299,6 +321,7 @@ protected:
       bool isVarDefined = false, bool isLess = true);
   static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
   static bool isTemporalType(code::Type ty);
+  static code::Expr* tempTableEntryRefer(std::string table, int ts = -1);
 
   // Utils for Liu-West Filter
   // Record all the random function names accociated with at least *ONE* observation

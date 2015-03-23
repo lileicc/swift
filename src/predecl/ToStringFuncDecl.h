@@ -1,17 +1,13 @@
-/*
-  Interface for matrix initialization functions
-*/
-
 #pragma once
 #include "PreDecl.h"
 
 namespace swift {
 namespace predecl {
 
-class MatrixInitFuncDecl: public swift::predecl::PreDecl {
+class ToStringFuncDecl: public swift::predecl::PreDecl {
 public:
-  MatrixInitFuncDecl(std::string name);
-  virtual ~MatrixInitFuncDecl();
+  ToStringFuncDecl();
+  virtual ~ToStringFuncDecl();
 
   virtual std::shared_ptr<ir::Expr>
   getNew(std::vector<std::shared_ptr<ir::Expr>>& args,

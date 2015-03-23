@@ -33,6 +33,16 @@ void ArrayExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string ArrayExpr::toString() {
+  std::string ret = "[";
+  for (size_t i = 0; i < args.size(); ++i) {
+    if (i > 0) ret += " ,";
+    if (args[i] != NULL) 
+      ret += args[i]->toString();
+  }
+  return ret + "]";
+}
+
 Expr* ArrayExpr::clone(){
   ArrayExpr* ret = new ArrayExpr(*this);
   ret->cloneArgs();

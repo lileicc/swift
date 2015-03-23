@@ -29,7 +29,6 @@ private:
   bool init_flag;
 public:
   void clear() {
-    sum_wei = 0;
     init_flag = false;
     table.clear();
   }
@@ -45,18 +44,23 @@ public:
 
   void add(mat element, double weight) {
     mat cur;
+    if (init_flag) {
+      sum += cur;
+      if (isLogarithm) {
+        sum_wei = logsum(sum_wei, weight);
+      } else {
+        sum_wei += weight;
+      }
+    } else {
+      init_flag = true;
+      sum = cur;
+      sum_wei = weight;
+    }
     if (isLogarithm) {
-      cur = element * exp(weight);
-      sum_wei = logsum(sum_wei, weight);
+      cur = element * std::exp(weight);
     }
     else {
       cur = element * weight;
-      sum_wei += weight;
-    }
-    if (init_flag) sum += cur;
-    else {
-      init_flag = true;
-      sum = cur;
     }
 
     table.push_back(std::make_pair(element, weight));
@@ -92,7 +96,7 @@ public:
     double w = getTotalWeight();
     for (auto & it : table) {
       if (isLogarithm)
-        it.second = exp(it.second - w);
+        it.second = std::exp(it.second - w);
       else
         it.second = it.second / w;
     }
@@ -103,7 +107,7 @@ public:
   void print(std::string str = std::string()) {
     if(str.size() > 0)
       printf(">> query : %s\n", str.c_str());
-    if (isLogarithm) sum_wei = exp(sum_wei);
+    if (isLogarithm) sum_wei = std::exp(sum_wei);
     mat mean = sum / sum_wei;
     mat cov = mean, var = mean;
     cov.zeros(); var.zeros();
@@ -113,16 +117,17 @@ public:
     }
     cov /= sum_wei;
     var /= sum_wei;
+#ifndef NO_PRINT
     mean.print("Mean : ");
     var.print( "Var  : ");
     cov.print( "Cov  : ");
-    
+#endif
     clear();
   }
 
   void debug() {
     for (auto& it : getResult()) {
-      it.first.print(cerr, "weight = " + std::to_string(isLogarithm ? exp(it.second) : it.second) + " :");
+      it.first.print(cerr, "weight = " + toString(isLogarithm ? exp(it.second) : it.second) + " :");
     }
   }
 };

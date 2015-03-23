@@ -60,9 +60,11 @@ public:
 
   size_t size();
   void add(Stmt* decl);
+  void add(const std::vector<Stmt*>& stmts);
   Stmt* get(int k);
   const std::vector<Stmt*>& getAll();
   std::vector<Stmt*>& getAllRef();
+  void clear();
 
   // For Debugging Use
   void print(FILE* file, int indent);

@@ -7,6 +7,8 @@
 
 #include <cassert>
 #include "../predecl/PreDecl.h"
+#include "../predecl/MatrixStackFuncDecl.h"
+#include "../predecl/SetAggrFuncDecl.h"
 
 #include "Translator.h"
 
@@ -33,8 +35,10 @@ const code::Type Translator::DOUBLE_REF_TYPE("double", true);
 const code::Type Translator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {
                                                        DOUBLE_TYPE });
 const code::Type Translator::STRING_TYPE("string");
+const code::Type Translator::CHAR_TYPE("char");
 const code::Type Translator::TIMESTEP_TYPE("unsigned");
 const code::Type Translator::BOOL_TYPE("bool");
+const code::Type Translator::BOOL_REF_TYPE("bool", true);
 const code::Type Translator::VOID_TYPE("void");
 
 const code::Type Translator::MATRIX_TYPE("mat");
@@ -46,6 +50,7 @@ const code::Type Translator::MATRIX_CONTAINER_TYPE("vector<double>");
 
 // TODO: This could be potentially replaced by array
 const code::Type Translator::ARRAY_BASE_TYPE("vector");
+const code::Type Translator::ARRAY_STRING_CONST_TYPE("vector<string>",false,false,true);
 const code::Type Translator::MAP_BASE_TYPE("map");
 const code::Type Translator::SET_BASE_TYPE("set");
 const std::string Translator::SET_EVIDENCE_FUN_NAME = "_set_evidence";
@@ -66,7 +71,7 @@ const std::string Translator::HISTOGRAM_ADD_METHOD_NAME = "add";
 const std::string Translator::HISTOGRAM_PRINT_METHOD_NAME = "print";
 const std::string Translator::LOG_EQUAL_FUN_NAME = "logEqual";
 const std::string Translator::ISFINITE_FUN_NAME = "isfinite";
-const std::string Translator::NEG_INFINITE_NAME = "-INFINITE";
+const std::string Translator::NEG_INFINITE_NAME = "-INFINITY";
 const std::string Translator::ANSWER_VAR_NAME_PREFIX = "_answer_";
 const std::string Translator::ANSWER_PRINT_METHOD_NAME = "print";
 const std::string Translator::MAIN_DEBUG_METHOD_NAME = "debug";
@@ -93,8 +98,9 @@ const int Translator::TOTAL_NUM_SAMPLES = 1000000;
 // internal predefined functions
 const std::string Translator::GEN_FULL_SET_NAME = "_gen_full";
 const std::string Translator::APPLY_FUNC_NAME = "_apply";
+const std::string Translator::AGGREGATE_FUNC_NAME = "_aggregate";
 const std::string Translator::FILTER_FUNC_NAME = "_filter";
-const std::string Translator::FILTER_RANGE_FUNC_NAME = "_filter";
+const std::string Translator::FILTER_RANGE_FUNC_NAME = "_filter_range";
 const std::string Translator::FILTER_COUNT_NAME = "_count";
 const std::string Translator::FILTER_RANGE_COUNT_NAME = "std::count";
 const std::string Translator::FORALL_NAME = "_forall";
@@ -104,6 +110,9 @@ const std::string Translator::EXISTS_RANGE_NAME = "std::any_of";
 
 // internal predefined functions for Matrix
 const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
+
+// Precison Parameter
+const double Translator::ZERO_EPS = 1e-30;
 
 Translator::Translator() {
   useTag = false;
@@ -228,6 +237,15 @@ code::FunctionDecl* Translator::transSampleAlg() {
 
 void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   const std::string& name = td->getName();
+  // create a vector containing all the names of its distinct instances
+  if (td->getInstNames().size() > 0) {
+    std::string arrName = getInstanceStringArrayName(name);
+    std::vector<code::Expr*> names;
+    for (auto& n : td->getInstNames())
+      names.push_back(new code::StringLiteral(n));
+    coreNs->addDeclFront(new code::VarDecl(coreNs, arrName, ARRAY_STRING_CONST_TYPE,
+                                      new code::ListInitExpr(names)));
+  }
   // create a class for this declared type
   // and declare a vector to hold all instance in this type
   TYPEDEFN blogtypedefn = DECLARE_TYPE(name);
@@ -417,10 +435,7 @@ code::FunctionDecl* Translator::transGetterFun(
 
   // Note: when adding field, refTag MUST be false!
   // Optimization for Vector/Map/Set Return
-  if (valuetype.getName() == ARRAY_BASE_TYPE.getName()
-    || valuetype.getName() == MAP_BASE_TYPE.getName()
-    || valuetype.getName() == SET_BASE_TYPE.getName()
-    || valuetype.getName() == MATRIX_TYPE.getName())
+  if (isObjectType(fd->getRetTyp()))
     valuetype.setRef(true);
 
   // define getter function :::==> __get_value()
@@ -546,6 +561,28 @@ void Translator::checkConstValue(std::shared_ptr<ir::FuncDefn> fd) {
   }
 }
 
+bool Translator::checkFixedFunNeedMemo(std::shared_ptr<ir::FuncDefn> fd, std::vector<int>& dims) {
+  if (!fd->isFixed() || fd->argSize() == 0) return false;
+  dims.clear();
+  if (fd->isTemporal())
+    dims.push_back(model->getMarkovOrder() + 1);
+  for (auto& a : fd->getArgs()) {
+    auto nt = dynamic_cast<const ir::NameTy*>(a->getTyp());
+    if (nt == NULL) {
+      dims.clear();
+      return false;
+    }
+    // Do not allowed Number Statement
+    if (nt->getRefer()->getAllNumberStmt().size() > 0) {
+      dims.clear();
+      return false;
+    }
+    // only distinct objects defined for nameTy
+    dims.push_back(nt->getRefer()->getPreLen());
+  }
+  return true;
+}
+
 code::FunctionDecl* Translator::transFixedFun(
   std::shared_ptr<ir::FuncDefn> fd) {
   const std::string & name = fd->getName();
@@ -554,20 +591,81 @@ code::FunctionDecl* Translator::transFixedFun(
 
   // special check to translate to const value instead of a function
   if (fd->argSize() == 0 && constValTable.count(fixedfunname) > 0) {
+    valuetype.setConst();
     code::FieldDecl::createFieldDecl(
-      coreCls, fixedfunname, code::Type(fd->getRetTyp()->toString(),false,false,true),
+      coreCls, fixedfunname, valuetype,
       transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody())));
     return NULL;
   }
+
+  // Check whether need to do memorization
+  std::vector<int> dims;
+  if (checkFixedFunNeedMemo(fd, dims)) {
+    // register memozization cache
+    std::vector<code::Expr*> args;
+    for (auto&d : dims) {
+      args.push_back(new code::IntegerLiteral(d));
+    }
+    code::FieldDecl::createFieldDecl(
+      coreCls, getValueVarName(fixedfunname),
+      args, valuetype);
+    args.clear(); // Attention: we need to create args twice!
+    for (auto&d : dims) {
+      args.push_back(new code::IntegerLiteral(d));
+    }
+    code::FieldDecl::createFieldDecl(
+      coreCls, getMarkVarName(fixedfunname),
+      args, BOOL_TYPE);
+
+    if (isObjectType(fd->getRetTyp()))
+      valuetype.setRef(true);
+  }
+  else
+    dims.clear();
 
   // adding method declaration in the main class
   code::FunctionDecl* fixedfun = code::FunctionDecl::createFunctionDecl(
     coreCls, fixedfunname, valuetype);
   fixedfun->setParams(transParamVarDecls(fixedfun, fd->getArgs()));
   declared_funs[fixedfun->getName()] = fixedfun;
-  // translate the Clause and calculate weight
-  fixedfun->addStmt(
-    transClause(fd->getBody(),""));
+
+  if (dims.size() > 0) { // need memorization
+    code::Type valueRefType = valuetype; 
+    valueRefType.setRef(true);
+    // create mark value
+    addFunValueRefStmt(fixedfun, getMarkVarName(fixedfunname), fixedfun->getParams(), MARK_VAR_REF_NAME, BOOL_REF_TYPE);
+    addFunValueRefStmt(fixedfun, getValueVarName(fixedfunname), fixedfun->getParams(), VALUE_VAR_REF_NAME, valueRefType);
+
+    code::IfStmt* stmt = new code::IfStmt(
+      new code::Identifier(MARK_VAR_REF_NAME),
+      new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
+    fixedfun->addStmt(stmt);
+    fixedfun->addStmt(new code::BinaryOperator(
+      new code::Identifier(MARK_VAR_REF_NAME),new code::BooleanLiteral(true),
+      code::OpKind::BO_ASSIGN));
+  }
+
+  code::Expr* retExpr = NULL;
+  // Normal Fixed Function
+  if (std::dynamic_pointer_cast<ir::Expr>(fd->getBody()) != nullptr) {
+    retExpr = transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody()));
+  }
+  else {
+    if (dims.size() == 0) // did not do memorization
+      code::VarDecl::createVarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()));
+    fixedfun->addStmt(
+      transClause(fd->getBody(), VALUE_VAR_REF_NAME));
+    retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
+  }
+  // when memorization we need to update the value reference
+  if (dims.size() > 0) {
+    fixedfun->addStmt(
+      new code::BinaryOperator(
+        new code::Identifier(VALUE_VAR_REF_NAME),
+        retExpr, code::OpKind::BO_ASSIGN));
+    retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
+  }
+  fixedfun->addStmt(new code::ReturnStmt(retExpr));
   return fixedfun;
 }
 
@@ -778,7 +876,14 @@ code::Expr* Translator::transExpr(std::shared_ptr<ir::Expr> expr,
 
   // Special check when a branch returns a fixed expression rather than a distribution
   if (valuevar.size() > 0) {
-    res = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_EQU);
+    if (expr->getTyp() != NULL && expr->getTyp()->getTyp() == ir::IRConstant::MATRIX) {
+      // cannot use EQU. Instead, we need to apply norm here
+      auto diff = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_MINUS);
+      auto mat_norm = new code::CallExpr(new code::Identifier("norm"), std::vector<code::Expr*>{diff});
+      res = new code::BinaryOperator(mat_norm, new code::FloatingLiteral(ZERO_EPS), code::OpKind::BO_LEQ);
+    }
+    else
+      res = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_EQU);
   }
 
   // TODO translate other expression
@@ -885,33 +990,38 @@ code::Expr* Translator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   std::vector<code::Expr*> args;
   args.push_back(new code::CallExpr(new code::Identifier(getnumvarfunname)));
 
-  code::CallExpr* gen_set = NULL;
-  if (condset->getCond() == nullptr) {
-    gen_set = new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
-  }
-  else {
+  if (condset->getCond() != nullptr) {
     auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
     func->addParam(
       new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
     func->addStmt(new code::ReturnStmt(transExpr(condset->getCond())));
     args.push_back(func);
-
-    gen_set =  new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
   }
 
-  if (condset->getFunc() == nullptr) {
-    return gen_set;
-  }
-  else {
-    args.clear();
-    args.push_back(gen_set);
+  if (condset->getFunc() != nullptr) { // applied function associated
     auto func = new code::LambdaExpr(code::LambdaKind::REF, mapIRTypeToCodeType(condset->getFunc()->getTyp()));
     func->addParam(
-      new code::ParamVarDecl(func,condset->getVar()->getVarName(),INT_TYPE));
+      new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
     func->addStmt(new code::ReturnStmt(transExpr(condset->getFunc())));
     args.push_back(func);
 
-    return new code::CallExpr(new code::Identifier(APPLY_FUNC_NAME), args);
+    // call builtin function: _apply<...>(...)
+    // Note: currently we only support NameTy!
+    return new code::CallExpr(
+      new code::TemplateExpr(
+        new code::Identifier(APPLY_FUNC_NAME),
+        std::vector<code::Expr*>{ new code::Identifier(mapIRTypeToCodeType(condset->getFunc()->getTyp()).getName()) }),
+      args);
+  }
+  else { // no applied function, pure condition set
+    if (condset->getCond() == nullptr) { // no condition here
+      // _gen_full(n)
+      return new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
+    }
+    else { // with condition
+      // _filter(n, cond)
+      return new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
+    }
   }
 }
 
@@ -1334,7 +1444,7 @@ void Translator::addFunValueRefStmt(
   // valuevarname[index1][index2]...
   // where the index are corresponding to the arguments
   code::Expr* exp = new code::Identifier(valuevarname);
-  for (auto prm : valueindex) {
+  for (auto& prm : valueindex) {
     exp = new code::ArraySubscriptExpr(exp, new code::Identifier(prm->getId()));
   }
 //  if (valueindex.empty()) {
@@ -1439,19 +1549,15 @@ void Translator::transAllEvidence(
       coreCls, SET_EVIDENCE_FUN_NAME, BOOL_TYPE);
   fun->setParams(std::vector<code::ParamVarDecl*>{new code::ParamVarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_REF_TYPE)});
 
-  code::Expr* res;
-  if (COMPUTE_LIKELIHOOD_IN_LOG)
-    res = new code::Identifier(NEG_INFINITE_NAME);
-  else
-    res = new code::IntegerLiteral(0);
-  fun->addStmt(new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME), res, code::OpKind::BO_ASSIGN));
+  fun->addStmt(new code::BinaryOperator(
+    new code::Identifier(WEIGHT_VAR_REF_NAME),
+    new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
+
   for (auto evid : evids) {
     // Firstly Translate all rejection sampling stmts
     transEvidence(fun, evid, false);
   }
-  fun->addStmt(new code::BinaryOperator(
-    new code::Identifier(WEIGHT_VAR_REF_NAME),
-    new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
+  
   for (auto evid : evids) {
     // Firstly Translate all likelihood weighing stmts
     transEvidence(fun, evid, true);
@@ -1478,16 +1584,28 @@ void Translator::transAllQuery(
 
 void Translator::transQuery(code::FunctionDecl* fun,
                                std::shared_ptr<ir::Query> qr, int n) {
+  // Register Printing Hist Class
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+  std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) };
+  if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
+    auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
+    std::string tyName = ty->getRefer()->getName();
+    initArgs.push_back(new code::StringLiteral(tyName));
+    if (ty->getRefer()->getInstNames().size() > 0) {
+      initArgs.push_back(new code::BinaryOperator(NULL,
+        new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+    }
+  }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
-      std::vector<code::Expr*>(
-          { new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) }));
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+          initArgs);
   code::FieldDecl::createFieldDecl(
       coreCls, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
@@ -1496,10 +1614,22 @@ void Translator::transQuery(code::FunctionDecl* fun,
       code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
                                        args));
   // add print this result in print()
-  // :::=> answer_id.print();
+  // :::=> answer_id.print("query expr");
   coreClsPrint->addStmt(
       code::CallExpr::createMethodCall(answervarname,
-                                       HISTOGRAM_PRINT_METHOD_NAME));
+                                       HISTOGRAM_PRINT_METHOD_NAME,
+                                       std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
+}
+
+bool Translator::isObjectType(const ir::Ty* ty) {
+  if (ty == NULL) return false;
+  if (ty->getTyp() == ir::IRConstant::ARRAY
+    || ty->getTyp() == ir::IRConstant::MAP
+    || ty->getTyp() == ir::IRConstant::SET
+    || ty->getTyp() == ir::IRConstant::STRING
+    || ty->getTyp() == ir::IRConstant::MATRIX)
+    return true;
+  return false;
 }
 
 code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool isPtr) {
@@ -1508,6 +1638,7 @@ code::Type Translator::mapIRTypeToCodeType(const ir::Ty* ty, bool isRef, bool is
   ///    Note: in IR, the type->toString() will return the corresponding C++ translation of that type
   switch (ty->getTyp()) {
     case ir::IRConstant::BOOL:
+      return code::Type(CHAR_TYPE.getName(), isRef, isPtr); // Special Treatment for Bool in C++
     case ir::IRConstant::INT:
     case ir::IRConstant::DOUBLE:
     case ir::IRConstant::STRING:
@@ -1549,7 +1680,8 @@ code::Expr* Translator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    return new code::BooleanLiteral(bl->getValue());
+    // TODO
+    return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
       ir::DoubleLiteral>(cs);
@@ -1584,6 +1716,33 @@ code::Expr* Translator::transFunctionCall(
   std::string getterfunname;
   // Special Check for builtin functions
   if (fc->isBuiltin()) {
+    // Special Check for vstack and hstack
+    if (dynamic_cast<const predecl::MatrixStackFuncDecl*>(fc->getBuiltinRefer()) != NULL) {
+      auto lst = new code::ListInitExpr(args);
+      return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), std::vector<code::Expr*>{lst});
+    }
+    // Special Check for aggregate function
+    if (dynamic_cast<const predecl::SetAggrFuncDecl*>(fc->getBuiltinRefer()) != NULL) {
+      auto setexpr = std::dynamic_pointer_cast<ir::CondSet>(fc->get(0));
+      if (setexpr != nullptr && args.size() == 1 && setexpr->getFunc() != nullptr) {
+        // assert(args.size() == 1);
+        // assert(args[0].size() == 2 + (setexpr->getCond() != nullptr));
+        auto set_gen = args[0];
+        args = set_gen->getArgs();
+        set_gen->clearArgs();
+        delete set_gen;
+      }
+      args.push_back(
+        new code::TemplateExpr(
+          new code::Identifier(fc->getBuiltinRefer()->getName()),
+          std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}));
+      return new code::CallExpr(
+        new code::TemplateExpr(
+          new code::Identifier(AGGREGATE_FUNC_NAME),
+          std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}),
+        args);
+    }
+
     return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
   }
   switch (fc->getKind()) {
@@ -1687,7 +1846,9 @@ inline STMT Translator::CREATE_INSTANCE(std::string tyname,
     values.insert(values.end(), originvalues.begin(), originvalues.end());
   if (ncopy)
     st = new code::CallExpr(
-        new code::Identifier(APPEND_FUN_NAME),
+        new code::TemplateExpr(
+          new code::Identifier(APPEND_FUN_NAME),
+          std::vector<EXPR>{new code::Identifier(tyname)}),
         std::vector<EXPR>( { new code::Identifier(inst_var_name), ncopy,
             new code::ListInitExpr(values) }));
   else

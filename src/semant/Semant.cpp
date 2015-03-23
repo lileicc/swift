@@ -420,7 +420,7 @@ std::shared_ptr<ir::Branch> Semant::transBranch(absyn::CaseExpr* expr) {
   }
   if (n_from_args > 1) {
     if (std::dynamic_pointer_cast<ir::ArrayExpr>(ptr->getVar()) == nullptr
-      || ptr->getVar()->argSize() != n_from_args) {
+      || (int)ptr->getVar()->argSize() != n_from_args) {
       error(expr->getTest()->line, expr->getTest()->col,
         "The Dimension of *Test Var* differs from the From Type of the Map in < CaseExpr >!");
       return ptr;
@@ -607,9 +607,8 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
     // Numerical Operator
   case IRConstant::MOD:
     // Special Check for TimeStep (MOD)
-    if (isSubType(arg[0]->getTyp(), arg[1]->getTyp())
-      && arg[0]->getTyp() == lookupTy(ir::IRConstString::TIMESTEP))
-      return arg[0]->getTyp();
+    if (getSuperType(arg[0]->getTyp(), arg[1]->getTyp()) == lookupTy(ir::IRConstString::TIMESTEP))
+      return lookupTy(ir::IRConstString::TIMESTEP);
     if (arg[0]->getTyp() != arg[1]->getTyp() // For MOD, current everything should be INT
         || arg[0]->getTyp() != lookupTy(IRConstString::INT))
       return NULL;
@@ -659,7 +658,7 @@ const ir::Ty* Semant::OprExpr_checkType(ir::IRConstant op,
     // Address Operator
   case IRConstant::SUB: {
     if (arg[0]->getTyp() == NULL) return NULL;
-    if (arg[1]->getTyp() != tyFactory.getTy(ir::IRConstString::INT)
+    if (arg[1]->getTyp() != lookupTy(ir::IRConstString::INT)
         || (arg[0]->getTyp()->getTyp() != ir::IRConstant::ARRAY
             && arg[0]->getTyp()->getTyp() != ir::IRConstant::MATRIX))
       return NULL;
@@ -765,7 +764,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
       && std::dynamic_pointer_cast<ir::OprExpr>(ret->get(0)) != nullptr) {
       auto left_sub = std::dynamic_pointer_cast<ir::OprExpr>(ret->get(0));
       if (left_sub->getOp() == ir::IRConstant::SUB
-        && left_sub->get(0)->getTyp() == lookupTy(ir::IRConstString::MATRIX)) { // Here is the Case!
+        && left_sub->get(0)->getTyp() != NULL 
+        && left_sub->get(0)->getTyp()->getTyp() == ir::IRConstant::MATRIX) { // Here is the Case!
         std::vector<std::shared_ptr<ir::Expr>> args;
         args.push_back(left_sub->get(0));
         args.push_back(left_sub->get(1));
@@ -777,8 +777,9 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::OpExpr* expr) {
       }
     }
 
-    if (!isGetMatrixEntry)
+    if (!isGetMatrixEntry) {
       error(expr->line, expr->col, "Error Type Matching for OprExpr!");
+    }
   }
   /*
    * TODO: Add crucial check for Markov Order! Now it is a hack!! (@MarkovOrder)
@@ -845,6 +846,11 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
           model->updateMarkovOrder(std::dynamic_pointer_cast<ir::IntLiteral>(ref->get(0))->getValue());
         }
       }
+
+      // Special Checking: Usage of Matrix
+      if (ptr->getTyp() != NULL && ptr->getTyp()->getTyp() == ir::IRConstant::MATRIX)
+        lookupTy(ir::IRConstString::MATRIX);
+
       return ptr;
     }
   }
@@ -1219,7 +1225,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
       if (okay) {
         std::shared_ptr<ir::MatrixExpr> mat_ret = std::make_shared<ir::MatrixExpr>();
         mat_ret->setArgs(ret->getArgs());
-        mat_ret->setTyp(mat_ty);
+        mat_ret->setTyp(lookupTy(ir::IRConstString::MATRIX));
         mat_ret->setRowVecFlag(true);
         mat_ret->setColVecFlag(ret->argSize() == 1);
         ret=mat_ret;
@@ -1335,33 +1341,54 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
     if (fun->getBody()->getTyp() == NULL)
       fun->getBody()->setTyp(rettyp);
     else {
+      bool special_case = true;
+      if (fun->getRetTyp() != NULL 
+          && fun->getRetTyp()->getTyp() == ir::IRConstant::MATRIX
+          && fun->getBody()->getTyp()->getTyp() != ir::IRConstant::MATRIX) {
+        if (std::dynamic_pointer_cast<ir::Expr>(fun->getBody()) == nullptr) {
+          special_case = false;
+        }
+        else {
+          auto body = std::dynamic_pointer_cast<ir::Expr>(fun->getBody());
+          std::vector<std::shared_ptr<ir::Expr>> args{ body };
+          auto expr = predecl::PreDeclList::toMatrixFuncDecl.getNew(args, &tyFactory);
+          if (expr == nullptr)
+            special_case = false;
+          else {
+            fun->setBody(expr);
+            warning(fd->line, fd->col, "The return type does not match the Declared Type <RealMatrix>! \
+                                       A internal type conversion to RealMatrix is added!");
+          }
+        }
+      }
+      else
       if (!isSubType(fun->getBody()->getTyp(), rettyp)) { // Type Checking Failed!
-        bool special_case = false;
+        special_case = false;
         // Special Case checking for Real func() = RealMatrix * RealMatrix
         // We only raise a warning and return the first element of the result matrix
         if (rettyp == lookupTy(ir::IRConstString::DOUBLE)
-          && fun->getBody()->getTyp() == lookupTy(ir::IRConstString::MATRIX)) {
+          && fun->getBody()->getTyp()->getTyp() == ir::IRConstant::MATRIX) {
           auto body = std::dynamic_pointer_cast<ir::Expr>(fun->getBody());
           if (body != nullptr && std::dynamic_pointer_cast<ir::MatrixExpr>(body) == nullptr) {
             /*
               The computation result of the body is a RealMatrix.
               However, the declaration of the function is Real.
               We assume that the return value will always become a 1x1 RealMatrix. A warnning will be raised.
-              e.g. Real fun() = A * B ===> Real fun() = as_scalar(A * B)
+              e.g. Real fun() = A * B ===> Real fun() = as_scalar(A*B)
             */
-            std::vector<std::shared_ptr<ir::Expr> > args;
-            args.push_back(body);
-            auto mat = predecl::PreDeclList::asScalarFuncDecl.getNew(args, &tyFactory);
-            fun->setBody(mat);
-            warning(fd->line, fd->col, "The return type of the body is RealMatrix. But the Declared Type is Real! The first element of the result matrix will be returned.");
+            std::vector<std::shared_ptr<ir::Expr>> vec; vec.push_back(body);
+            auto scalar = predecl::PreDeclList::asScalarFuncDecl.getNew(vec, &tyFactory);
+            fun->setBody(scalar);
+            warning(fd->line, fd->col, "The return type of the body is RealMatrix. But the Declared Type is Real!"
+                                       " A internal type conversion will be applied! if the matrix is not a scalar, a run-time error will occur.");
             special_case = true;
           }
         }
-        if (!special_case) {
-          fprintf(stderr, "func<%s> rettyp = %s  bodytyp = %s\n", fun->getName().c_str(), fun->getRetTyp()->toString().c_str(),
-            fun->getBody()->getTyp()->toString().c_str());
-          error(fd->line, fd->col, "The type of the function body does not match its declaration!");
-        }
+      }
+      if (!special_case) {
+        fprintf(stderr, "func<%s> rettyp = %s  bodytyp = %s\n", fun->getName().c_str(), fun->getRetTyp()->toString().c_str(),
+          fun->getBody()->getTyp()->toString().c_str());
+        error(fd->line, fd->col, "The type of the function body does not match its declaration!");
       }
     }
 
@@ -1502,6 +1529,20 @@ void Semant::transEvidence(absyn::Evidence* ne) {
         "Evidence format not correct! We assume < FunctionCall | #TypeName = Non-Random Expr >!");
     return; // TODO: build internal function to avoid this
   }
+  // Temporal Evidence Checking
+  // TODO: currently we only allowed temporal evidence with timestep = TS_Literal
+  //    --> to support arbitrary timestep argument in future
+  if (std::dynamic_pointer_cast<ir::FunctionCall>(lhs) != nullptr) {
+    auto func = std::dynamic_pointer_cast<ir::FunctionCall>(lhs);
+    if (func->isTemporal()) {
+      if (std::dynamic_pointer_cast<ir::TimestepLiteral>(func->getTemporalArg()) == nullptr) {
+        error(ne->line, ne->col,
+          "Illegal Timestep Argument in the left hand side!\
+           We currently only accept fixed timestep as argument in temporal evidence.");
+        return ;
+      }
+    }
+  }
   model->addEvidence(
       std::make_shared<ir::Evidence>(lhs, rhs));
 }
@@ -1513,9 +1554,20 @@ void Semant::transQuery(absyn::Query* nq) {
     /* General Case: Arbitrary Expr
     TODO: check if we need to build a internal Void Function Call to represent this expr
       */
-    model->addQuery(std::make_shared<ir::Query>(ptr, true));
-  } else // Special Case: function call
-    model->addQuery(std::make_shared<ir::Query>(ptr));
+    model->addQuery(std::make_shared<ir::Query>(ptr, nq->getExpr()->toString(), true));
+  }
+  else {// Special Case: function call
+    auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(ptr);
+    if (fun != nullptr && fun->isTemporal()) {
+      if (std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg()) == nullptr) {
+        error(nq->line, nq->col,
+          "Illegal Timestep Argument in query expression!\
+                     We currently only accept fixed timestep as argument for temporal variables.");
+        return;
+      }
+    }
+    model->addQuery(std::make_shared<ir::Query>(ptr, nq->getExpr()->toString()));
+  }
 }
 
 const ir::Ty* Semant::transTy(const absyn::Ty& typ) {

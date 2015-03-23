@@ -118,7 +118,7 @@ void TypeDomain::print(FILE* file, int indent) {
   if (origin.size()) {
     fprintf(file, "%*sorigin:\n", indent + 2, "");
     for (size_t i = 0; i < origin.size(); i++) {
-      fprintf(file, "%*s:arg %lu\n", indent + 4, "", i);
+      fprintf(file, "%*s:arg %d\n", indent + 4, "", (int)i);
       origin[i]->print(file, indent + 4);
     }
     fprintf(file, "%*s\n", indent + 2, "");

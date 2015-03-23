@@ -8,6 +8,7 @@
 #pragma once
 
 #include<vector>
+#include<string>
 #include "Absyn.h"
 
 namespace swift {
@@ -23,6 +24,7 @@ public:
   size_t size();
   void clearArgs();
 
+  virtual std::string toString() = 0;
   virtual Expr* clone() = 0;
 
 protected:

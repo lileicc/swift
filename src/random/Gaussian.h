@@ -22,8 +22,10 @@ public:
   double loglikeli(const double& x);
 private:
   std::normal_distribution<double> dist;
-  double mean, stddev;
+  double mean, stddev, var;
   double coef, log_coef, scale;
+  bool is_like_ok, is_loglike_ok;
+  const double sqrt_2PI;
 };
 
 } /* namespace random */

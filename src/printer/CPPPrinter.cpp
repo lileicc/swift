@@ -230,6 +230,7 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include <utility>\n");
   fprintf(file, "#include \"random/Bernoulli.h\"\n");
   fprintf(file, "#include \"random/Beta.h\"\n");
+  fprintf(file, "#include \"random/Binomial.h\"\n");
   fprintf(file, "#include \"random/BooleanDistrib.h\"\n");
   fprintf(file, "#include \"random/Categorical.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
@@ -260,15 +261,14 @@ void CPPPrinter::print(code::Code* prog) {
       fprintf(file, "#include \"random/Dirichlet.h\"\n");
       fprintf(file, "#include \"random/Discrete.h\"\n");
       fprintf(file, "#include \"random/MultivarGaussian.h\"\n");
+      fprintf(file, "#include \"random/Multinomial.h\"\n");
       fprintf(file, "#include \"random/UniformVector.h\"\n");
       fprintf(file, "#include \"util/Hist_matrix.h\"\n");
       fprintf(file, "#include \"util/util_matrix.h\"\n");
-      fprintf(file, "#define transpose trans\n");
-      fprintf(file, "#define diag diagmat\n");
       fprintf(file, "using namespace arma;\n\n");
     }
 
-  fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
+  //fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
   fprintf(file, "using namespace std;\n");
   fprintf(file, "using namespace swift::random;\n");
 
@@ -405,22 +405,22 @@ void CPPPrinter::print(code::CallExpr* term) {
   printLine();
 }
 
-void CPPPrinter::print(code::CallTemplateExpr* term) {
+void CPPPrinter::print(code::TemplateExpr* term) {
   printIndent();
   bool backup = newline;
   newline = false;
 
   // Note: () operatorƒf
-  auto f_prec = OpPrec(term->getFunc());
+  auto f_prec = OpPrec(term->getVar());
   if (f_prec.first > 1)
     fprintf(file, "(");
-  term->getFunc()->print(this);
+  term->getVar()->print(this);
   if (f_prec.first > 1)
     fprintf(file, ")");
 
   bool not_first = false;
   fprintf(file, "<");
-  for (auto p : term->getTempArgs()) {
+  for (auto p : term->getArgs()) {
     if (not_first)
       fprintf(file, ",");
     else 
@@ -428,17 +428,6 @@ void CPPPrinter::print(code::CallTemplateExpr* term) {
     p->print(this);
   }
   fprintf(file, ">");
-
-  fprintf(file, "(");
-  not_first = false;
-  for (auto p : term->getArgs()) {
-    if (not_first)
-      fprintf(file, ",");
-    else
-      not_first = true;
-    p->print(this);
-  }
-  fprintf(file, ")");
 
   newline = backup;
   if (backup)
@@ -539,8 +528,12 @@ void CPPPrinter::print(code::FieldDecl* term) {
 void CPPPrinter::print(code::FloatingLiteral* term) {
   printIndent();
   // Special Case!
-  //   Here we keep 7 digits after decimal point
-  fprintf(file, "%.7lf", term->getVal());
+  //   Generally Here we keep 8 digits after decimal point
+  if (term->getVal() < 1e-6) 
+    fprintf(file, "%s", std::to_string(term->getVal()).c_str());
+  else {
+    fprintf(file, "%.8lf", term->getVal());
+  }
   if (newline)
     fprintf(file, ";");
   printLine();

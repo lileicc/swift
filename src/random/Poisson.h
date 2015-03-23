@@ -24,6 +24,7 @@ private:
   std::poisson_distribution<int> dist;
   double lambda;
   double loglambda;
+  bool is_dist_ok, is_coef_ok;
 };
 
 } /* namespace random */

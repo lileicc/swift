@@ -8,13 +8,15 @@
 #include <cassert>
 #include <iostream>
 #include "../predecl/PreDecl.h"
+#include "../predecl/MatrixStackFuncDecl.h"
+#include "../predecl/SetAggrFuncDecl.h"
 
 #include "PFTranslator.h"
 
 namespace swift {
 namespace codegen {
 
-const int PFTranslator::TOTAL_NUM_PARTICLES = Translator::TOTAL_NUM_SAMPLES;
+const int PFTranslator::DEFAULT_TOTAL_NUM_PARTICLES = Translator::TOTAL_NUM_SAMPLES;
 
 const std::string PFTranslator::StaticClsName = "BLOG_Static_State";
 const std::string PFTranslator::TemporalClsName = "BLOG_Temporal_State";
@@ -29,7 +31,6 @@ const std::string PFTranslator::PTR_TEMP_MEMO_VAR_NAME = "_ptr_temp_memo";
 const std::string PFTranslator::PTR_BACKUP_VAR_NAME = "_ptr_backup";
 const TYPE PFTranslator::STAT_MEMO_TYPE = code::Type(StaticClsName,false,false);
 const TYPE PFTranslator::REF_STAT_MEMO_TYPE = code::Type(StaticClsName, true, false);
-const TYPE PFTranslator::PTR_STAT_MEMO_TYPE = code::Type(StaticClsName, false, true);
 const TYPE PFTranslator::TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, false);
 const TYPE PFTranslator::REF_TEMP_MEMO_TYPE = code::Type(TemporalClsName, true, false);
 const TYPE PFTranslator::PTR_TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, true);
@@ -41,26 +42,39 @@ const std::string PFTranslator::TMP_LOOP_VAR_NAME = "_i";
 const std::string PFTranslator::TMP_LOCAL_TS_INDEX_VAR_NAME = "_tmp_idx";
 // Special Util Funciton for PF
 const std::string PFTranslator::PF_RESAMPLE_FUN_NAME = "resample";
+const std::string PFTranslator::PF_NORMALIZE_LOGWEI_FUN_NAME = "normalizeLogWeights";
 const std::string PFTranslator::PF_COPY_PTR_FUN_NAME = "pointer_copy";
+// Special Util data structure for PF to store temporal evidence/query/print
+const std::string PFTranslator::TMP_EVI_STORE_NAME = "_evidenceTable";
+const code::Type PFTranslator::TMP_EVI_STORE_TYPE("std::function<bool(double&)>");
+const std::string PFTranslator::TMP_EVI_INIT_FUNC_NAME = "setup_temporal_evidences";
+const std::string PFTranslator::TMP_QUERY_STORE_NAME = "_queryTable";
+const code::Type PFTranslator::TMP_QUERY_STORE_TYPE("std::function<void(double)>");
+const std::string PFTranslator::TMP_QUERY_INIT_FUNC_NAME = "setup_temporal_queries";
+const std::string PFTranslator::TMP_PRINT_STORE_NAME = "_printTable";
+const code::Type PFTranslator::TMP_PRINT_STORE_TYPE("std::function<void(void)>");
+const std::string PFTranslator::TMP_PRINT_INIT_FUNC_NAME = "setup_temporal_prints";
 
 ///////////////////////////////////////////////////////////////
 //  Util Functions for Particle Filtering
 ///////////////////////////////////////////////////////////////
 code::Stmt* PFTranslator::referStaticStateStmt(code::DeclContext* context) {
   return new code::DeclStmt(new code::VarDecl(context, CUR_STATE_VAR_NAME, REF_STAT_MEMO_TYPE,
-    new code::BinaryOperator(NULL,
-      new code::ArraySubscriptExpr(new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
-                                   new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),code::OpKind::UO_DEREF)));
+      new code::ArraySubscriptExpr(new code::Identifier(STAT_MEMO_VAR_NAME),
+                                   new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME))));
 }
 
 code::Stmt* PFTranslator::referTempStateStmt(code::DeclContext* context, std::string tempArg) {
   code::Expr* TS_loc = new code::BinaryOperator(
     new code::Identifier(tempArg), new code::Identifier(DEPEND_NUM_VAE_NAME), code::OpKind::BO_MOD);
   return new code::DeclStmt(new code::VarDecl(context, CUR_STATE_VAR_NAME, REF_TEMP_MEMO_TYPE,
-    new code::BinaryOperator(NULL,
+    new code::BinaryOperator(
+      NULL,
       new code::ArraySubscriptExpr(
-        new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME),TS_loc),
-        new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)), code::OpKind::UO_DEREF)));
+        new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), 
+                                   new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
+        TS_loc),
+      code::OpKind::UO_DEREF)));
 }
 
 code::Expr* PFTranslator::referVarFromState(code::Expr* var) {
@@ -92,10 +106,32 @@ bool PFTranslator::isTemporalType(code::Type ty) {
   return ty.getName() == ir::IRConstString::TIMESTEP;
 }
 
+/*
+ * ==> table[ts]
+ */
+code::Expr* PFTranslator::tempTableEntryRefer(std::string table, int ts) {
+  code::Expr* ind;
+  if (ts < 0) ind = new code::Identifier(CUR_TIMESTEP_VAR_NAME);
+  else ind = new code::IntegerLiteral(ts);
+  code::Expr* entry = new code::ArraySubscriptExpr(new code::Identifier(table), ind);
+  return entry;
+}
+
 // Special Utils for Liu-West Filter
 std::set<std::string> PFTranslator::obsFuncStore = std::set<std::string>();
 const std::string PFTranslator::DOUBLE_PERTURB_FUN_NAME = "__perturb";
 const std::string PFTranslator::MATRIX_PERTURB_FUN_NAME = "__perturb_matrix";
+
+// Set Parameters
+void PFTranslator::setParticleNum(int part) {
+  particleNum = part;
+}
+void PFTranslator::setTimeLimit(int tm) {
+  ModelTimeLimit = tm;
+}
+void PFTranslator::setDepend(int dep) {
+  ModelDependency = dep;
+}
 
 /////////////// END of Util Functions ///////////////////
 
@@ -104,6 +140,9 @@ PFTranslator::PFTranslator() {
   coreStaticCls = NULL;
   coreTemporalCls = NULL;
   coreTemporalClsClear = NULL;
+  particleNum = DEFAULT_TOTAL_NUM_PARTICLES;
+  ModelDependency = 0;
+  ModelTimeLimit = 0;
 }
 
 void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
@@ -113,13 +152,15 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   if (model->isUseMatrix())
     prog->addOption("matrix");
 
-  ModelDependency = model->getMarkovOrder();
-  ModelTimeLimit = model->getTempLimit();
+  if (model->getMarkovOrder() > ModelDependency)
+    ModelDependency = model->getMarkovOrder();
+  if (model->getTempLimit() > (unsigned)ModelTimeLimit)
+    ModelTimeLimit = model->getTempLimit();
 
   if (coreStaticCls == NULL) {
     // add global constant values
     coreNs->addDecl(new code::VarDecl(coreNs,
-      PARTICLE_NUM_VAR_NAME, INT_CONST_TYPE, new code::IntegerLiteral(TOTAL_NUM_PARTICLES)));
+      PARTICLE_NUM_VAR_NAME, INT_CONST_TYPE, new code::IntegerLiteral(particleNum)));
     coreNs->addDecl(new code::VarDecl(coreNs,
       TIMESTEP_LIMIT_VAR_NAME, INT_CONST_TYPE, new code::IntegerLiteral(ModelTimeLimit)));
     coreNs->addDecl(new code::VarDecl(coreNs,
@@ -132,26 +173,26 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
     /*
     translated code for basic data structures looks like:
       Static_State stat_memo[SampleN];
-      Temp_State temp_memo[Dependency][SampleN];
+      Temp_State temp_memo[SampleN][Dependency];
       Static_State* ptr_stat_memo[SampleN];
-      Temp_State* ptr_temp_memo[Dependency][SampleN];
-      Temp_State* backup_ptr[Dependency][SampleN];
+      Temp_State* ptr_temp_memo[SampleN][Dependency];
+      Temp_State* backup_ptr[SampleN][Dependency];
     */
     // Basic Memorization Data Structure for variables
     code::VarDecl::createVarDecl(coreNs, STAT_MEMO_VAR_NAME, 
       std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), STAT_MEMO_TYPE);
-    code::VarDecl::createVarDecl(coreNs, TEMP_MEMO_VAR_NAME,
-      std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME), 
-                          new code::Identifier(PARTICLE_NUM_VAR_NAME) }), TEMP_MEMO_TYPE);
-    // Pointer to Memorization Data Structures
     code::VarDecl::createVarDecl(coreNs, PTR_STAT_MEMO_VAR_NAME,
-      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_STAT_MEMO_TYPE);
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), STAT_MEMO_TYPE);
+    code::VarDecl::createVarDecl(coreNs, TEMP_MEMO_VAR_NAME,
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME), 
+                          new code::Identifier(DEPEND_NUM_VAE_NAME) }), TEMP_MEMO_TYPE);
+    // Pointer to Memorization Data Structures
     code::VarDecl::createVarDecl(coreNs, PTR_TEMP_MEMO_VAR_NAME,
-      std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME), 
-                          new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_TEMP_MEMO_TYPE);
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME),
+                          new code::Identifier(DEPEND_NUM_VAE_NAME) }), PTR_TEMP_MEMO_TYPE);
     code::VarDecl::createVarDecl(coreNs, PTR_BACKUP_VAR_NAME,
-      std::vector<EXPR>({ new code::Identifier(DEPEND_NUM_VAE_NAME),
-                          new code::Identifier(PARTICLE_NUM_VAR_NAME) }), PTR_TEMP_MEMO_TYPE);
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME),
+                          new code::Identifier(DEPEND_NUM_VAE_NAME)}), PTR_TEMP_MEMO_TYPE);
 
     // create Init Method
     createInit();
@@ -211,12 +252,6 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
     code::CallExpr::createMethodCall(
       new code::ArraySubscriptExpr(new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
       MAIN_INIT_FUN_NAME),true));
-  // :::=> pointer_copy(ptr_stat_memo, stat_memo, SampleN);
-  fun->addStmt(new code::CallExpr(new code::Identifier(PF_COPY_PTR_FUN_NAME),
-    std::vector<code::Expr*>({
-      new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
-      new code::Identifier(STAT_MEMO_VAR_NAME),
-      new code::Identifier(PARTICLE_NUM_VAR_NAME)})));
   
   /*
     :::=>
@@ -228,6 +263,8 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
           evaluate_query(local_weight);
         weight[cur_loop]=local_weight;
       }
+      print();
+      (optional, if compute in log_likeli) normalizeLogWeights<SampleN>(weight);
       resample(...);
       (optional) [pertubations ... ]
     }
@@ -241,14 +278,19 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
       new code::VarDecl(NULL,TMP_LOCAL_TS_INDEX_VAR_NAME,INT_TYPE,
         new code::BinaryOperator(new code::Identifier(CUR_TIMESTEP_VAR_NAME),
                                  new code::Identifier(DEPEND_NUM_VAE_NAME),code::OpKind::BO_MOD))));
-  // :::=> copy_pointer(ptr_temp_memo[ind_t], temp_memo[ind_t], ParticleN);
-  body_time->addStmt(new code::CallExpr(new code::Identifier(PF_COPY_PTR_FUN_NAME),
+  // :::=> pointer_copy<_ParticleN_,_DependN_>(_tmp_idx,_ptr_temp_memo,_temp_memo);
+  body_time->addStmt(new code::CallExpr(
+    new code::TemplateExpr(
+      new code::Identifier(PF_COPY_PTR_FUN_NAME),
+      std::vector<code::Expr*>({ 
+        new code::Identifier(PARTICLE_NUM_VAR_NAME), 
+        new code::Identifier(DEPEND_NUM_VAE_NAME)
+      })),
     std::vector<code::Expr*>({
-      new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME),
-                                   new code::Identifier(TMP_LOCAL_TS_INDEX_VAR_NAME)),
-      new code::ArraySubscriptExpr(new code::Identifier(TEMP_MEMO_VAR_NAME),
-                                   new code::Identifier(TMP_LOCAL_TS_INDEX_VAR_NAME)),
-      new code::Identifier(PARTICLE_NUM_VAR_NAME)})));
+      new code::Identifier(TMP_LOCAL_TS_INDEX_VAR_NAME),
+      new code::Identifier(PTR_TEMP_MEMO_VAR_NAME),
+      new code::Identifier(TEMP_MEMO_VAR_NAME)
+    })));
   // body of cur_loop for-loop
   code::CompoundStmt* body_loop = new code::CompoundStmt();
   body_time->addStmt(createForeachLoop(CURRENT_SAMPLE_NUM_VARNAME, PARTICLE_NUM_VAR_NAME, body_loop, true));
@@ -269,18 +311,37 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
               new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
           new code::Identifier(WEIGHT_VAR_REF_NAME), code::OpKind::BO_ASSIGN));
   
+  // :::==> print();
+  body_time->addStmt(new code::CallExpr(new code::Identifier(ANSWER_PRINT_METHOD_NAME)));
+
+  if (COMPUTE_LIKELIHOOD_IN_LOG) {
+    /*
+     * :::=>
+     *  normalizeLogWeights<SampleN>(weight);
+     */
+    body_time->addStmt(
+      new code::CallExpr(
+        new code::TemplateExpr(
+          new code::Identifier(PF_NORMALIZE_LOGWEI_FUN_NAME),
+          std::vector<code::Expr*>({new code::Identifier(PARTICLE_NUM_VAR_NAME)})),
+        std::vector<code::Expr*>({new code::Identifier(GLOBAL_WEIGHT_VARNAME)})));
+  }
+
   /* :::=> 
-    resample<Dependency,SampleN,Static_State,Temp_State>(
+    resample<SampleN,Dependency,Static_State,Temp_State>(
       weight, stat_memo, ptr_stat_memo,
-      temp_memo, ptr_temp_memo, backup_ptr);
+      ptr_temp_memo, backup_ptr);
   */
-  body_time->addStmt(new code::CallTemplateExpr(
-    new code::Identifier(PF_RESAMPLE_FUN_NAME),
+  body_time->addStmt(new code::CallExpr(
+    new code::TemplateExpr(
+      new code::Identifier(PF_RESAMPLE_FUN_NAME),
+      std::vector<code::Expr*>({
+        new code::Identifier(PARTICLE_NUM_VAR_NAME),
+        new code::Identifier(DEPEND_NUM_VAE_NAME)})),
     std::vector<code::Expr*>({
-      new code::Identifier(DEPEND_NUM_VAE_NAME), new code::Identifier(PARTICLE_NUM_VAR_NAME)}),
-    std::vector<code::Expr*>({
-      new code::Identifier(GLOBAL_WEIGHT_VARNAME), new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
-      new code::Identifier(TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_BACKUP_VAR_NAME)}))
+      new code::Identifier(GLOBAL_WEIGHT_VARNAME), 
+      new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
+      new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_BACKUP_VAR_NAME)}))
   );
 
   // Perturbation for Liu-West Filter
@@ -328,6 +389,15 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
 
 void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   const std::string& name = td->getName();
+  // create a vector containing all the names of its distinct instances
+  if (td->getInstNames().size() > 0) {
+    std::string arrName = getInstanceStringArrayName(name);
+    std::vector<code::Expr*> names;
+    for (auto& n : td->getInstNames())
+      names.push_back(new code::StringLiteral(n));
+    coreNs->addDeclFront(new code::VarDecl(coreNs, arrName, ARRAY_STRING_CONST_TYPE, 
+                                      new code::ListInitExpr(names)));
+  }
   // create a class for this declared type
   // and declare a vector to hold all instance in this type
   TYPEDEFN blogtypedefn = DECLARE_TYPE(name);
@@ -368,8 +438,11 @@ void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
                                new code::IntegerLiteral(-1),
                                code::OpKind::BO_ASSIGN)); // in StaticMemo
   // create ensure_num function
+  // TODO: yiwu Oct.5.2014
+  //   ---> currently a hack. Since we do not allow temporal numberstatement in TimeSeries Model!
+  //          So ensure function always locates in the static state
   code::FunctionDecl* ensureFun = code::FunctionDecl::createFunctionDecl(
-      coreNs, getEnsureFunName(numvar), VOID_TYPE, true); // function is always Globally defined
+      coreStaticCls, getEnsureFunName(numvar), VOID_TYPE, true);
   declared_funs[ensureFun->getName()] = ensureFun;
   // add in the init function to call this ensure_fun
   // :::=> ensure_numvar();
@@ -532,10 +605,7 @@ code::FunctionDecl* PFTranslator::transGetterFun(
 
   // Note: when adding field, refTag MUST be false!
   // Optimization for Vector/Map/Set Return
-  if (valuetype.getName() == ARRAY_BASE_TYPE.getName()
-    || valuetype.getName() == MAP_BASE_TYPE.getName()
-    || valuetype.getName() == SET_BASE_TYPE.getName()
-    || valuetype.getName() == MATRIX_TYPE.getName())
+  if (isObjectType(fd->getRetTyp()))
     valuetype.setRef(true);
 
   // define getter function :::==> __get_value()
@@ -556,12 +626,22 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   addFunValueRefStmt(getterfun, markvarname, getterfun->getParams(),
                      MARK_VAR_REF_NAME);
   // now translating::: if (markvar == current sample num) then return value;
-  std::string flagVarName = (isTemp ? fd->getTemporalArg()->getVarName() : CURRENT_SAMPLE_NUM_VARNAME);
-  st = new code::IfStmt(
+  if (isTemp) {
+    std::string flagVarName = fd->getTemporalArg()->getVarName();
+    st = new code::IfStmt(
       new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
-                               createVarPlusDetExpr(flagVarName, 1), // Mark Current TimeStep if Temporal
-                               code::OpKind::BO_EQU),
+      createVarPlusDetExpr(flagVarName, 1), // Mark Current TimeStep if Temporal
+      code::OpKind::BO_EQU),
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)), NULL);
+  }
+  else {
+    /// ::: if (markvar > 0) then return value;
+    st = new code::IfStmt(
+      new code::BinaryOperator(new code::Identifier(MARK_VAR_REF_NAME),
+      new code::IntegerLiteral(0),
+      code::OpKind::BO_GT),
+      new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)), NULL);
+  }
   getterfun->addStmt(st);
   // now should sample
   //now translate actual sampling part
@@ -569,10 +649,13 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   // now return the value
   // mark the variable first
   // ::: => markvar = cur_loop
+  code::Expr* flagVar = (isTemp ? createVarPlusDetExpr(fd->getTemporalArg()->getVarName(), 1)
+                                  : new code::IntegerLiteral(1));
   st = new code::BinaryOperator(
-      new code::Identifier(MARK_VAR_REF_NAME),
-      createVarPlusDetExpr(flagVarName, 1),
-      code::OpKind::BO_ASSIGN);
+       new code::Identifier(MARK_VAR_REF_NAME),
+       flagVar,
+       code::OpKind::BO_ASSIGN);
+  
   getterfun->addStmt(st);
   // special treatment for bool
   if (valuetype == BOOL_TYPE) {
@@ -638,7 +721,7 @@ code::FunctionDecl* PFTranslator::transSetterFun(
   std::string setterfunname = getSetterFunName(name);
   // adding setter method declaration in the main class
   code::FunctionDecl* setterfun = code::FunctionDecl::createFunctionDecl(
-      coreNs, setterfunname, DOUBLE_TYPE); // Globally defined
+      coreNs, setterfunname, VOID_TYPE); // Globally defined
   std::vector<code::ParamVarDecl*> args_with_value = transParamVarDecls(
       setterfun, fd);
   declared_funs[setterfun->getName()] = setterfun;
@@ -658,10 +741,11 @@ code::FunctionDecl* PFTranslator::transSetterFun(
       new code::ParamVarDecl(setterfun, VALUE_ARG_NAME, valuetype));
   setterfun->setParams(args_with_value);
 
-  std::string flagVarName = (isTemp ? fd->getTemporalArg()->getVarName() : CURRENT_SAMPLE_NUM_VARNAME);
+  code::Expr* flagVar = (isTemp ? createVarPlusDetExpr(fd->getTemporalArg()->getVarName(),1) 
+                                  : new code::IntegerLiteral(1));
   st = new code::BinaryOperator(
       new code::Identifier(MARK_VAR_REF_NAME),
-      createVarPlusDetExpr(flagVarName, 1), // when temporal, mark by timestep
+      flagVar, // when temporal, mark by timestep
       code::OpKind::BO_ASSIGN);
   setterfun->addStmt(st);
   // :::==> value_var = value_arg
@@ -671,9 +755,6 @@ code::FunctionDecl* PFTranslator::transSetterFun(
   for (auto a : fd->getArgs()) {
     args_ref.push_back(new code::Identifier(a->getVarName()));
   }
-  st = new code::ReturnStmt(
-      new code::CallExpr(new code::Identifier(likelifunname), args_ref));
-  setterfun->addStmt(st);
   return setterfun;
 }
 
@@ -685,20 +766,101 @@ code::FunctionDecl* PFTranslator::transFixedFun(
 
   // special check to translate to const value instead of a function
   if (fd->argSize() == 0 && constValTable.count(fixedfunname) > 0) {
-    code::FieldDecl::createFieldDecl(
-      coreCls, fixedfunname, code::Type(fd->getRetTyp()->toString(), false, false, true),
+    code::FieldDecl::createVarDecl(
+      coreNs, fixedfunname, code::Type(fd->getRetTyp()->toString(), false, false, true),
       transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody())));
     return NULL;
   }
+
+  // Check whether need to do memorization
+  std::vector<int> dims;
+  if (checkFixedFunNeedMemo(fd, dims)) {
+    // register memozization cache
+    std::vector<code::Expr*> args;
+    for (auto&d : dims) {
+      args.push_back(new code::IntegerLiteral(d));
+    }
+    code::VarDecl::createVarDecl(
+      coreNs, getValueVarName(fixedfunname),
+      args, valuetype);
+    args.clear(); // Attention: we need to create args twice!
+    for (auto&d : dims) {
+      args.push_back(new code::IntegerLiteral(d));
+    }
+    code::VarDecl::createVarDecl(
+      coreNs, getMarkVarName(fixedfunname),
+      args, fd->isTemporal() ? INT_TYPE : BOOL_TYPE);
+
+    if (isObjectType(fd->getRetTyp()))
+      valuetype.setRef(true);
+  }
+  else
+    dims.clear();
 
   // adding method declaration in the main class
   code::FunctionDecl* fixedfun = code::FunctionDecl::createFunctionDecl(
     coreNs, fixedfunname, valuetype);
   fixedfun->setParams(transParamVarDecls(fixedfun, fd));
   declared_funs[fixedfun->getName()] = fixedfun;
-  // translate the Clause and calculate weight
-  fixedfun->addStmt(
-    transClause(fd->getBody(), ""));
+  
+  if (dims.size() > 0) { // need memorization
+    code::Expr* tar = NULL;
+    code::Type valueRefType = valuetype;
+    valueRefType.setRef(true);
+    // create mark ref var
+    tar = new code::Identifier(getMarkVarName(fixedfunname));
+    for (auto& prm : fixedfun->getParams()) {
+      code::Expr* sub = new code::Identifier(prm->getId());
+      if (isTemporalType(prm->getType()))
+        sub = new code::BinaryOperator(sub, new code::Identifier(DEPEND_NUM_VAE_NAME), code::OpKind::BO_MOD);
+      tar = new code::ArraySubscriptExpr(tar, sub);
+    }
+    fixedfun->addStmt(new code::DeclStmt(
+      new code::VarDecl(fixedfun,MARK_VAR_REF_NAME,fd->isTemporal() ? INT_REF_TYPE : BOOL_REF_TYPE,tar)));
+    // create value ref var
+    tar = new code::Identifier(getValueVarName(fixedfunname));
+    for (auto& prm : fixedfun->getParams()) {
+      code::Expr* sub = new code::Identifier(prm->getId());
+      if (isTemporalType(prm->getType()))
+        sub = new code::BinaryOperator(sub, new code::Identifier(DEPEND_NUM_VAE_NAME), code::OpKind::BO_MOD);
+      tar = new code::ArraySubscriptExpr(tar, sub);
+    }
+    fixedfun->addStmt(new code::DeclStmt(new code::VarDecl(fixedfun, VALUE_VAR_REF_NAME, valueRefType, tar)));
+
+    code::Expr* cond = new code::Identifier(MARK_VAR_REF_NAME);
+    if (fd->isTemporal()) {
+      // ::==> mark_var == t + 1
+      cond = new code::BinaryOperator(cond, createVarPlusDetExpr(fd->getTemporalArg()->getVarName(), 1), code::OpKind::BO_EQU);
+    }
+    code::IfStmt* stmt = new code::IfStmt(
+      cond,
+      new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
+    fixedfun->addStmt(stmt);
+    fixedfun->addStmt(new code::BinaryOperator(
+      new code::Identifier(MARK_VAR_REF_NAME), 
+      fd->isTemporal() ? createVarPlusDetExpr(fd->getTemporalArg()->getVarName(), 1) : new code::BooleanLiteral(true),
+      code::OpKind::BO_ASSIGN));
+  }
+
+  code::Expr* retExpr = NULL;
+  if (std::dynamic_pointer_cast<ir::Expr>(fd->getBody()) != nullptr) {
+    retExpr = transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody()));
+  }
+  else {
+    code::VarDecl::createVarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()));
+    fixedfun->addStmt(
+      transClause(fd->getBody(), VALUE_VAR_REF_NAME));
+    retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
+  }
+  // when memorization we need to update the value reference
+  if (dims.size() > 0) {
+    fixedfun->addStmt(
+      new code::BinaryOperator(
+      new code::Identifier(VALUE_VAR_REF_NAME),
+      retExpr, code::OpKind::BO_ASSIGN));
+    retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
+  }
+  fixedfun->addStmt(new code::ReturnStmt(retExpr));
   return fixedfun;
 }
 
@@ -906,7 +1068,13 @@ code::Expr* PFTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
 
   // Special check when a branch returns a fixed expression rather than a distribution
   if (valuevar.size() > 0) {
-    res = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_EQU);
+    if (expr->getTyp() != NULL && expr->getTyp()->getTyp() == ir::IRConstant::MATRIX) {
+      // cannot use EQU. Instead, we need to apply norm here
+      auto diff = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_MINUS);
+      auto mat_norm = new code::CallExpr(new code::Identifier("norm"), std::vector<code::Expr*>{diff});
+      res = new code::BinaryOperator(mat_norm, new code::FloatingLiteral(ZERO_EPS), code::OpKind::BO_LEQ);
+    } else
+      res = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_EQU);
   }
 
   // TODO translate other expression
@@ -1013,33 +1181,38 @@ code::Expr* PFTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   std::vector<code::Expr*> args;
   args.push_back(new code::CallExpr(new code::Identifier(getnumvarfunname)));
 
-  code::CallExpr* gen_set = NULL;
-  if (condset->getCond() == nullptr) {
-    gen_set = new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
-  }
-  else {
+  if (condset->getCond() != nullptr) {
     auto func = new code::LambdaExpr(code::LambdaKind::REF, BOOL_TYPE);
     func->addParam(
       new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
     func->addStmt(new code::ReturnStmt(transExpr(condset->getCond())));
     args.push_back(func);
-
-    gen_set = new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
   }
 
-  if (condset->getFunc() == nullptr) {
-    return gen_set;
-  }
-  else {
-    args.clear();
-    args.push_back(gen_set);
+  if (condset->getFunc() != nullptr) { // applied function associated
     auto func = new code::LambdaExpr(code::LambdaKind::REF, mapIRTypeToCodeType(condset->getFunc()->getTyp()));
     func->addParam(
       new code::ParamVarDecl(func, condset->getVar()->getVarName(), INT_TYPE));
     func->addStmt(new code::ReturnStmt(transExpr(condset->getFunc())));
     args.push_back(func);
 
-    return new code::CallExpr(new code::Identifier(APPLY_FUNC_NAME), args);
+    // call builtin function: _apply<...>(...)
+    // Note: currently we only support NameTy!
+    return new code::CallExpr(
+      new code::TemplateExpr(
+        new code::Identifier(APPLY_FUNC_NAME),
+        std::vector<code::Expr*>{ new code::Identifier(mapIRTypeToCodeType(condset->getFunc()->getTyp()).getName()) }),
+      args);
+  }
+  else { // no applied function, pure condition set
+    if (condset->getCond() == nullptr) { // no condition here
+      // _gen_full(n)
+      return new code::CallExpr(new code::Identifier(GEN_FULL_SET_NAME), args);
+    }
+    else { // with condition
+      // _filter(n, cond)
+      return new code::CallExpr(new code::Identifier(FILTER_FUNC_NAME), args);
+    }
   }
 }
 
@@ -1411,10 +1584,6 @@ void PFTranslator::createInit() {
     MAIN_CLEAR_FUN_NAME,
     VOID_TYPE);
 
-  // add method print() in main class to print the answers
-  coreClsPrint = code::FunctionDecl::createFunctionDecl(
-      coreNs, ANSWER_PRINT_METHOD_NAME, VOID_TYPE);
-
   // add method debug() in main class to print the current state of the possible world
   // TODO add a flag to support debug or not
   coreClsDebug = code::FunctionDecl::createFunctionDecl(coreNs,
@@ -1459,9 +1628,11 @@ void PFTranslator::addFieldForFunVar(
       if (cls == coreTemporalCls) { // init temporal MEMO
         ensureFun->addStmt(createForeachLoop(TMP_LOOP_VAR_NAME,DEPEND_NUM_VAE_NAME,
           code::CallExpr::createMethodCall(
-          new code::ArraySubscriptExpr(
-                  new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(TMP_LOOP_VAR_NAME)),
-                  new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
+          new code::BinaryOperator(
+            new code::ArraySubscriptExpr(
+                    new code::ArraySubscriptExpr(new code::Identifier(TEMP_MEMO_VAR_NAME), new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
+                    new code::Identifier(TMP_LOOP_VAR_NAME)),
+            new code::Identifier(varname),code::OpKind::BO_FIELD),
           DYNAMICTABLE_RESIZE_METHOD_NAME,
           std::vector<code::Expr*>({new code::IntegerLiteral((int) id), new code::Identifier(numvarname_for_arg)}))));
       }
@@ -1522,15 +1693,23 @@ void PFTranslator::addFunValueAssignStmt(
   fun->addStmt(dst);
 }
 
-void PFTranslator::transEvidence(code::CompoundStmt* fun,
+void PFTranslator::transEvidence(std::vector<std::vector<code::Stmt*> >&setterFuncs,
+                                  std::vector<std::vector<code::Stmt*> >&likeliFuncs,
                                   std::shared_ptr<ir::Evidence> evid, bool transFuncApp) {
   const std::shared_ptr<ir::Expr>& left = evid->getLeft();
   // check whether left is a function application variable
   std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
       ir::FunctionCall>(left);
-
+  // the timestep this evidence should be processed
+  int id = 0;
   // Update the random functions associated with observations
   if (leftexp != nullptr) {
+    if (leftexp->isTemporal() 
+        && std::dynamic_pointer_cast<ir::TimestepLiteral>(leftexp->getTemporalArg())) 
+        // Now we only accept timestep literal. This should be checked in Semant!
+    {
+      id = std::dynamic_pointer_cast<ir::TimestepLiteral>(leftexp->getTemporalArg())->getValue();
+    }
     if (leftexp->getRefer()->isRand()) {
       obsFuncStore.insert(leftexp->getRefer()->getName());
     }
@@ -1540,6 +1719,7 @@ void PFTranslator::transEvidence(code::CompoundStmt* fun,
     // left side of the evidence is a function application
     std::string blogfunname = leftexp->getRefer()->getName();  // the function name in blog model
     std::string setterfunname = getSetterFunName(blogfunname);  // setter function for the blog function predicate
+    std::string likelifunname = getLikeliFunName(blogfunname);  // likeli function for the blog function predicate
     std::vector<code::Expr*> args;
     // check special case for timestep functioncall
     if (leftexp->isTemporal())
@@ -1550,13 +1730,24 @@ void PFTranslator::transEvidence(code::CompoundStmt* fun,
     }
     // assign the right side of the evidence to left function application variable
     args.push_back(transExpr(evid->getRight()));
-    // call setter function and calculate likelihood
-    // :::=> weight += set_evidence();
+    // call setter function
+    setterFuncs[id].push_back(new code::CallExpr(new code::Identifier(setterfunname), args));
+
+    // calculate likelihood
+    // :::=> weight += likeli(...);
+    // recompute the args
+    args.clear();
+    if (leftexp->isTemporal())
+      args.push_back(transExpr(leftexp->getTemporalArg()));
+    for (auto a : leftexp->getArgs()) {
+      args.push_back(transExpr(a));
+    }
     code::Stmt* st = new code::BinaryOperator(
         new code::Identifier(WEIGHT_VAR_REF_NAME),
-        new code::CallExpr(new code::Identifier(setterfunname), args),
+        new code::CallExpr(new code::Identifier(likelifunname), args),
         COMPUTE_LIKELIHOOD_IN_LOG ?
             code::OpKind::BO_SPLUS : code::OpKind::BO_SMUL);
+    likeliFuncs[id].push_back(st);
     // add checking for infinity
     // :::=> if (isfinite(weight)) weight += ...
     /*
@@ -1573,8 +1764,6 @@ void PFTranslator::transEvidence(code::CompoundStmt* fun,
     */
     // TODO: To polish the following
     // NOTE: Now remove the if statement since we will print rejection terms firstly
-    //st = new code::IfStmt(cond, st);
-    fun->addStmt(st);
     return;
   }
 
@@ -1595,7 +1784,7 @@ void PFTranslator::transEvidence(code::CompoundStmt* fun,
                                                 code::OpKind::BO_NEQ);
     code::Stmt* st = new code::ReturnStmt(new code::BooleanLiteral(false));
     st = new code::IfStmt(cond, st);
-    fun->addStmt(st);
+    setterFuncs[id].push_back(st);
     return;
   }
   // TODO adding support for other evidence
@@ -1604,14 +1793,47 @@ void PFTranslator::transEvidence(code::CompoundStmt* fun,
 
 void PFTranslator::transAllEvidence(
     std::vector<std::shared_ptr<ir::Evidence> > evids) {
-  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
-      coreNs, SET_EVIDENCE_FUN_NAME, BOOL_TYPE);
-  fun->setParams(std::vector<code::ParamVarDecl*>{new code::ParamVarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_REF_TYPE)});
+  /*
+  Firstly generate main set_evidence function
+  ==>
+  bool _set_evidence(double& __local_weight)
+  {
+  __local_weight=1.0000000;
+  if (evidenceTable[_cur_time])
+  return evidenceTable[_cur_time](__local_weight);
+  return true;
+  }
+  */
+  code::FunctionDecl* main_fun = code::FunctionDecl::createFunctionDecl(
+    coreNs, SET_EVIDENCE_FUN_NAME, BOOL_TYPE);
+  main_fun->setParams(std::vector<code::ParamVarDecl*>{new code::ParamVarDecl(main_fun, WEIGHT_VAR_REF_NAME, DOUBLE_REF_TYPE)});
+  main_fun->addStmt(new code::BinaryOperator(
+    new code::Identifier(WEIGHT_VAR_REF_NAME),
+    new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
+  code::Expr* cond = tempTableEntryRefer(TMP_EVI_STORE_NAME, -1);
+  code::CallExpr* eviCall = new code::CallExpr(tempTableEntryRefer(TMP_EVI_STORE_NAME),
+    std::vector<code::Expr*> {new code::Identifier(WEIGHT_VAR_REF_NAME)});
+  code::IfStmt* ifstmt = new code::IfStmt(cond, new code::ReturnStmt(eviCall));
+  main_fun->addStmt(ifstmt);
+  main_fun->addStmt(new code::ReturnStmt(new code::BooleanLiteral(true)));
+  /*
+  Register data structure to store all the evidences
+  ==> std::function<bool(double&)> evidenceTable[_TimeLim_+1];
+  ==> void setup_temporal_evidence(){}
+  */
+  code::VarDecl::createVarDecl(coreNs, TMP_EVI_STORE_NAME,
+    std::vector<EXPR>({ 
+      new code::BinaryOperator(new code::Identifier(TIMESTEP_LIMIT_VAR_NAME), 
+      new code::IntegerLiteral(1), code::OpKind::BO_PLUS) }
+    ),TMP_EVI_STORE_TYPE);
+  tempEvidenceInit = code::FunctionDecl::createFunctionDecl(
+    coreNs, TMP_EVI_INIT_FUNC_NAME, VOID_TYPE);
+  // put the init function in the coreInit
+  coreClsInit->addStmt(new code::CallExpr(new code::Identifier(TMP_EVI_INIT_FUNC_NAME)));
 
-  code::BinaryOperator* cond = new code::BinaryOperator(
-    new code::Identifier(CUR_TIMESTEP_VAR_NAME),
-    new code::IntegerLiteral(0),code::OpKind::BO_EQU);
-  code::CompoundStmt* cmp = new code::CompoundStmt();
+  // generate all the evidences
+  std::vector<std::vector<code::Stmt*> > setterFuncs(model->getTempLimit() + 1);
+  std::vector<std::vector<code::Stmt*> > likeliFuncs(model->getTempLimit() + 1);
 
   //TODO: 
   //  gather timestep information for evidence in Semant
@@ -1619,58 +1841,38 @@ void PFTranslator::transAllEvidence(
     // Firstly Translate all rejection sampling stmts
     // TODO:
     //   Now we assume all rejection sampling contain no timestep!!! to add timestep support
-    transEvidence(cmp, evid, false);
+    transEvidence(setterFuncs, likeliFuncs, evid, false);
   }
-  // if (_cur_timestep == 0) {set all rejection evidence;}
-  code::IfStmt* brch = new code::IfStmt(cond, cmp, NULL);
-  if (cmp->size() > 0)
-    fun->addStmt(brch);
-  else
-    delete brch;
 
-  // all likelihood evidence
-  fun->addStmt(new code::BinaryOperator(
-    new code::Identifier(WEIGHT_VAR_REF_NAME),
-    new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
-
-  // branch for static likelihood evidences
-  code::BinaryOperator* stat_cond = new code::BinaryOperator(
-    new code::Identifier(CUR_TIMESTEP_VAR_NAME),
-    new code::IntegerLiteral(0), code::OpKind::BO_EQU);
-  code::CompoundStmt* stat_cmp = new code::CompoundStmt();
-
-  // Make sure that all the branches are non-empty and sorted in input order
-  // Make sure that non-timestep evidence locates in the beginning
-  std::vector<code::IfStmt*> branches;
-  branches.push_back(new code::IfStmt(stat_cond, stat_cmp, NULL));
   for (auto evid : evids) {
-    // Firstly Translate all likelihood weighing stmts
-    // TODO:
-    //  to better organize timporal/static evidence
-    //  e.g. firstly do non-temporal then use caseExpr to better organize all timestep branches;
+    // Secondly Translate all likelihood weighing stmts
     std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
       ir::FunctionCall>(evid->getLeft());
     if (leftexp == nullptr) continue; // not likelihood evidence at all!
-    if (leftexp->isTemporal()) { // timestep evidence
-      cond = new code::BinaryOperator(
-        new code::Identifier(CUR_TIMESTEP_VAR_NAME),
-        transExpr(leftexp->getTemporalArg()), code::OpKind::BO_EQU); // if (tmp_arg == cur_time) {set_evidence(cur_time);}
-      cmp = new code::CompoundStmt();
-      branches.push_back(new code::IfStmt(cond, cmp, NULL));
-      transEvidence(cmp, evid, true);
-    }
-    else { // static evidence
-      transEvidence(stat_cmp, evid, true);
-    }
+    transEvidence(setterFuncs, likeliFuncs, evid, true);
   }
-  if (stat_cmp->size() == 0) { // make sure there is no empty branch
-    delete branches[0];
-    branches.erase(branches.begin());
+  
+  /*
+   * for each timestep
+   * ==> 
+   *  evidenceTable[3] = [&](double& __local_weight)->bool {
+   *  __local_weight *= __set_O(3, 0);
+   *  return true;
+   * };
+   */
+  for (size_t i = 0; i < setterFuncs.size(); ++i) {
+    if (setterFuncs[i].size() == 0) continue; // no evidence in this timestep
+    auto lamFunc = new code::LambdaExpr(code::LambdaKind::REF,BOOL_TYPE);
+    lamFunc->addParam(new code::ParamVarDecl(lamFunc,WEIGHT_VAR_REF_NAME,DOUBLE_REF_TYPE));
+    for (auto& st : setterFuncs[i])
+      lamFunc->addStmt(st);
+    for (auto& st : likeliFuncs[i])
+      lamFunc->addStmt(st);
+    lamFunc->addStmt(new code::ReturnStmt(new code::BooleanLiteral(true)));
+    auto stmt = new code::BinaryOperator(tempTableEntryRefer(TMP_EVI_STORE_NAME,i),
+                lamFunc, code::OpKind::BO_ASSIGN);
+    tempEvidenceInit->addStmt(stmt);
   }
-  for (auto p : branches)
-    fun->addStmt(p);
-
-  fun->addStmt(new code::ReturnStmt(new code::BooleanLiteral(true)));
 }
 
 void PFTranslator::transAllQuery(
@@ -1680,73 +1882,169 @@ void PFTranslator::transAllQuery(
   // TODO:
   //  to parse timestep in general expressions in Semant
 
-  // create evaluate function
-  code::FunctionDecl* fun = code::FunctionDecl::createFunctionDecl(
-      coreNs, QUERY_EVALUATE_FUN_NAME, VOID_TYPE, true);
-  // setting arguments for queryfun
-  std::vector<code::ParamVarDecl*> args;
-  // query function has one argument of double, for weight
-  args.push_back(new code::ParamVarDecl(fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE));
-  fun->setParams(args);
+  /*
+  Firstly generate main evaluate_query function
+  ==>
+  inline void _evaluate_query(double __local_weight)
+  {
+    if (queryTable[_cur_time])
+      queryTable[_cur_time](__local_weight);
+  }
+  */
+  code::FunctionDecl* main_fun = code::FunctionDecl::createFunctionDecl(
+    coreNs, QUERY_EVALUATE_FUN_NAME, VOID_TYPE, true);
+  main_fun->setParams(std::vector<code::ParamVarDecl*>{new code::ParamVarDecl(main_fun, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE)});
+  code::Expr* cond = tempTableEntryRefer(TMP_QUERY_STORE_NAME, -1);
+  code::CallExpr* queryCall = new code::CallExpr(tempTableEntryRefer(TMP_QUERY_STORE_NAME),
+    std::vector<code::Expr*> {new code::Identifier(WEIGHT_VAR_REF_NAME)});
+  code::IfStmt* ifstmt = new code::IfStmt(cond, queryCall);
+  main_fun->addStmt(ifstmt);
 
-  // Branches of all temporal queries
-  code::BinaryOperator* cond, *stat_cond = new code::BinaryOperator(
-      new code::Identifier(CUR_TIMESTEP_VAR_NAME), 
-      new code::IntegerLiteral(0), code::OpKind::BO_EQU);
-  code::CompoundStmt* cmp, *stat_cmp = new code::CompoundStmt();
-  std::vector<code::IfStmt*> branches;
-  branches.push_back(new code::IfStmt(stat_cond, stat_cmp, NULL));
+  /*
+  also generate main answer_print function
+  ==>
+  void print() {
+    if (printTable[_cur_time]) {
+      printf("++++++++++++++++ TimeStep @%d ++++++++++++++++\n", _cur_time);
+      printTable[_cur_time]();
+    }
+  }
+  */
+  coreClsPrint = code::FunctionDecl::createFunctionDecl(
+    coreNs, ANSWER_PRINT_METHOD_NAME, VOID_TYPE, true);
+  code::Expr* prtcond = tempTableEntryRefer(TMP_PRINT_STORE_NAME, -1);
+  code::CallExpr* prtCall = new code::CallExpr(tempTableEntryRefer(TMP_PRINT_STORE_NAME));
+  code::CompoundStmt* cmp = new code::CompoundStmt();
+
+  // Output Timestep Counter
+  cmp->addStmt(new code::CallExpr( new code::Identifier("printf"),
+    std::vector<code::Expr*>{ new code::StringLiteral("++++++++++++++++ TimeStep @%d ++++++++++++++++\\n"), 
+                              new code::Identifier(CUR_TIMESTEP_VAR_NAME)})
+  );
+
+  cmp->addStmt(prtCall);
+  code::IfStmt* prtifstmt = new code::IfStmt(prtcond, cmp);
+  coreClsPrint->addStmt(prtifstmt);
+
+  /*
+  Register data structure to store all the evidences
+  ==> std::function<void(double)> queryTable[_TimeLim_+1];
+  ==> std::function<void(void)> printTable[_TimeLim_+1];
+  ==> void setup_temporal_query(){}
+  ==> void setup_temporal_print(){}
+  */
+  code::VarDecl::createVarDecl(coreNs, TMP_QUERY_STORE_NAME,
+    std::vector<EXPR>({
+    new code::BinaryOperator(new code::Identifier(TIMESTEP_LIMIT_VAR_NAME),
+    new code::IntegerLiteral(1), code::OpKind::BO_PLUS) }
+  ), TMP_QUERY_STORE_TYPE);
+  code::VarDecl::createVarDecl(coreNs, TMP_PRINT_STORE_NAME,
+    std::vector<EXPR>({
+    new code::BinaryOperator(new code::Identifier(TIMESTEP_LIMIT_VAR_NAME),
+    new code::IntegerLiteral(1), code::OpKind::BO_PLUS) }
+  ), TMP_PRINT_STORE_TYPE);
+  tempQueryInit = code::FunctionDecl::createFunctionDecl(
+    coreNs, TMP_QUERY_INIT_FUNC_NAME, VOID_TYPE);
+  tempPrintInit = code::FunctionDecl::createFunctionDecl(
+    coreNs, TMP_PRINT_INIT_FUNC_NAME, VOID_TYPE);
+
+  // put the init function in the coreInit
+  coreClsInit->addStmt(new code::CallExpr(new code::Identifier(TMP_QUERY_INIT_FUNC_NAME)));
+  coreClsInit->addStmt(new code::CallExpr(new code::Identifier(TMP_PRINT_INIT_FUNC_NAME)));
+
+  // generate all the queries
+  std::vector<std::vector<code::Stmt*> > queryFuncs(model->getTempLimit() + 1);
+  std::vector<std::vector<code::Stmt*> > printFuncs(model->getTempLimit() + 1);
 
   int index = 0;
   for (auto qr : queries) {
-    std::shared_ptr<ir::FunctionCall> fc = std::dynamic_pointer_cast<ir::FunctionCall>(qr->getVar());
-    if (fc != nullptr && fc->isTemporal()) { // Temporal Function Call!
-      cond = new code::BinaryOperator(new code::Identifier(CUR_TIMESTEP_VAR_NAME), 
-                                      transExpr(fc->getTemporalArg()), code::OpKind::BO_EQU);
-      cmp = new code::CompoundStmt();
-      branches.push_back(new code::IfStmt(cond, cmp, NULL));
-
-      transQuery(cmp, qr, index);
-    }
-    else { // we assume static otherwise
-      transQuery(stat_cmp, qr, index);
-    }
-    index ++;
+    transQuery(queryFuncs, printFuncs, qr, index ++);
   }
 
-  if (stat_cmp->size() == 0) {
-    delete branches[0];
-    branches.erase(branches.begin());
+  /*
+  * for each timestep
+  * ==>
+  *  queryTable[0] = [&](double __local_weight) {
+  *   _answer.add(....);
+  *  };
+  *  printTable[0] = [&]() {
+  *    _answer_0.print("query expr"); ...
+  *  };
+  */
+  for (size_t i = 0; i < queryFuncs.size(); ++i) {
+    if (queryFuncs[i].size() == 0) continue; // no query in this timestep, and we do not need to print
+    // LambdaFunction for Query
+    auto queryLambda = new code::LambdaExpr(code::LambdaKind::REF);
+    queryLambda->addParam(new code::ParamVarDecl(queryLambda, WEIGHT_VAR_REF_NAME, DOUBLE_TYPE));
+    for (auto& st : queryFuncs[i])
+      queryLambda->addStmt(st);
+    tempQueryInit->addStmt(
+      new code::BinaryOperator(tempTableEntryRefer(TMP_QUERY_STORE_NAME, i),
+      queryLambda, code::OpKind::BO_ASSIGN));
+    // LambdaFunction for Print
+    auto printLambda = new code::LambdaExpr(code::LambdaKind::REF);
+    for (auto& st : printFuncs[i])
+      printLambda->addStmt(st);
+    tempPrintInit->addStmt(
+      new code::BinaryOperator(tempTableEntryRefer(TMP_PRINT_STORE_NAME, i),
+      printLambda, code::OpKind::BO_ASSIGN));
   }
-
-  for (auto st : branches)
-    fun->addStmt(st);
 }
 
-void PFTranslator::transQuery(code::CompoundStmt* cmp,
+void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs,
+                               std::vector<std::vector<code::Stmt*> >& printFuncs, 
                                std::shared_ptr<ir::Query> qr, int n) {
+  // Register Printer Class
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+  std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) };
+  if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
+    auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
+    std::string tyName = ty->getRefer()->getName();
+    initArgs.push_back(new code::StringLiteral(tyName));
+    if (ty->getRefer()->getInstNames().size() > 0) {
+      initArgs.push_back(new code::BinaryOperator(NULL,
+        new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+    }
+  }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
-      std::vector<code::Expr*>(
-          { new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) }));
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+          initArgs);
   code::VarDecl::createVarDecl(
       coreNs, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          mapIRTypeToCodeType(qr->getVar()->getTyp()) })),
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
+  // The timestep this query should be processed
+  int id = 0;
+  auto var = qr->getVar();
+  if (std::dynamic_pointer_cast<ir::FunctionCall>(var) != nullptr) {
+    auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(var);
+    if (fun->isTemporal() && std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg()) != nullptr) {
+      // Assume that the Timestep for each query is a fixed value
+      //  >> This should be checked in Semant
+      id = std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg())->getValue();
+    }
+    else {
+      if (!fun->isTemporal())
+        id = model->getTempLimit();
+    }
+  }
+
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
   args.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
-  cmp->addStmt(
-      code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
-                                       args));
+  queryFuncs[id].push_back(code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
+    args));
+  
   // add print this result in print()
-  // :::=> answer_id.print();
-  coreClsPrint->addStmt(
+  // :::=> answer_id.print("query expr");
+  printFuncs[id].push_back(
       code::CallExpr::createMethodCall(answervarname,
-                                       HISTOGRAM_PRINT_METHOD_NAME));
+                                       HISTOGRAM_PRINT_METHOD_NAME,
+                                       std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
 }
 
 code::Expr* PFTranslator::transConstSymbol(
@@ -1759,7 +2057,8 @@ code::Expr* PFTranslator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    return new code::BooleanLiteral(bl->getValue());
+    // TODO
+    return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
       ir::DoubleLiteral>(cs);
@@ -1799,6 +2098,32 @@ code::Expr* PFTranslator::transFunctionCall(
   std::string getterfunname;
   // Special Check for builtin functions
   if (fc->isBuiltin()) {
+    // Special Check for vstack and hstack
+    if (dynamic_cast<const predecl::MatrixStackFuncDecl*>(fc->getBuiltinRefer()) != NULL) {
+      auto lst = new code::ListInitExpr(args);
+      return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), std::vector<code::Expr*>{lst});
+    }
+    // Special Check for aggregate function
+    if (dynamic_cast<const predecl::SetAggrFuncDecl*>(fc->getBuiltinRefer()) != NULL) {
+      auto setexpr = std::dynamic_pointer_cast<ir::CondSet>(fc->get(0));
+      if (setexpr != nullptr && args.size() == 1 && setexpr->getFunc() != nullptr) {
+        // assert(args.size() == 1);
+        // assert(args[0].size() == 2 + (setexpr->getCond() != nullptr));
+        auto set_gen = args[0];
+        args = set_gen->getArgs();
+        set_gen->clearArgs();
+        delete set_gen;
+      }
+      args.push_back(
+        new code::TemplateExpr(
+          new code::Identifier(fc->getBuiltinRefer()->getName()),
+          std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}));
+      return new code::CallExpr(
+        new code::TemplateExpr(
+          new code::Identifier(AGGREGATE_FUNC_NAME),
+          std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}),
+        args);
+    }
     return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
   }
   switch (fc->getKind()) {
@@ -1844,18 +2169,11 @@ void PFTranslator::createMain() {
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
                                         MAIN_SAMPLING_FUN_NAME);
   mainFun->addStmt(st);
-  st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
-                                        ANSWER_PRINT_METHOD_NAME);
-  mainFun->addStmt(st);
   */
   mainFun->addStmt(
     new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME), 
     new code::CallExpr(new code::Identifier(MAIN_SAMPLING_FUN_NAME)),code::OpKind::BO_SCOPE)
   );
-  mainFun->addStmt(
-    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME),
-    new code::CallExpr(new code::Identifier(ANSWER_PRINT_METHOD_NAME)), code::OpKind::BO_SCOPE)
-    );
   // calculate duration
   st = new code::DeclStmt(
       new code::VarDecl(
@@ -1910,7 +2228,9 @@ inline STMT PFTranslator::CREATE_INSTANCE(std::string tyname,
     values.insert(values.end(), originvalues.begin(), originvalues.end());
   if (ncopy)
     st = new code::CallExpr(
-        new code::Identifier(APPEND_FUN_NAME),
+        new code::TemplateExpr(
+          new code::Identifier(APPEND_FUN_NAME),
+          std::vector<EXPR>{new code::Identifier(tyname)}),
         std::vector<EXPR>( { new code::Identifier(inst_var_name), ncopy,
             new code::ListInitExpr(values) }));
   else

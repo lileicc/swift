@@ -28,6 +28,10 @@ void BlogProgram::add(Stmt* decl) {
   args.push_back(decl);
 }
 
+void BlogProgram::add(const std::vector<Stmt*>& stmts) {
+  args.insert(args.end(), stmts.begin(), stmts.end());
+}
+
 Stmt* BlogProgram::get(int k) {
   return args[k];
 }
@@ -38,6 +42,10 @@ const std::vector<Stmt*>& BlogProgram::getAll() {
 
 std::vector<Stmt*>& BlogProgram::getAllRef() {
   return args;
+}
+
+void BlogProgram::clear() {
+  args.clear();
 }
 
 // For Debugging Use

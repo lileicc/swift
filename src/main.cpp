@@ -18,20 +18,26 @@ int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
     std::cout
-        << "\t[main] -v [-e ParticleFilter] -i <input filename> -o <output filename> --ir <filename for printing ir>"
+        << "\t[main] [-v] -i <input filename>... -o <output filename> [-e ParticleFilter [--particle ParticleNumber]] [--ir <filename for printing ir>]"
         << std::endl;
     exit(0);
   }
-  const char* inp = "";
+  std::vector<const char*> inp;
   const char* out = "";
   const char* irfile = nullptr;
   bool verbose = false;
   std::string engine_type = "LWSampler";
+  int particle_N = 0;
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-v") == 0)
       verbose = true;
-    if (strcmp(argv[i], "-i") == 0)
-      inp = argv[++i];
+    if (strcmp(argv[i], "-i") == 0) { 
+      if(i + 1 < argc && argv[i+1] && argv[i+1][0] != '-') {
+        for(++i; i < argc && argv[i] && argv[i][0] != '-'; ++ i)
+          inp.push_back(argv[i]);
+        -- i;
+      }
+    }
     if (strcmp(argv[i], "-o") == 0)
       out = argv[++i];
     if (strcmp(argv[i], "-e") == 0)
@@ -43,15 +49,36 @@ int main(int argc, char** argv) {
         i--;
       }
     }
+    if (strcmp(argv[i], "--particle") == 0 && i + 1 < argc && argv[i+1]) {
+      int part;
+      if(sscanf(argv[i + 1], "%d", &part) == 1 && part > 0) {
+        particle_N = part;
+        ++ i;
+      }
+    }
   }
 
-  // parse the input file to get abstract syntax
-  swift::absyn::BlogProgram* blog_absyn = parse(inp);
-
-  if (blog_absyn == NULL) {
-    fprintf(stderr, "Error in parsing input %s!", inp);
-    // TODO print the error message!
+  swift::absyn::BlogProgram* blog_absyn = NULL;
+  if(inp.size() == 0) {
+    fprintf(stderr, "No Input File Specified!\n");
     return 1;
+  } else {
+    for(size_t i = 0; i < inp.size(); ++ i) {
+      // parse the input file to get abstract syntax
+      swift::absyn::BlogProgram* sub_absyn = parse(inp[i]);
+      if (sub_absyn == NULL) {
+        fprintf(stderr, "Error in parsing input %s!", inp[i]);
+        // TODO print the error message!
+        return 1;
+      }
+      if(blog_absyn == NULL)
+        blog_absyn = sub_absyn;
+      else {
+        blog_absyn->add(sub_absyn->getAll());
+        sub_absyn->clear();
+        delete sub_absyn;
+      }
+    }
   }
   
   if (verbose)
@@ -73,7 +100,7 @@ int main(int argc, char** argv) {
   std::shared_ptr<swift::ir::BlogModel> model = sem.getModel();
 
   if (!sem.Okay()) {
-    fprintf(stderr, "Error in semantic checking input %s!", inp);
+    fprintf(stderr, "Error in semantic checking!");
     // TODO print the error message!
     return 1;
   }
@@ -87,7 +114,10 @@ int main(int argc, char** argv) {
   if (engine_type == "LWSampler") {
     trans = new swift::codegen::Translator();
   } else if (engine_type == "ParticleFilter") {
-    trans = new swift::codegen::PFTranslator();
+    auto PF_trans = new swift::codegen::PFTranslator();
+    if(particle_N>0)
+      PF_trans->setParticleNum(particle_N);
+    trans = PF_trans;
   } else {
     printf("%s engine not found", engine_type.c_str());
   }
@@ -101,7 +131,15 @@ int main(int argc, char** argv) {
                                                                    std::string(out));
     program->print(prt);
     
-    printf("correctly translated %s!\n", inp);
+    printf("correctly translated model file");
+    if(inp.size() == 1) 
+      printf(" <%s>!\n", inp[0]);
+    else {
+      printf("s!");
+      for(size_t i = 0; i < inp.size(); ++ i)
+        printf(" <%s>", inp[i]);
+      printf("\n");
+   }
     delete program;
     delete prt;
   }

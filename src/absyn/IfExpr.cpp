@@ -50,6 +50,19 @@ void IfExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string IfExpr::toString() {
+  std::string ret = "if (";
+  if (getCond() != NULL)
+    ret += getCond()->toString();
+  ret += ") then ";
+  if (getThen() != NULL)
+    ret += getThen()->toString();
+  if (getElse() != NULL) {
+    ret += " else " + getElse()->toString();
+  }
+  return ret;
+}
+
 Expr* IfExpr::clone() {
   IfExpr* ret = new IfExpr(*this);
   ret->cloneArgs();

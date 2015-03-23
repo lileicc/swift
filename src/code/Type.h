@@ -32,7 +32,7 @@ public:
   bool isRef() const;
   void setPtr(bool ptrTag = false);
   bool isPtr() const;
-  void setConst();
+  void setConst(bool consTag = false);
   bool isConst() const;
   bool hasScope() const;
   std::vector<Type> & getTypeArgs();

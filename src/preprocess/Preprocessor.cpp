@@ -59,19 +59,19 @@ void Preprocessor::processSetEvidence(absyn::BlogProgram*& prog) {
 
     // TODO: IMPORTANT!!!
     //   due to lack of clone method, 
-    //      we only support list set containing VarRef
+    //      we only support list set containing VarRef (FuncApp with no arguments)
     std::vector<absyn::Symbol> sym;
     for (size_t k = 0; k < rt->size(); ++k) {
-      auto ref = dynamic_cast<absyn::VarRef*>(rt->get(k));
-      if (ref == NULL) {
-        error(rt->line, rt->col, "For Evidence Set, We Only Support VarRef in the List Set (right hand side of the evidence).");
+      auto ref = dynamic_cast<absyn::FuncApp*>(rt->get(k));
+      if (ref == NULL || ref->size() > 0) {
+        error(rt->line, rt->col, "For Evidence Set, We Only Support VarRef (FuncApp with no arguments) in the List Set (right hand side of the evidence).");
         return;
       }
-      sym.push_back(ref->getVar());
+      sym.push_back(ref->getFuncName());
     }
     // For the same reason, we do not support general expression in TupleSetExpr
-    if (lfunc.size() != 1 || dynamic_cast<absyn::VarRef*>(lfunc[0]) == NULL
-      || (dynamic_cast<absyn::VarRef*>(lfunc[0]))->getVar().getValue() != lvar.getVar().getValue()) {
+    if (lfunc.size() != 1 || dynamic_cast<absyn::FuncApp*>(lfunc[0]) == NULL || (dynamic_cast<absyn::FuncApp*>(lfunc[0])->size() > 0)
+      || (dynamic_cast<absyn::FuncApp*>(lfunc[0]))->getFuncName().getValue() != lvar.getVar().getValue()) {
       error(cd->line, cd->col, "For Evidence Set, We DO NOT general expression in TupleSetExpr (the left hand side of the evidence).");
       return;
     }
@@ -83,12 +83,12 @@ void Preprocessor::processSetEvidence(absyn::BlogProgram*& prog) {
     ev->setRight(new absyn::IntLiteral(line, col, rt->size()));
     // :::=> randon <element> ~ UniformChoice({T t: t != prev})
     for (size_t k = 0; k < sym.size(); ++k) {
-      auto dist = new absyn::DistrExpr(line, col, absyn::Symbol("UniformChoice"));
+      auto dist = new absyn::FuncApp(line, col, absyn::Symbol("UniformChoice"));
       absyn::Expr* root = (lcond != NULL ? lcond->clone() : NULL);
       for (size_t p = 0; p < k; ++p) {
         absyn::Expr* cur = 
             new absyn::OpExpr(line, col, absyn::AbsynConstant::NEQ,
-            new absyn::VarRef(line, col, var.getVar()), new absyn::VarRef(line, col, sym[p]));
+            new absyn::FuncApp(line, col, var.getVar()), new absyn::FuncApp(line, col, sym[p]));
         if (root == NULL) root = cur;
         else
           root = new absyn::OpExpr(line, col, absyn::AbsynConstant::AND, root->clone(), cur);

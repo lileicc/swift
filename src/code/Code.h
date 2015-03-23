@@ -13,7 +13,6 @@
 #include "BooleanLiteral.h"
 #include "BreakStmt.h"
 #include "CallExpr.h"
-#include "CallTemplateExpr.h"
 #include "CaseStmt.h"
 #include "ClassConstructor.h"
 #include "CallClassConstructor.h"
@@ -41,6 +40,7 @@
 #include "SwitchStmt.h"
 #include "Stmt.h"
 #include "StringLiteral.h"
+#include "TemplateExpr.h"
 #include "VarDecl.h"
 #include "Identifier.h"
 

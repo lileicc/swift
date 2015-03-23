@@ -24,6 +24,9 @@ private:
   std::uniform_int_distribution<int> dist;
   int a;
   int b;
+  int det;
+  double logdet;
+  bool is_loglike_ok, is_dist_ok;
 };
 
 } /* namespace random */

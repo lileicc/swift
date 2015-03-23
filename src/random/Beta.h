@@ -24,6 +24,7 @@ private:
   std::gamma_distribution<double> dist_alpha, dist_beta;
   double alpha, beta;
   double coef, log_coef;
+  bool is_dist_ok, is_like_ok, is_loglike_ok;
 };
 
 } /* namespace random */

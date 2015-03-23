@@ -62,7 +62,7 @@ BlogProgram* parse(const char* inp) {
   FILE *myfile = fopen(inp, "r");
   // make sure it is valid:
   if (!myfile) {
-    cout << "I can't open input.in" << endl;
+    cout << "I can't open " << inp << endl;
     exit(0);
     //return -1;
   }
@@ -159,7 +159,7 @@ BlogProgram* parse(const char* inp) {
 %type <distdec> distinct_decl;
 %type <stmt> evidence value_evidence;
 %type <exp> expression literal operation_expr unary_operation_expr
-  quantified_formula function_call list_construct_expression
+  quantified_formula function_call list_expr
   if_expr case_expr;
 %type <compexp> comprehension_expr;
 %type <cardexp> number_expr;
@@ -171,7 +171,7 @@ BlogProgram* parse(const char* inp) {
 %type <explst> semi_colon_separated_expression_list
   opt_expression_list expression_list;
 %type <exptuplst> expression_pair_list;
-%type <typ> type;
+%type <typ> type, array_type;
 //%type <ast> opt_parenthesized_type_lst, type_lst // Not Used
 %type <varlist> type_var_lst;
 %type <varlist> opt_parenthesized_type_var_lst;
@@ -180,7 +180,7 @@ BlogProgram* parse(const char* inp) {
 %type <symbintpair> id_or_subid;
 %type <symbintvect> id_or_subid_list;
 %type <vardec> var_decl;
-%type <sval> refer_name;
+%type <sval> refer_name, array_type_or_sub;
 
 %left THEN EXISTS_ FORALL_
 %nonassoc EQ_ DISTRIB
@@ -254,6 +254,18 @@ type_decl:
 
 type:
     refer_name { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
+  | array_type { $$ = $1; }
+  ;
+
+array_type_or_sub : refer_name LBRACKET
+    { $$ = $1; }
+;
+
+array_type : array_type_or_sub RBRACKET
+    { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue()), 1); }
+  | array_type LBRACKET RBRACKET
+    { $1->setDim($1->getDim() + 1);
+      $$ = $1; }
   ;
 
 opt_parenthesized_type_var_lst:
@@ -500,7 +512,7 @@ expression:
     operation_expr {$$ = $1;}
   | literal {$$ = $1;}
   | function_call {$$ = $1;}
-  | list_construct_expression {$$ = $1;}
+  | list_expr {$$ = $1;}
   | map_construct_expression {$$ = $1;}
   | quantified_formula { $$ = $1; }
   | set_expr { $$ = $1; }
@@ -564,7 +576,7 @@ operation_expr:
   
 unary_operation_expr:
     MINUS_ expression
-    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, new IntLiteral(curr_line, curr_col, 0), $2); } %prec UMINUS
+    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, nullptr, $2); } %prec UMINUS
   | NOT_ expression
     {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::NOT, NULL, $2); } 
   | AT_ expression
@@ -640,10 +652,14 @@ expression_list:
     }
   ;
   
-//TODO: ExprList  
-list_construct_expression:
-    LBRACKET opt_expression_list RBRACKET { }
-  | LBRACKET semi_colon_separated_expression_list RBRACKET { }
+list_expr:
+    LBRACKET opt_expression_list RBRACKET
+    { $$ = new ArrayExpr(curr_line, curr_col);
+      for (size_t i = 0; i < $2->size(); i++ ) {
+         $$->add((*$2)[i]);
+      }
+    }
+| LBRACKET semi_colon_separated_expression_list RBRACKET { yyerror("semi colon separated list init expression not supported yet"); }
   ;
   
 //TODO: ExprList  

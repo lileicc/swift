@@ -21,6 +21,7 @@
 #include <memory>
 #include <functional>
 #include <cstdarg>
+#include <initializer_list>
 
 #include "armadillo"
 
@@ -28,13 +29,53 @@ using namespace arma;
 
 namespace swift {
 
+#define _predecl_colsum(a) (arma::sum(a,0))
+#define _predecl_rowsum(a) (arma::sum(a,1))
+
+// Special Case for toInt
+template<>
+inline int toInt<arma::mat>(const arma::mat& a) {
+  return a[0];
+}
+
+// Special Case for toReal
+template<>
+inline double toReal<arma::mat>(const arma::mat& a) {
+  return a[0];
+}
+
+// Get number of rows of a matrix
+inline int numrows(const arma::mat& a) { return a.n_rows; }
+// Get number of columns of a matrix
+inline int numcols(const arma::mat& a) { return a.n_cols; }
+
+
+// get submatrix from a large matrix
+inline mat _mat_getrow(const mat& m, int r) {
+  return m.row(r);
+}
+inline mat _mat_getcol(const mat& m, int c) {
+  return m.col(c);
+}
+inline mat _mat_getrows(const mat&m, int r1, int r2) {
+  return m.rows(r1, r2);
+}
+inline mat _mat_getcols(const mat&m, int c1, int c2) {
+  return m.cols(c1, c2);
+}
+inline mat _mat_submat(const mat&m, int r1, int c1, int r2, int c2) {
+  return m.submat(r1,c1,r2,c2);
+}
+
+
 // convert a vector containing all the elements to a row x col matrix
 inline mat _to_matrix(const std::vector<double>& val, int row, int col) {
   return mat(val.data(), row, col);
 }
 
 // convert a vector<vector> to a real matrix
-inline mat _to_matrix(const std::vector<std::vector<double>>& val) {
+template<class T>
+inline mat _to_matrix(const std::vector<std::vector<T>>& val) {
   int row = val.size();
   if (row == 0)return mat();
   int col = val[0].size();
@@ -43,34 +84,72 @@ inline mat _to_matrix(const std::vector<std::vector<double>>& val) {
   mat ret(row, col);
   for (int i = 0; i < row; ++ i)
     for (int j = 0; j < col; ++ j)
-      ret(i, j) = val[i][j];
+      ret(i, j) = (double)val[i][j];
   return ret;
+}
+
+// convert a general vector<> to a real rowvec
+template<class T>
+inline mat _to_matrix(const std::vector<T>& val) {
+  int n = val.size();
+  if (n == 0)return mat();
+  mat ret(1, n);
+  for (size_t i = 0; i < val.size(); ++ i)
+    ret[i] = (double)val[i];
+  return ret;
+}
+
+// construct a matrix from a string
+inline mat _to_matrix(const std::string& str) {
+  return mat(str);
 }
 
 
 // horizontally stack all the matrix/col vector
-mat hstack(int n_param, ...) {
-  va_list args;
-  va_start(args, n_param);
+mat hstack(std::initializer_list<mat> mat_list) {
   mat ret;
-  for (int i = 0; i < n_param; ++i) {
-    if (i == 0) ret = va_arg(args, mat);
-    else ret = join_horiz(ret, va_arg(args, mat));
+  bool flag = false;
+  for (auto& m : mat_list) {
+    if (!flag) {
+      flag = true;
+      ret = m;
+    } else
+      ret = join_horiz(ret, m);
   }
-  va_end(args);
+  return ret;
+}
+
+// horizontally stack all the double scalars
+mat hstack(std::initializer_list<double> val_list) {
+  rowvec ret(val_list.size());
+  int i=0;
+  for (auto& m : val_list) {
+    ret[i++] = m;
+  }
   return ret;
 }
 
 // vertically stack all the matrix/row vector
-mat vstack(int n_param, ...) {
-  va_list args;
-  va_start(args, n_param);
+mat vstack(std::initializer_list<mat> mat_list) {
   mat ret;
-  for (int i = 0; i < n_param; ++i) {
-    if (i == 0) ret = va_arg(args, mat);
-    else ret = join_vert(ret, va_arg(args, mat));
+  bool flag=false;
+  for (auto& m : mat_list) {
+    if (!flag) {
+      flag = true;
+      ret = m;
+    } else
+      ret = join_vert(ret, m);
   }
-  va_end(args);
+  return ret;
+}
+
+// vertically stack all the double scalars
+mat vstack(std::initializer_list<double> val_list) {
+  vec ret(val_list.size());
+  int i = 0;
+  for (auto& v : val_list) {
+    ret[i++] = v;
+  }
   return ret;
 }
 

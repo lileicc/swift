@@ -29,6 +29,10 @@ int Ty::getDim() const {
   return dim;
 }
 
+void Ty::setDim(int d) {
+  dim = d;
+}
+  
 std::string Ty::toString() const {
   std::string ret(typ.getValue());
   for (int i = 0; i < dim; i++)

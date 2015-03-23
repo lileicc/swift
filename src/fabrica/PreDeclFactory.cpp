@@ -11,6 +11,8 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::bernoulliDistr;
   decls[predecl::PreDeclList::betaDistr.getName()] =
     &predecl::PreDeclList::betaDistr;
+  decls[predecl::PreDeclList::binomialDistr.getName()] =
+    &predecl::PreDeclList::binomialDistr;
   decls[predecl::PreDeclList::booleanDistr.getName()] =
     &predecl::PreDeclList::booleanDistr;
   decls[predecl::PreDeclList::categoricalDistr.getName()] =
@@ -25,8 +27,14 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::gaussianDistr;
   decls[predecl::PreDeclList::multivargaussianDistr.getName()] =
     &predecl::PreDeclList::multivargaussianDistr;
+  decls[predecl::PreDeclList::multinomialDistr.getName()] =
+    &predecl::PreDeclList::multinomialDistr;
   decls[predecl::PreDeclList::poissonDistr.getName()] =
       &predecl::PreDeclList::poissonDistr;
+  decls[predecl::PreDeclList::uniformIntDistr.getName()] =
+    &predecl::PreDeclList::uniformIntDistr;
+  decls[predecl::PreDeclList::uniformRealDistr.getName()] =
+    &predecl::PreDeclList::uniformRealDistr;
   decls[predecl::PreDeclList::uniformChoiceDistr.getName()] =
       &predecl::PreDeclList::uniformChoiceDistr;
   decls[predecl::PreDeclList::uniformVectorDistr.getName()] =
@@ -41,13 +49,25 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::toIntFuncDecl;
   decls[predecl::PreDeclList::toRealFuncDecl.getName()] =
     &predecl::PreDeclList::toRealFuncDecl;
+  decls[predecl::PreDeclList::toMatrixFuncDecl.getName()] =
+    &predecl::PreDeclList::toMatrixFuncDecl;
+  decls[predecl::PreDeclList::toStringFuncDecl.getName()] =
+    &predecl::PreDeclList::toStringFuncDecl;
+
+  // Special Commonly used Predecl Functions
+  decls[predecl::PreDeclList::onesFuncDecl.getName()] =
+    &predecl::PreDeclList::onesFuncDecl;
+  decls[predecl::PreDeclList::asScalarFuncDecl.getName()] =
+    &predecl::PreDeclList::asScalarFuncDecl;
+
+  // Different Names Referring to the Same Function/Distribution
+  decls["toString"] = &predecl::PreDeclList::toStringFuncDecl;
+  decls["UnivarGaussian"] = &predecl::PreDeclList::gaussianDistr;
+  decls["toMatrix"] = &predecl::PreDeclList::toMatrixFuncDecl;
 
   // Add Builtin Function using Function Interface
   for (auto& s : predecl::PreDeclList::funcStore)
     decls[s.first] = s.second.get();
-  // Special Matrix Builtin Function
-  decls[predecl::PreDeclList::asScalarFuncDecl.getName()] =
-    &predecl::PreDeclList::asScalarFuncDecl;
 }
 
 PreDeclFactory::~PreDeclFactory() {

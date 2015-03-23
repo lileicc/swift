@@ -24,6 +24,8 @@ public:
 
   const Symbol& getTyp() const;
   int getDim() const;
+  
+  void setDim(int d);
 
   // For Debugging Use
   std::string toString() const;

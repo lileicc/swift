@@ -51,9 +51,9 @@ void MapExpr::print(FILE* file, int indent) const {
   fprintf(file, "%*stoTyp: %s", indent + 2, "",
       getToTyp()->toString().c_str());
   for (size_t i = 0; i < mapSize(); i++) {
-    fprintf(file, "%*sfrom#%lu: \n", indent + 2, "", i);
+    fprintf(file, "%*sfrom#%d: \n", indent + 2, "", (int)i);
     getFrom(i)->print(file, indent + 4);
-    fprintf(file, "%*sto#%lu: \n", indent + 2, "", i);
+    fprintf(file, "%*sto#%d: \n", indent + 2, "", (int)i);
     getTo(i)->print(file, indent + 4);
   }
 }

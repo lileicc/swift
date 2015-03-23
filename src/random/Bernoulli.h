@@ -21,10 +21,11 @@ public:
   double likeli(const int& x);
   double loglikeli(const int& x);
 private:
-  std::bernoulli_distribution dist;
+  std::uniform_real_distribution<double> dist;
   double p;
   double logp;
   double log1_p;
+  bool is_loglike_ok;
 };
 
 } /* namespace random */

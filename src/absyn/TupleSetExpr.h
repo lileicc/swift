@@ -26,6 +26,8 @@ public:
   
   // For Debugging Use
   void print(FILE *file, int indent = 0);
+  std::string toString();
+
   Expr* clone();
 
 protected:

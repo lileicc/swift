@@ -21,6 +21,10 @@ void NullLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(NullLiteral: NULL )\n", indent, "");
 }
 
+std::string NullLiteral::toString() {
+  return "NULL";
+}
+
 Expr* NullLiteral::clone() {
   return new NullLiteral(line, col);
 }
