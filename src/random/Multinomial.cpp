@@ -7,6 +7,7 @@
  
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 #include "Multinomial.h"
 
 namespace swift {
@@ -21,9 +22,7 @@ Multinomial::~Multinomial() {
 void Multinomial::init(const std::vector<double>& wei) {
   weight = wei;
   n = 1;
-  for (size_t i = 1; i < weight.size(); ++ i)
-    weight[i] += weight[i - 1];
-  sum_wei = weight.back();
+  sum_wei = std::accumulate(wei.begin(), wei.end(), 0.0);
   is_logwei_ok.clear();
 }
 
@@ -33,10 +32,11 @@ void Multinomial::init(int n, const std::vector<double>& wei) {
 }
 
 void Multinomial::init(const double* begin, const double* end) {
-  weight.clear();
+  weight.resize(end - begin);
   sum_wei = 0;
-  for (const double* ptr = begin; ptr != end; ++ ptr)
-    weight.push_back(sum_wei += *ptr);
+  int i = 0;
+  for (const double* ptr = begin; ptr != end; ptr ++)
+    sum_wei += (weight[i++] = *ptr);
   n = 1;
   is_logwei_ok.clear();
 }
@@ -64,8 +64,9 @@ std::vector<int> Multinomial::gen_small(int n) {
   std::sort(tmp_keys.begin(), tmp_keys.end());
   std::vector<int> ret(weight.size(), 0);
   int ptr = 0;
+  int acc_w = weight[ptr];
   for (auto& k : tmp_keys) {
-    while (weight[ptr] < k) ++ ptr;
+    while (acc_w < k) acc_w += weight[++ptr];
     ret[ptr] ++;
   }
   return ret;
@@ -92,8 +93,7 @@ double Multinomial::likeli(const std::vector<int>& x) {
   double ret = 1;
   for (size_t i = 0; i < x.size(); ++i) {
     if (x[i] > 0) {
-      double w = (!i ? weight[0] : weight[i] - weight[i - 1]);
-      ret *= std::pow(w, x[i]);
+      ret *= std::pow(weight[i], x[i]);
     }
   }
   return ret;
@@ -113,8 +113,7 @@ double Multinomial::loglikeli(const std::vector<int>& x) {
     else {
       is_logwei_ok[i] = true;
       ret += 
-      x[i] * (log_weight[i] = 
-      std::log(i == 0 ? weight[0] : weight[i] - weight[i-1]));
+        x[i] * (log_weight[i] = std::log(weight[i]));
     }
   }
   return ret;
