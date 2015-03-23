@@ -10,33 +10,33 @@
 namespace swift {
 namespace code {
 Type::Type(std::vector<std::string> scope, std::string name,
-    std::vector<Type> typeArgs, bool refTag) :
-    scope(scope), name(name), typeArgs(typeArgs), refTag(refTag) {
+  std::vector<Type> typeArgs, bool refTag, bool ptrTag, bool constTag) :
+    scope(scope), name(name), typeArgs(typeArgs), refTag(refTag), ptrTag(ptrTag), constTag(constTag) {
 }
 
 Type::Type(std::vector<std::string> scope, std::string name, Type typeArg,
-    bool refTag) :
-    Type(scope, name, std::vector<Type>( { typeArg }), refTag) {
+  bool refTag, bool ptrTag, bool constTag) :
+    Type(scope, name, std::vector<Type>( { typeArg }), refTag, ptrTag, constTag) {
 }
 
-Type::Type(const std::string name, bool refTag) :
-    Type(std::vector<std::string>(), name, std::vector<Type>(), refTag) {
+Type::Type(const std::string name, bool refTag, bool ptrTag, bool constTag) :
+  Type(std::vector<std::string>(), name, std::vector<Type>(), refTag, ptrTag, constTag) {
 }
 
-Type::Type(std::vector<std::string> scope, std::string name, bool refTag) :
-    Type(scope, name, std::vector<Type>(), refTag) {
+Type::Type(std::vector<std::string> scope, std::string name, bool refTag, bool ptrTag, bool constTag) :
+  Type(scope, name, std::vector<Type>(), refTag, ptrTag, constTag) {
 }
 
 bool Type::hasScope() const {
   return scope.size() > 0;
 }
 
-Type::Type(std::string name, std::vector<Type> typeArgs, bool refTag) :
-    Type(std::vector<std::string>(), name, typeArgs, refTag) {
+Type::Type(std::string name, std::vector<Type> typeArgs, bool refTag, bool ptrTag, bool constTag) :
+    Type(std::vector<std::string>(), name, typeArgs, refTag, ptrTag, constTag) {
 }
 
-Type::Type(Type baseType, std::vector<Type> typeArgs, bool refTag) :
-    Type(baseType.scope, baseType.name, typeArgs, refTag) {
+Type::Type(Type baseType, std::vector<Type> typeArgs, bool refTag, bool ptrTag, bool constTag) :
+    Type(baseType.scope, baseType.name, typeArgs, refTag, ptrTag, constTag) {
 }
 
 Type::~Type() {
@@ -53,6 +53,22 @@ void Type::setRef(bool refTag) {
 
 bool Type::isRef() const {
   return refTag;
+}
+
+void Type::setPtr(bool ptrTag) {
+  this->ptrTag = ptrTag;
+}
+
+bool Type::isPtr() const {
+  return ptrTag;
+}
+
+void Type::setConst(bool consTag) {
+  this->constTag = consTag;
+}
+
+bool Type::isConst() const {
+  return constTag;
 }
 
 std::vector<Type> & Type::getTypeArgs() {

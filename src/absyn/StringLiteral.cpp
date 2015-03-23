@@ -26,5 +26,13 @@ void StringLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(StringLiteral: %s )\n", indent, "", value.c_str());
 }
 
+std::string StringLiteral::toString() {
+  return "\"" + value + "\"";
+}
+
+Expr* StringLiteral::clone() {
+  return new StringLiteral(line, col, value);
+}
+
 }
 }

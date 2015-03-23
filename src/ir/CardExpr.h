@@ -12,7 +12,7 @@ public:
 
   const Ty* getType() const;
   void setBody(std::shared_ptr<SetExpr> b);
-  const std::shared_ptr<SetExpr>& getBody() const;
+  std::shared_ptr<SetExpr> getBody() const;
   void print(FILE* file, int indent) const;
 
 private:

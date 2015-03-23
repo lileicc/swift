@@ -26,5 +26,13 @@ void TimeStampLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(TimeStampLiteral: @%d )\n", indent, "", value);
 }
 
+std::string TimeStampLiteral::toString() {
+  return "@" + std::to_string(value);
+}
+
+Expr* TimeStampLiteral::clone() {
+  return new TimeStampLiteral(line, col, value);
+}
+
 }
 }

@@ -34,12 +34,9 @@ void Categorical::init(const std::map<int, double>& ws) {
   }
   /*
    Note: In VS2013, we have to rewrite the last line with the following code
-
-   double* A = new double[weights.size()];
-   for (int i = 0; i<weights.size(); ++i)A[i] = weights[i];
-   auto lis = std::initializer_list<double>(A, A + weights.size());
-   dist = std::discrete_distribution<int>(lis);
-   delete[weights.size()] A;
+   
+  auto lis = std::initializer_list<double>(weights.data(), weights.data() + weights.size());
+  dist = std::discrete_distribution<int>(lis);
    */
   dist = std::discrete_distribution<int>(weights.begin(), weights.end());
 }
@@ -57,13 +54,10 @@ void Categorical::init(std::vector<int> val, std::vector<double> wei) {
   }
   /*
   Note: In VS2013, we have to rewrite the last line with the following code
-
-  double* A = new double[weights.size()];
-  for (int i = 0; i<weights.size(); ++i)A[i] = weights[i];
-  auto lis = std::initializer_list<double>(A, A + weights.size());
+  
+  auto lis = std::initializer_list<double>(weights.data(), weights.data() + weights.size());
   dist = std::discrete_distribution<int>(lis);
-  delete[weights.size()] A;
-  */
+   */
   dist = std::discrete_distribution<int>(weights.begin(), weights.end());
 }
 

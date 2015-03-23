@@ -8,27 +8,40 @@
 #include "absyn/BlogProgram.h"
 #include "preprocess/Preprocessor.h"
 #include "semant/Semant.h"
-#include "codegen/CPPTranslator.h"
+#include "codegen/Translator.h"
 #include "ir/BlogModel.h"
 #include "printer/CPPPrinter.h"
+#include "codegen/PFTranslator.h"
 
 extern swift::absyn::BlogProgram* parse(const char* inp);
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
     std::cout
-        << "\t[main] -i <input filename> -o <output filename> --ir <filename for printing ir>"
+        << "\t[main] [-v] -i <input filename>... -o <output filename> [-e ParticleFilter [--particle ParticleNumber]] [--ir <filename for printing ir>]"
         << std::endl;
     exit(0);
   }
-  const char* inp = "";
+  std::vector<const char*> inp;
   const char* out = "";
   const char* irfile = nullptr;
+  bool verbose = false;
+  std::string engine_type = "LWSampler";
+  int particle_N = 0;
   for (int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-i") == 0)
-      inp = argv[++i];
+    if (strcmp(argv[i], "-v") == 0)
+      verbose = true;
+    if (strcmp(argv[i], "-i") == 0) { 
+      if(i + 1 < argc && argv[i+1] && argv[i+1][0] != '-') {
+        for(++i; i < argc && argv[i] && argv[i][0] != '-'; ++ i)
+          inp.push_back(argv[i]);
+        -- i;
+      }
+    }
     if (strcmp(argv[i], "-o") == 0)
       out = argv[++i];
+    if (strcmp(argv[i], "-e") == 0)
+      engine_type = std::string(argv[++i]);
     if (strcmp(argv[i], "--ir") == 0) {
       irfile = argv[++i];
       if (i >= argc || (irfile && irfile[0] == '-')) {
@@ -36,16 +49,40 @@ int main(int argc, char** argv) {
         i--;
       }
     }
+    if (strcmp(argv[i], "--particle") == 0 && i + 1 < argc && argv[i+1]) {
+      int part;
+      if(sscanf(argv[i + 1], "%d", &part) == 1 && part > 0) {
+        particle_N = part;
+        ++ i;
+      }
+    }
   }
 
-  // parse the input file to get abstract syntax
-  swift::absyn::BlogProgram* blog_absyn = parse(inp);
-
-  if (blog_absyn == NULL) {
-    fprintf(stderr, "Error in parsing input %s!", inp);
-    // TODO print the error message!
+  swift::absyn::BlogProgram* blog_absyn = NULL;
+  if(inp.size() == 0) {
+    fprintf(stderr, "No Input File Specified!\n");
     return 1;
+  } else {
+    for(size_t i = 0; i < inp.size(); ++ i) {
+      // parse the input file to get abstract syntax
+      swift::absyn::BlogProgram* sub_absyn = parse(inp[i]);
+      if (sub_absyn == NULL) {
+        fprintf(stderr, "Error in parsing input %s!", inp[i]);
+        // TODO print the error message!
+        return 1;
+      }
+      if(blog_absyn == NULL)
+        blog_absyn = sub_absyn;
+      else {
+        blog_absyn->add(sub_absyn->getAll());
+        sub_absyn->clear();
+        delete sub_absyn;
+      }
+    }
   }
+  
+  if (verbose)
+    blog_absyn->print(stdout, 0);
   
   // preprocess of input blog program
   swift::preprocess::Preprocessor preproc;
@@ -60,10 +97,10 @@ int main(int argc, char** argv) {
   // semantic checking and translating to ir
   swift::semant::Semant sem;
   sem.process(blog_absyn);
-  swift::ir::BlogModel* model = sem.getModel();
+  std::shared_ptr<swift::ir::BlogModel> model = sem.getModel();
 
   if (!sem.Okay()) {
-    fprintf(stderr, "Error in semantic checking input %s!", inp);
+    fprintf(stderr, "Error in semantic checking!");
     // TODO print the error message!
     return 1;
   }
@@ -73,20 +110,40 @@ int main(int argc, char** argv) {
   }
 
   // translate ir to code representation
-  swift::codegen::CPPTranslator trans;
-  trans.translate(model);
-  swift::code::Code* program = trans.getResult();
-
-  // print code
-  swift::printer::Printer * prt = new swift::printer::CPPPrinter(
-      std::string(out));
-  program->print(prt);
-
-  printf("correctly translated %s!\n", inp);
+  swift::codegen::Translator* trans = nullptr;
+  if (engine_type == "LWSampler") {
+    trans = new swift::codegen::Translator();
+  } else if (engine_type == "ParticleFilter") {
+    auto PF_trans = new swift::codegen::PFTranslator();
+    if(particle_N>0)
+      PF_trans->setParticleNum(particle_N);
+    trans = PF_trans;
+  } else {
+    printf("%s engine not found", engine_type.c_str());
+  }
+  
+  if (trans != nullptr) {
+    trans->translate(model);
+    swift::code::Code* program = trans->getResult();
+    
+    // print code
+    swift::printer::Printer * prt = new swift::printer::CPPPrinter(
+                                                                   std::string(out));
+    program->print(prt);
+    
+    printf("correctly translated model file");
+    if(inp.size() == 1) 
+      printf(" <%s>!\n", inp[0]);
+    else {
+      printf("s!");
+      for(size_t i = 0; i < inp.size(); ++ i)
+        printf(" <%s>", inp[i]);
+      printf("\n");
+   }
+    delete program;
+    delete prt;
+  }
 
   delete blog_absyn;
-  delete model;
-  delete program;
-  delete prt;
   return 0;
 }

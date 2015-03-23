@@ -11,28 +11,25 @@
 namespace swift {
 namespace random {
 
-Discrete::Discrete() {
+Discrete::Discrete()
+  :is_dist_ok(false) {
 }
 
 Discrete::~Discrete() {
 }
 
-void Discrete::init(std::vector<double> wei) {
+void Discrete::init(const std::vector<double>& wei) {
   weights = wei;
-  log_weights.clear();
-  for (auto w : weights) {
-    log_weights.push_back(std::log(w));
-  }
-  /*
-   Note: In VS2013, we have to rewrite the last line with the following code
+  is_dist_ok = false;
+  is_logwei_ok.clear();
+}
 
-   double* A = new double[weights.size()];
-   for (int i = 0; i<weights.size(); ++i)A[i] = weights[i];
-   auto lis = std::initializer_list<double>(A, A + weights.size());
-   dist = std::discrete_distribution<int>(lis);
-   delete[weights.size()] A;
-   */
-  dist = std::discrete_distribution<int>(weights.begin(), weights.end());
+void Discrete::init(const arma::mat& wei) {
+  weights.resize(wei.n_elem);
+  for (size_t i = 0; i < wei.n_elem; ++ i)
+    weights[i] = wei[i];
+  is_dist_ok = false;
+  is_logwei_ok.clear();
 }
 
 template<typename _RD>
@@ -41,6 +38,16 @@ int Discrete::gen(_RD& rd) {
 }
 
 int Discrete::gen() {
+  if(!is_dist_ok) {
+    /*
+     Note: In VS2013, we have to rewrite the last line with the following code
+     
+    auto lis = std::initializer_list<double>(weights.data(), weights.data() + weights.size());
+    dist = std::discrete_distribution<int>(lis);
+     */
+    dist = std::discrete_distribution<int>(weights.begin(), weights.end());
+    is_dist_ok = true;
+  }
   return gen(engine);
 //  //custom implementation 
 //  double u = (double)rand() / RAND_MAX;
@@ -61,9 +68,17 @@ double Discrete::likeli(const int& x) {
 
 double Discrete::loglikeli(const int& x) {
   // todo: check -infinity!!!
-  if (x >= 0 && x < weights.size())
+  if (x >= 0 && x < weights.size()) {
+    if(is_logwei_ok.size() == 0) {
+      is_logwei_ok.resize(weights.size());
+      log_weights.resize(weights.size());
+    }
+    if(!is_logwei_ok[x]) {
+      log_weights[x] = std::log(weights[x]);
+      is_logwei_ok[x]=true;
+    }
     return log_weights[x];
-  else
+  } else
     return - INFINITY;
 }
 

@@ -17,7 +17,7 @@ class Expr: public Clause {
 public:
   Expr();
   virtual ~Expr();
-  void addArg(std::shared_ptr<Expr> expr);
+  virtual void addArg(std::shared_ptr<Expr> expr);
   void setArgs(std::vector<std::shared_ptr<Expr> > a);
   const std::vector<std::shared_ptr<Expr> >& getArgs() const;
   std::shared_ptr<Expr> get(size_t k) const;

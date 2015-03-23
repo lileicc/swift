@@ -43,5 +43,18 @@ void CondSet::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string CondSet::toString() {
+  std::string ret = "{ " + var.toString();
+  if (getCond() != NULL)
+    ret += " : " + getCond()->toString();
+  return ret + " }";
+}
+
+Expr* CondSet::clone() {
+  CondSet* ret = new CondSet(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

@@ -62,7 +62,7 @@ BlogProgram* parse(const char* inp) {
   FILE *myfile = fopen(inp, "r");
   // make sure it is valid:
   if (!myfile) {
-    cout << "I can't open input.in" << endl;
+    cout << "I can't open " << inp << endl;
     exit(0);
     //return -1;
   }
@@ -151,16 +151,16 @@ BlogProgram* parse(const char* inp) {
 %token COMMA SEMI COLON DOT NUMSIGN RIGHTARROW
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
 
-%type <stmt> statement, declaration_stmt, type_decl, distribution_decl, parameter_decl,
-  evidence_stmt, query_stmt;
+%type <stmt> statement declaration_stmt type_decl distribution_decl parameter_decl
+  evidence_stmt query_stmt;
 %type <numstdec> number_stmt;
 %type <origdec> origin_func_decl;
-%type <funcdec> fixed_func_decl, rand_func_decl;
+%type <funcdec> fixed_func_decl rand_func_decl;
 %type <distdec> distinct_decl;
-%type <stmt> evidence, value_evidence;
-%type <exp> expression, literal, operation_expr, unary_operation_expr,
-  quantified_formula, function_call, list_construct_expression,
-  if_expr, case_expr;
+%type <stmt> evidence value_evidence;
+%type <exp> expression literal operation_expr unary_operation_expr
+  quantified_formula function_call list_expr
+  if_expr case_expr;
 %type <compexp> comprehension_expr;
 %type <cardexp> number_expr;
 %type <mapexp> map_construct_expression;
@@ -168,20 +168,21 @@ BlogProgram* parse(const char* inp) {
 %type <setexp> set_expr;
 %type <setexp> explicit_set;
 %type <setexp> tuple_set;
-%type <explst> semi_colon_separated_expression_list,
-  opt_expression_list, expression_list;
+%type <explst> semi_colon_separated_expression_list
+  opt_expression_list expression_list;
 %type <exptuplst> expression_pair_list;
-%type <typ> type, array_type, list_type, map_type, name_type, array_type_or_sub;
+%type <typ> type, array_type;
 //%type <ast> opt_parenthesized_type_lst, type_lst // Not Used
 %type <varlist> type_var_lst;
 %type <varlist> opt_parenthesized_type_var_lst;
-%type <varlst> opt_parenthesized_origin_var_list,
+%type <varlst> opt_parenthesized_origin_var_list
   origin_var_list;
 %type <symbintpair> id_or_subid;
 %type <symbintvect> id_or_subid_list;
 %type <vardec> var_decl;
-%type <sval> refer_name;
+%type <sval> refer_name, array_type_or_sub;
 
+%left THEN EXISTS_ FORALL_
 %nonassoc EQ_ DISTRIB
 %left SEMI
 %left ELSE
@@ -191,8 +192,8 @@ BlogProgram* parse(const char* inp) {
 %left PLUS_ MINUS_
 %left MULT_ DIV_ MOD_ POWER_
 %left UMINUS
-%left NOT_, AT_
-%left LBRACKET;
+%left NOT_ AT_
+%left LBRACKET
 
 %%
 program:
@@ -253,34 +254,18 @@ type_decl:
 
 type:
     refer_name { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
-  | list_type { $$ = $1; }
-  | map_type { $$ = $1; }
-  | array_type {$$ = $1;}
+  | array_type { $$ = $1; }
   ;
 
-name_type:
-  ID { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue())); }
-  ;
+array_type_or_sub : refer_name LBRACKET
+    { $$ = $1; }
+;
 
-list_type:
-  LIST LT_ ID GT_
-  { $$ = new Ty(curr_line, curr_col, Symbol($3->getValue())); }
-  ;
-
-array_type_or_sub:
-  refer_name LBRACKET {}
-
-//TODO: Not sure what type this should be
-array_type:
-  array_type_or_sub RBRACKET
-  {}
+array_type : array_type_or_sub RBRACKET
+    { $$ = new Ty(curr_line, curr_col, Symbol($1->getValue()), 1); }
   | array_type LBRACKET RBRACKET
-  {}
-  ;
-
-//TODO: Not sure what type this should be
-map_type:
-  MAP LT_ type COMMA type GT_ { $$ = $3; }
+    { $1->setDim($1->getDim() + 1);
+      $$ = $1; }
   ;
 
 opt_parenthesized_type_var_lst:
@@ -527,7 +512,7 @@ expression:
     operation_expr {$$ = $1;}
   | literal {$$ = $1;}
   | function_call {$$ = $1;}
-  | list_construct_expression {$$ = $1;}
+  | list_expr {$$ = $1;}
   | map_construct_expression {$$ = $1;}
   | quantified_formula { $$ = $1; }
   | set_expr { $$ = $1; }
@@ -591,7 +576,7 @@ operation_expr:
   
 unary_operation_expr:
     MINUS_ expression
-    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::SUB, new IntLiteral(curr_line, curr_col, 0), $2); } %prec UMINUS
+    {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::MINUS, nullptr, $2); } %prec UMINUS
   | NOT_ expression
     {$$ = new OpExpr(curr_line, curr_col, AbsynConstant::NOT, NULL, $2); } 
   | AT_ expression
@@ -600,9 +585,9 @@ unary_operation_expr:
   ;
   
 quantified_formula:
-    FORALL_ type ID expression
+    FORALL_ type ID expression %prec FORALL_
     {$$ = new QuantExpr(curr_line, curr_col, AbsynConstant::FORALL, *(new VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue()))), $4); }
-  | EXISTS_ type ID expression
+  | EXISTS_ type ID expression %prec EXISTS_
     {$$ = new QuantExpr(curr_line, curr_col, AbsynConstant::EXISTS, *(new VarDecl(curr_line, curr_col, *$2, Symbol($3->getValue()))), $4); }
   ;
   
@@ -667,10 +652,14 @@ expression_list:
     }
   ;
   
-//TODO: ExprList  
-list_construct_expression:
-    LBRACKET opt_expression_list RBRACKET { }
-  | LBRACKET semi_colon_separated_expression_list RBRACKET { }
+list_expr:
+    LBRACKET opt_expression_list RBRACKET
+    { $$ = new ArrayExpr(curr_line, curr_col);
+      for (size_t i = 0; i < $2->size(); i++ ) {
+         $$->add((*$2)[i]);
+      }
+    }
+| LBRACKET semi_colon_separated_expression_list RBRACKET { yyerror("semi colon separated list init expression not supported yet"); }
   ;
   
 //TODO: ExprList  

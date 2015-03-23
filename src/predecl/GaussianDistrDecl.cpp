@@ -29,6 +29,7 @@ std::shared_ptr<ir::Expr> GaussianDistrDecl::getNew(
   ret->setArgs(args);
   ret->setTyp(fact->getTy(ir::IRConstString::DOUBLE));
   ret->processArgRandomness();
+  ret->setRandom(true);
   return ret;
 }
 

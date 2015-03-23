@@ -35,6 +35,8 @@ std::string Ty::toString() const {
   case IRConstant::TIMESTEP:
     // TODO: To specify the type for timestamp in C++ code
     return IRConstString::TIMESTEP;
+  case IRConstant::MATRIX:
+    return IRConstString::MATRIX;
   default:
     return IRConstString::NA;
   }

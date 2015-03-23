@@ -16,8 +16,8 @@ int IntLiteral::getValue() const {
   return value;
 }
 
-void IntLiteral::print(FILE* file, int indent){
-  fprintf(file, "%*sIntLiteral: %d", indent, "", value);
+void IntLiteral::print(FILE* file, int indent) const {
+  fprintf(file, "%*sIntLiteral: %d\n", indent, "", value);
 }
 
 }

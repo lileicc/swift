@@ -20,10 +20,18 @@ std::string CPPPrinter::OpConvert(code::OpKind op) {
     return "~"; // complement
   case OpKind::UO_NEG:
     return "!"; // negate
+  case OpKind::UO_PLUS:
+    return "+"; // unary plus
+  case OpKind::UO_MINUS:
+    return "-"; // unary minus
   case OpKind::UO_INC:
     return "++"; // increment
   case OpKind::UO_DEC:
     return "--"; // decrement
+  case OpKind::UO_ADDR:
+    return "&"; // address of
+  case OpKind::UO_DEREF:
+    return "*"; // deference of
   case OpKind::UO_NEW:
     return "new "; // new or malloc
   case OpKind::UO_DEL:
@@ -113,6 +121,10 @@ std::pair<int, int> CPPPrinter::OpPrec(code::Expr* expr) {
       return std::make_pair<int, int>(1,0);
   case OpKind::UO_CMPT:
   case OpKind::UO_NEG:
+  case OpKind::UO_PLUS:
+  case OpKind::UO_MINUS:
+  case OpKind::UO_ADDR:
+  case OpKind::UO_DEREF:
     return std::make_pair<int, int>(2,1);
   case OpKind::UO_NEW:
   case OpKind::UO_DEL:
@@ -218,14 +230,15 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include <utility>\n");
   fprintf(file, "#include \"random/Bernoulli.h\"\n");
   fprintf(file, "#include \"random/Beta.h\"\n");
+  fprintf(file, "#include \"random/Binomial.h\"\n");
   fprintf(file, "#include \"random/BooleanDistrib.h\"\n");
   fprintf(file, "#include \"random/Categorical.h\"\n");
-  fprintf(file, "#include \"random/Dirichlet.h\"\n");
-  fprintf(file, "#include \"random/Discrete.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
+  fprintf(file, "#include \"random/Geometric.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
+  fprintf(file, "#include \"random/UniformReal.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
   fprintf(file, "#include \"util/util.h\"\n");
   fprintf(file, "#include \"util/DynamicTable.h\"\n");
@@ -239,6 +252,23 @@ void CPPPrinter::print(code::Code* prog) {
     s->print(this);
   printLine();
 
+  // Check for Special Printing Option 
+  for (auto s : prog->getAllOptions())
+    if (s == "matrix") {
+      // Support Matrix
+      fprintf(file, "\n// Matrix Library included\n");
+      fprintf(file, "#include \"armadillo\"\n");
+      fprintf(file, "#include \"random/Dirichlet.h\"\n");
+      fprintf(file, "#include \"random/Discrete.h\"\n");
+      fprintf(file, "#include \"random/MultivarGaussian.h\"\n");
+      fprintf(file, "#include \"random/Multinomial.h\"\n");
+      fprintf(file, "#include \"random/UniformVector.h\"\n");
+      fprintf(file, "#include \"util/Hist_matrix.h\"\n");
+      fprintf(file, "#include \"util/util_matrix.h\"\n");
+      fprintf(file, "using namespace arma;\n\n");
+    }
+
+  //fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
   fprintf(file, "using namespace std;\n");
   fprintf(file, "using namespace swift::random;\n");
 
@@ -375,6 +405,36 @@ void CPPPrinter::print(code::CallExpr* term) {
   printLine();
 }
 
+void CPPPrinter::print(code::TemplateExpr* term) {
+  printIndent();
+  bool backup = newline;
+  newline = false;
+
+  // Note: () operatorƒf
+  auto f_prec = OpPrec(term->getVar());
+  if (f_prec.first > 1)
+    fprintf(file, "(");
+  term->getVar()->print(this);
+  if (f_prec.first > 1)
+    fprintf(file, ")");
+
+  bool not_first = false;
+  fprintf(file, "<");
+  for (auto p : term->getArgs()) {
+    if (not_first)
+      fprintf(file, ",");
+    else 
+      not_first = true;
+    p->print(this);
+  }
+  fprintf(file, ">");
+
+  newline = backup;
+  if (backup)
+    fprintf(file, ";");
+  printLine();
+}
+
 void CPPPrinter::print(code::CaseStmt* term) {
   decIndent();
   printIndent();
@@ -468,8 +528,12 @@ void CPPPrinter::print(code::FieldDecl* term) {
 void CPPPrinter::print(code::FloatingLiteral* term) {
   printIndent();
   // Special Case!
-  //   Here we keep 7 digits after decimal point
-  fprintf(file, "%.7lf", term->getVal());
+  //   Generally Here we keep 8 digits after decimal point
+  if (term->getVal() < 1e-6) 
+    fprintf(file, "%s", std::to_string(term->getVal()).c_str());
+  else {
+    fprintf(file, "%.8lf", term->getVal());
+  }
   if (newline)
     fprintf(file, ";");
   printLine();
@@ -704,6 +768,8 @@ void CPPPrinter::print(code::SwitchStmt* term) {
 void CPPPrinter::print(code::Type* term) {
   // assume newline == false;
   assert(newline == false);
+  if (term->isConst())
+    fprintf(file, "const ");
   if (term->hasScope()) {
     for (auto & nm : term->getScope()) {
       fprintf(file, "%s::", nm.c_str());
@@ -722,6 +788,8 @@ void CPPPrinter::print(code::Type* term) {
   }
   if (term->isRef())
     fprintf(file, "&");
+  if (term->isPtr())
+    fprintf(file, "*");
 }
 
 void CPPPrinter::print(code::VarDecl* term) {
@@ -734,6 +802,15 @@ void CPPPrinter::print(code::VarDecl* term) {
 
   term->getType().print(this);
   fprintf(file, " %s", term->getId().c_str());
+
+  if (term->getArrArgs().size() > 0) {
+    for (auto p : term->getArrArgs()) {
+      fprintf(file, "[");
+      p->print(this);
+      fprintf(file, "]");
+    }
+  }
+
   if (term->getValue() != NULL) {
     fprintf(file, " = ");
     term->getValue()->print(this);

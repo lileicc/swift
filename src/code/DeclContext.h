@@ -23,6 +23,7 @@ public:
   DeclContext();
   virtual ~DeclContext();
   virtual void addDecl(Decl* decl);
+  virtual void addDeclFront(Decl* decl);
 //  virtual Decl* getMem(int k);
   virtual std::vector<Decl*>& getAllDecls();
   virtual void print(printer::Printer* prt) = 0;

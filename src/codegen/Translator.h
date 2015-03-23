@@ -1,5 +1,5 @@
 /*
- * CPPTranslator.h
+ * Translator.h
  *
  *  Created on: Nov 23, 2013
  *      Author: leili
@@ -7,6 +7,9 @@
 
 #pragma once
 #include <string>
+#include <memory>
+#include <vector>
+#include <set>
 #include "../ir/IRHeader.h"
 #include "../code/Code.h"
 #include "../util/Configuration.h"
@@ -22,15 +25,19 @@ typedef code::Type TYPE;
 typedef code::FieldDecl* ORIGINDEFN;
 typedef code::Expr* EXPR;
 typedef code::Stmt* STMT;
+typedef code::FunctionDecl* SAMPLEFUN;
+typedef code::ClassDecl* STATE; // state (partial possible world)
+typedef code::VarDecl* SITE; // storage site declaration
 
-class CPPTranslator {
+class Translator {
 public:
-  CPPTranslator();
-  virtual ~CPPTranslator();
-  void translate(swift::ir::BlogModel* model);
+  Translator();
+  virtual ~Translator();
+  virtual void translate(std::shared_ptr<ir::BlogModel> model);
   code::Code* getResult();
 
 protected:
+  std::shared_ptr<ir::BlogModel> model;
 
   /**
    * declare a named type
@@ -55,10 +62,18 @@ protected:
   
   inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
 
-private:
+  /**
+   * create FunctionDecl and setup argument for sampling algorithm
+   * the function should take one argument (number of samples)
+   * @return
+   */
+  inline SAMPLEFUN DECLARE_SAMPLEFUN();
+  
+  inline SITE DECLARE_STORE_SITE();
+
   code::Code* prog; // holder for result target code
   bool useTag;
-  code::ClassDecl* coreCls; // main Class for the sampler;
+  STATE coreCls; // main Class for the sampler;
   code::NamespaceDecl* coreNs; // main namespace
   code::FunctionDecl* coreClsConstructor; // construction function for main class
   code::FunctionDecl* coreClsInit; // init function for main class
@@ -70,9 +85,23 @@ private:
 
   code::FunctionDecl* mainFun; //main function
   code::FunctionDecl* coreClsPrint; // print function for answers
-  code::FunctionDecl* transSampleAlg();
+
+  /**
+   * translate the sampling algorithm
+   * @return
+   */
+  virtual code::FunctionDecl* transSampleAlg();
 
   void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
+
+  /**
+   * Given a fixed function, check whether it is corresponding to a constant value
+   * If so, add to constValTable
+   *   i.e. fixed Real x = 1.0;
+   *         x here is a constant value rather than a function
+   */
+  void checkConstValue(std::shared_ptr<ir::FuncDefn> fd);
+
   /**
    * translate blog function
    */
@@ -82,7 +111,7 @@ private:
    * create declaration of variables/fields
    * initialization statements
    */
-  void createInit();
+  virtual void createInit();
 
   /**
    * create main function
@@ -104,7 +133,16 @@ private:
    * and calculate the likelihood (need to call the likelifun)
    */
   code::FunctionDecl* transSetterFun(std::shared_ptr<ir::FuncDefn> fd);
-
+  /**
+  * translate the blog function body to a fixed function
+  */
+  code::FunctionDecl* transFixedFun(std::shared_ptr<ir::FuncDefn> fd);
+  /**
+  * Check whether this fixed function needs memorization
+  * @Param fd: fixed function with at least one argument
+  * @Param dims: the dimensions of the pre-allocated memory required for memozation 
+  */
+  bool checkFixedFunNeedMemo(std::shared_ptr<ir::FuncDefn> fd, std::vector<int>& dims);
   /**
    * translate a clause in ir to a statement in code,
    * retvar is for return variable
@@ -116,7 +154,10 @@ private:
    * translate a Branch in ir to a statement in code,
    * retvar is for return variable
    * if valuevar is nonempty, then it will calculate weight instead of sampling
+   *   >> Special Note: different translation for *Multi-Case Expr*
    */
+  code::Stmt* transMultiCaseBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
+    std::string valuevar = std::string());
   code::Stmt* transBranch(std::shared_ptr<ir::Branch> br, std::string retvar,
       std::string valuevar = std::string());
   /**
@@ -146,6 +187,11 @@ private:
    */
   code::Expr* transArrayExpr(std::shared_ptr<ir::ArrayExpr> opr,
     std::vector<code::Expr*> args);
+
+  /**
+  * translate the matrix construction expression
+  */
+  code::Expr* transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat);
 
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
@@ -180,7 +226,7 @@ private:
    *  @param evid    ir evidence declaration
    */
   void transEvidence(code::FunctionDecl* context,
-      std::shared_ptr<ir::Evidence> evid);
+      std::shared_ptr<ir::Evidence> evid, bool transFuncApp = true);
 
   /**
    * translate all evidences
@@ -200,7 +246,7 @@ private:
    * create reference to blog function value
    */
   void addFunValueRefStmt(code::FunctionDecl* fun, std::string valuevarname,
-      std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
+      const std::vector<code::ParamVarDecl*>& valueindex, std::string valuerefname,
       code::Type varType = INT_REF_TYPE);
 
   /**
@@ -243,24 +289,39 @@ private:
       code::DeclContext* context,
       const std::vector<std::shared_ptr<ir::VarDecl> > & vars);
 
-  static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false); // map ir type to code type
+  static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false, bool isPtr = false); // map ir type to code type
+  static bool isObjectType(const ir::Ty *ty);
 
   static const code::Type INT_TYPE;
   static const code::Type INT_VECTOR_TYPE;
   static const code::Type INT_REF_TYPE;
+  static const code::Type INT_CONST_TYPE; // this is to define global constant values
 
   static const code::Type DOUBLE_TYPE;
+  static const code::Type DOUBLE_REF_TYPE;
   static const code::Type DOUBLE_VECTOR_TYPE;
 
   static const code::Type STRING_TYPE;
 
+  static const code::Type CHAR_TYPE;
+
   static const code::Type TIMESTEP_TYPE;
 
   static const code::Type BOOL_TYPE;
+  static const code::Type BOOL_REF_TYPE;
 
   static const code::Type VOID_TYPE;
 
+  static const code::Type MATRIX_TYPE;
+  static const code::Type MATRIX_REF_TYPE;
+  static const code::Type MATRIX_CONST_TYPE;
+  static const code::Type MATRIX_ROW_VECTOR_TYPE;
+  static const code::Type MATRIX_COL_VECTOR_TYPE;
+  static const code::Type MATRIX_CONTAINER_TYPE;
+
   static const code::Type ARRAY_BASE_TYPE;
+
+  static const code::Type ARRAY_STRING_CONST_TYPE;
 
   static const code::Type MAP_BASE_TYPE;
 
@@ -354,10 +415,16 @@ private:
   // function name for generating a full set: _gen_full() in util.h
   static const std::string GEN_FULL_SET_NAME;
 
+  // function name for internal apply: _apply() in util.h
+  static const std::string APPLY_FUNC_NAME;
+
+  // function name for internal aggregator: _set_aggregate() in util.h
+  static const std::string AGGREGATE_FUNC_NAME;
+
   // function name for internal filter: _filer() in util.h
   static const std::string FILTER_FUNC_NAME;
 
-  // function name for internal filter with range input: _filer() in util.h
+  // function name for internal filter with range input: _filer_range() in util.h
   static const std::string FILTER_RANGE_FUNC_NAME;
 
   // function name for internal filter counter: _count() in util.h
@@ -377,6 +444,9 @@ private:
 
   // function name for internal exists operator with range input: std::any_of() in <algorithm>
   static const std::string EXISTS_RANGE_NAME;
+
+  // Builtin Functions for Matrix Initialization
+  static const std::string TO_MATRIX_FUN_NAME;
 
   /**
    * method name for vector.resize()
@@ -466,9 +536,99 @@ private:
    */
   static const code::Type RANDOM_ENGINE_TYPE;
 
+  /**
+   * Name of the Map in Multi-Case Expr
+   */
+  static const std::string MULTI_CASE_MAP_NAME;
+
   static bool COMPUTE_LIKELIHOOD_IN_LOG;
 
+  static const double ZERO_EPS;
+
   static swift::Configuration* config;
+
+  std::set<std::string> constValTable;
+
+  /**
+* give the name of the type,
+* return the variable name corresponding to the number of objects for this type
+*/
+std::string getVarOfNumType(std::string name) {
+  return "__num_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to get the number of objects for this type
+*/
+std::string getGetterFunName(std::string name) {
+  return "__get_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to get the likelihood of objects for this type
+*/
+std::string getLikeliFunName(std::string name) {
+  return "__likeli_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to set the value
+*/
+std::string getSetterFunName(std::string name) {
+  return "__set_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the function name to set the value
+*/
+std::string getEnsureFunName(std::string name) {
+  return "__ensure_" + name;
+}
+
+/**
+* given the name of a fixed function
+* return the function name  assigned in the translated program
+*/
+std::string getFixedFunName(std::string name) {
+  return "__fixed_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the variable name to get the number of samples for the current variable
+*/
+std::string getMarkVarName(std::string name) {
+  return "__mark_" + name;
+}
+
+/**
+* given the name of a variable (can be number var, or random function)
+* return the variable name to get the value of that var/fun
+*/
+std::string getValueVarName(std::string name) {
+  return "__value_" + name;
+}
+
+/**
+* given the type name,
+* return the variable name to store all the instances in that type
+*/
+std::string getInstanceArrayName(std::string name) {
+  return "__instance_" + name;
+}
+
+/**
+* given the type name,
+* return the variable name to store all the strings referring to the names of the distinct objects
+*/
+std::string getInstanceStringArrayName(std::string name) {
+  return "__vecstr_instance_" + name;
+}
+
 };
 
 } /* namespace codegen */

@@ -53,7 +53,15 @@ const std::vector<std::shared_ptr<Evidence>>& BlogModel::getEvidences() {
 }
 
 BlogModel::BlogModel(const std::string name) :
-    name(name), markov_order(-1), time_limit(0) {
+    name(name), markov_order(-1), time_limit(0), useMatrix(false) {
+}
+
+void BlogModel::setUseMatrix(bool flag) {
+  useMatrix = flag;
+}
+
+bool BlogModel::isUseMatrix() {
+  return useMatrix;
 }
 
 const std::vector<std::shared_ptr<TypeDomain>>& BlogModel::getTypes() {
@@ -70,17 +78,24 @@ void BlogModel::setMarkovOrder(int k) {
   markov_order = k;
 }
 
+void BlogModel::updateMarkovOrder(int k) {
+  if (k > markov_order)
+    markov_order = k;
+}
+
 int BlogModel::getMarkovOrder() const {
   return markov_order;
 }
 
 // Note: when markov order = 0, the model contains time series but states only depend on states for the current timestep
-bool BlogModel::isTemporal() {
+bool BlogModel::isTemporal() const {
   return markov_order >= 0;
 }
 
 void BlogModel::setTempLimit(unsigned k) {
   time_limit = k;
+  if (k > 0 && markov_order < 0)
+    markov_order = 0;
 }
 
 unsigned BlogModel::getTempLimit() const {
@@ -111,6 +126,9 @@ void BlogModel::print(const char* filename) const {
   if (filename && filename[0] != '\0')
     irf = fopen(filename, "w");
   this->print(irf);
+  if (isTemporal()) {
+    fprintf(irf, ">> Model is Temporal!!\n   --> Markov Order = %d\n    --> Time Limit = %d\n", markov_order, time_limit);
+  }
   if (irf != stdout)
     fclose(irf);
 }

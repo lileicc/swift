@@ -42,6 +42,7 @@ class SpecialMacro;
 class Stmt;
 class StringLiteral;
 class SwitchStmt;
+class TemplateExpr;
 class Type;
 class VarDecl;
 class Identifier;

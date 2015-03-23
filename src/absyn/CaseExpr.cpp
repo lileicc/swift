@@ -41,5 +41,19 @@ void CaseExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string CaseExpr::toString() {
+  std::string ret = "case ";
+  if (getTest() != NULL) ret += getTest()->toString();
+  ret += " in ";
+  if (getMap() != NULL) ret += getMap()->toString();
+  return ret;
+}
+
+Expr* CaseExpr::clone() {
+  CaseExpr* ret = new CaseExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

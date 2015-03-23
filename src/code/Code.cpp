@@ -31,6 +31,14 @@ std::vector<SpecialMacro*>& swift::code::Code::getAllMacros() {
   return macros;
 }
 
+void Code::addOption(std::string op) {
+  options.push_back(op);
+}
+
+const std::vector<std::string>& Code::getAllOptions() {
+  return options;
+}
+
 } /* namespace code */
 } /* namespace swift */
 

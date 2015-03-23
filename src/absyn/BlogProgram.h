@@ -17,6 +17,7 @@
 #include "ArrayExpr.h"
 #include "BoolLiteral.h"
 #include "CardinalityExpr.h"
+#include "CaseExpr.h"
 #include "CondSet.h"
 #include "Decl.h"
 #include "DistinctDecl.h"
@@ -42,6 +43,7 @@
 #include "StringLiteral.h"
 #include "Symbol.h"
 #include "TimeStampLiteral.h"
+#include "TupleSetExpr.h"
 #include "Ty.h"
 #include "TypDecl.h"
 #include "VarDecl.h"
@@ -58,9 +60,11 @@ public:
 
   size_t size();
   void add(Stmt* decl);
+  void add(const std::vector<Stmt*>& stmts);
   Stmt* get(int k);
   const std::vector<Stmt*>& getAll();
   std::vector<Stmt*>& getAllRef();
+  void clear();
 
   // For Debugging Use
   void print(FILE* file, int indent);

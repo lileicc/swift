@@ -32,9 +32,14 @@ public:
   // For Temporal Features
   int getMarkovOrder() const;
   void setMarkovOrder(int k = -1);
-  bool isTemporal();
+  void updateMarkovOrder(int k);
+  bool isTemporal() const;
   unsigned getTempLimit() const ;
   void setTempLimit(unsigned k);
+
+  // for Matrix Usage
+  bool isUseMatrix();
+  void setUseMatrix(bool flag);
 
 private:
   std::vector<std::shared_ptr<FuncDefn>> fixFunc;
@@ -47,6 +52,9 @@ private:
   // Temporal Features
   int markov_order;
   unsigned time_limit;
+
+  // Matrix Feature
+  bool useMatrix;
 };
 
 }

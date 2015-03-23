@@ -26,5 +26,13 @@ void DoubleLiteral::print(FILE* file, int indent) {
   fprintf(file, "%*s(DoubleLiteral: %f )\n", indent, "", value);
 }
 
+std::string DoubleLiteral::toString() {
+  return std::to_string(value);
+}
+
+Expr* DoubleLiteral::clone() {
+  return new DoubleLiteral(line, col, value);
+}
+
 }
 }

@@ -26,5 +26,17 @@ void CardinalityExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string CardinalityExpr::toString() {
+  std::string ret = "#";
+  if (args[0] != NULL) ret += args[0]->toString();
+  return ret;
+}
+
+Expr* CardinalityExpr::clone() {
+  CardinalityExpr* ret = new CardinalityExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }

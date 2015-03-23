@@ -38,12 +38,31 @@ void MapExpr::addMap(Expr* from, Expr* to) {
 void MapExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s(MapExpr:\n", indent, "");
   for (size_t i = 0; i < mapSize(); i++) {
-    fprintf(file, "%*s:from#%zu\n", indent + 2, "", i);
+    fprintf(file, "%*s:from#%u\n", indent + 2, "", (unsigned)i);
     getFrom(i)->print(file, indent + 4);
-    fprintf(file, "%*s:to#%zu\n", indent + 2, "", i);
+    fprintf(file, "%*s:to#%u\n", indent + 2, "", (unsigned)i);
     getTo(i)->print(file, indent + 4);
   }
   fprintf(file, "%*s)\n", indent, "");
+}
+
+std::string MapExpr::toString() {
+  std::string ret = "{";
+  for (size_t i = 0; i < mapSize(); ++i) {
+    if (i > 0) ret += ", ";
+    if (getFrom(i) != NULL)
+      ret += getFrom(i)->toString();
+    ret += " -> ";
+    if (getTo(i) != NULL)
+      ret += getTo(i)->toString();
+  }
+  return ret + "}";
+}
+
+Expr* MapExpr::clone() {
+  MapExpr* ret = new MapExpr(*this);
+  ret->cloneArgs();
+  return ret;
 }
 
 }

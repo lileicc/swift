@@ -26,5 +26,13 @@ void VarRef::print(FILE* file, int indent) {
   fprintf(file, "%*s(VarRef: %s )\n", indent, "", var.getValue().c_str());
 }
 
+std::string VarRef::toString() {
+  return var.getValue();
+}
+
+Expr* VarRef::clone() {
+  return new VarRef(line, col, var);
+}
+
 }
 }

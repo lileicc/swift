@@ -15,6 +15,7 @@ const ir::Ty TypeFactory::BOOL_TY = ir::Ty(ir::IRConstant::BOOL);
 const ir::Ty TypeFactory::DOUBLE_TY = ir::Ty(ir::IRConstant::DOUBLE);
 const ir::Ty TypeFactory::STRING_TY = ir::Ty(ir::IRConstant::STRING);
 const ir::Ty TypeFactory::TIMESTEP_TY = ir::Ty(ir::IRConstant::TIMESTEP);
+const ir::Ty TypeFactory::MATRIX_TY = ir::Ty(ir::IRConstant::MATRIX);
 const ir::Ty TypeFactory::NA_TY = ir::Ty(ir::IRConstant::NA);
 
 TypeFactory::TypeFactory() {
@@ -29,6 +30,8 @@ TypeFactory::TypeFactory() {
       &STRING_TY;
   tyTable[ir::IRConstString::TIMESTEP] = tyTable[ir::IRConstString::BLOG_TIMESTEP] =
     &TIMESTEP_TY;
+  tyTable[ir::IRConstString::MATRIX] = tyTable[ir::IRConstString::BLOG_MATRIX] =
+    &MATRIX_TY;
   tyTable[ir::IRConstString::NA] = &NA_TY;
 }
 
@@ -45,6 +48,8 @@ TypeFactory::~TypeFactory() {
   tyTable.erase(ir::IRConstString::STRING);
   tyTable.erase(ir::IRConstString::BLOG_TIMESTEP);
   tyTable.erase(ir::IRConstString::TIMESTEP);
+  tyTable.erase(ir::IRConstString::BLOG_MATRIX);
+  tyTable.erase(ir::IRConstString::MATRIX);
   tyTable.erase(ir::IRConstString::NA);
   // IMPORTANT:
   //   tyTable should NOT be deleted!

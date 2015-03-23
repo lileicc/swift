@@ -46,5 +46,42 @@ void OpExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string OpExpr::toString() {
+  std::string opr = "?";
+  switch (op) {
+  case AbsynConstant::PLUS: opr = "+"; break;
+  case AbsynConstant::MINUS: opr = "-"; break;
+  case AbsynConstant::MUL: opr = "*"; break;
+  case AbsynConstant::DIV: opr = "/"; break;
+  case AbsynConstant::POWER: opr = "^"; break;
+  case AbsynConstant::MOD: opr = "%"; break;
+  case AbsynConstant::EQ: opr = "="; break;
+  case AbsynConstant::NEQ: opr = "!="; break;
+  case AbsynConstant::LT: opr = "<"; break;
+  case AbsynConstant::GT: opr = ">"; break;
+  case AbsynConstant::LE: opr = "<="; break;
+  case AbsynConstant::GE: opr = ">="; break;
+  case AbsynConstant::AND: opr = "&"; break;
+  case AbsynConstant::OR: opr = "|"; break;
+  case AbsynConstant::NOT: opr = "!"; break;
+  case AbsynConstant::IMPLY: opr = "->"; break;
+  case AbsynConstant::SUB: opr = "["; break;
+  case AbsynConstant::AT: opr = "@"; break;
+  default: opr = "?"; break;
+  }
+  std::string ret;
+  if (getLeft() != NULL) ret += getLeft()->toString();
+  ret += opr;
+  if (getRight() != NULL) ret += getRight()->toString();
+  if (opr == "[") ret += "]";
+  return ret;
+}
+
+Expr* OpExpr::clone() {
+  OpExpr* ret = new OpExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 } /* namespace swift */

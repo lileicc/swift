@@ -42,5 +42,19 @@ void QuantExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s)\n", indent, "");
 }
 
+std::string QuantExpr::toString() {
+  std::string ret = (typ == AbsynConstant::FORALL ? "forall " : "exists ") + var.toString();
+  if (args[0] != NULL) {
+    ret += ": " + args[0]->toString();
+  }
+  return ret;
+}
+
+Expr* QuantExpr::clone() {
+  QuantExpr* ret = new QuantExpr(*this);
+  ret->cloneArgs();
+  return ret;
+}
+
 }
 }
