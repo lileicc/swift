@@ -12,6 +12,7 @@
 #include "ir/BlogModel.h"
 #include "printer/CPPPrinter.h"
 #include "codegen/PFTranslator.h"
+#include "codegen/MHTranslator.h"
 
 extern swift::absyn::BlogProgram* parse(const char* inp);
 int main(int argc, char** argv) {
@@ -27,7 +28,7 @@ int main(int argc, char** argv) {
   const char* irfile = nullptr;
   bool verbose = false;
   std::string engine_type = "LWSampler";
-  int particle_N = 0;
+  int particle_N = 0, iter_N = 0;
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-v") == 0)
       verbose = true;
@@ -53,6 +54,13 @@ int main(int argc, char** argv) {
       int part;
       if(sscanf(argv[i + 1], "%d", &part) == 1 && part > 0) {
         particle_N = part;
+        ++ i;
+      }
+    }
+    if (strcmp(argv[i], "-n") == 0 && i + 1 < argc && argv[i+1]) {
+      int iter;
+      if(sscanf(argv[i + 1], "%d", &iter) == 1 && iter > 0) {
+        iter_N = iter;
         ++ i;
       }
     }
@@ -118,6 +126,11 @@ int main(int argc, char** argv) {
     if(particle_N>0)
       PF_trans->setParticleNum(particle_N);
     trans = PF_trans;
+  } if (engine_type == "MHSampler") {
+    auto MH_trans = new swift::codegen::MHTranslator();
+    if(iter_N>0)
+      MH_trans->setIterationNum(iter_N);
+    trans = MH_trans;
   } else {
     printf("%s engine not found", engine_type.c_str());
   }
