@@ -459,7 +459,20 @@ void CPPPrinter::print(code::ClassDecl* term) {
   } else
   if (isheader) { // print everything except body of FunctionDecl
     printIndent();
-    fprintf(file, "class %s {", term->getName().c_str());
+    fprintf(file, "class %s", term->getName().c_str());
+    // inheritance
+    if (term->getInherit().size() > 0) {
+      auto& h = term->getInherit();
+      for (size_t i = 0; i < h.size(); ++i) {
+        if (i == 0)
+          fprintf(file, ":");
+        else
+          fprintf(file, ",");
+        fprintf(file, " public ");
+        h[i].print(this);
+      }
+    }
+    fprintf(file, " {");
     printLine();
     printIndent();
     fprintf(file, "public:");
