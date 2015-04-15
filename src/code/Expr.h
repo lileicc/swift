@@ -8,7 +8,6 @@
 #pragma once
 #include <vector>
 #include "Stmt.h"
-#include "Expr.h"
 
 namespace swift {
 namespace code {
