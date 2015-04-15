@@ -25,6 +25,8 @@ namespace swift {
 extern int cur_loop = 0;
 
 class GibbsObject {
+protected:
+  std::default_random_engine engine;
 public:
   GibbsObject() { list_pos = -1; }
   int list_pos;
