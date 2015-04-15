@@ -22,9 +22,6 @@
 
 namespace swift {
 
-// Evaluate Queries! Must be completed in the main program!
-void __eval_query();
-
 class GibbsObject {
 public:
   GibbsObject() { list_pos = -1; }
@@ -254,7 +251,6 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
   // in normal cases, there is no cache val
   cur_node->clear_cache();
 
-  __eval_query();
 }
 
 template<class Tp>
@@ -306,7 +302,6 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
       cur_node->val = nxt_val;
   }
 
-  __eval_query();
 }
 
 template<class Tp>
@@ -335,7 +330,6 @@ void BayesVar<Tp>::conjugate_gibbs_resample_arg(BayesVar* cur_node) {
   else
     cur_node->val = nxt_val;
 
-  __eval_query();
 }
 
 /////////////////////////////////////
@@ -587,8 +581,6 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
     }
   }
 
-  // evaluate query
-  __eval_query();
 }
 
 }

@@ -253,7 +253,7 @@ void CPPPrinter::print(code::Code* prog) {
   printLine();
 
   // Check for Special Printing Option 
-  for (auto s : prog->getAllOptions())
+  for (auto s : prog->getAllOptions()) {
     if (s == "matrix") {
       // Support Matrix
       fprintf(file, "\n// Matrix Library included\n");
@@ -266,7 +266,14 @@ void CPPPrinter::print(code::Code* prog) {
       fprintf(file, "#include \"util/Hist_matrix.h\"\n");
       fprintf(file, "#include \"util/util_matrix.h\"\n");
       fprintf(file, "using namespace arma;\n\n");
+    } else
+    if (s == "MCMC" || s == "mcmc") {
+      // Support MCMC algorithms (Parental-MH, Gibbs)
+      fprintf(file, "\n// MCMC Library included\n");
+      fprintf(file, "#include \"util/MCMC.h\"\n");
+      fprintf(file, "using namespace arma;\n\n");
     }
+  }
 
   //fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
   fprintf(file, "using namespace std;\n");
