@@ -22,6 +22,8 @@
 
 namespace swift {
 
+extern int cur_loop = 0;
+
 class GibbsObject {
 public:
   GibbsObject() { list_pos = -1; }
