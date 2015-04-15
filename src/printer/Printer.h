@@ -39,6 +39,7 @@ public:
   virtual void print(code::LambdaExpr* term)=0;
   virtual void print(code::ListInitExpr* term)=0;
   virtual void print(code::NamespaceDecl* term)=0;
+  virtual void print(code::NewExpr* term) = 0;
   virtual void print(code::NullLiteral* term)=0;
   virtual void print(code::ParamVarDecl* term)=0;
   virtual void print(code::ReturnStmt* term)=0;

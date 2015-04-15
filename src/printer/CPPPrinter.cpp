@@ -412,6 +412,20 @@ void CPPPrinter::print(code::CallExpr* term) {
   printLine();
 }
 
+void CPPPrinter::print(code::NewExpr* term) {
+  printIndent();
+  bool backup = newline;
+  newline = false;
+
+  fprintf(file, "new ");
+  term->getExpr()->print(this);
+
+  newline = backup;
+  if (backup)
+    fprintf(file, ";");
+  printLine();
+}
+
 void CPPPrinter::print(code::TemplateExpr* term) {
   printIndent();
   bool backup = newline;
