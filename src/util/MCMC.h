@@ -24,11 +24,11 @@ namespace swift {
 
 extern int cur_loop = 0;
 
-class GibbsObject {
+class MCMCObject {
 protected:
   std::default_random_engine engine;
 public:
-  GibbsObject() { list_pos = -1; }
+  MCMCObject() { list_pos = -1; }
   int list_pos;
   virtual void gibbs_resample() = 0;
   virtual double getlikeli() = 0;
@@ -43,15 +43,15 @@ public:
 };
 
 // Table that contains all the vars active in the current world and are not observed
-vector<GibbsObject*> __active_list;
+vector<MCMCObject*> __active_list;
 
 // Methods for adding/removing var to active_list
-inline void add_var_to_list(GibbsObject* node) { // assert(node not in active_list)
+inline void add_var_to_list(MCMCObject* node) { // assert(node not in active_list)
   // assert(node->list_pos == -1);
   node->list_pos = (int)__active_list.size();
   __active_list.push_back(node);
 }
-inline void remove_var_from_list(GibbsObject* node) { // assert(node is in active_list)
+inline void remove_var_from_list(MCMCObject* node) { // assert(node is in active_list)
   // assert(node->list_pos > -1);
   // assert(node->list_pos > -1 && node->list_pos<__active_list.size() && __active_list[node->list_pos] == node);
 
@@ -63,16 +63,16 @@ inline void remove_var_from_list(GibbsObject* node) { // assert(node is in activ
 }
 
 template<class Tp>
-class BayesVar : public GibbsObject {
+class BayesVar : public MCMCObject {
 public:
 
   // Utility Members
   uniform_real_distribution<double> uni_r_dist;
   vector<double> all_weis; // TODO: do we need to get rid of it?
 
-  set<GibbsObject*> child;  // variables that depend on this var
-  set<GibbsObject*> contig; // variables that are contingent on this var
-  set<GibbsObject*> backup; // temporary storage
+  set<MCMCObject*> child;  // variables that depend on this var
+  set<MCMCObject*> contig; // variables that are contingent on this var
+  set<MCMCObject*> backup; // temporary storage
 
   Tp val;
   bool is_obs;
@@ -436,7 +436,7 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
   //resample number_var, dep_var
   // instantiate and uninstantiate some properties
   //compute likelihood of vars depending on dep_var and numbervar
-  set<GibbsObject*> cond;
+  set<MCMCObject*> cond;
   for (auto&c : cur_node->child) {
     if (dep_var.find(dynamic_cast<BayesVar<int>*>(c)) == dep_var.end())
       cond.insert(c);

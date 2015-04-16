@@ -271,7 +271,7 @@ void CPPPrinter::print(code::Code* prog) {
       // Support MCMC algorithms (Parental-MH, Gibbs)
       fprintf(file, "\n// MCMC Library included\n");
       fprintf(file, "#include \"util/MCMC.h\"\n");
-      fprintf(file, "using namespace arma;\n\n");
+      fprintf(file, "#include \"util/util_MCMC.h\"\n");
     }
   }
 
