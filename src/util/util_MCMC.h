@@ -30,10 +30,10 @@ inline void _free_obj(MCMCObject* obj) {
   if (obj != NULL) delete obj;
 }
 
-// Garbage Collection for objects stored in Dynamic Tables
+// Garbage Collection for objects stored in multi-dimensional tables
 template <typename _T, size_t _dim>
 struct _mdvector_ptr {
-  //  static_assert(_dim >= 1, "entering general _mdvector with _dim ");
+  //  static_assert(_dim >= 1, "entering general _mdvector_ptr with _dim ");
   typedef std::vector<typename _mdvector_ptr<_T, _dim - 1>::type> type;
 
   static void _free(typename _mdvector_ptr<_T, _dim>::type & data) {
@@ -58,7 +58,7 @@ struct _mdvector_ptr<_T, 0> {
   typedef _T* type;
 };
 
-// Clear Dynamic Tables with pointers
+// Clear Dynamic Tables storing pointers
 template <typename _T, size_t _dim>
 inline void _free_obj(DynamicTable<_T*, _dim>& vec) {
   _mdvector_ptr<_T, _dim>::_free(vec.data);
