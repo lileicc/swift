@@ -22,11 +22,12 @@
 
 namespace swift {
 
-extern int cur_loop = 0;
+extern int __cur_loop = 0;
 
 class MCMCObject {
 protected:
-  std::default_random_engine engine;
+  static std::default_random_engine engine;
+  static std::uniform_real_distribution<double> uni_r_dist;
 public:
   MCMCObject() { list_pos = -1; }
   int list_pos;
@@ -39,11 +40,15 @@ public:
   // generate all edges from its parent when this node is instantiated
   //   TODO: only need to do this during initialization and modification of contingent vars
   virtual void active_edge() {};
-  virtual string getname() = 0;
+  virtual std::string getname() = 0;
 };
 
+// Initialization
+std::default_random_engine MCMCObject::engine = std::default_random_engine();
+std::uniform_real_distribution<double> MCMCObject::uni_r_dist = std::uniform_real_distribution<double>(0.0,1.0);
+
 // Table that contains all the vars active in the current world and are not observed
-vector<MCMCObject*> __active_list;
+std::vector<MCMCObject*> __active_list;
 
 // Methods for adding/removing var to active_list
 inline void add_var_to_list(MCMCObject* node) { // assert(node not in active_list)
@@ -65,20 +70,17 @@ inline void remove_var_from_list(MCMCObject* node) { // assert(node is in active
 template<class Tp>
 class BayesVar : public MCMCObject {
 public:
+  std::vector<double> all_weis; // TODO: do we need to get rid of it?
 
-  // Utility Members
-  uniform_real_distribution<double> uni_r_dist;
-  vector<double> all_weis; // TODO: do we need to get rid of it?
-
-  set<MCMCObject*> child;  // variables that depend on this var
-  set<MCMCObject*> contig; // variables that are contingent on this var
-  set<MCMCObject*> backup; // temporary storage
+  std::set<MCMCObject*> child;  // variables that depend on this var
+  std::set<MCMCObject*> contig; // variables that are contingent on this var
+  std::set<MCMCObject*> backup; // temporary storage
 
   Tp val;
   bool is_obs;
   bool is_active; // if a var is active and not observed, it is in active_list
 
-  BayesVar() :uni_r_dist(0, 1) { is_obs = is_active = false; is_cached = -1; }
+  BayesVar() { is_obs = is_active = false; is_cached = -1; }
 
   // for Caching values
   //   Gibbs sampling may generate temporal samples for weight computation
@@ -86,7 +88,7 @@ public:
   int is_cached;
   virtual Tp& getcache_arg(BayesVar* cur_node);
   virtual Tp& getcache() = 0;
-  virtual void cache_cur_val() { cache_val = val; is_cached = (is_active ? cur_loop : -1); } // when not active, we DO NOT cache val
+  virtual void cache_cur_val() { cache_val = val; is_cached = (is_active ? __cur_loop : -1); } // when not active, we DO NOT cache val
   virtual void clear_cache() { is_cached = -1; }
 
   // Uninstantiate Active Node
@@ -102,10 +104,10 @@ public:
   virtual void sample() = 0;
   virtual void sample_cache() = 0;
 
-  vector<Tp> all_vals; // containing all possible values
+  std::vector<Tp> all_vals; // containing all possible values
   // TODO: add method so that it can return a range of integer/real
   //       possibly <support analysis> ?
-  virtual vector<Tp>& get_all_vals() { return all_vals; };
+  virtual std::vector<Tp>& get_all_vals() { return all_vals; };
 
   // ensure support
   Tp& getval_arg(BayesVar* cur_node);
@@ -123,7 +125,7 @@ public:
   virtual void conjugacy_analysis(Tp& nxt_val) {}; // to be filled later for conjugacy analysis
   virtual void conjugate_gibbs_resample_arg(BayesVar* curnode);
 
-  virtual string getname() { return ""; }
+  virtual std::string getname() { return ""; }
 };
 
 template<class Tp>
@@ -131,10 +133,10 @@ Tp& BayesVar<Tp>::getcache_arg(BayesVar* cur_node) {
   if (cur_node->is_active)
     return cur_node->val;
 
-  if (cur_node->is_cached != cur_loop) {
+  if (cur_node->is_cached != __cur_loop) {
     cur_node->sample_cache();
 
-    cur_node->is_cached = cur_loop;
+    cur_node->is_cached = __cur_loop;
   }
   return cur_node->cache_val;
 }
@@ -143,7 +145,7 @@ template<class Tp>
 Tp& BayesVar<Tp>::getval_arg(BayesVar* cur_node) {
   if (!cur_node->is_active) {
 
-    if (cur_node->is_cached == cur_loop) {
+    if (cur_node->is_cached == __cur_loop) {
       cur_node->val = cur_node->cache_val;
       cur_node->is_cached = -1; // fetch cache and clear it
     }
@@ -183,7 +185,7 @@ void BayesVar<Tp>::clear_arg(BayesVar* cur_node) {
 template<class Tp>
 void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
   auto& child = cur_node->child;
-  vector<Tp>&values = cur_node->get_all_vals();
+  std::vector<Tp>&values = cur_node->get_all_vals();
   Tp old_val = cur_node->val, nxt_val;
   all_weis.resize(values.size());
   int active_n = __active_list.size();
@@ -220,7 +222,7 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
 
   for (auto&w : all_weis) {
     if (w > 1000) w = 0;
-    else w = exp(w - basic);
+    else w = std::exp(w - basic);
   }
 
   // resample part
@@ -228,7 +230,7 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
     all_weis[i] += all_weis[i - 1];
 
   double loc = uni_r_dist(engine) * all_weis.back(); // TODO: *IMPORTANT* simplified for close-world case here
-  nxt_val = values[lower_bound(all_weis.begin(), all_weis.end(), loc) - all_weis.begin()];
+  nxt_val = values[std::lower_bound(all_weis.begin(), all_weis.end(), loc) - all_weis.begin()];
 
 
   if (nxt_val != old_val && contig.size() > 0) {
@@ -265,21 +267,21 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
   double old_w = 0;
   for (auto&c : child)
     old_w += c->getlikeli();
-  old_w -= log(__active_list.size());
+  old_w -= std::log(__active_list.size());
 
   double nxt_w = 0;
   cur_node->is_active = false;
   cur_node->sample_cache();
-  cur_node->is_cached = cur_loop; // mark cache_flag
+  cur_node->is_cached = __cur_loop; // mark cache_flag
   Tp nxt_val = cur_node->cache_val;
   for (auto&c : child)
     nxt_w += c->getcachelikeli();
-  nxt_w -= log(__active_list.size() + cur_node->get_reference_diff(old_val, nxt_val));
+  nxt_w -= std::log(__active_list.size() + cur_node->get_reference_diff(old_val, nxt_val));
   cur_node->is_active = true;
 
   cur_node->clear_cache();
 
-  double alpha = min(1.0, exp(nxt_w - old_w));
+  double alpha = std::min(1.0, std::exp(nxt_w - old_w));
   double loc = uni_r_dist(engine);
   bool acceptance = (loc <= alpha);
 
@@ -343,16 +345,15 @@ void BayesVar<Tp>::conjugate_gibbs_resample_arg(BayesVar* cur_node) {
 class NumberVar : public BayesVar<int> {
 public:
 
-  vector<int> refer_cnt; // reference number for each objects
-  vector<int> active_obj; // all objects with at least one reference
-  vector<int> obj_pos; // possition of objects in active_obj
+  std::vector<int> refer_cnt; // reference number for each objects
+  std::vector<int> active_obj; // all objects with at least one reference
+  std::vector<int> obj_pos; // possition of objects in active_obj
 
-  set<BayesVar<int>*> dep_var; // all the variables that return an object of this type
+  std::set<BayesVar<int>*> dep_var; // all the variables that return an object of this type
 
   // gibbs usage
-  vector<int> sl_tar; // selected mapping
-  vector<int> tar; // storage for a mapping
-  vector<int> pick; // reverse map: TODO: probably change to map<int,int> for memory efficiency??
+  std::vector<int> tar; // storage for a mapping
+  std::vector<int> pick; // reverse map: TODO: probably change to map<int,int> for memory efficiency??
 
   // cache all the properties of current prop, and then uninstatiate them
   //    when is_full_clear == true, we invoke clear(), otherwise, we only mark the flag: is_active <- true
@@ -389,7 +390,7 @@ int& NumberVar::getval_numvar_arg(NumberVar* cur_node) {
     dep_var.clear(); // in normal case, it should be already cleared
     active_obj.clear();
 
-    if (cur_node->is_cached == cur_loop) {
+    if (cur_node->is_cached == __cur_loop) {
       cur_node->val = cur_node->cache_val;
       cur_node->is_cached = -1; // clear cache
     }
@@ -414,9 +415,9 @@ int& NumberVar::getcache_numvar_arg(NumberVar* cur_node) {
   if (cur_node->is_active)
     return cur_node->val;
 
-  if (cur_node->is_cached != cur_loop) {
+  if (cur_node->is_cached != __cur_loop) {
     cur_node->sample_cache();
-    cur_node->is_cached = cur_loop;
+    cur_node->is_cached = __cur_loop;
 
     if (cur_node->cache_val > refer_cnt.size()) { // only increase here!
       refer_cnt.resize(cur_node->cache_val);
@@ -436,7 +437,7 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
   //resample number_var, dep_var
   // instantiate and uninstantiate some properties
   //compute likelihood of vars depending on dep_var and numbervar
-  set<MCMCObject*> cond;
+  std::set<MCMCObject*> cond;
   for (auto&c : cur_node->child) {
     if (dep_var.find(dynamic_cast<BayesVar<int>*>(c)) == dep_var.end())
       cond.insert(c);
@@ -465,14 +466,14 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
 
   // sample new values
   cur_node->sample_cache();
-  cur_node->is_cached = cur_loop;
+  cur_node->is_cached = __cur_loop;
   int nxt_val = cur_node->cache_val; // proposed number var
 
   int m = active_obj.size();
   int nxt_active_n = __active_list.size() - m * prop_size;
 
   cur_node->ensure_size(nxt_val);
-  int sz = max(old_val, nxt_val);
+  int sz = std::max(old_val, nxt_val);
   pick.resize(sz); std::fill(pick.begin(), pick.end(), 0);
   for (auto &j : active_obj)
     pick[j] = 1; // already exists in the old world
@@ -480,7 +481,7 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
 
   for (auto& u : dep_var) {
     u->sample_cache();
-    u->is_cached = cur_loop;
+    u->is_cached = __cur_loop;
 
     int t = u->cache_val;
     if (!pick[t]) {
@@ -504,11 +505,11 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
   for (auto&u : dep_var) u->is_active = true;
 
   // compute acceptance ratio
-  old_w -= log(old_active_n);
-  nxt_w -= log(nxt_active_n);
+  old_w -= std::log(old_active_n);
+  nxt_w -= std::log(nxt_active_n);
 
   bool acceptance;
-  double alpha = min(exp(nxt_w - old_w), 1.0);
+  double alpha = std::min(std::exp(nxt_w - old_w), 1.0);
   double rd = uni_r_dist(engine);
   acceptance = (rd <= alpha);
 
