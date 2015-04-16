@@ -120,10 +120,10 @@ public:
   /*
     w_i <- w_i * P( Y_new_value | Y_new_parents  ) / P( Y_old_value | Y_old_parent  )
   */
-  virtual void mcmc_resample_arg(BayesVar* cur_node);
+  virtual void gibbs_resample_arg(BayesVar* cur_node);
   virtual void mh_parent_resample_arg(BayesVar* curnode);
   virtual void conjugacy_analysis(Tp& nxt_val) {}; // to be filled later for conjugacy analysis
-  virtual void conjugate_mcmc_resample_arg(BayesVar* curnode);
+  virtual void conjugate_gibbs_resample_arg(BayesVar* curnode);
 
   virtual std::string getname() { return ""; }
 };
@@ -183,7 +183,7 @@ void BayesVar<Tp>::clear_arg(BayesVar* cur_node) {
 }
 
 template<class Tp>
-void BayesVar<Tp>::mcmc_resample_arg(BayesVar* cur_node) {
+void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
   auto& child = cur_node->child;
   std::vector<Tp>&values = cur_node->get_all_vals();
   Tp old_val = cur_node->val, nxt_val;
@@ -311,7 +311,7 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
 }
 
 template<class Tp>
-void BayesVar<Tp>::conjugate_mcmc_resample_arg(BayesVar* cur_node) {
+void BayesVar<Tp>::conjugate_gibbs_resample_arg(BayesVar* cur_node) {
   Tp nxt_val;
   cur_node->conjugacy_analysis(nxt_val); // sample from true posterior with conjugacy
 
@@ -346,7 +346,8 @@ class NumberVar : public BayesVar<int> {
 public:
 
   int capacity; // maximum value in history
-  NumberVar() : capacity(0) {};
+  int property_size;
+  NumberVar() : capacity(0), property_size(0) {};
 
   std::vector<int> refer_cnt; // reference number for each objects
   std::vector<int> active_obj; // all objects with at least one reference
@@ -379,7 +380,7 @@ public:
   virtual void ensure_size(int n) = 0; // need to specify!
 
   // Number of properties (random functions) related this this type
-  virtual inline int get_property_size() { return 0; }
+  inline int get_property_size() { return property_size; }
 
   // main resample process for number variable
   virtual void mcmc_resample_numvar_arg(NumberVar* cur_node);
