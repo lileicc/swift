@@ -31,7 +31,7 @@ protected:
 public:
   MCMCObject() { list_pos = -1; }
   int list_pos;
-  virtual void gibbs_resample() = 0;
+  virtual void mcmc_resample() = 0;
   virtual double getlikeli() = 0;
   virtual double getcachelikeli() = 0;
   // degenerate all edges from its parent when we erase this var OR 
@@ -120,10 +120,10 @@ public:
   /*
     w_i <- w_i * P( Y_new_value | Y_new_parents  ) / P( Y_old_value | Y_old_parent  )
   */
-  virtual void gibbs_resample_arg(BayesVar* cur_node);
+  virtual void mcmc_resample_arg(BayesVar* cur_node);
   virtual void mh_parent_resample_arg(BayesVar* curnode);
   virtual void conjugacy_analysis(Tp& nxt_val) {}; // to be filled later for conjugacy analysis
-  virtual void conjugate_gibbs_resample_arg(BayesVar* curnode);
+  virtual void conjugate_mcmc_resample_arg(BayesVar* curnode);
 
   virtual std::string getname() { return ""; }
 };
@@ -183,7 +183,7 @@ void BayesVar<Tp>::clear_arg(BayesVar* cur_node) {
 }
 
 template<class Tp>
-void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
+void BayesVar<Tp>::mcmc_resample_arg(BayesVar* cur_node) {
   auto& child = cur_node->child;
   std::vector<Tp>&values = cur_node->get_all_vals();
   Tp old_val = cur_node->val, nxt_val;
@@ -311,7 +311,7 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
 }
 
 template<class Tp>
-void BayesVar<Tp>::conjugate_gibbs_resample_arg(BayesVar* cur_node) {
+void BayesVar<Tp>::conjugate_mcmc_resample_arg(BayesVar* cur_node) {
   Tp nxt_val;
   cur_node->conjugacy_analysis(nxt_val); // sample from true posterior with conjugacy
 
@@ -379,7 +379,7 @@ public:
   virtual inline int get_property_size() { return 0; }
 
   // main resample process for number variable
-  virtual void gibbs_resample_numvar_arg(NumberVar* cur_node);
+  virtual void mcmc_resample_numvar_arg(NumberVar* cur_node);
 
   virtual void mh_parent_resample_numvar_arg(NumberVar* cur_node);
 };
@@ -428,7 +428,7 @@ int& NumberVar::getcache_numvar_arg(NumberVar* cur_node) {
   return cur_node->cache_val;
 }
 
-void NumberVar::gibbs_resample_numvar_arg(NumberVar* cur_node) {
+void NumberVar::mcmc_resample_numvar_arg(NumberVar* cur_node) {
   // DO NOTHING..... to be filled later
 }
 
