@@ -1,7 +1,7 @@
 /*
  * Analyzer.h
  *
- *  Created on: Feb 13, 2014
+ *  Created on: Apr 16, 2015
  *      Author: yiwu
  */
 
@@ -15,15 +15,15 @@ namespace analyzer {
 
 class Analyzer {
 public:
-  Analyzer();
-  ~Analyzer();
+  Analyzer(ir::BlogModel* _model = NULL);
+  virtual ~Analyzer();
  
-  void process(ir::BlogModel* model);
+  virtual void process() = 0;
+  
+  virtual void setModel(ir::BlogModel* _model);
 
-private:
-  // Process Temporal Information
-  //   i.e. Markov Order
-  void processTemporal(ir::BlogModel* model);
+protected:
+  ir::BlogModel* model;
 };
 
 }
