@@ -22,7 +22,7 @@
 
 namespace swift {
 
-extern int __cur_loop = 0;
+extern int _cur_loop = 0;
 
 class MCMCObject {
 protected:
@@ -48,23 +48,23 @@ std::default_random_engine MCMCObject::engine = std::default_random_engine();
 std::uniform_real_distribution<double> MCMCObject::uni_r_dist = std::uniform_real_distribution<double>(0.0,1.0);
 
 // Table that contains all the vars active in the current world and are not observed
-std::vector<MCMCObject*> __active_list;
+std::vector<MCMCObject*> _active_list;
 
 // Methods for adding/removing var to active_list
 inline void add_var_to_list(MCMCObject* node) { // assert(node not in active_list)
   // assert(node->list_pos == -1);
-  node->list_pos = (int)__active_list.size();
-  __active_list.push_back(node);
+  node->list_pos = (int)_active_list.size();
+  _active_list.push_back(node);
 }
 inline void remove_var_from_list(MCMCObject* node) { // assert(node is in active_list)
   // assert(node->list_pos > -1);
-  // assert(node->list_pos > -1 && node->list_pos<__active_list.size() && __active_list[node->list_pos] == node);
+  // assert(node->list_pos > -1 && node->list_pos<_active_list.size() && _active_list[node->list_pos] == node);
 
   int p = node->list_pos;
-  __active_list[p] = __active_list.back();
-  __active_list[p]->list_pos = p;
+  _active_list[p] = _active_list.back();
+  _active_list[p]->list_pos = p;
   node->list_pos = -1;
-  __active_list.pop_back();
+  _active_list.pop_back();
 }
 
 template<class Tp>
@@ -88,7 +88,7 @@ public:
   int is_cached;
   virtual Tp& getcache_arg(BayesVar* cur_node);
   virtual Tp& getcache() = 0;
-  virtual void cache_cur_val() { cache_val = val; is_cached = (is_active ? __cur_loop : -1); } // when not active, we DO NOT cache val
+  virtual void cache_cur_val() { cache_val = val; is_cached = (is_active ? _cur_loop : -1); } // when not active, we DO NOT cache val
   virtual void clear_cache() { is_cached = -1; }
 
   // Uninstantiate Active Node
@@ -133,10 +133,10 @@ Tp& BayesVar<Tp>::getcache_arg(BayesVar* cur_node) {
   if (cur_node->is_active)
     return cur_node->val;
 
-  if (cur_node->is_cached != __cur_loop) {
+  if (cur_node->is_cached != _cur_loop) {
     cur_node->sample_cache();
 
-    cur_node->is_cached = __cur_loop;
+    cur_node->is_cached = _cur_loop;
   }
   return cur_node->cache_val;
 }
@@ -145,7 +145,7 @@ template<class Tp>
 Tp& BayesVar<Tp>::getval_arg(BayesVar* cur_node) {
   if (!cur_node->is_active) {
 
-    if (cur_node->is_cached == __cur_loop) {
+    if (cur_node->is_cached == _cur_loop) {
       cur_node->val = cur_node->cache_val;
       cur_node->is_cached = -1; // fetch cache and clear it
     }
@@ -188,7 +188,7 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
   std::vector<Tp>&values = cur_node->get_all_vals();
   Tp old_val = cur_node->val, nxt_val;
   all_weis.resize(values.size());
-  int active_n = __active_list.size();
+  int active_n = _active_list.size();
   double basic = 0;
   for (size_t i = 0; i < all_weis.size(); ++i) {
     double &w = all_weis[i];
@@ -267,16 +267,16 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
   double old_w = 0;
   for (auto&c : child)
     old_w += c->getlikeli();
-  old_w -= std::log(__active_list.size());
+  old_w -= std::log(_active_list.size());
 
   double nxt_w = 0;
   cur_node->is_active = false;
   cur_node->sample_cache();
-  cur_node->is_cached = __cur_loop; // mark cache_flag
+  cur_node->is_cached = _cur_loop; // mark cache_flag
   Tp nxt_val = cur_node->cache_val;
   for (auto&c : child)
     nxt_w += c->getcachelikeli();
-  nxt_w -= std::log(__active_list.size() + cur_node->get_reference_diff(old_val, nxt_val));
+  nxt_w -= std::log(_active_list.size() + cur_node->get_reference_diff(old_val, nxt_val));
   cur_node->is_active = true;
 
   cur_node->clear_cache();
@@ -390,7 +390,7 @@ int& NumberVar::getval_numvar_arg(NumberVar* cur_node) {
     dep_var.clear(); // in normal case, it should be already cleared
     active_obj.clear();
 
-    if (cur_node->is_cached == __cur_loop) {
+    if (cur_node->is_cached == _cur_loop) {
       cur_node->val = cur_node->cache_val;
       cur_node->is_cached = -1; // clear cache
     }
@@ -415,9 +415,9 @@ int& NumberVar::getcache_numvar_arg(NumberVar* cur_node) {
   if (cur_node->is_active)
     return cur_node->val;
 
-  if (cur_node->is_cached != __cur_loop) {
+  if (cur_node->is_cached != _cur_loop) {
     cur_node->sample_cache();
-    cur_node->is_cached = __cur_loop;
+    cur_node->is_cached = _cur_loop;
 
     if (cur_node->cache_val > refer_cnt.size()) { // only increase here!
       refer_cnt.resize(cur_node->cache_val);
@@ -445,7 +445,7 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
   int old_val = cur_node->val;
   double old_w = 0, nxt_w = 0; // log likelihood
   int prop_size = cur_node->get_property_size();
-  int old_active_n = __active_list.size();
+  int old_active_n = _active_list.size();
 
   // compute old probability
   old_w = cur_node->getlikeli();
@@ -466,11 +466,11 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
 
   // sample new values
   cur_node->sample_cache();
-  cur_node->is_cached = __cur_loop;
+  cur_node->is_cached = _cur_loop;
   int nxt_val = cur_node->cache_val; // proposed number var
 
   int m = active_obj.size();
-  int nxt_active_n = __active_list.size() - m * prop_size;
+  int nxt_active_n = _active_list.size() - m * prop_size;
 
   cur_node->ensure_size(nxt_val);
   int sz = std::max(old_val, nxt_val);
@@ -481,7 +481,7 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
 
   for (auto& u : dep_var) {
     u->sample_cache();
-    u->is_cached = __cur_loop;
+    u->is_cached = _cur_loop;
 
     int t = u->cache_val;
     if (!pick[t]) {
