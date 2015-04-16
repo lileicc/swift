@@ -345,6 +345,9 @@ void BayesVar<Tp>::conjugate_mcmc_resample_arg(BayesVar* cur_node) {
 class NumberVar : public BayesVar<int> {
 public:
 
+  int capacity; // maximum value in history
+  NumberVar() : capacity(0) {};
+
   std::vector<int> refer_cnt; // reference number for each objects
   std::vector<int> active_obj; // all objects with at least one reference
   std::vector<int> obj_pos; // possition of objects in active_obj
