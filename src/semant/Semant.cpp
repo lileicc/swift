@@ -1523,6 +1523,7 @@ void Semant::transEvidence(absyn::Evidence* ne) {
   //         left side  : function call | #TypeName
   //         right side : non-random expression
   if (rhs->isRandom()
+      || !lhs->isRandom()
       || ((std::dynamic_pointer_cast<ir::FunctionCall>(lhs) == nullptr)
           && !isCardAll(lhs))) {
     error(ne->line, ne->col,

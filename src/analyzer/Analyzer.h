@@ -9,6 +9,7 @@
 
 #include <memory>
 #include "../ir/BlogModel.h"
+#include "../msg/ErrorMsg.h"
 
 namespace swift {
 namespace analyzer {
@@ -18,12 +19,13 @@ public:
   Analyzer(ir::BlogModel* _model = NULL);
   virtual ~Analyzer();
  
-  virtual void process() = 0;
+  virtual bool process() = 0;
   
   virtual void setModel(ir::BlogModel* _model);
 
 protected:
   ir::BlogModel* model;
+  msg::ErrorMsg errMsg;
 };
 
 }

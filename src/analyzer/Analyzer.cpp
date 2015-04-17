@@ -17,7 +17,7 @@ namespace swift {
 namespace analyzer {
 
 Analyzer::Analyzer(ir::BlogModel* _model)
-  : model(_model) {
+  : model(_model), errMsg(stderr) {
 }
 
 Analyzer::~Analyzer() {
