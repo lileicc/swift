@@ -8,8 +8,10 @@
 #pragma once
 
 #include "Translator.h"
+#include <map>
 #include <memory>
 #include <set>
+#include <string>
 
 namespace swift {
 namespace codegen {
@@ -20,77 +22,104 @@ public:
   void translate(std::shared_ptr<swift::ir::BlogModel> model);
   code::Code* getResult();
   void setIterationNum(int iter);
-  void setTimeLimit(int tm);
-  void setDepend(int dep);
+  void setBurnInNum(int iter);
   
 protected:
   /**
-  * how many particles to sample in total : default parameter for PF
+  * how many interations to sample in total : default parameter for MCMC
   */
   static const int DEFAULT_TOTAL_NUM_ITERATIONS;
   int iterNum;
+  int burnInNum; // by defualt: burnIn = iterNum/2
 
-  // Time Series Features
-  int ModelDependency;
-  int ModelTimeLimit;
+  // All the bayesVar to declare
+  std::map<std::string, code::ClassDecl*> bayesVars;
 
-  // classes for memorization for static and temporal data
-  STATE coreStaticCls; // memorization data structure for static variables
-  static const std::string StaticClsName;
-  code::FunctionDecl* coreStaticClsInit; // clear function for static varaibles
-  STATE coreTemporalCls; // memorization data structure for temporal variables
-  code::FunctionDecl* coreTemporalClsInit; // init function for temporal varaibles
-  code::FunctionDecl* coreTemporalClsClear; // clear function for temporal varaibles
-  static const std::string MAIN_CLEAR_FUN_NAME;
-  static const std::string TemporalClsName;
+  // The function declaration for each random varibales
+  std::map<std::string, std::map<std::string, code::FunctionDecl*> > varMethods;
   
-  //Constant Variable Names of Parameters of Particle Filtering
-  static const std::string TIMESTEP_LIMIT_VAR_NAME; // variable for Maximum TimeStep
-  static const std::string PARTICLE_NUM_VAR_NAME; // variable for Number of Particles
-  static const std::string DEPEND_NUM_VAE_NAME; // variable for dependency
-  
-  // Internal Varaibles for Memorization Particles
-  static const std::string STAT_MEMO_VAR_NAME;
-  static const std::string TEMP_MEMO_VAR_NAME;
-  static const std::string PTR_STAT_MEMO_VAR_NAME;
-  static const std::string PTR_TEMP_MEMO_VAR_NAME;
-  static const std::string PTR_BACKUP_VAR_NAME;
+  // Main Functions
+  code::FunctionDecl* coreQuery;
+  code::FunctionDecl* coreStorageInit;
+  code::FunctionDecl* coreWorldInit;
+  code::FunctionDecl* coreGarbageCollect;
+  code::FunctionDecl* corePrint;
 
-  // Types for Memorization Data Structure
-  static const TYPE STAT_MEMO_TYPE;
-  static const TYPE REF_STAT_MEMO_TYPE;
-  static const TYPE TEMP_MEMO_TYPE;
-  static const TYPE REF_TEMP_MEMO_TYPE;
-  static const TYPE PTR_TEMP_MEMO_TYPE;
+  // Global Function Name
+  static const std::string CoreQueryFuncName;
+  static const std::string CoreStorageInitFuncName;
+  static const std::string CoreWorldInitFuncName;
+  static const std::string CoreGarbageCollectFuncName;
+  static const std::string CorePrintFuncName;
+  static const std::string MCMCResampleFuncName; // this function is from MCMC.h
 
-  // Variable Name denoting data structure containing all the required info
-  static const std::string CUR_STATE_VAR_NAME;
-  static const std::string CUR_TIMESTEP_VAR_NAME;
+  // Global Class/Var Name
+  static const std::string BayesVarClsName;
+  static const std::string ActiveListName;
+  static const std::string RoundCounterVarName;
+  static const std::string TotalRoundVarName;
+  static const std::string BurnInVarName;
 
-  // Temperary Variable Name
-  static const std::string TMP_LOOP_VAR_NAME;
-  static const std::string TMP_LOCAL_TS_INDEX_VAR_NAME;
+  // BayesVar Method Name
+  static const std::string MCMC_Global_MHAlgo_MethodName;
+  static const std::string MCMC_Global_MHNumVarAlgo_MethodName;
+  static const std::string MCMC_Global_Clear_MethodName;
+  static const std::string MCMC_Global_GetVal_MethodName;
+  static const std::string MCMC_Global_GetCache_MethodName;
+  static const std::string MCMC_Global_GetValNumVar_MethodName;
+  static const std::string MCMC_Global_GetCacheNumVar_MethodName;
+  static const std::string MCMC_GetName_MethodName;
+  static const std::string MCMC_Resample_MethodName;
+  static const std::string MCMC_Clear_MethodName;
+  static const std::string MCMC_GetVal_MethodName;
+  static const std::string MCMC_GetCache_MethodName;
+  static const std::string MCMC_SampleVal_MethodName;
+  static const std::string MCMC_SampleCache_MethodName;
+  static const std::string MCMC_GetLike_MethodName;
+  static const std::string MCMC_GetCacheLike_MethodName;
+  static const std::string MCMC_ActiveEdge_MethodName;
+  static const std::string MCMC_RemoveEdge_MethodName;
+  //   ==> Evidence Related
+  static const std::string MCMC_CheckObs_MethodName;
+  static const std::string MCMC_UpdateObs_MethodName;
+  //   ==> Number Variable Related
+  static const std::string MCMC_UpdateRef_MethodName;
+  static const std::string MCMC_ClearRef_MethodName;
+  static const std::string MCMC_CalcRefDiff_MethodName;
+  static const std::string MCMC_EnsureSize_MethodName;
+  static const std::string MCMC_EnsureSupport_MethodName;
+  static const std::string MCMC_EnsureCache_MethodName;
+  static const std::string MCMC_ClearProp_MethodName;
 
-  // Util Functions for Particle Filtering in Util.h
-  static const std::string PF_RESAMPLE_FUN_NAME;
-  static const std::string PF_NORMALIZE_LOGWEI_FUN_NAME;
-  static const std::string PF_COPY_PTR_FUN_NAME;
+  // BayesVar member variable
+  static const std::string MCMC_Val_VarName;
+  static const std::string MCMC_Cache_VarName;
+  static const std::string MCMC_CachedFlag_VarName;
+  static const std::string MCMC_ActiveFlag_VarName;
+  static const std::string MCMC_ObsFlag_VarName;
+  // ==> Number Variable Related
+  static const std::string MCMC_PropSize_VarName;
+  static const std::string MCMC_Capacity_VarName;
 
-  // Variable Name to store all evidences
-  static const std::string TMP_EVI_STORE_NAME;
-  static const code::Type TMP_EVI_STORE_TYPE;
-  static const std::string TMP_EVI_INIT_FUNC_NAME;
-  code::FunctionDecl* tempEvidenceInit;
-  // Variable Name to store all queries
-  static const std::string TMP_QUERY_STORE_NAME;
-  static const code::Type TMP_QUERY_STORE_TYPE;
-  static const std::string TMP_QUERY_INIT_FUNC_NAME;
-  code::FunctionDecl* tempQueryInit;
-  // Variable Name to store all prints
-  static const std::string TMP_PRINT_STORE_NAME;
-  static const code::Type TMP_PRINT_STORE_TYPE;
-  static const std::string TMP_PRINT_INIT_FUNC_NAME;
-  code::FunctionDecl* tempPrintInit;
+  // Temp variable
+  static const std::string TEMP_N_NAME;
+  static const std::string TEMP_FROM_NAME;
+  static const std::string TEMP_TO_NAME;
+  static const std::string TEMP_IND_NAME;
+  static const std::string TEMP_VAL_NAME;
+
+  // Util Func Name
+  static const std::string UtilSetEviFuncName;
+  static const std::string UtilUpdateRefFuncName;
+  static const std::string UtilClearRefFuncName;
+  static const std::string UtilCalcRefDiffFuncName;
+  static const std::string UtilFreeObjFuncName;
+
+
+
+  ////////// @Start ///////////////////////
+  // Start from Here!!!!
+  ///////////////////////////////////////////////////////////////////
 
   /**
    * declare a named type

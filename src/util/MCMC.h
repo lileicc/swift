@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <cstdlib>
 #include <cstring>
 #include <cmath>
 #include <vector>
@@ -22,7 +23,7 @@
 
 namespace swift {
 
-extern int _cur_loop = 0;
+int _cur_loop = 0;
 
 class MCMCObject {
 protected:
@@ -49,6 +50,13 @@ std::uniform_real_distribution<double> MCMCObject::uni_r_dist = std::uniform_rea
 
 // Table that contains all the vars active in the current world and are not observed
 std::vector<MCMCObject*> _active_list;
+
+inline void mcmc_sample_single_iter() {
+  // TODO: to use some other random number generator??
+  int pos = rand() % _active_list.size();
+  auto node = _active_list[pos];
+  node->mcmc_resample();
+}
 
 // Methods for adding/removing var to active_list
 inline void add_var_to_list(MCMCObject* node) { // assert(node not in active_list)
@@ -361,16 +369,15 @@ public:
 
   // cache all the properties of current prop, and then uninstatiate them
   //    when is_full_clear == true, we invoke clear(), otherwise, we only mark the flag: is_active <- true
-  virtual void cache_and_clear_prop_arg(int k) = 0; // Note: some property might NOT be instantiated!
-  virtual void cache_and_clear_prop() {
+  virtual void clear_prop_arg(int k) = 0; // Note: some property might NOT be instantiated!
+  virtual void clear_prop() {
     for (auto& k : active_obj) {
-      cache_and_clear_prop_arg(k);
+      clear_prop_arg(k);
     }
   };
 
   virtual void ensure_support_prop_arg(int i) = 0; // instantiate property of object_i (sample / init from cached val)
   virtual void ensure_cache_prop_arg(int i) = 0; // sample cache value of property of object_i and mark its flag true
-  virtual void clear_cache_prop_arg(int i) = 0; // mark all the cache_flag of properties
 
   // special getval()/getcache() for number variable (need to invoke ensure_size())
   virtual int& getval_numvar_arg(NumberVar* cur_node);
@@ -578,16 +585,11 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
 
     // uninstantiate redundant properties
     for (auto& j : tar) {
-      cur_node->cache_and_clear_prop_arg(j);
+      cur_node->clear_prop_arg(j);
     }
   }
   else { // reject
-    // remove all caches
-    cur_node->clear_cache();
-    for (auto& u : dep_var) u->clear_cache();
-    for (auto& j : tar) {
-      cur_node->clear_cache_prop_arg(j);
-    }
+    // DO NOTHING!
   }
 
 }

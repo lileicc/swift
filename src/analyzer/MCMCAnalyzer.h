@@ -17,7 +17,7 @@ namespace analyzer {
 
 class MCMCAnalyzer: public Analyzer{
 public:
-  MCMCAnalyzer(ir::BlogModel* _model = NULL);
+  MCMCAnalyzer(std::shared_ptr<ir::BlogModel> _model = nullptr);
  
   // return true when the input model is compatible with the analyzer
   virtual bool process();

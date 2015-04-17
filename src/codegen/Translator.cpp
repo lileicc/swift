@@ -128,7 +128,7 @@ Translator::Translator() {
 }
 
 Translator::~Translator() {
-  if (!useTag)
+  if (!useTag && prog != NULL)
     delete prog;
 }
 

@@ -109,6 +109,7 @@ int main(int argc, char** argv) {
 
   if (!sem.Okay()) {
     fprintf(stderr, "Error in semantic checking!");
+    delete blog_absyn;
     // TODO print the error message!
     return 1;
   }
@@ -139,6 +140,13 @@ int main(int argc, char** argv) {
     trans->translate(model);
     swift::code::Code* program = trans->getResult();
     
+    if (program == NULL) {
+      fprintf(stderr, "Error in algorithm-specific program translating!");
+      delete trans;
+      delete blog_absyn;
+      return 1;
+    }
+    
     // print code
     swift::printer::Printer * prt = new swift::printer::CPPPrinter(
                                                                    std::string(out));
@@ -157,6 +165,7 @@ int main(int argc, char** argv) {
     delete prt;
   }
 
+  delete trans;
   delete blog_absyn;
   return 0;
 }

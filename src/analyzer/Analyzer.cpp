@@ -16,14 +16,14 @@
 namespace swift {
 namespace analyzer {
 
-Analyzer::Analyzer(ir::BlogModel* _model)
+Analyzer::Analyzer(std::shared_ptr<ir::BlogModel> _model)
   : model(_model), errMsg(stderr) {
 }
 
 Analyzer::~Analyzer() {
 }
 
-void Analyzer::setModel(ir::BlogModel* _model) {
+void Analyzer::setModel(std::shared_ptr<ir::BlogModel> _model) {
   model = _model;
 }
 

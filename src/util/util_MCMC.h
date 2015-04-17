@@ -98,8 +98,8 @@ inline void _util_clear_reference(NumberVar* numvar, BayesVar<int>*ptr, int val)
     pos[lis.back()] = t;
     lis.pop_back();
     pos[val] = -1;
-    // fully clear all the properties
-    numvar->cache_and_clear_prop_arg(val);
+    // fully clear all the properties related to this object
+    numvar->clear_prop_arg(val);
   }
 }
 
@@ -113,6 +113,16 @@ inline void _util_update_reference(NumberVar* numvar, BayesVar<int>*ptr, int val
     // instantiate all the properties
     numvar->ensure_support_prop_arg(val);
   }
+}
+
+template<class T>
+inline void _util_set_evidence(BayesVar<T>* ptr, T val) {
+  ptr->getval();
+  ptr->val = val;
+  ptr->is_obs = true;
+
+  // Remove it from active var
+  remove_var_from_list(ptr);
 }
 
 }

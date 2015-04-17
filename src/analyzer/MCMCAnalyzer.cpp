@@ -18,7 +18,7 @@
 namespace swift {
 namespace analyzer {
 
-MCMCAnalyzer::MCMCAnalyzer(ir::BlogModel* _model)
+MCMCAnalyzer::MCMCAnalyzer(std::shared_ptr<ir::BlogModel> _model)
   : Analyzer(_model) {
 }
 

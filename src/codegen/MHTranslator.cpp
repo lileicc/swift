@@ -11,6 +11,8 @@
 #include "../predecl/MatrixStackFuncDecl.h"
 #include "../predecl/SetAggrFuncDecl.h"
 
+#include "../analyzer/MCMCAnalyzer.h"
+
 #include "MHTranslator.h"
 
 namespace swift {
@@ -18,139 +20,126 @@ namespace codegen {
 
 const int MHTranslator::DEFAULT_TOTAL_NUM_ITERATIONS = Translator::TOTAL_NUM_SAMPLES;
 
-const std::string MHTranslator::StaticClsName = "BLOG_Static_State";
-const std::string MHTranslator::TemporalClsName = "BLOG_Temporal_State";
-const std::string MHTranslator::MAIN_CLEAR_FUN_NAME = "_clear_marks";
-const std::string MHTranslator::TIMESTEP_LIMIT_VAR_NAME = "_TimeLim_";
-const std::string MHTranslator::PARTICLE_NUM_VAR_NAME = "_ParticleN_";
-const std::string MHTranslator::DEPEND_NUM_VAE_NAME = "_DependN_";
-const std::string MHTranslator::STAT_MEMO_VAR_NAME = "_stat_memo";
-const std::string MHTranslator::TEMP_MEMO_VAR_NAME = "_temp_memo";
-const std::string MHTranslator::PTR_STAT_MEMO_VAR_NAME = "_ptr_stat_memo";
-const std::string MHTranslator::PTR_TEMP_MEMO_VAR_NAME = "_ptr_temp_memo";
-const std::string MHTranslator::PTR_BACKUP_VAR_NAME = "_ptr_backup";
-const TYPE MHTranslator::STAT_MEMO_TYPE = code::Type(StaticClsName,false,false);
-const TYPE MHTranslator::REF_STAT_MEMO_TYPE = code::Type(StaticClsName, true, false);
-const TYPE MHTranslator::TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, false);
-const TYPE MHTranslator::REF_TEMP_MEMO_TYPE = code::Type(TemporalClsName, true, false);
-const TYPE MHTranslator::PTR_TEMP_MEMO_TYPE = code::Type(TemporalClsName, false, true);
-// Global Variable Names for Particle Filtering
-const std::string MHTranslator::CUR_STATE_VAR_NAME = "_cur_state";
-const std::string MHTranslator::CUR_TIMESTEP_VAR_NAME = "_cur_time";
-// Temporary Local Variable Names
-const std::string MHTranslator::TMP_LOOP_VAR_NAME = "_i";
-const std::string MHTranslator::TMP_LOCAL_TS_INDEX_VAR_NAME = "_tmp_idx";
-// Special Util Funciton for PF
-const std::string MHTranslator::PF_RESAMPLE_FUN_NAME = "resample";
-const std::string MHTranslator::PF_NORMALIZE_LOGWEI_FUN_NAME = "normalizeLogWeights";
-const std::string MHTranslator::PF_COPY_PTR_FUN_NAME = "pointer_copy";
-// Special Util data structure for PF to store temporal evidence/query/print
-const std::string MHTranslator::TMP_EVI_STORE_NAME = "_evidenceTable";
-const code::Type MHTranslator::TMP_EVI_STORE_TYPE("std::function<bool(double&)>");
-const std::string MHTranslator::TMP_EVI_INIT_FUNC_NAME = "setup_temporal_evidences";
-const std::string MHTranslator::TMP_QUERY_STORE_NAME = "_queryTable";
-const code::Type MHTranslator::TMP_QUERY_STORE_TYPE("std::function<void(double)>");
-const std::string MHTranslator::TMP_QUERY_INIT_FUNC_NAME = "setup_temporal_queries";
-const std::string MHTranslator::TMP_PRINT_STORE_NAME = "_printTable";
-const code::Type MHTranslator::TMP_PRINT_STORE_TYPE("std::function<void(void)>");
-const std::string MHTranslator::TMP_PRINT_INIT_FUNC_NAME = "setup_temporal_prints";
+const std::string MHTranslator::CoreQueryFuncName = "_eval_query";
+const std::string MHTranslator::CoreStorageInitFuncName = "_init_storage";
+const std::string MHTranslator::CoreWorldInitFuncName = "_init_world";
+const std::string MHTranslator::CoreGarbageCollectFuncName = "_garbage_collection";
+const std::string MHTranslator::CorePrintFuncName = "_print_answer";
+const std::string MHTranslator::MCMCResampleFuncName = "mcmc_sample_single_iter"; // this function is from MCMC.h
+
+// Global Class/Var Name
+const std::string MHTranslator::BayesVarClsName = "BayesVar";
+const std::string MHTranslator::ActiveListName = "_active_list";
+const std::string MHTranslator::RoundCounterVarName = "_tot_round";
+const std::string MHTranslator::TotalRoundVarName = "_TOT_LOOP";
+const std::string MHTranslator::BurnInVarName = "_BURN_IN";
+
+// BayesVar Method Name
+const std::string MHTranslator::MCMC_Global_MHAlgo_MethodName = "mh_parent_resample_arg";
+const std::string MHTranslator::MCMC_Global_MHNumVarAlgo_MethodName = "mh_parent_resample_numvar_arg";
+const std::string MHTranslator::MCMC_Global_Clear_MethodName = "clear_arg";
+const std::string MHTranslator::MCMC_Global_GetVal_MethodName = "getval_arg";
+const std::string MHTranslator::MCMC_Global_GetCache_MethodName = "getcache_arg";
+const std::string MHTranslator::MCMC_Global_GetValNumVar_MethodName = "getval_numvar_arg";
+const std::string MHTranslator::MCMC_Global_GetCacheNumVar_MethodName = "getcache_numvar_arg";
+const std::string MHTranslator::MCMC_GetName_MethodName = "getname";
+const std::string MHTranslator::MCMC_Resample_MethodName = "mcmc_resample";
+const std::string MHTranslator::MCMC_Clear_MethodName = "clear";
+const std::string MHTranslator::MCMC_GetVal_MethodName = "getval";
+const std::string MHTranslator::MCMC_GetCache_MethodName = "getcache";
+const std::string MHTranslator::MCMC_SampleVal_MethodName = "sample";
+const std::string MHTranslator::MCMC_SampleCache_MethodName = "sample_cache";
+const std::string MHTranslator::MCMC_GetLike_MethodName = "getlikeli";
+const std::string MHTranslator::MCMC_GetCacheLike_MethodName = "getcachelikeli";
+const std::string MHTranslator::MCMC_ActiveEdge_MethodName = "active_edge";
+const std::string MHTranslator::MCMC_RemoveEdge_MethodName = "remove_edge";
+//   ==> Evidence Related
+const std::string MHTranslator::MCMC_CheckObs_MethodName = "check_obs";
+const std::string MHTranslator::MCMC_UpdateObs_MethodName = "update_obs";
+//   ==> Number Variable Related
+const std::string MHTranslator::MCMC_UpdateRef_MethodName = "update_reference";
+const std::string MHTranslator::MCMC_ClearRef_MethodName = "clear_reference";
+const std::string MHTranslator::MCMC_CalcRefDiff_MethodName = "get_reference_diff";
+const std::string MHTranslator::MCMC_EnsureSize_MethodName = "ensure_size";
+const std::string MHTranslator::MCMC_EnsureSupport_MethodName = "ensure_support_prop_arg";
+const std::string MHTranslator::MCMC_EnsureCache_MethodName = "ensure_cache_prop_arg";
+const std::string MHTranslator::MCMC_ClearProp_MethodName = "clear_prop_arg";
+
+// BayesVar member variable
+const std::string MHTranslator::MCMC_Val_VarName = "val";
+const std::string MHTranslator::MCMC_Cache_VarName = "cache_val";
+const std::string MHTranslator::MCMC_CachedFlag_VarName = "is_cached";
+const std::string MHTranslator::MCMC_ActiveFlag_VarName = "is_active";
+const std::string MHTranslator::MCMC_ObsFlag_VarName = "is_obs";
+// ==> Number Variable Related
+const std::string MHTranslator::MCMC_PropSize_VarName = "property_size";
+const std::string MHTranslator::MCMC_Capacity_VarName = "capacity";
+
+// Temp variable
+const std::string MHTranslator::TEMP_N_NAME = "_n";
+const std::string MHTranslator::TEMP_FROM_NAME = "_from";
+const std::string MHTranslator::TEMP_TO_NAME = "_to";
+const std::string MHTranslator::TEMP_IND_NAME = "_i";
+const std::string MHTranslator::TEMP_VAL_NAME = "_t_val";
+
+// Util Func Name
+const std::string MHTranslator::UtilSetEviFuncName = "_util_set_evidence";
+const std::string MHTranslator::UtilUpdateRefFuncName = "_util_update_reference";
+const std::string MHTranslator::UtilClearRefFuncName = "_util_clear_reference";
+const std::string MHTranslator::UtilCalcRefDiffFuncName = "_util_calc_reference_diff";
+const std::string MHTranslator::UtilFreeObjFuncName = "_free_obj";
 
 ///////////////////////////////////////////////////////////////
-//  Util Functions for Particle Filtering
+//  Util Functions for Metropolis-Hastings
 ///////////////////////////////////////////////////////////////
-code::Stmt* MHTranslator::referStaticStateStmt(code::DeclContext* context) {
-  return new code::DeclStmt(new code::VarDecl(context, CUR_STATE_VAR_NAME, REF_STAT_MEMO_TYPE,
-      new code::ArraySubscriptExpr(new code::Identifier(STAT_MEMO_VAR_NAME),
-                                   new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME))));
-}
 
-code::Stmt* MHTranslator::referTempStateStmt(code::DeclContext* context, std::string tempArg) {
-  code::Expr* TS_loc = new code::BinaryOperator(
-    new code::Identifier(tempArg), new code::Identifier(DEPEND_NUM_VAE_NAME), code::OpKind::BO_MOD);
-  return new code::DeclStmt(new code::VarDecl(context, CUR_STATE_VAR_NAME, REF_TEMP_MEMO_TYPE,
-    new code::BinaryOperator(
-      NULL,
-      new code::ArraySubscriptExpr(
-        new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), 
-                                   new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
-        TS_loc),
-      code::OpKind::UO_DEREF)));
-}
-
-code::Expr* MHTranslator::referVarFromState(code::Expr* var) {
-  return new code::BinaryOperator(new code::Identifier(CUR_STATE_VAR_NAME), var, code::OpKind::BO_FIELD);
-}
-
-code::ForStmt* MHTranslator::createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body, 
-      bool isVarDefined, bool isLess) {
-  code::Stmt* init = NULL;
-  if (isVarDefined)  
-    init = new code::BinaryOperator(new code::Identifier(loop_var),new code::IntegerLiteral(0),code::OpKind::BO_ASSIGN);
-  else
-    init = new code::DeclStmt(new code::VarDecl(NULL, loop_var, INT_TYPE, new code::IntegerLiteral(0)));
-  return new code::ForStmt(init,
-    new code::BinaryOperator(new code::Identifier(loop_var),new code::Identifier(loop_n),
-                             (isLess ? code::OpKind::BO_LT : code::OpKind::BO_LEQ)),
-    new code::BinaryOperator(new code::Identifier(loop_var),NULL,code::OpKind::UO_INC),
-    body);
-}
-
-code::Expr* MHTranslator::createVarPlusDetExpr(std::string varName, int det) {
-  if (det == 0) 
-    return new code::Identifier(varName);
-  code::OpKind opr = (det > 0 ? code::OpKind::BO_PLUS : (det = -det, code::OpKind::BO_MINUS));
-  return new code::BinaryOperator(new code::Identifier(varName), new code::IntegerLiteral(det), opr);
-}
-
-bool MHTranslator::isTemporalType(code::Type ty) {
-  return ty.getName() == ir::IRConstString::TIMESTEP;
-}
-
-/*
- * ==> table[ts]
- */
-code::Expr* MHTranslator::tempTableEntryRefer(std::string table, int ts) {
-  code::Expr* ind;
-  if (ts < 0) ind = new code::Identifier(CUR_TIMESTEP_VAR_NAME);
-  else ind = new code::IntegerLiteral(ts);
-  code::Expr* entry = new code::ArraySubscriptExpr(new code::Identifier(table), ind);
-  return entry;
-}
-
-// Special Utils for Liu-West Filter
-std::set<std::string> MHTranslator::obsFuncStore = std::set<std::string>();
-const std::string MHTranslator::DOUBLE_PERTURB_FUN_NAME = "__perturb";
-const std::string MHTranslator::MATRIX_PERTURB_FUN_NAME = "__perturb_matrix";
-
-// Set Parameters
-void MHTranslator::setIterationNum(int iter) {
-  iterNum = iter;
-}
-void MHTranslator::setTimeLimit(int tm) {
-  ModelTimeLimit = tm;
-}
-void MHTranslator::setDepend(int dep) {
-  ModelDependency = dep;
-}
 
 /////////////// END of Util Functions ///////////////////
 
 MHTranslator::MHTranslator() {
   Translator();
-  coreStaticCls = NULL;
-  coreTemporalCls = NULL;
-  coreTemporalClsClear = NULL;
   iterNum = DEFAULT_TOTAL_NUM_ITERATIONS;
-  ModelDependency = 0;
-  ModelTimeLimit = 0;
+  burnInNum = iterNum / 2;
+  coreQuery = code::FunctionDecl::createFunctionDecl(coreNs,CoreQueryFuncName,VOID_TYPE);
+  coreStorageInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreStorageInitFuncName, VOID_TYPE);
+  coreWorldInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreWorldInitFuncName, VOID_TYPE);
+  coreGarbageCollect = code::FunctionDecl::createFunctionDecl(coreNs, CoreGarbageCollectFuncName, VOID_TYPE);
+  corePrint = code::FunctionDecl::createFunctionDecl(coreNs, CorePrintFuncName, VOID_TYPE);
 }
+
+void MHTranslator::setIterationNum(int iter) {
+  iterNum = iter;
+  burnInNum = iterNum / 2;
+}
+
+void MHTranslator::setBurnInNum(int bi) {
+  burnInNum = bi;
+}
+
+/////////////////////////////////////////
+///// @Start
+////// Start From here
+//////////////////////////////////////////
+
 
 void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   this->model = model;
 
+  prog->addOption("MCMC");
+
   // Special Check for Matrix Usage
   if (model->isUseMatrix())
     prog->addOption("matrix");
+
+  // Model Analysis
+  analyzer::MCMCAnalyzer mcmc_analyzer(model);
+  if (!mcmc_analyzer.process()) {
+    delete prog;
+    prog = NULL; // model not valid
+    return ;
+  }
+
+  ss
 
   if (model->getMarkovOrder() > ModelDependency)
     ModelDependency = model->getMarkovOrder();
@@ -246,7 +235,7 @@ code::FunctionDecl* MHTranslator::transSampleAlg() {
   //   ::: => init()
   fun->addStmt(
       new code::CallExpr(new code::Identifier(MAIN_INIT_FUN_NAME)));
-  //call the initialization function for all static Memorization Data Structure
+  //call the initialization function for all Memorization Data Structure
   //   ::: => for(cur_loop = 0; cur_loop < particleN; ++ cur_loop) stat_memo[cur_loop].init();
   fun->addStmt(createForeachLoop(CURRENT_SAMPLE_NUM_VARNAME,PARTICLE_NUM_VAR_NAME,
     code::CallExpr::createMethodCall(
@@ -440,7 +429,7 @@ void MHTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   // create ensure_num function
   // TODO: yiwu Oct.5.2014
   //   ---> currently a hack. Since we do not allow temporal numberstatement in TimeSeries Model!
-  //          So ensure function always locates in the static state
+  //          So ensure function always locates in the state
   code::FunctionDecl* ensureFun = code::FunctionDecl::createFunctionDecl(
       coreStaticCls, getEnsureFunName(numvar), VOID_TYPE, true);
   declared_funs[ensureFun->getName()] = ensureFun;
@@ -1573,7 +1562,7 @@ void MHTranslator::createInit() {
   coreClsInit = code::FunctionDecl::createFunctionDecl(coreNs,
                                                        MAIN_INIT_FUN_NAME,
                                                        VOID_TYPE);
-  // add clear and init method for static and temporal variables
+  // add clear and init method for and temporal variables
   coreStaticClsInit = code::FunctionDecl::createFunctionDecl(coreStaticCls,
     MAIN_INIT_FUN_NAME,
     VOID_TYPE);

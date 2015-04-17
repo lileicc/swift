@@ -16,15 +16,15 @@ namespace analyzer {
 
 class Analyzer {
 public:
-  Analyzer(ir::BlogModel* _model = NULL);
+  Analyzer(std::shared_ptr<ir::BlogModel> _model = nullptr);
   virtual ~Analyzer();
  
   virtual bool process() = 0;
   
-  virtual void setModel(ir::BlogModel* _model);
+  virtual void setModel(std::shared_ptr<ir::BlogModel> _model);
 
 protected:
-  ir::BlogModel* model;
+  std::shared_ptr<ir::BlogModel> model;
   msg::ErrorMsg errMsg;
 };
 
