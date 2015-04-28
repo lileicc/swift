@@ -11,6 +11,8 @@ public:
   virtual ~VarRefer();
 
   std::shared_ptr<VarDecl> getRefer() const;
+
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
 private:

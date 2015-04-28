@@ -1,4 +1,5 @@
 #include "InstSymbolRef.h"
+#include "TypeDomain.h"
 
 namespace swift {
 namespace ir {
@@ -16,6 +17,10 @@ const InstSymbol* InstSymbolRef::getInst() const {
 void InstSymbolRef::print(FILE* file, int indent) const {
   fprintf(file, "%*sInstSymbolRef: \n", indent, "");
   inst->print(file, indent + 2);
+}
+
+std::string InstSymbolRef::toString() {
+  return inst->getRefer()->getInstName(inst->getID());
 }
 
 }

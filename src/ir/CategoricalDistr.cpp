@@ -50,5 +50,14 @@ void CategoricalDistr::print(FILE* file, int indent) const {
   }
 }
 
+std::string CategoricalDistr::toString() {
+  std::string ret = "Categorical(";
+  for (size_t i = 0; i < size(); ++i) {
+    ret.append(getSymbol(i)->toString() + "->" + std::to_string(getWeight(i)));
+  }
+  ret.push_back(')');
+  return ret;
+}
+
 }
 }

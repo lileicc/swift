@@ -12,6 +12,8 @@
 #include <memory>
 #include <set>
 #include <string>
+#include "../analyzer/MCMCAnalyzer.h"
+#include "../analyzer/ContigAnalyzer.h"
 
 namespace swift {
 namespace codegen {
@@ -25,6 +27,9 @@ public:
   void setBurnInNum(int iter);
   
 protected:
+  analyzer::MCMCAnalyzer* mcmc_analyzer;
+  analyzer::ContigAnalyzer* contig_analyzer;
+
   /**
   * how many interations to sample in total : default parameter for MCMC
   */
@@ -66,8 +71,13 @@ protected:
   static const std::string MCMC_Global_Clear_MethodName;
   static const std::string MCMC_Global_GetVal_MethodName;
   static const std::string MCMC_Global_GetCache_MethodName;
+  static const std::string MCMC_Global_EnsureCache_MethodName;
   static const std::string MCMC_Global_GetValNumVar_MethodName;
   static const std::string MCMC_Global_GetCacheNumVar_MethodName;
+  static const std::string MCMC_Global_AddChild_MethodName;
+  static const std::string MCMC_Global_RemoveChild_MethodName;
+  static const std::string MCMC_Global_AddContig_MethodName;
+  static const std::string MCMC_Global_RemoveContig_MethodName;
   static const std::string MCMC_GetName_MethodName;
   static const std::string MCMC_Resample_MethodName;
   static const std::string MCMC_Clear_MethodName;
@@ -83,6 +93,7 @@ protected:
   static const std::string MCMC_CheckObs_MethodName;
   static const std::string MCMC_UpdateObs_MethodName;
   //   ==> Number Variable Related
+  static const std::string MCMC_GetPropSize_MethodName;
   static const std::string MCMC_UpdateRef_MethodName;
   static const std::string MCMC_ClearRef_MethodName;
   static const std::string MCMC_CalcRefDiff_MethodName;
@@ -98,7 +109,6 @@ protected:
   static const std::string MCMC_ActiveFlag_VarName;
   static const std::string MCMC_ObsFlag_VarName;
   // ==> Number Variable Related
-  static const std::string MCMC_PropSize_VarName;
   static const std::string MCMC_Capacity_VarName;
 
   // Temp variable
@@ -107,42 +117,112 @@ protected:
   static const std::string TEMP_TO_NAME;
   static const std::string TEMP_IND_NAME;
   static const std::string TEMP_VAL_NAME;
+  static const std::string TEMP_FLAG_NAME;
+  static const std::string TEMP_LOOP_VAR_NAME;
 
   // Util Func Name
   static const std::string UtilSetEviFuncName;
   static const std::string UtilUpdateRefFuncName;
+  static const std::string UtilUpdateObsFuncName;
   static const std::string UtilClearRefFuncName;
   static const std::string UtilCalcRefDiffFuncName;
   static const std::string UtilFreeObjFuncName;
 
 
+  // Predefined Types
+  static const code::Type NumberVar_Base_Type;
+  
 
-  ////////// @Start ///////////////////////
-  // Start from Here!!!!
+  ////////////////////////////////////////////////
+  // Util Functions for MCMC
+  ////////////////////////////////////////////////
+  std::string getNameOfNumberVar(std::string name);
+  std::string getStoreOfNumberVar(std::string name);
+  std::string getNameOfRandomVar(std::string name);
+  std::string getStoreOfRandomVar(std::string name);
+
+  // create method call for a pointer
+  code::Expr* createPtrMethodCall(code::Expr* ptr, std::string method_name, 
+    std::vector<code::Expr*> args = std::vector<code::Expr*>());
+
+  // create a reference to a random variable
+  code::Expr* createRandomVarRef(std::shared_ptr<ir::Expr> expr);
+
+  // get the random function name corresponding to the expression
+  std::string getRandomVarRefName(std::shared_ptr<ir::Expr> expr);
+
+  void addDefualtMethods(std::string name, code::ClassDecl* clsdef, code::Type clsValRefType, bool isNumberVar);
+  void addNumberVarSpecialMethods(std::string name, code::ClassDecl* clsdef, int prop_size);
+  void addObjectRefSpecialMethods(std::string name, std::string objTypeName, code::ClassDecl* clsdef);
+  void addEvidenceCheckSpecialMethods(std::string name, code::ClassDecl* clsdef);
+
+  // util function for ensure_clear(), ensure_cache(), ensure_support()
+  /*
+   * @param: storage variable name
+   * @param: method name
+   * @param: refering the current index, default = TEMP_IND_NAME("_i")
+   * @param: dimensions of indices, if dim[k]==0, then k-th dim is denoted by argname
+   * @return: the generated for loop
+   */
+  code::Stmt* createLoopMethodCall(std::string varname, std::string method_name, std::string argname, std::vector<int> dims);
+  // util function for ensure_size()
+  /*
+  * @param: storage variable name
+  * @param: variable class name
+  * @param: lower bound looping range, default = MCMC_Capacity_var("capapcity")
+  * @param: upper bound looping range, default = TEMP_N_VAR_NAME("_n")
+  * @param: dimensions of indices, if dims[i]==0, that dimension should range from lo to hi
+  */
+  code::Stmt* createLoopNewObject(std::string store_name, std::string var_name, 
+    std::string lo_var, std::string hi_var, std::vector<int> dims);
+
+  ///////////////////////////////////////////////////////////////////
+  //     Core methods start from here
   ///////////////////////////////////////////////////////////////////
 
-  /**
-   * declare a named type
-   * it will create class definition for this type, and one field "name" (std::string)
-   */
-  inline TYPEDEFN DECLARE_TYPE(std::string name);
+  // Add Constant Values
+  void transGlobalConstant();
 
-  inline ORIGINDEFN DECLARE_ORIGIN_FIELD(TYPEDEFN typedf, std::string originname,
-      TYPE origintype);
+  // create class def for number variable
+  void transTypeDomainDef(std::shared_ptr<ir::TypeDomain> ty);
+
+  // create class def for normal random variable
+  void transRandomFuncDef(std::shared_ptr<ir::FuncDefn> fun);
+
+  // set function call in the method of mcmc_resample()
+  void setSampleAlgorithm();
+
+  // create storage initialization
+  void createStorageInit();
+
+  // translate sample()/sample_cache()/getlikeli()/getcachelikeli()
+  void transSampleMethod(std::string name, std::shared_ptr<ir::Clause> body);
+
+  // translate active_edge()/remove_edge()
+  void transDependency(std::shared_ptr<ir::Clause> cls, 
+                        code::CompoundStmt& cmp,
+                        std::string child_method_name,
+                        std::string contig_method_name);
+
+  code::Stmt* transDependIfThen(std::shared_ptr<ir::IfThen> st, std::string child_method_name, std::string contig_method_name);
+
+  code::Stmt* transDependBranch(std::shared_ptr<ir::Branch> br, std::string child_method_name, std::string contig_method_name);
+
+  code::Stmt* transDependMultiCase(std::shared_ptr<ir::Branch> br, std::string child_method_name, std::string contig_method_name);
+
+  // translate clear_prop()/ensure_support()/ensure_size()/ensure_cache()
+  void transObjectProperty(std::shared_ptr<ir::TypeDomain> ty, std::vector<std::shared_ptr<ir::FuncDefn>>& funcs);
+
   /**
-   *  create BLOG instance, which can be distinct symbols, 
-   *  or instance generated in possible worlds
-   *
-   *  @param tyname         blog type name
-   *  @param instname       instance name
-   *  @param originvalues   a vector of values for origin fields
-   *  @param ncopy          how many copy to create, if null, it will just create 1
-   *
-   *  @return an assignment statement in target code
-   */
-  inline STMT CREATE_INSTANCE(std::string tyname, std::string instname, std::vector<EXPR> originvalues = std::vector<EXPR>(), EXPR ncopy = nullptr, bool inGetter = false);
-  
-  inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
+  * translate all queries
+  */
+  void transAllQuery(std::vector<std::shared_ptr<ir::Query>> queries);
+  void transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr, int n);
+
+  /**
+  * translate all evidences
+  */
+  void transAllEvidence(std::vector<std::shared_ptr<ir::Evidence>> evids);
 
   /**
    * create FunctionDecl and setup argument for sampling algorithm
@@ -150,8 +230,6 @@ protected:
    * @return
    */
   inline SAMPLEFUN DECLARE_SAMPLEFUN();
-  
-  inline SITE DECLARE_STORE_SITE();
 
   /**
    * translate the sampling algorithm
@@ -159,38 +237,24 @@ protected:
    */
   virtual code::FunctionDecl* transSampleAlg();
 
-  void transTypeDomain(std::shared_ptr<ir::TypeDomain> td);
-  /**
-   * translate blog function
-   */
-  void transFun(std::shared_ptr<ir::FuncDefn> fd);
-
-  /**
-   * create declaration of variables/fields
-   * initialization statements
-   */
-  virtual void createInit();
-
   /**
    * create main function
    */
   void createMain();
-  
-  /**
-   * translate the blog function to getter function
-   * ::: random Color truecolor(Ball b) => int get_truecolor(int i)
-   */
-  code::FunctionDecl* transGetterFun(std::shared_ptr<ir::FuncDefn> fd);
-  /**
-   * translate the blog function body to likelihood function
-   */
-  code::FunctionDecl* transLikeliFun(std::shared_ptr<ir::FuncDefn> fd);
-  /**
-   * setup the Setter function for a predicate
-   * will set a value for the given Function Application variable
-   * and calculate the likelihood (need to call the likelifun)
-   */
-  code::FunctionDecl* transSetterFun(std::shared_ptr<ir::FuncDefn> fd);
+
+  ////////////////////////////////////////////////////////
+  // Global Flag
+  // Indicate the class the current expr/stmt locates in
+  //    When it is not NULL, we need to register variable/distributions
+  code::ClassDecl* cur_context;
+  // The constructor of the class pointed by cur_contex
+  code::CompoundStmt* cur_constructor;
+  // indicate whether using getval() or getcache()
+  std::string cur_method_name;
+  // indicate whether using getlikeli() or getcachelikeli()
+  std::string cur_likeli_method_name;
+  /////////////////////////////////////////////////////////
+
   /**
   * translate the blog function body to a fixed function
   */
@@ -199,6 +263,7 @@ protected:
    * translate a clause in ir to a statement in code,
    * retvar is for return variable
    * if valuevar is given, then it will calculate weight instead of sampling
+   * method denotes the method name in order to get the actual value
    */
   code::Stmt* transClause(std::shared_ptr<ir::Clause> clause,
       std::string retvar, std::string valuevar = std::string());
@@ -224,8 +289,8 @@ protected:
    * retvar is for return variable
    * if valuevar is nonempty, then it will calculate weight instead of sampling
    */
-  code::Expr* transExpr(std::shared_ptr<ir::Expr> expr, std::string valuevar =
-      std::string());
+  code::Expr* transExpr(std::shared_ptr<ir::Expr> expr, 
+    std::string valuevar = std::string());
 
   code::Expr* transMapExpr(std::shared_ptr<ir::MapExpr> mex);
   /**
@@ -247,10 +312,13 @@ protected:
 
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
-  code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, std::string valuevar =
-                            std::string());
+  code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, 
+    std::string valuevar = std::string(),
+    bool is_return_value = true);
   
   /**
+   *  @deprecated: TODO: currently MCMC do not support origin function!
+   * 
    *  translate the origin function call (origin reference)
    *
    *  @param originref origin function
@@ -266,36 +334,10 @@ protected:
   code::Expr* transSetExpr(std::shared_ptr<ir::SetExpr> e);
 
   /*
-  * translate the QuantForm. Including both forall and exists
-  */
+   * translate the QuantForm. Including both forall and exists
+   */
   code::Expr* transQuantForm(std::shared_ptr<ir::QuantForm> qt, code::Expr* cond);
 
-  /**
-   * translate the evidence in obs statement, the resulting statement is added
-   * to the declaration context
-   *
-   *  @param context within which the translated statment will reside
-   *  @param evid    ir evidence declaration
-   */
-  void transEvidence(std::vector<std::vector<code::Stmt*> >&setterFuncs,
-      std::vector<std::vector<code::Stmt*> >&likeliFuncs,
-      std::shared_ptr<ir::Evidence> evid, bool transFuncApp = true);
-
-  /**
-   * translate all evidences
-   */
-  void transAllEvidence(std::vector<std::shared_ptr<ir::Evidence>> evids);
-
-  /**
-   * translate all queries
-   */
-  void transAllQuery(std::vector<std::shared_ptr<ir::Query>> queries);
-  /**
-   * translate n-th query
-   */
-  void transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs,
-      std::vector<std::vector<code::Stmt*> >& printFuncs, 
-      std::shared_ptr<ir::Query> qr, int n);
   /**
    * create reference to blog function value
    */
@@ -309,7 +351,6 @@ protected:
   void addFunValueAssignStmt(code::FunctionDecl* fun, std::string valuevarname,
                              std::vector<code::ParamVarDecl*>& valueindex,
                              std::string valuerefname);
-  
   
   /**
    * create a field for function value
@@ -328,9 +369,12 @@ protected:
 
   /**
    * translate the function call expression
+   * Note: when is_return_value == true: return a concrete value
+   *                              false: return a reference to the random variable
    */
   code::Expr* transFunctionCall(std::shared_ptr<ir::FunctionCall> fc,
-      std::vector<code::Expr*> args);
+      std::vector<code::Expr*> args,
+      bool is_return_value = true);
 
   code::ParamVarDecl* transParamVarDecl(code::DeclContext* context,
       const std::shared_ptr<ir::VarDecl> var);
@@ -341,22 +385,6 @@ protected:
    */
   std::vector<code::ParamVarDecl*> transParamVarDecls(
       code::DeclContext* context, std::shared_ptr<ir::FuncDefn> fun);
-
-  // Util Functions
-  static code::Stmt* referStaticStateStmt(code::DeclContext* context);
-  static code::Stmt* referTempStateStmt(code::DeclContext* context, std::string tempVar);
-  static code::Expr* referVarFromState(code::Expr*);
-  static code::ForStmt* createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body = NULL, 
-      bool isVarDefined = false, bool isLess = true);
-  static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
-  static bool isTemporalType(code::Type ty);
-  static code::Expr* tempTableEntryRefer(std::string table, int ts = -1);
-
-  // Utils for Liu-West Filter
-  // Record all the random function names accociated with at least *ONE* observation
-  static std::set<std::string> obsFuncStore;
-  static const std::string DOUBLE_PERTURB_FUN_NAME;
-  static const std::string MATRIX_PERTURB_FUN_NAME;
 };
 
 } /* namespace codegen */

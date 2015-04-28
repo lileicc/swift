@@ -956,7 +956,53 @@ void CPPPrinter::print(std::vector<code::Expr*>& exprs) {
 }
 
 void CPPPrinter::print(code::ClassConstructor* term) {
-  print(term, false);
+  if (isforward) return;
+  bool backup;
+  if (isheader) {
+    printIndent();
+    backup = newline;
+    newline = false;
+    fprintf(file, "%s(", term->getName().c_str());
+    bool not_first = false;
+    for (auto p : term->getParams()) {
+      if (not_first)
+        fprintf(file, ",");
+      else
+        not_first = true;
+      p->print(this);
+    }
+    fprintf(file, ");");
+    newline = backup;
+    printLine();
+  }
+  else {
+    printIndent();
+    backup = newline;
+    newline = false;
+    printPrefix();
+    fprintf(file, "%s(", term->getName().c_str());
+    bool not_first = false;
+    for (auto p : term->getParams()) {
+      if (not_first)
+        fprintf(file, ", ");
+      else
+        not_first = true;
+      p->print(this);
+    }
+    fprintf(file, ")");
+
+    // print initial expression
+    if (term->getInitExpr() != NULL) {
+      fprintf(file, ":");
+      term->getInitExpr()->print(this);
+    }
+
+    newline = backup;
+    printLine();
+
+    term->getBody().print(this);
+  }
+
 }
 
 void CPPPrinter::print(code::CallClassConstructor* term) {

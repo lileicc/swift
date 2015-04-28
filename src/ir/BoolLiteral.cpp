@@ -20,5 +20,9 @@ void BoolLiteral::print(FILE* file, int indent) const {
       (value ? "true" : "false"));
 }
 
+std::string BoolLiteral::toString() {
+  return value ? "'true" : "'false";
+}
+
 }
 }

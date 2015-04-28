@@ -22,6 +22,7 @@ public:
   virtual void addArg(std::shared_ptr<Expr> e);
   std::shared_ptr<Expr> getCond() const;
 
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
 private:

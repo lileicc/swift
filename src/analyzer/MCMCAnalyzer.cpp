@@ -22,6 +22,11 @@ MCMCAnalyzer::MCMCAnalyzer(std::shared_ptr<ir::BlogModel> _model)
   : Analyzer(_model) {
 }
 
+// Check whether a function has an argument of open-type
+bool MCMCAnalyzer::isPropertyFunc(std::shared_ptr<ir::FuncDefn> fun) {
+  return prop_fun.count(fun) > 0;
+}
+
 // Number Variable related
 bool MCMCAnalyzer::isOpenType(std::shared_ptr<ir::TypeDomain> ty) {
   return prop_size.count(ty) > 0;
@@ -49,6 +54,7 @@ bool MCMCAnalyzer::process() {
   ///////////////////////////////////////////////
   prop_size.clear();
   depend_func.clear();
+  prop_fun.clear();
 
   // Only one number statement per type allowed
   //      when with number statement, no distinct vars are allowed
@@ -101,6 +107,7 @@ bool MCMCAnalyzer::process() {
     }
 
     if (refer != nullptr) {
+      prop_fun.insert(f);
       prop_size[refer] += arg_dim;
       depend_func[refer].push_back(f);
     }

@@ -896,7 +896,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::CardExpr> Semant::processCardExpr(absyn::Expr* expr) {
+std::shared_ptr<ir::Expr> Semant::processCardExpr(absyn::Expr* expr) {
   std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
   cd->setTyp(lookupTy(ir::IRConstString::INT));
   std::shared_ptr<ir::Expr> b = transExpr(expr);
@@ -906,13 +906,20 @@ std::shared_ptr<ir::CardExpr> Semant::processCardExpr(absyn::Expr* expr) {
       "Invalid Cardinality Expression! Body must be a SetExpr!");
     return cd;
   }
+  auto lst_st = std::dynamic_pointer_cast<ir::ListSet>(st);
+  if (lst_st != nullptr) {
+    auto ret = std::make_shared<ir::IntLiteral>(lst_st->getArgs().size());
+    ret->setRandom(false);
+    ret->setTyp(lookupTy(ir::IRConstString::INT));
+    return ret;
+  }
   cd->setBody(st);
   // randomness checking
   cd->setRandom(st->isRandom());
   return cd;
 }
 
-std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::CardinalityExpr* expr) {
   std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
   cd->setTyp(lookupTy(ir::IRConstString::INT));
   if (expr->size() != 1) {

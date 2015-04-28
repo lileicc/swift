@@ -19,6 +19,7 @@ bool Translator::COMPUTE_LIKELIHOOD_IN_LOG =
     swift::Configuration::getConfiguration()->getBoolValue(
         "COMPUTE_LIKELIHOOD_IN_LOG");
 
+const std::string Translator::KEYWORD_THIS = "this";
 const std::string Translator::VECTOR_CLASS_NAME = "vector";
 const std::string Translator::VECTOR_RESIZE_METHOD_NAME = "resize";
 const std::string Translator::VECTOR_ADD_METHOD_NAME = "push_back";
@@ -114,7 +115,7 @@ const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
 // Precison Parameter
 const double Translator::ZERO_EPS = 1e-30;
 
-Translator::Translator() {
+Translator::Translator(): errorMsg(stdout) {
   useTag = false;
   prog = new code::Code();
   coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);

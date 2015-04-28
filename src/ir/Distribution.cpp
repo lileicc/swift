@@ -48,5 +48,16 @@ void Distribution::print(FILE* file, int indent) const {
   }
 }
 
+std::string Distribution::toString() {
+  std::string ret = name + "(";
+  for (size_t i = 0; i < argSize(); ++i) {
+    if (i > 0) ret.push_back(',');
+    if (get(i) != nullptr)
+      ret.append(get(i)->toString());
+  }
+  ret.push_back(')');
+  return ret;
+}
+
 }
 }

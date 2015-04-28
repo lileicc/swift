@@ -82,5 +82,22 @@ void FunctionCall::print(FILE* file, int indent) const {
   }
 }
 
+std::string FunctionCall::toString() {
+  std::string ret = (refer != nullptr ? refer->getName() : builtin->getName()) + "(";
+  bool mark = false;
+  if (tmparg != nullptr) {
+    ret.append(tmparg->toString());
+    mark = true;
+  }
+  for (size_t i = 0; i < argSize(); ++i) {
+    if (mark) ret.push_back(',');
+    else mark=true;
+    if (get(i)!=nullptr)
+      ret.append(get(i)->toString());
+  }
+  ret.push_back(')');
+  return ret;
+}
+
 }
 }

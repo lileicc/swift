@@ -42,5 +42,15 @@ void MatrixExpr::print(FILE* file, int indent) const {
   }
 }
 
+std::string MatrixExpr::toString() {
+  std::string ret = (flag_colvec && !flag_rowvec ? "vec(" : "[");
+  for (size_t i = 0; i < argSize(); i++) {
+    if (i > 0) ret.push_back(',');
+    ret.append(get(i)->toString());
+  }
+  ret.push_back((flag_colvec && !flag_rowvec ? ')' : ']'));
+  return ret;
+}
+
 }
 }

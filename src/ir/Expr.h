@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <string>
 #include <vector>
 
 #include "Clause.h"
@@ -22,6 +23,7 @@ public:
   const std::vector<std::shared_ptr<Expr> >& getArgs() const;
   std::shared_ptr<Expr> get(size_t k) const;
   size_t argSize() const;
+  virtual std::string toString();
 protected:
   std::vector<std::shared_ptr<Expr> > args;
 };

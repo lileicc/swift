@@ -84,6 +84,22 @@ public:
   std::set<MCMCObject*> contig; // variables that are contingent on this var
   std::set<MCMCObject*> backup; // temporary storage
 
+  inline void add_contig(MCMCObject* var) {
+    contig.insert(var);
+  }
+
+  inline void erase_contig(MCMCObject* var) {
+    contig.insert(var);
+  }
+
+  inline void add_child(MCMCObject* var) {
+    child.insert(var);
+  }
+
+  inline void erase_child(MCMCObject* var) {
+    child.insert(var);
+  }
+
   Tp val;
   bool is_obs;
   bool is_active; // if a var is active and not observed, it is in active_list
@@ -111,6 +127,10 @@ public:
   // BUT will ensure the initialization of variables
   virtual void sample() = 0;
   virtual void sample_cache() = 0;
+  virtual inline void ensure_cache() {
+    sample_cache();
+    is_cached = _cur_loop;
+  }
 
   std::vector<Tp> all_vals; // containing all possible values
   // TODO: add method so that it can return a range of integer/real
@@ -354,8 +374,7 @@ class NumberVar : public BayesVar<int> {
 public:
 
   int capacity; // maximum value in history
-  int property_size;
-  NumberVar() : capacity(0), property_size(0) {};
+  NumberVar() : capacity(0) {};
 
   std::vector<int> refer_cnt; // reference number for each objects
   std::vector<int> active_obj; // all objects with at least one reference
@@ -387,7 +406,7 @@ public:
   virtual void ensure_size(int n) = 0; // need to specify!
 
   // Number of properties (random functions) related this this type
-  inline int get_property_size() { return property_size; }
+  virtual inline int get_property_size() { return 0; }
 
   // main resample process for number variable
   virtual void mcmc_resample_numvar_arg(NumberVar* cur_node);

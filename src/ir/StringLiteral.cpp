@@ -19,5 +19,9 @@ void StringLiteral::print(FILE* file, int indent) const {
   fprintf(file, "%*s(StringLitera: %s)\n", indent, "", value.c_str());
 }
 
+std::string StringLiteral::toString() {
+  return "\"" + value + "\"";
+}
+
 }
 }

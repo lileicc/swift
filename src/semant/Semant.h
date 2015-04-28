@@ -75,8 +75,8 @@ private:
 
   std::shared_ptr<ir::MapExpr> transExpr(absyn::MapExpr* expr);
 
-  std::shared_ptr<ir::CardExpr> processCardExpr(absyn::Expr* expr); // Special Treatment for CardExpr
-  std::shared_ptr<ir::CardExpr> transExpr(absyn::CardinalityExpr* expr);
+  std::shared_ptr<ir::Expr> processCardExpr(absyn::Expr* expr); // Special Treatment for CardExpr
+  std::shared_ptr<ir::Expr> transExpr(absyn::CardinalityExpr* expr);
 
   std::shared_ptr<ir::QuantForm> transExpr(absyn::QuantExpr* expr);
 

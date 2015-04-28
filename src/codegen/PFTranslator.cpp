@@ -944,6 +944,9 @@ code::Stmt* PFTranslator::transMultiCaseBranch(std::shared_ptr<ir::Branch> br,
 code::Stmt* PFTranslator::transBranch(std::shared_ptr<ir::Branch> br,
                                        std::string retvar,
                                        std::string valuevar) {
+  if (br->getArgDim() > 1)
+    return transMultiCaseBranch(br, retvar, valuevar); // Special Multi-Case Expr
+
   code::SwitchStmt* sst = new code::SwitchStmt(transExpr(br->getVar()));
   code::CaseStmt* cst;
   for (size_t i = 0; i < br->size(); i++) {

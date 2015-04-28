@@ -22,6 +22,8 @@ public:
 
   IRConstant getKind() const;
   std::shared_ptr<FuncDefn> getRefer() const;
+
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
   // TimeStep Features

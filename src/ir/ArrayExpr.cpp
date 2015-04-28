@@ -17,5 +17,15 @@ void ArrayExpr::print(FILE* file, int indent) const {
   }
 }
 
+std::string ArrayExpr::toString() {
+  std::string ret = "[";
+  for (size_t i = 0; i < args.size(); ++i) {
+    if (i > 0) ret.push_back(',');
+    ret.append(args[i]->toString());
+  }
+  ret.push_back(']');
+  return ret;
+}
+
 }
 }
