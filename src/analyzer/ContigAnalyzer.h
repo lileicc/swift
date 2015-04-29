@@ -44,7 +44,7 @@ private:
 
   void parse_expr(std::shared_ptr<ir::Expr> expr, bool is_restricted = false);
 
-  void process_fetch(std::shared_ptr<ir::Clause> cls);
+  void process_fetch(std::shared_ptr<ir::Clause> cls, bool restricted_flag = true);
 
   bool generate_conting(std::shared_ptr<ir::Clause> cls);
 

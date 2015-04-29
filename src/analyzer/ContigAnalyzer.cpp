@@ -126,8 +126,12 @@ void ContigAnalyzer::parse_expr(std::shared_ptr<ir::Expr> expr, bool is_restrict
   }
 }
 
-void ContigAnalyzer::process_fetch(std::shared_ptr<ir::Clause> cls) {
+void ContigAnalyzer::process_fetch(std::shared_ptr<ir::Clause> cls, bool restricted_flag) {
   if (referredVar.count(cls) > 0) return ;
+
+  auto backup_condVar = cur_condVar;
+  auto backup_restrictVar = cur_restrictVar;
+  auto backup_referredVar = cur_referredVar;
 
   cur_condVar = &condVar[cls];
   cur_restrictVar = &restrictVar[cls];
@@ -135,7 +139,9 @@ void ContigAnalyzer::process_fetch(std::shared_ptr<ir::Clause> cls) {
 
   auto expr = std::dynamic_pointer_cast<ir::Expr>(cls);
   if (expr != nullptr) {
-    parse_expr(expr, true); // This expression represents the distribution! Flag should be * TRUE *
+    parse_expr(expr, restricted_flag); // This expression represents the distribution! Flag should be * TRUE *
+
+    cur_condVar = backup_condVar; cur_restrictVar = backup_restrictVar; cur_referredVar = backup_referredVar;
     return ;
   }
 
@@ -197,6 +203,7 @@ void ContigAnalyzer::process_fetch(std::shared_ptr<ir::Clause> cls) {
     util_set_minus(restrictVar[b], *cur_restrictVar);
   }
 
+  cur_condVar = backup_condVar; cur_restrictVar = backup_restrictVar; cur_referredVar = backup_referredVar;
   return ;
 }
 
@@ -298,7 +305,7 @@ bool ContigAnalyzer::process() {
 
   // Evidences
   for (auto&evi : model->getEvidences()) {
-    parse_expr(evi->getLeft(), false);
+    process_fetch(evi->getLeft(), false);
 
     stack_child.clear();
     stack_contig.clear();

@@ -130,8 +130,8 @@ inline void _util_set_evidence(BayesVar<T>* ptr, T val) {
 template<class T>
 inline void _util_update_evidence(BayesVar<T>* ptr, bool flag) {
   if (ptr->is_obs == flag) return ;
-  ptr->is_obs = flag;
   if (flag) {
+    if (!ptr->is_active) ptr->getval();
     // A un-observed var become observed
     remove_var_from_list(ptr);
   }
@@ -139,6 +139,7 @@ inline void _util_update_evidence(BayesVar<T>* ptr, bool flag) {
     // an observed var become un-observed
     add_var_to_list(ptr);
   }
+  ptr->is_obs = flag;
 }
 
 }

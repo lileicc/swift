@@ -1038,19 +1038,24 @@ void MHTranslator::transAllEvidence(
     // check_obs() / update_obs() 
     auto& contig_list = contig_analyzer->getContig(evi->getLeft());
     if (contig_list.size() != 0) {
-      std::string name = getRandomVarRefName(evi->getLeft());
-      // assert(name.size() > 0);
-      addEvidenceCheckSpecialMethods(name, bayesVars[name]); // register methods: check_obs()/update_obs(bool flag)
-      
-      auto&mp = varMethods[name];
-      // bool check_obs() {if (var != evi) return false; ....}
-      mp[MCMC_CheckObs_MethodName]->addStmt(new code::IfStmt(
-        new code::BinaryOperator(transExpr(evi->getLeft()), transExpr(evi->getRight()), code::OpKind::BO_NEQ),
-        new code::ReturnStmt(new code::BooleanLiteral(false))));
-      // void update_obs(bool flag) {util_update_obs(var, flag);}
-      mp[MCMC_UpdateObs_MethodName]->addStmt(new code::CallExpr(
-        new code::Identifier(UtilUpdateObsFuncName), 
-        std::vector<code::Expr*> {createRandomVarRef(evi->getLeft()), new code::Identifier(TEMP_FLAG_NAME)}));
+      for (auto& v : contig_list) {
+        std::string name = getRandomVarRefName(v);
+        if (name.size() == 0) continue;
+
+        // assert(name.size() > 0);
+        addEvidenceCheckSpecialMethods(name, bayesVars[name]); // register methods: check_obs()/update_obs(bool flag)
+
+        auto&mp = varMethods[name];
+        // bool check_obs() {if (var != evi) return false; ....}
+        mp[MCMC_CheckObs_MethodName]->addStmt(new code::IfStmt(
+          new code::BinaryOperator(transExpr(evi->getLeft()), transExpr(evi->getRight()), code::OpKind::BO_NEQ),
+          new code::ReturnStmt(new code::BooleanLiteral(false))));
+
+        // void update_obs(bool flag) {util_update_obs(var, flag);}
+        mp[MCMC_UpdateObs_MethodName]->addStmt(new code::CallExpr(
+          new code::Identifier(UtilUpdateObsFuncName),
+          std::vector<code::Expr*> {createRandomVarRef(evi->getLeft()), new code::Identifier(TEMP_FLAG_NAME)}));
+      }
     }
   }
 
@@ -1080,8 +1085,6 @@ code::FunctionDecl* MHTranslator::transSampleAlg() {
     cmp);
 
   fun->addStmt(loop);
-
-  fun->addStmt(new code::CallExpr(new code::Identifier(CorePrintFuncName)));
 
   return fun;
 }
@@ -1168,6 +1171,12 @@ void MHTranslator::createMain() {
           code::CallExpr::createMethodCall("__elapsed_seconds", "count"),
           new code::IntegerLiteral(iterNum)}));
   mainFun->addStmt(st);
+
+  // Print Result
+  mainFun->addStmt(
+    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME),
+    new code::CallExpr(new code::Identifier(CorePrintFuncName)), code::OpKind::BO_SCOPE)
+  );
 
   // GarbageCollection
   mainFun->addStmt(

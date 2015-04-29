@@ -119,8 +119,8 @@ public:
   virtual void clear_arg(BayesVar* cur_node);
   virtual void clear() = 0;
 
-  virtual inline bool check_obs() { return true; }
-  virtual inline void update_obs(bool flag) {}; // for contingent var associated with obs
+  virtual bool check_obs() { return true; }
+  virtual void update_obs(bool flag) {}; // for contingent var associated with obs
 
   // this method only does the sampling process, NO graph maintainance.
   // For graph maintainance, we need to invoke getval()
@@ -181,6 +181,7 @@ Tp& BayesVar<Tp>::getval_arg(BayesVar* cur_node) {
       cur_node->sample();
 
     cur_node->is_active = true;
+
     add_var_to_list(cur_node); // add to active_list
 
     // add dependency edges
@@ -195,7 +196,8 @@ void BayesVar<Tp>::clear_arg(BayesVar* cur_node) {
   if (!cur_node->is_active) return;
 
   // remove from active_list
-  remove_var_from_list(cur_node);
+  if (!cur_node->is_obs)
+    remove_var_from_list(cur_node);
   cur_node->is_active = false;
 
   // We DO NOT clear cache here
@@ -260,11 +262,13 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
   double loc = uni_r_dist(engine) * all_weis.back(); // TODO: *IMPORTANT* simplified for close-world case here
   nxt_val = values[std::lower_bound(all_weis.begin(), all_weis.end(), loc) - all_weis.begin()];
 
+  cur_node->val = old_val;
+  if (nxt_val == old_val) return ;
 
-  if (nxt_val != old_val && contig.size() > 0) {
+  cur_node->update_obs(false);
+  if (contig.size() > 0) {
     backup = contig;
-    cur_node->val = old_val;
-    cur_node->update_obs(false);
+    
     for (auto&c : backup) {
       c->remove_edge();
     }
@@ -275,12 +279,11 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
 
     cur_node->update_reference(); // only has content when this returns an object
 
-    cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
     for (auto&c : backup) {
       c->active_edge();
     }
   }
-  else cur_node->val = nxt_val;
+  cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
 
   // in normal cases, there is no cache val
   cur_node->clear_cache();
@@ -302,21 +305,33 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
   cur_node->sample_cache();
   cur_node->is_cached = _cur_loop; // mark cache_flag
   Tp nxt_val = cur_node->cache_val;
+  cur_node->is_active = true;
+  if (nxt_val == old_val) return ;
+
+  cur_node->val = nxt_val;
+
+  if (!cur_node->check_obs()) {
+    return;
+  }
+
   for (auto&c : child)
     nxt_w += c->getcachelikeli();
   nxt_w -= std::log(_active_list.size() + cur_node->get_reference_diff(old_val, nxt_val));
   cur_node->is_active = true;
 
   cur_node->clear_cache();
+  
 
   double alpha = std::min(1.0, std::exp(nxt_w - old_w));
   double loc = uni_r_dist(engine);
   bool acceptance = (loc <= alpha);
 
   if (acceptance) { // accept
+    cur_node->val = old_val;
+    cur_node->update_obs(false);
+
     if (contig.size() > 0) {
       backup = contig;
-      cur_node->update_obs(false);
       for (auto&c : backup) {
         c->remove_edge();
       }
@@ -327,14 +342,15 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
 
       cur_node->update_reference(); // only has content when this returns an object
 
-      cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
       for (auto&c : backup) {
         c->active_edge();
       }
-    }
-    else
-      cur_node->val = nxt_val;
+    } else 
+       cur_node->val = nxt_val;
+
+    cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
   }
+  else cur_node->val = old_val; // reject
 
 }
 
@@ -343,9 +359,9 @@ void BayesVar<Tp>::conjugate_gibbs_resample_arg(BayesVar* cur_node) {
   Tp nxt_val;
   cur_node->conjugacy_analysis(nxt_val); // sample from true posterior with conjugacy
 
+  cur_node->update_obs(false);
   if (contig.size() > 0) {
     backup = contig;
-    cur_node->update_obs(false);
     for (auto&c : backup) {
       c->remove_edge();
     }
@@ -356,7 +372,6 @@ void BayesVar<Tp>::conjugate_gibbs_resample_arg(BayesVar* cur_node) {
 
     cur_node->update_reference(); // only has content when this returns an object
 
-    cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
     for (auto&c : backup) {
       c->active_edge();
     }
@@ -364,6 +379,7 @@ void BayesVar<Tp>::conjugate_gibbs_resample_arg(BayesVar* cur_node) {
   else
     cur_node->val = nxt_val;
 
+  cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
 }
 
 /////////////////////////////////////
@@ -566,14 +582,15 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
         obj_pos[t] = active_obj.size();
         active_obj.push_back(t);
       }
+
+      u->update_obs(false); // TODO: to support general evidence contigency!
       if (u->contig.size() > 0) {
         backup = u->contig;
-        u->update_obs(false);
+        
         for (auto&c : backup) {
           c->remove_edge();
         }
         u->val = t;
-        u->update_obs(true); // need to make sure support!
         for (auto&c : backup) {
           c->active_edge();
         }
@@ -581,17 +598,18 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
       else
         u->val = t;
 
+      u->update_obs(true); // need to make sure support!
       u->clear_cache();
     }
+
+    cur_node->update_obs(false);
     if (contig.size() > 0) {
       backup = contig;
-      cur_node->update_obs(false);
+      
       for (auto&c : backup) {
         c->remove_edge();
       }
-
       cur_node->val = nxt_val;
-      cur_node->update_obs(true); // need to make sure support!
       for (auto&c : backup) {
         c->active_edge();
       }
@@ -600,6 +618,7 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
       // set value
       cur_node->val = nxt_val;
     }
+    cur_node->update_obs(true); // need to make sure support!
     cur_node->clear_cache();
 
     // uninstantiate redundant properties
