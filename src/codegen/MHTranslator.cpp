@@ -326,6 +326,9 @@ void MHTranslator::addObjectRefSpecialMethods(std::string name, std::string objT
 
 code::Stmt* MHTranslator::createLoopMethodCall(
   std::string varname, std::string method_name, std::string argname, std::vector<int> dims) {
+
+  assert(dims.size() > 0);
+
   code::Expr* ref = new code::Identifier(varname);
   int cnt = 0;
   for (auto&d : dims) {
@@ -334,7 +337,7 @@ code::Stmt* MHTranslator::createLoopMethodCall(
   }
   ref = createPtrMethodCall(ref, method_name);
   code::Stmt* ret = ref;
-  for (size_t i = dims.size() - 1; i >= 0; --i) {
+  for (int i = (int)dims.size() - 1; i >= 0; --i) {
     if (dims[i] != 0) {
       std::string iter_var = TEMP_LOOP_VAR_NAME + std::to_string(cnt--);
       code::DeclStmt* init = new code::DeclStmt(
@@ -386,6 +389,12 @@ code::Stmt* MHTranslator::createLoopNewObject(std::string store_name, std::strin
   }
 
   return stmt;
+}
+
+bool MHTranslator::needExpandDepend(std::shared_ptr<ir::Clause> cls) {
+  return contig_analyzer->hasSub(cls) ||
+    contig_analyzer->getContig(cls).size() > 0 ||
+    contig_analyzer->getChild(cls).size() > 0;
 }
 
 /////////////// END of Util Functions ///////////////////
@@ -597,7 +606,7 @@ void MHTranslator::transRandomFuncDef(std::shared_ptr<ir::FuncDefn> fun) {
   {
     // register arguments as field members
     for (auto arg : fun->getArgs()) {
-      clsdef->addDecl(code::VarDecl::createVarDecl(clsdef,arg->getVarName(),INT_TYPE)); // assume all arguments are int!
+      code::VarDecl::createVarDecl(clsdef,arg->getVarName(),INT_TYPE); // assume all arguments are int!
     }
     // register constructor
     auto cons = code::ClassConstructor::createClassConstructor(clsdef);
@@ -611,8 +620,8 @@ void MHTranslator::transRandomFuncDef(std::shared_ptr<ir::FuncDefn> fun) {
     cons->setParams(params); // set parameters
   }
 
-  code::Type baseRefType 
-    = code::Type(code::Type(BayesVarClsName), std::vector<code::Type>{mapIRTypeToCodeType(fun->getRetTyp())},true);
+  code::Type baseRefType = mapIRTypeToCodeType(fun->getRetTyp());
+  baseRefType.setRef(true);
   addDefualtMethods(name, clsdef, baseRefType, false);
 
   auto retTp = fun->getRetTyp();
@@ -757,8 +766,8 @@ void MHTranslator::transSampleMethod(std::string name, std::shared_ptr<ir::Claus
   auto&clsdef = bayesVars[name];
 
   // translate sample()/sample_cache()/getlikeli()/getcachelikeli()
-  cur_context = clsdef; // register all the distributions
-  cur_constructor = &mp[name]->getBody(); // initialization of all static distributions 
+  cur_context = coreNs; // register all the distributions
+  cur_constructor = &coreStorageInit->getBody(); // initialization of all static distributions 
   cur_method_name = MCMC_GetVal_MethodName; // getval();
   cur_likeli_method_name = MCMC_GetLike_MethodName; // getlikeli();
   // sample()
@@ -775,9 +784,12 @@ void MHTranslator::transSampleMethod(std::string name, std::shared_ptr<ir::Claus
   mp[MCMC_SampleCache_MethodName]->addStmt(transClause(body, MCMC_Cache_VarName));
 
   // getcachelikeli()
-  auto&ptr = mp[MCMC_SampleCache_MethodName];
-  ptr->addStmt(new code::CallExpr(new code::Identifier(MCMC_GetCache_MethodName)));
-  ptr->addStmt(transClause(body, std::string(), MCMC_Cache_VarName));
+  auto&ptr = mp[MCMC_GetCacheLike_MethodName];
+  ptr->addStmt(new code::DeclStmt(
+    new code::VarDecl(
+      ptr,TEMP_VAL_NAME,AUTO_TYPE,
+      new code::CallExpr(new code::Identifier(MCMC_GetCache_MethodName)))));
+  ptr->addStmt(transClause(body, std::string(), TEMP_VAL_NAME));
 }
 
 void MHTranslator::transDependency(std::shared_ptr<ir::Clause> cls, code::CompoundStmt& cmp,
@@ -795,6 +807,8 @@ void MHTranslator::transDependency(std::shared_ptr<ir::Clause> cls, code::Compou
     cmp.addStmt(createPtrMethodCall(var, child_method_name,
       std::vector<code::Expr*>{new code::Identifier(KEYWORD_THIS)}));
   }
+
+  if (!contig_analyzer->hasSub(cls)) return ;
 
   // Translating Case/MultiCase/IfThen
   auto ifstmt = std::dynamic_pointer_cast<ir::IfThen>(cls);
@@ -817,11 +831,11 @@ code::Stmt* MHTranslator::transDependIfThen(std::shared_ptr<ir::IfThen> st,
   std::string child_method_name, std::string contig_method_name) {
   code::Expr* cond = transExpr(st->getCond());
   code::CompoundStmt* ifcl = new code::CompoundStmt();
-  if (st->getThen() != nullptr) {
+  if (st->getThen() != nullptr && needExpandDepend(st->getThen())) {
     transDependency(st->getThen(), *ifcl, child_method_name, contig_method_name);
   }
   code::CompoundStmt* elcl = NULL;
-  if (st->getElse() != nullptr) {
+  if (st->getElse() != nullptr && needExpandDepend(st->getElse())) {
     elcl = new code::CompoundStmt();
     transDependency(st->getElse(), *elcl, child_method_name, contig_method_name);
   }
@@ -836,11 +850,13 @@ code::Stmt* MHTranslator::transDependBranch(std::shared_ptr<ir::Branch> br,
   code::SwitchStmt* sst = new code::SwitchStmt(transExpr(br->getVar()));
   code::CaseStmt* cst;
   for (size_t i = 0; i < br->size(); i++) {
-    code::CompoundStmt* cmp = new code::CompoundStmt();
-    cst = new code::CaseStmt(transExpr(br->getCond(i)), cmp);
-    transDependency(br->getBranch(i), *cmp, child_method_name, contig_method_name);
-    sst->addStmt(cst);
-    sst->addStmt(new code::BreakStmt());
+    if (br->getBranch(i) != nullptr && needExpandDepend(br->getBranch(i))) {
+      code::CompoundStmt* cmp = new code::CompoundStmt();
+      cst = new code::CaseStmt(transExpr(br->getCond(i)), cmp);
+      transDependency(br->getBranch(i), *cmp, child_method_name, contig_method_name);
+      sst->addStmt(cst);
+      sst->addStmt(new code::BreakStmt());
+    }
   }
   return sst;
 }
@@ -857,11 +873,13 @@ code::Stmt* MHTranslator::transDependMultiCase(std::shared_ptr<ir::Branch> br,
   code::SwitchStmt* sst = new code::SwitchStmt(indx);
   code::CaseStmt* cst;
   for (size_t i = 0; i < br->size(); i++) {
-    code::CompoundStmt* cmp = new code::CompoundStmt();
-    cst = new code::CaseStmt(new code::IntegerLiteral(i), cmp);
-    transDependency(br->getBranch(i), *cmp, child_method_name, contig_method_name);
-    sst->addStmt(cst);
-    sst->addStmt(new code::BreakStmt());
+    if (br->getBranch(i) != nullptr && needExpandDepend(br->getBranch(i))) {
+      code::CompoundStmt* cmp = new code::CompoundStmt();
+      cst = new code::CaseStmt(new code::IntegerLiteral(i), cmp);
+      transDependency(br->getBranch(i), *cmp, child_method_name, contig_method_name);
+      sst->addStmt(cst);
+      sst->addStmt(new code::BreakStmt());
+    }
   }
   return sst;
 }
@@ -911,6 +929,11 @@ void MHTranslator::transObjectProperty(std::shared_ptr<ir::TypeDomain> ty, std::
       }
       // close-type
       dims.push_back(ref->getRefer()->getPreLen());
+    }
+
+    // @debug
+    if (dims.size() == 0) {
+      std::cerr << "Error!! for func <" << fun->getName() << " >! depend on ty <" << ty->getName() << "> dims.size() == 0"<<std::endl;
     }
 
     // clear_prop()
@@ -1058,7 +1081,7 @@ code::FunctionDecl* MHTranslator::transSampleAlg() {
 
   fun->addStmt(loop);
 
-  fun->addStmt(new code::CallExpr(new code::Identifier(CoreQueryFuncName)));
+  fun->addStmt(new code::CallExpr(new code::Identifier(CorePrintFuncName)));
 
   return fun;
 }
@@ -1141,8 +1164,9 @@ void MHTranslator::createMain() {
 
   st = new code::CallExpr(
       new code::Identifier("printf"), std::vector<code::Expr*>( {
-          new code::StringLiteral("\\ninit time: %fs\\n"),
-          code::CallExpr::createMethodCall("__elapsed_seconds", "count") }));
+          new code::StringLiteral("\\nsample time: %fs (#iter = %d)\\n"),
+          code::CallExpr::createMethodCall("__elapsed_seconds", "count"),
+          new code::IntegerLiteral(iterNum)}));
   mainFun->addStmt(st);
 
   // GarbageCollection
@@ -1458,8 +1482,6 @@ code::Expr* MHTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
       expr);
   if (setexp) {
     res = transSetExpr(setexp);
-
-    errorMsg.warning(-1, -1, "[MHTranslator] : [General Set Expression] is not fully supported! Might lead to error result!");
   }
 
   // translate array expression
@@ -1599,6 +1621,10 @@ code::Expr* MHTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   if (condset == nullptr) {
     // Should not reach here!!
     assert(false);
+  }
+
+  if (condset->getCond() != nullptr) {
+    errorMsg.warning(-1, -1, "[MHTranslator] : [General Set Expression] is not fully supported! Might lead to error result!");
   }
 
   std::shared_ptr<ir::VarDecl> var = condset->getVar();
@@ -1867,8 +1893,10 @@ code::Expr* MHTranslator::transDistribution(
       if (valuevar.empty()) {
         // sample value
         // define a field in the current bayesvar class corresponding to the distribution
-        code::VarDecl::createVarDecl(
+        if (cur_context != NULL) {
+          code::VarDecl::createVarDecl(
             cur_context, distvarname, code::Type(UNIFORM_INT_DISTRIBUTION_NAME));
+        }
         // put init just before sampling
         // :::=> dist.init(0, get_num_of_type - 1)
         code::Expr* callinit = code::CallExpr::createMethodCall(
@@ -1882,7 +1910,7 @@ code::Expr* MHTranslator::transDistribution(
             distvarname, DISTRIBUTION_GEN_FUN_NAME);
 
         if (tp->getRefer()->getNumberStmtSize() == 0) {
-          cur_constructor->addStmt(callinit);
+          if(cur_constructor != NULL) cur_constructor->addStmt(callinit);
           return callgen;
         }
         else {
@@ -1925,8 +1953,10 @@ code::Expr* MHTranslator::transDistribution(
       if (valuevar.empty()) {
         // Sample value from the distribution
         // define a field in the main class corresponding to the distribution
-        code::VarDecl::createVarDecl(
+        if (cur_context != NULL) {
+          code::VarDecl::createVarDecl(
             cur_context, distvarname, code::Type(UNIFORM_CHOICE_DISTRIBUTION_NAME));
+        }
         // put init just before sampling
         // :::=> dist.init(_filter(...)) or dist.init(_apply(...))
         code::Expr* callinit = code::CallExpr::createMethodCall(
@@ -1962,11 +1992,13 @@ code::Expr* MHTranslator::transDistribution(
   //          Y~Poisson(X) : dynamic, since X is not fixed
   std::string name = dist->getDistrName();
   std::string distvarname = name + std::to_string((size_t) &(dist->getArgs()));
+  if (cur_context != NULL) {
+    code::VarDecl::createVarDecl(cur_context, distvarname, code::Type(name));
+  }
   if (dist->isArgRandom()) {
     if (valuevar.empty()) {
       // Sample value from the distribution
       // define a field in the main class corresponding to the distribution
-      code::VarDecl::createVarDecl(cur_context, distvarname, code::Type(name));
       // put init just before sampling
       // :::=> dist.init(...)
       code::Expr* callinit = code::CallExpr::createMethodCall(
@@ -1995,12 +2027,12 @@ code::Expr* MHTranslator::transDistribution(
   } else {
     if (valuevar.empty()) {
       // now actual sampling a value from the distribution
-      // define a field in the main class corresponding to the distribution
-      code::VarDecl::createVarDecl(coreNs, distvarname, code::Type(name));
       //put initialization in coreClasInit
-      cur_constructor->addStmt(
+      if (cur_constructor != NULL) {
+        cur_constructor->addStmt(
           code::CallExpr::createMethodCall(distvarname,
-                                           DISTRIBUTION_INIT_FUN_NAME, args));
+          DISTRIBUTION_INIT_FUN_NAME, args));
+      }
       // :::==> distribution.gen();
       // the following two lines of code are not used right now, just use the default engine
       //    std::vector<code::Expr *> rd;

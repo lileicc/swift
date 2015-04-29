@@ -176,6 +176,9 @@ protected:
   code::Stmt* createLoopNewObject(std::string store_name, std::string var_name, 
     std::string lo_var, std::string hi_var, std::vector<int> dims);
 
+  // Check whether need expand cls to fill active_edge()/remove_edge()
+  bool needExpandDepend(std::shared_ptr<ir::Clause> cls);
+
   ///////////////////////////////////////////////////////////////////
   //     Core methods start from here
   ///////////////////////////////////////////////////////////////////
@@ -246,7 +249,7 @@ protected:
   // Global Flag
   // Indicate the class the current expr/stmt locates in
   //    When it is not NULL, we need to register variable/distributions
-  code::ClassDecl* cur_context;
+  code::DeclContext* cur_context;
   // The constructor of the class pointed by cur_contex
   code::CompoundStmt* cur_constructor;
   // indicate whether using getval() or getcache()

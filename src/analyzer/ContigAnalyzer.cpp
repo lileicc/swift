@@ -30,6 +30,10 @@ std::vector<std::shared_ptr<ir::Expr>>& ContigAnalyzer::getChild(std::shared_ptr
   return childVar[c];
 }
 
+bool ContigAnalyzer::hasSub(std::shared_ptr<ir::Clause> c) {
+  return hasSubTerm[c];
+}
+
 ////////////////////////////////////////////////////
 ///              Util Functions
 ////////////////////////////////////////////////////
@@ -196,7 +200,13 @@ void ContigAnalyzer::process_fetch(std::shared_ptr<ir::Clause> cls) {
   return ;
 }
 
-void ContigAnalyzer::generate_conting(std::shared_ptr<ir::Clause> cls) {
+bool ContigAnalyzer::generate_conting(std::shared_ptr<ir::Clause> cls) {
+  if (hasSubTerm.count(cls) > 0) return hasSubTerm[cls];
+
+  bool &sub = hasSubTerm[cls]; 
+  sub = false;
+  bool ret = false;
+
   auto& cur_contig = contigVar[cls];
   auto& cur_child = childVar[cls];
 
@@ -208,6 +218,7 @@ void ContigAnalyzer::generate_conting(std::shared_ptr<ir::Clause> cls) {
 
   for (auto&r : cur_restrict) {
     if (stack_contig.count(r.first) == 0) {
+      ret=true;
       stack_contig.insert(r.first);
       str_contig.push_back(r.first);
       cur_contig.push_back(r.second);
@@ -215,6 +226,7 @@ void ContigAnalyzer::generate_conting(std::shared_ptr<ir::Clause> cls) {
   }
   for (auto&c : cur_cond) {
     if (stack_child.count(c.first) == 0) {
+      ret=true;
       stack_child.insert(c.first);
       str_child.push_back(c.first);
       cur_child.push_back(c.second);
@@ -224,15 +236,15 @@ void ContigAnalyzer::generate_conting(std::shared_ptr<ir::Clause> cls) {
   auto fun = std::dynamic_pointer_cast<ir::IfThen>(cls);
   if (fun != nullptr) {
     if (fun->getThen() != nullptr)
-      generate_conting(fun->getThen());
+      sub |= generate_conting(fun->getThen());
     if (fun->getElse() != nullptr)
-      generate_conting(fun->getElse());
+      sub |= generate_conting(fun->getElse());
   }
 
   auto brch = std::dynamic_pointer_cast<ir::Branch>(cls);
   if (brch != nullptr) {
     for (auto&b : brch->getBranches()) {
-      generate_conting(b);
+      sub |= generate_conting(b);
     }
   }
 
@@ -243,6 +255,8 @@ void ContigAnalyzer::generate_conting(std::shared_ptr<ir::Clause> cls) {
   for (auto& c : str_child) {
     stack_child.erase(c);
   }
+
+  return ret || sub;
 }
 
 bool ContigAnalyzer::process() {
@@ -251,6 +265,7 @@ bool ContigAnalyzer::process() {
   referredVar.clear();
   contigVar.clear();
   childVar.clear();
+  hasSubTerm.clear();
 
   // Number Statement
   for (auto& ty : model->getTypes()) {
@@ -283,7 +298,7 @@ bool ContigAnalyzer::process() {
 
   // Evidences
   for (auto&evi : model->getEvidences()) {
-    process_fetch(evi->getLeft());
+    parse_expr(evi->getLeft(), false);
 
     stack_child.clear();
     stack_contig.clear();

@@ -26,6 +26,10 @@ const std::string Translator::VECTOR_ADD_METHOD_NAME = "push_back";
 const std::string Translator::APPEND_FUN_NAME = "append";
 const std::string Translator::DYNAMICTABLE_CLASS_NAME = "DynamicTable";
 const std::string Translator::DYNAMICTABLE_RESIZE_METHOD_NAME = "resize";
+
+const code::Type Translator::AUTO_TYPE("auto");
+const code::Type Translator::AUTO_REF_TYPE("auto",true);
+
 const code::Type Translator::INT_TYPE("int");
 const code::Type Translator::INT_REF_TYPE("int", true);
 const code::Type Translator::INT_CONST_TYPE("int", false, false, true);

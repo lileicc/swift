@@ -26,10 +26,12 @@ public:
 
   std::vector<std::shared_ptr<ir::Expr>>& getContig(std::shared_ptr<ir::Clause> c);
   std::vector<std::shared_ptr<ir::Expr>>& getChild(std::shared_ptr<ir::Clause> c);
+  bool hasSub(std::shared_ptr<ir::Clause> c);
 
 private:
   std::map<std::shared_ptr<ir::Clause>, std::vector<std::shared_ptr<ir::Expr>>> contigVar;
   std::map<std::shared_ptr<ir::Clause>, std::vector<std::shared_ptr<ir::Expr>>> childVar;
+  std::map<std::shared_ptr<ir::Clause>, bool> hasSubTerm;
 
   std::map<std::shared_ptr<ir::Clause>, std::map<std::string, std::shared_ptr<ir::Expr>>> condVar;
   std::map<std::shared_ptr<ir::Clause>, std::map<std::string, std::shared_ptr<ir::Expr>>> restrictVar;
@@ -44,7 +46,7 @@ private:
 
   void process_fetch(std::shared_ptr<ir::Clause> cls);
 
-  void generate_conting(std::shared_ptr<ir::Clause> cls);
+  bool generate_conting(std::shared_ptr<ir::Clause> cls);
 
   ///////////////////////
   //  Util Functions

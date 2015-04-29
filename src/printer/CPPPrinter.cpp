@@ -483,6 +483,9 @@ void CPPPrinter::print(code::ClassDecl* term) {
     fprintf(file, "class %s", term->getName().c_str());
     // inheritance
     if (term->getInherit().size() > 0) {
+      bool backup = newline;
+      newline = false;
+
       auto& h = term->getInherit();
       for (size_t i = 0; i < h.size(); ++i) {
         if (i == 0)
@@ -492,6 +495,8 @@ void CPPPrinter::print(code::ClassDecl* term) {
         fprintf(file, " public ");
         h[i].print(this);
       }
+
+      newline = backup;
     }
     fprintf(file, " {");
     printLine();

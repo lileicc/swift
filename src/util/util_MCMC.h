@@ -119,10 +119,12 @@ template<class T>
 inline void _util_set_evidence(BayesVar<T>* ptr, T val) {
   ptr->getval();
   ptr->val = val;
-  ptr->is_obs = true;
+  if (!ptr->is_obs) {
+    ptr->is_obs = true;
 
-  // Remove it from active var
-  remove_var_from_list(ptr);
+    // Remove it from active var
+    remove_var_from_list(ptr);
+  }
 }
 
 template<class T>

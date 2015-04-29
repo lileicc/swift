@@ -297,6 +297,9 @@ protected:
 
   static const std::string KEYWORD_THIS;
 
+  static const code::Type AUTO_TYPE;
+  static const code::Type AUTO_REF_TYPE;
+
   static const code::Type INT_TYPE;
   static const code::Type INT_VECTOR_TYPE;
   static const code::Type INT_REF_TYPE;
