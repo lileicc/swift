@@ -21,6 +21,7 @@ namespace codegen {
 class MHTranslator: public swift::codegen::Translator {
 public:
   MHTranslator();
+  virtual ~MHTranslator();
   void translate(std::shared_ptr<swift::ir::BlogModel> model);
   code::Code* getResult();
   void setIterationNum(int iter);

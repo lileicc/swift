@@ -13,6 +13,7 @@
 #include "printer/CPPPrinter.h"
 #include "codegen/PFTranslator.h"
 #include "codegen/MHTranslator.h"
+#include "codegen/GibbsTranslator.h"
 
 extern swift::absyn::BlogProgram* parse(const char* inp);
 int main(int argc, char** argv) {
@@ -132,6 +133,11 @@ int main(int argc, char** argv) {
     if(iter_N>0)
       MH_trans->setIterationNum(iter_N);
     trans = MH_trans;
+  } else if (engine_type == "GibbsSampler") {
+    auto gibbs_trans = new swift::codegen::GibbsTranslator();
+    if(iter_N>0)
+      gibbs_trans->setIterationNum(iter_N);
+    trans = gibbs_trans;
   } else {
     printf("%s engine not found", engine_type.c_str());
   }

@@ -282,7 +282,8 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
     for (auto&c : backup) {
       c->active_edge();
     }
-  }
+  } else
+    cur_node->val = nxt_val;
   cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
 
   // in normal cases, there is no cache val

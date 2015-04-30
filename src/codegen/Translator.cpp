@@ -35,10 +35,14 @@ const code::Type Translator::INT_REF_TYPE("int", true);
 const code::Type Translator::INT_CONST_TYPE("int", false, false, true);
 const code::Type Translator::INT_VECTOR_TYPE(VECTOR_CLASS_NAME,
                                                 { INT_TYPE });
+const code::Type Translator::INT_VECTOR_REF_TYPE(VECTOR_CLASS_NAME,
+                                                { INT_TYPE }, true);
 const code::Type Translator::DOUBLE_TYPE("double");
 const code::Type Translator::DOUBLE_REF_TYPE("double", true);
 const code::Type Translator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {
                                                        DOUBLE_TYPE });
+const code::Type Translator::DOUBLE_VECTOR_REF_TYPE(VECTOR_CLASS_NAME, {
+                                                       DOUBLE_TYPE }, true);
 const code::Type Translator::STRING_TYPE("string");
 const code::Type Translator::CHAR_TYPE("char");
 const code::Type Translator::TIMESTEP_TYPE("unsigned");

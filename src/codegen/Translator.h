@@ -302,12 +302,14 @@ protected:
 
   static const code::Type INT_TYPE;
   static const code::Type INT_VECTOR_TYPE;
+  static const code::Type INT_VECTOR_REF_TYPE;
   static const code::Type INT_REF_TYPE;
   static const code::Type INT_CONST_TYPE; // this is to define global constant values
 
   static const code::Type DOUBLE_TYPE;
   static const code::Type DOUBLE_REF_TYPE;
   static const code::Type DOUBLE_VECTOR_TYPE;
+  static const code::Type DOUBLE_VECTOR_REF_TYPE;
 
   static const code::Type STRING_TYPE;
 
