@@ -997,12 +997,12 @@ void MHTranslator::transObjectProperty(std::shared_ptr<ir::TypeDomain> ty, std::
 void MHTranslator::transAllQuery(
   std::vector<std::shared_ptr<ir::Query> > queries) {
   /* ++ tot_round;
-   * int temp_val = (tot_round > 0)
+   * if (tot_round <= 0) return ;
    */
   coreQuery->addStmt(new code::BinaryOperator(new code::Identifier(RoundCounterVarName),NULL,code::OpKind::UO_INC));
-  coreQuery->addStmt(new code::DeclStmt(
-    new code::VarDecl(coreQuery,TEMP_VAL_NAME,INT_TYPE,
-    new code::BinaryOperator(new code::Identifier(RoundCounterVarName),new code::IntegerLiteral(0), code::OpKind::BO_GT))));
+  coreQuery->addStmt(new code::IfStmt(
+    new code::BinaryOperator(new code::Identifier(RoundCounterVarName),new code::IntegerLiteral(0),code::OpKind::BO_LEQ),
+    new code::ReturnStmt()));
 
   cur_context = NULL;
   cur_method_name = MCMC_GetVal_MethodName;
@@ -1038,7 +1038,7 @@ void MHTranslator::transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query
       initvalue);
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
-  args.push_back(new code::Identifier(TEMP_VAL_NAME)); // current weight = (total_round > 0 ? 1 : 0)
+  args.push_back(new code::IntegerLiteral(1)); 
   fun->addStmt(
       code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
                                        args));
