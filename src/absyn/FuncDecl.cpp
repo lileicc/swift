@@ -31,7 +31,7 @@ bool FuncDecl::isRandom() const {
   return random;
 }
 
-Expr* FuncDecl::getExpr() {
+Expr*& FuncDecl::getExpr() {
   return expr;
 }
 

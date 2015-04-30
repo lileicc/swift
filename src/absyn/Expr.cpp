@@ -28,6 +28,10 @@ Expr* Expr::get(size_t id) {
   return args[id];
 }
 
+std::vector<Expr*>& Expr::getAllExpr() {
+  return args;
+}
+
 size_t Expr::size() {
   return args.size();
 }

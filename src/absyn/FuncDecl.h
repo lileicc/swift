@@ -31,7 +31,7 @@ public:
 
   const Ty& getRetTyp() const;
   const Symbol& getFuncName() const;
-  Expr* getExpr();
+  Expr*& getExpr();
   bool isRandom() const;
   size_t argSize() const;
   void addArg(VarDecl var);

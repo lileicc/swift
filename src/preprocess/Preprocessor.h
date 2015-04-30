@@ -23,6 +23,20 @@ public:
   bool Okay();
   absyn::BlogProgram* getProg();
 private:
+
+  // assume that fun->getname() == "EXPAND"
+  // @return: return empty vector when there is some error using EXPAND macro
+  //     NOTE: fun will not be deleted!
+  std::vector<absyn::Expr*> parse_macro_EXPAND(absyn::FuncApp* fun);
+
+  // parse the expression tree
+  // @return: NULL if expr remains unchanged, 
+  //          o.w. return the new expression, the old expr will be deleted
+  absyn::Expr* parse_expr(absyn::Expr* expr);
+
+  // process and expand all the macros defined in the program
+  void processMacro(absyn::BlogProgram*& prog);
+
   /**
   * process set evidence
   *    i.e.  obs {T t} = {t1,t2}

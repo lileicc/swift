@@ -21,6 +21,7 @@ public:
 
   void add(Expr* e);
   Expr* get(size_t id);
+  std::vector<Expr*>& getAllExpr();
   size_t size();
   void clearArgs();
 

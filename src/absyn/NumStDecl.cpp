@@ -23,7 +23,7 @@ const Symbol& NumStDecl::getTyp() {
   return typ;
 }
 
-Expr* NumStDecl::getExpr() {
+Expr*& NumStDecl::getExpr() {
   return expr;
 }
 
