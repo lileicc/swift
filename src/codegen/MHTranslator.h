@@ -27,6 +27,15 @@ public:
   void setBurnInNum(int iter);
   
 protected:
+  /*
+   * Translation Steps called in translate()
+   */
+  virtual bool init_MHTranslator(std::shared_ptr<swift::ir::BlogModel> model);
+  virtual void translate_fixed_part();
+  virtual void translate_mcmc_data_structure();
+  virtual void translate_mcmc_obj_methods();
+  virtual void translate_mcmc_query_evidences();
+
   analyzer::MCMCAnalyzer* mcmc_analyzer;
   analyzer::ContigAnalyzer* contig_analyzer;
 
@@ -184,19 +193,19 @@ protected:
   ///////////////////////////////////////////////////////////////////
 
   // Add Constant Values
-  void transGlobalConstant();
+  virtual void transGlobalConstant();
 
   // create class def for number variable
-  void transTypeDomainDef(std::shared_ptr<ir::TypeDomain> ty);
+  virtual void transTypeDomainDef(std::shared_ptr<ir::TypeDomain> ty);
 
   // create class def for normal random variable
-  void transRandomFuncDef(std::shared_ptr<ir::FuncDefn> fun);
+  virtual void transRandomFuncDef(std::shared_ptr<ir::FuncDefn> fun);
 
   // set function call in the method of mcmc_resample()
-  void setSampleAlgorithm();
+  virtual void setSampleAlgorithm();
 
   // create storage initialization
-  void createStorageInit();
+  virtual void createStorageInit();
 
   // translate sample()/sample_cache()/getlikeli()/getcachelikeli()
   void transSampleMethod(std::string name, std::shared_ptr<ir::Clause> body);
@@ -219,13 +228,13 @@ protected:
   /**
   * translate all queries
   */
-  void transAllQuery(std::vector<std::shared_ptr<ir::Query>> queries);
+  virtual void transAllQuery(std::vector<std::shared_ptr<ir::Query>> queries);
   void transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr, int n);
 
   /**
   * translate all evidences
   */
-  void transAllEvidence(std::vector<std::shared_ptr<ir::Evidence>> evids);
+  virtual void transAllEvidence(std::vector<std::shared_ptr<ir::Evidence>> evids);
 
   /**
    * create FunctionDecl and setup argument for sampling algorithm
@@ -243,7 +252,7 @@ protected:
   /**
    * create main function
    */
-  void createMain();
+  virtual void createMain();
 
   ////////////////////////////////////////////////////////
   // Global Flag

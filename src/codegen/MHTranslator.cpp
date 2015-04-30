@@ -425,6 +425,30 @@ void MHTranslator::setBurnInNum(int bi) {
 
 void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
 
+  if (!init_MHTranslator(model)) return ;
+  
+  translate_fixed_part();
+
+  translate_mcmc_data_structure();
+
+  // set the sample algorithm selected for the MCMC framework
+  setSampleAlgorithm();
+
+  // create initStorage() and GarbageCollect()
+  createStorageInit();
+  
+  translate_mcmc_obj_methods();
+
+  translate_mcmc_query_evidences();
+
+  // translate sampleAlg and main
+  transSampleAlg();
+  createMain();
+
+  if (!errorMsg.Okay()) prog = NULL;
+}
+
+bool MHTranslator::init_MHTranslator(std::shared_ptr<swift::ir::BlogModel> model) {
   if (!COMPUTE_LIKELIHOOD_IN_LOG) {
     errorMsg.warning(-1, -1, "[MCMCTranslator] : [Compute in *Log* Likelihood] is *required* now! We will automatically ensure using Loglikelihood.");
     COMPUTE_LIKELIHOOD_IN_LOG = true;
@@ -443,7 +467,7 @@ void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   if (!mcmc_analyzer->process()) {
     delete prog;
     prog = NULL; // model not valid
-    return ;
+    return false;
   }
 
   // Contingency Analysis
@@ -451,9 +475,12 @@ void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   if (!contig_analyzer->process()) {
     delete prog;
     prog = NULL;
-    return ;
+    return false;
   }
-  
+  return true;
+}
+
+void MHTranslator::translate_fixed_part() {
   // Add Global Constant
   transGlobalConstant();
 
@@ -465,7 +492,9 @@ void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   // translate fixed function
   for (auto fun : model->getFixFuncs())
     transFixedFun(fun);
+}
 
+void MHTranslator::translate_mcmc_data_structure() {
   // create classe definitions for all random variables
   for (auto ty : model->getTypes())
     transTypeDomainDef(ty);
@@ -473,13 +502,9 @@ void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   // translate random function, create the corresponding class
   for (auto fun : model->getRandFuncs())
     transRandomFuncDef(fun);
+}
 
-  // set the sample algorithm selected for the MCMC framework
-  setSampleAlgorithm();
-
-  // create initStorage() and GarbageCollect()
-  createStorageInit();
-  
+void MHTranslator::translate_mcmc_obj_methods() {
   // translate default methods:
   //   sample()/sample_cache()/getlikeli()/getcachelikeli()
   //   active_edge()/remove_edge()
@@ -493,14 +518,14 @@ void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
       cur_method_name = MCMC_GetVal_MethodName;
       // active_edge()
       transDependency(ty->getNumberStmt(0)->getBody(),
-                      varMethods[ty->getName()][MCMC_ActiveEdge_MethodName]->getBody(),
-                      MCMC_Global_AddChild_MethodName,
-                      MCMC_Global_AddContig_MethodName);
+        varMethods[ty->getName()][MCMC_ActiveEdge_MethodName]->getBody(),
+        MCMC_Global_AddChild_MethodName,
+        MCMC_Global_AddContig_MethodName);
       // remove_edge()
       transDependency(ty->getNumberStmt(0)->getBody(),
-                      varMethods[ty->getName()][MCMC_RemoveEdge_MethodName]->getBody(),
-                      MCMC_Global_RemoveChild_MethodName,
-                      MCMC_Global_RemoveContig_MethodName);
+        varMethods[ty->getName()][MCMC_RemoveEdge_MethodName]->getBody(),
+        MCMC_Global_RemoveChild_MethodName,
+        MCMC_Global_RemoveContig_MethodName);
     }
   }
   for (auto&fun : model->getRandFuncs()) { // For random functions
@@ -527,7 +552,9 @@ void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
       transObjectProperty(ty, mcmc_analyzer->getDependFunc(ty));
     }
   }
-  
+}
+
+void MHTranslator::translate_mcmc_query_evidences() {
   // translate queries
   //    include: eval_query(), print()
   transAllQuery(model->getQueries());
@@ -535,13 +562,11 @@ void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
   // translate evidence 
   //    include: initWorld(), check_obs()/update_obs()
   transAllEvidence(model->getEvidences());
-
-  // translate sampleAlg and main
-  transSampleAlg();
-  createMain();
-
-  if (!errorMsg.Okay()) prog = NULL;
 }
+
+///////////////////////////////////////////////////////////////
+////////////// high level translate() ends here ///////////////
+///////////////////////////////////////////////////////////////
 
 code::Code* MHTranslator::getResult() {
   if (!errorMsg.Okay()) return NULL;
