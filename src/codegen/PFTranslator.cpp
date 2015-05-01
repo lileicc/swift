@@ -2127,7 +2127,7 @@ code::Expr* PFTranslator::transFunctionCall(
           std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}),
         args);
     }
-    return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
+    return new code::CallExpr(new code::Identifier(fc->getName()), args);
   }
   switch (fc->getKind()) {
     case ir::IRConstant::RANDOM:

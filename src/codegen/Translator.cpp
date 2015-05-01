@@ -1752,7 +1752,7 @@ code::Expr* Translator::transFunctionCall(
         args);
     }
 
-    return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
+    return new code::CallExpr(new code::Identifier(fc->getName()), args);
   }
   switch (fc->getKind()) {
     case ir::IRConstant::RANDOM:

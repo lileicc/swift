@@ -12,6 +12,7 @@
 #include <cassert>
 #include <utility>
 #include <algorithm>
+#include <set>
 
 #include "../ir/IRHeader.h"
 
@@ -23,11 +24,23 @@ ContigAnalyzer::ContigAnalyzer(std::shared_ptr<ir::BlogModel> _model)
 }
 
 std::vector<std::shared_ptr<ir::Expr>>& ContigAnalyzer::getContig(std::shared_ptr<ir::Clause> c) {
-  return contigVar[c];
+  return contigVarList[c];
 }
 
 std::vector<std::shared_ptr<ir::Expr>>& ContigAnalyzer::getChild(std::shared_ptr<ir::Clause> c) {
-  return childVar[c];
+  return childVarList[c];
+}
+
+std::vector<std::shared_ptr<ir::Expr>>& ContigAnalyzer::getReferredVar(std::shared_ptr<ir::Clause> c) {
+  return referVarList[c];
+}
+
+std::vector<std::shared_ptr<ir::FuncDefn>>& ContigAnalyzer::getReferredFunc(std::shared_ptr<ir::Clause> c) {
+  return referFuncList[c];
+}
+
+std::vector<std::shared_ptr<ir::NumberStmt>>& ContigAnalyzer::getReferredNumberVar(std::shared_ptr<ir::Clause> c) {
+  return referNumVarList[c];
 }
 
 bool ContigAnalyzer::hasSub(std::shared_ptr<ir::Clause> c) {
@@ -214,8 +227,8 @@ bool ContigAnalyzer::generate_conting(std::shared_ptr<ir::Clause> cls) {
   sub = false;
   bool ret = false;
 
-  auto& cur_contig = contigVar[cls];
-  auto& cur_child = childVar[cls];
+  auto& cur_contig = contigVarList[cls];
+  auto& cur_child = childVarList[cls];
 
   auto& cur_cond = condVar[cls];
   auto& cur_restrict = restrictVar[cls];
@@ -263,6 +276,44 @@ bool ContigAnalyzer::generate_conting(std::shared_ptr<ir::Clause> cls) {
     stack_child.erase(c);
   }
 
+  // process referVar and referFunc
+  auto& var_ref = referredVar[cls];
+  auto& cur_var = referVarList[cls];
+  auto& cur_func = referFuncList[cls];
+  auto& cur_numst = referNumVarList[cls];
+  std::set<std::shared_ptr<ir::FuncDefn>> func_hash;
+  std::set<std::shared_ptr<ir::NumberStmt>> numst_hash;
+  for (auto&v : var_ref) {
+    auto expr = v.second;
+    cur_var.push_back(expr);
+    // check random var
+    auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(expr);
+    if (fun != nullptr && fun->getKind()==ir::IRConstant::RANDOM) {
+      if (func_hash.count(fun->getRefer()) == 0) {
+        func_hash.insert(fun->getRefer());
+        cur_func.push_back(fun->getRefer());
+      }
+    }
+    // check number statement
+    auto num = std::dynamic_pointer_cast<ir::CardExpr>(expr);
+    if (num != nullptr) {
+      auto st = std::dynamic_pointer_cast<ir::CondSet>(num->getBody());
+      if (st != nullptr) {
+        auto ty = dynamic_cast<const ir::NameTy*>(st->getVar()->getTyp());
+        if (ty != NULL && ty->getRefer()->getNumberStmtSize() > 0) {
+          auto& allnumst = ty->getRefer()->getAllNumberStmt();
+          for (auto& n : allnumst) {
+            if (numst_hash.count(n) == 0) {
+              numst_hash.insert(n);
+              cur_numst.push_back(n);
+            }
+          }
+        }
+      }
+    }
+    // Else: do nothing
+  }
+  
   return ret || sub;
 }
 
@@ -270,8 +321,11 @@ bool ContigAnalyzer::process() {
   condVar.clear();
   restrictVar.clear();
   referredVar.clear();
-  contigVar.clear();
-  childVar.clear();
+  contigVarList.clear();
+  childVarList.clear();
+  referVarList.clear();
+  referFuncList.clear();
+  referNumVarList.clear();
   hasSubTerm.clear();
 
   // Number Statement
@@ -313,8 +367,11 @@ bool ContigAnalyzer::process() {
   }
 
   if (!errMsg.Okay()) {
-    contigVar.clear();
-    childVar.clear();
+    contigVarList.clear();
+    childVarList.clear();
+    referVarList.clear();
+    referFuncList.clear();
+    referNumVarList.clear();
     return false;
   }
 

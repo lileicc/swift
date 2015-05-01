@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string>
 #include "Expr.h"
 #include "IRConst.h"
 #include "IRForwardDecl.h"
@@ -18,10 +19,12 @@ class FunctionCall: public swift::ir::Expr {
 public:
   FunctionCall(std::shared_ptr<FuncDefn> refer);
   FunctionCall(const predecl::PreDecl* refer);
+  FunctionCall(std::string name);
   virtual ~FunctionCall();
 
   IRConstant getKind() const;
   std::shared_ptr<FuncDefn> getRefer() const;
+  std::string getName() const;
 
   virtual std::string toString();
   void print(FILE* file, int indent) const;
@@ -53,6 +56,7 @@ private:
 
   // Builtin Function Refer
   const predecl::PreDecl* builtin;
+  std::string funcName;
 
   IRConstant kind;
 };

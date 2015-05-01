@@ -161,10 +161,14 @@ void GibbsTranslator::setSampleAlgorithm() {
       if (post != nullptr) { // posterior distribution can be analytically computed
         sample_algo_name = MCMC_Global_GibbsConjugateAlgo_MethodName;
 
-        cur_constructor = NULL;
-        cur_context = NULL;
+        cur_constructor = &f_ptr->getBody();
+        cur_context = coreNs; // need to register posterior distributions
         cur_method_name = MCMC_GetVal_MethodName;
-        f_ptr->addStmt(transExpr(post)); // set conjugacy_analysis()
+        f_ptr->addStmt(new code::BinaryOperator(
+          new code::Identifier(TEMP_NXT_VAL_NAME),
+          transExpr(post),
+          code::OpKind::BO_ASSIGN)); // set conjugacy_analysis()
+        cur_constructor = NULL;
       }
       else {
         // Conjugacy Checking Failure

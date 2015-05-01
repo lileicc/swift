@@ -26,11 +26,17 @@ public:
 
   std::vector<std::shared_ptr<ir::Expr>>& getContig(std::shared_ptr<ir::Clause> c);
   std::vector<std::shared_ptr<ir::Expr>>& getChild(std::shared_ptr<ir::Clause> c);
+  std::vector<std::shared_ptr<ir::Expr>>& getReferredVar(std::shared_ptr<ir::Clause> c);
+  std::vector<std::shared_ptr<ir::FuncDefn>>& getReferredFunc(std::shared_ptr<ir::Clause> c);
+  std::vector<std::shared_ptr<ir::NumberStmt>>& getReferredNumberVar(std::shared_ptr<ir::Clause> c);
   bool hasSub(std::shared_ptr<ir::Clause> c);
 
 private:
-  std::map<std::shared_ptr<ir::Clause>, std::vector<std::shared_ptr<ir::Expr>>> contigVar;
-  std::map<std::shared_ptr<ir::Clause>, std::vector<std::shared_ptr<ir::Expr>>> childVar;
+  std::map<std::shared_ptr<ir::Clause>, std::vector<std::shared_ptr<ir::Expr>>> contigVarList;
+  std::map<std::shared_ptr<ir::Clause>, std::vector<std::shared_ptr<ir::Expr>>> childVarList;
+  std::map<std::shared_ptr<ir::Clause>, std::vector<std::shared_ptr<ir::Expr>>> referVarList;
+  std::map<std::shared_ptr<ir::Clause>, std::vector<std::shared_ptr<ir::FuncDefn>>> referFuncList;
+  std::map<std::shared_ptr<ir::Clause>, std::vector<std::shared_ptr<ir::NumberStmt>>> referNumVarList;
   std::map<std::shared_ptr<ir::Clause>, bool> hasSubTerm;
 
   std::map<std::shared_ptr<ir::Clause>, std::map<std::string, std::shared_ptr<ir::Expr>>> condVar;
