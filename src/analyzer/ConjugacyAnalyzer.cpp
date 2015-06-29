@@ -76,7 +76,7 @@ bool ConjugacyAnalyzer::process() {
     if (std::dynamic_pointer_cast<ir::Distribution>(fun->getBody()) == nullptr) continue;
     
     if (childFuncs[fun].size() == 0) { // pure prior distribution
-      posterior[fun] = fun->getBody();
+      posterior[fun] = std::dynamic_pointer_cast<ir::Expr>(fun->getBody());
       continue;
     }
 
