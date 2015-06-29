@@ -10,11 +10,11 @@ namespace ir {
 
 // init for builtin functions
 FunctionCall::FunctionCall(const predecl::PreDecl* refer) :
-    refer(nullptr), istmp(false), tmparg(nullptr), builtin(refer), kind(IRConstant::FIXED), funcName("") {
+    refer(nullptr), istmp(false), tmparg(nullptr), builtin(refer), funcName(""), kind(IRConstant::FIXED) {
 }
 
 FunctionCall::FunctionCall(std::string name) :
-    refer(nullptr), istmp(false), tmparg(nullptr), builtin(NULL), kind(IRConstant::FIXED), funcName(name) {
+    refer(nullptr), istmp(false), tmparg(nullptr), builtin(NULL), funcName(name), kind(IRConstant::FIXED) {
 }
 
 FunctionCall::FunctionCall(std::shared_ptr<FuncDefn> refer) :

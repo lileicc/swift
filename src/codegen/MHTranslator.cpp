@@ -795,7 +795,7 @@ void MHTranslator::createStorageInit() {
 
 void MHTranslator::transSampleMethod(std::string name, std::shared_ptr<ir::Clause> body) {
   auto&mp = varMethods[name];
-  auto&clsdef = bayesVars[name];
+  //auto&clsdef = bayesVars[name];  /*seems to be not used*/
 
   // translate sample()/sample_cache()/getlikeli()/getcachelikeli()
   cur_context = coreNs; // register all the distributions

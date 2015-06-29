@@ -40,6 +40,7 @@ std::shared_ptr<ir::Expr> InvGammaPrior::process(
 
   // Conjugate Prior!!!
   // TODO:
+  return nullptr;
 }
 
 }
