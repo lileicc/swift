@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
     if(particle_N>0)
       PF_trans->setParticleNum(particle_N);
     trans = PF_trans;
-  } if (engine_type == "MHSampler") {
+  } else if (engine_type == "MHSampler") {
     auto MH_trans = new swift::codegen::MHTranslator();
     if(iter_N>0)
       MH_trans->setIterationNum(iter_N);
@@ -139,7 +139,7 @@ int main(int argc, char** argv) {
       gibbs_trans->setIterationNum(iter_N);
     trans = gibbs_trans;
   } else {
-    printf("%s engine not found", engine_type.c_str());
+    printf("<%s> engine not found", engine_type.c_str());
   }
   
   if (trans != nullptr) {
