@@ -34,6 +34,9 @@ const GammaDistrDecl PreDeclList::gammaDistr =
 const GaussianDistrDecl PreDeclList::gaussianDistr =
     GaussianDistrDecl();
 
+const GeometricDistrDecl PreDeclList::geometricDistr =
+    GeometricDistrDecl();
+
 const InvGammaDistrDecl PreDeclList::invGammaDistr =
     InvGammaDistrDecl();
 
