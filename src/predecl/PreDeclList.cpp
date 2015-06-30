@@ -26,7 +26,8 @@ const DirichletDistrDecl PreDeclList::dirichletDistr =
 const DiscreteDistrDecl PreDeclList::discreteDistr = 
     DiscreteDistrDecl();
 
-const PoissonDistrDecl PreDeclList::poissonDistr = PoissonDistrDecl();
+const PoissonDistrDecl PreDeclList::poissonDistr = 
+    PoissonDistrDecl();
 
 const GammaDistrDecl PreDeclList::gammaDistr =
     GammaDistrDecl();
