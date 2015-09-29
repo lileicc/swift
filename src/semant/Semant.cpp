@@ -1391,6 +1391,14 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
             special_case = true;
           }
         }
+
+        // When return type is a Integer but return type is a NameTy. We accept this and produce a warning
+        if (rettyp->getTyp() == ir::IRConstant::NAMETY && 
+           fun->getBody()->getTyp()->getTyp() == ir::IRConstant::INT) {
+            warning(fd->line, fd->col, "The return type of the body is Int. But the Declared Type is NameTy!"
+              " Please make sure that the return value is always *NON-NEGATIVE*!");
+            special_case = true;
+        }
       }
       if (!special_case) {
         fprintf(stderr, "func<%s> rettyp = %s  bodytyp = %s\n", fun->getName().c_str(), fun->getRetTyp()->toString().c_str(),
