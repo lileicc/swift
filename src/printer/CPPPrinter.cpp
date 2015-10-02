@@ -664,7 +664,9 @@ void CPPPrinter::print(code::FunctionDecl* term, bool hasRetType) {
     fprintf(file, ")");
     newline = backup;
     printLine();
-
+    for (auto&d : term->getAllDecls()) {
+      d->print(this);
+    }
     term->getBody().print(this);
   }
 }
