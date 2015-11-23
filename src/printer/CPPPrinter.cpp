@@ -235,8 +235,10 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Categorical.h\"\n");
   fprintf(file, "#include \"random/Exponential.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
+  fprintf(file, "#include \"random/Gamma.h\"\n");
   fprintf(file, "#include \"random/Geometric.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
+  fprintf(file, "#include \"random/InvGamma.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"random/UniformReal.h\"\n");
