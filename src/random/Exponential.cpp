@@ -14,7 +14,7 @@ Exponential::Exponential() {
   lambda = 1.0;
   log_lambda = 0.0;
   is_loglike_ok = true;
-  dist = std::exponential_distrbution<double>(lambda);
+  dist = std::exponential_distribution<double>(lambda);
 }
 
 Exponential::~Exponential() {
@@ -26,7 +26,7 @@ void Exponential::init(double lambda) {
     this->lambda = lambda;
     is_loglike_ok = false;
   }
-  dist = std::exponential_distrbution<double>(lambda);
+  dist = std::exponential_distribution<double>(lambda);
 }
 
 double Exponential::gen() {
