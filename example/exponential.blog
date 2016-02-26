@@ -2,7 +2,7 @@
 /**
 * Simple model to test if exponential distribution is working.
 *
-* If the distribution works, check should be true with probability 0.8646647.
+* If the distribution works, check should be true with probability ~0.864.
 * Query will check if BLOG can correctly compute the CDF of the exponential.
 */
 
@@ -13,4 +13,4 @@ random Boolean check ~
   else BooleanDistrib(0.0);
 
 query check;
-/* P(check = true) = 0.8646647 */
+/* P(check = true) is approx. 0.864 */
