@@ -22,7 +22,7 @@
  private:
    std::exponential_distribution<double> dist;
    double lambda, log_lambda;
-   bool is_like_ok, is_loglike_ok;
+   bool is_loglike_ok;
  };
 
  } /* namespace random */
