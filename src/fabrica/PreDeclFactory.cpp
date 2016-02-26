@@ -41,6 +41,8 @@ PreDeclFactory::PreDeclFactory() {
       &predecl::PreDeclList::uniformChoiceDistr;
   decls[predecl::PreDeclList::uniformVectorDistr.getName()] =
     &predecl::PreDeclList::uniformVectorDistr;
+  decls[predecl::PreDeclList::exponentialDistr.getName()] =
+    &predecl::PreDeclList::exponentialDistr;
 
   // Predecl Functions
   decls[predecl::PreDeclList::loadRealMatrixFuncDecl.getName()] =

@@ -23,10 +23,10 @@ const CategoricalDistrDecl PreDeclList::categoricalDistr =
 const DirichletDistrDecl PreDeclList::dirichletDistr =
     DirichletDistrDecl();
 
-const DiscreteDistrDecl PreDeclList::discreteDistr = 
+const DiscreteDistrDecl PreDeclList::discreteDistr =
     DiscreteDistrDecl();
 
-const PoissonDistrDecl PreDeclList::poissonDistr = 
+const PoissonDistrDecl PreDeclList::poissonDistr =
     PoissonDistrDecl();
 
 const GammaDistrDecl PreDeclList::gammaDistr =
@@ -59,10 +59,13 @@ const UniformRealDistrDecl PreDeclList::uniformRealDistr =
 const UniformVectorDistrDecl PreDeclList::uniformVectorDistr =
     UniformVectorDistrDecl();
 
+const ExponentialDistrDecl PreDeclList::exponentialDistr =
+    ExponentialDistrDecl();
+
 // PreDecl Functions
 const LoadRealMatrixFuncDecl PreDeclList::loadRealMatrixFuncDecl =
     LoadRealMatrixFuncDecl();
-const PrevFuncDecl PreDeclList::prevFuncDecl = 
+const PrevFuncDecl PreDeclList::prevFuncDecl =
     PrevFuncDecl();
 const ToIntFuncDecl PreDeclList::toIntFuncDecl =
     ToIntFuncDecl();

@@ -239,6 +239,7 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"random/UniformReal.h\"\n");
+  fprintf(file, "#include \"random/Exponential.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
   fprintf(file, "#include \"util/util.h\"\n");
   fprintf(file, "#include \"util/DynamicTable.h\"\n");
@@ -252,7 +253,7 @@ void CPPPrinter::print(code::Code* prog) {
     s->print(this);
   printLine();
 
-  // Check for Special Printing Option 
+  // Check for Special Printing Option
   for (auto s : prog->getAllOptions()) {
     if (s == "matrix") {
       // Support Matrix
@@ -445,7 +446,7 @@ void CPPPrinter::print(code::TemplateExpr* term) {
   for (auto p : term->getArgs()) {
     if (not_first)
       fprintf(file, ",");
-    else 
+    else
       not_first = true;
     p->print(this);
   }
@@ -569,7 +570,7 @@ void CPPPrinter::print(code::FloatingLiteral* term) {
   printIndent();
   // Special Case!
   //   Generally Here we keep 8 digits after decimal point
-  if (term->getVal() < 1e-6) 
+  if (term->getVal() < 1e-6)
     fprintf(file, "%s", std::to_string(term->getVal()).c_str());
   else {
     fprintf(file, "%.8lf", term->getVal());
@@ -1022,4 +1023,3 @@ void CPPPrinter::print(code::CallClassConstructor* term) {
 
 }
 }
-

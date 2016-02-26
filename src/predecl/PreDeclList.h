@@ -19,6 +19,7 @@
 #include "UniformIntDistrDecl.h"
 #include "UniformRealDistrDecl.h"
 #include "UniformVectorDistrDecl.h"
+#include "ExponentialDistrDecl.h"
 // PreDecl Functions
 #include "LoadRealMatrixFuncDecl.h"
 #include "PrevFuncDecl.h"
@@ -68,6 +69,7 @@ public:
   static const UniformIntDistrDecl uniformIntDistr;
   static const UniformRealDistrDecl uniformRealDistr;
   static const UniformVectorDistrDecl uniformVectorDistr;
+  static const ExponentialDistrDecl exponentialDistr;
   // PreDecl Functions
   static const LoadRealMatrixFuncDecl loadRealMatrixFuncDecl;
   static const PrevFuncDecl prevFuncDecl;
@@ -75,7 +77,7 @@ public:
   static const ToRealFuncDecl toRealFuncDecl;
   static const ToMatrixFuncDecl toMatrixFuncDecl;
   static const ToStringFuncDecl toStringFuncDecl;
-  
+
   // Functions using Builtin Function Interface
   static const std::map<std::string, std::shared_ptr<PreDecl>> funcStore; // used to store builtin functions using function interface
   static const std::vector<std::string> mathFuncList;
