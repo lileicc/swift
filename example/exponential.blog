@@ -6,11 +6,15 @@
 * Query will check if BLOG can correctly compute the CDF of the exponential.
 */
 
+
 random Real wait ~ Exponential(4);
 
 random Boolean check ~
   if wait < 0.5 then BooleanDistrib(1.0)
   else BooleanDistrib(0.0);
 
-query check;
+
+obs check = false;
+
+query wait;
 /* P(check = true) is approx. 0.864 */
