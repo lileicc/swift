@@ -17,4 +17,3 @@ random Boolean check ~
 obs check = false;
 
 query wait;
-/* P(check = true) is approx. 0.864 */
