@@ -21,6 +21,8 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::dirichletDistr;
   decls[predecl::PreDeclList::discreteDistr.getName()] =
     &predecl::PreDeclList::discreteDistr;
+  decls[predecl::PreDeclList::exponentialDistr.getName()] =
+    &predecl::PreDeclList::exponentialDistr;
   decls[predecl::PreDeclList::gammaDistr.getName()] =
     &predecl::PreDeclList::gammaDistr;
   decls[predecl::PreDeclList::gaussianDistr.getName()] =
