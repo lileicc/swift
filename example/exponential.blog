@@ -2,8 +2,7 @@
 /**
 * Simple model to test if exponential distribution is working.
 *
-* If the distribution works, check should be true with probability ~0.864.
-* Query will check if BLOG can correctly compute the CDF of the exponential.
+* Query will check if BLOG can correctly compute the likelihood of the exponential.
 */
 
 
