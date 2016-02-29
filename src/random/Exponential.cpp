@@ -25,8 +25,8 @@ void Exponential::init(double lambda) {
   if (lambda != this->lambda) {
     this->lambda = lambda;
     is_loglike_ok = false;
+    dist = std::exponential_distribution<double>(lambda);
   }
-  dist = std::exponential_distribution<double>(lambda);
 }
 
 double Exponential::gen() {
