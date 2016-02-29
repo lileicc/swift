@@ -8,6 +8,7 @@
 #include "CategoricalDistrDecl.h"
 #include "DirichletDistrDecl.h"
 #include "DiscreteDistrDecl.h"
+#include "ExponentialDistrDecl.h"
 #include "GammaDistrDecl.h"
 #include "GaussianDistrDecl.h"
 #include "GeometricDistrDecl.h"
@@ -19,7 +20,6 @@
 #include "UniformIntDistrDecl.h"
 #include "UniformRealDistrDecl.h"
 #include "UniformVectorDistrDecl.h"
-#include "ExponentialDistrDecl.h"
 // PreDecl Functions
 #include "LoadRealMatrixFuncDecl.h"
 #include "PrevFuncDecl.h"
@@ -58,6 +58,7 @@ public:
   static const CategoricalDistrDecl categoricalDistr;
   static const DirichletDistrDecl dirichletDistr;
   static const DiscreteDistrDecl discreteDistr;
+  static const ExponentialDistrDecl exponentialDistr;
   static const GammaDistrDecl gammaDistr;
   static const GaussianDistrDecl gaussianDistr;
   static const GeometricDistrDecl geometricDistr;
@@ -69,7 +70,6 @@ public:
   static const UniformIntDistrDecl uniformIntDistr;
   static const UniformRealDistrDecl uniformRealDistr;
   static const UniformVectorDistrDecl uniformVectorDistr;
-  static const ExponentialDistrDecl exponentialDistr;
   // PreDecl Functions
   static const LoadRealMatrixFuncDecl loadRealMatrixFuncDecl;
   static const PrevFuncDecl prevFuncDecl;

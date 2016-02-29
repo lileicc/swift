@@ -233,13 +233,13 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Binomial.h\"\n");
   fprintf(file, "#include \"random/BooleanDistrib.h\"\n");
   fprintf(file, "#include \"random/Categorical.h\"\n");
+  fprintf(file, "#include \"random/Exponential.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
   fprintf(file, "#include \"random/Geometric.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"random/UniformReal.h\"\n");
-  fprintf(file, "#include \"random/Exponential.h\"\n");
   fprintf(file, "#include \"util/Hist.h\"\n");
   fprintf(file, "#include \"util/util.h\"\n");
   fprintf(file, "#include \"util/DynamicTable.h\"\n");

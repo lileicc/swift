@@ -26,8 +26,8 @@ const DirichletDistrDecl PreDeclList::dirichletDistr =
 const DiscreteDistrDecl PreDeclList::discreteDistr =
     DiscreteDistrDecl();
 
-const PoissonDistrDecl PreDeclList::poissonDistr =
-    PoissonDistrDecl();
+const ExponentialDistrDecl PreDeclList::exponentialDistr =
+    ExponentialDistrDecl();
 
 const GammaDistrDecl PreDeclList::gammaDistr =
     GammaDistrDecl();
@@ -47,6 +47,9 @@ const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
 const MultinomialDistrDecl PreDeclList::multinomialDistr =
     MultinomialDistrDecl();
 
+const PoissonDistrDecl PreDeclList::poissonDistr =
+    PoissonDistrDecl();
+
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
 
@@ -58,9 +61,6 @@ const UniformRealDistrDecl PreDeclList::uniformRealDistr =
 
 const UniformVectorDistrDecl PreDeclList::uniformVectorDistr =
     UniformVectorDistrDecl();
-
-const ExponentialDistrDecl PreDeclList::exponentialDistr =
-    ExponentialDistrDecl();
 
 // PreDecl Functions
 const LoadRealMatrixFuncDecl PreDeclList::loadRealMatrixFuncDecl =

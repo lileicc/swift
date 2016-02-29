@@ -21,6 +21,8 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::dirichletDistr;
   decls[predecl::PreDeclList::discreteDistr.getName()] =
     &predecl::PreDeclList::discreteDistr;
+  decls[predecl::PreDeclList::exponentialDistr.getName()] =
+    &predecl::PreDeclList::exponentialDistr;
   decls[predecl::PreDeclList::gammaDistr.getName()] =
     &predecl::PreDeclList::gammaDistr;
   decls[predecl::PreDeclList::gaussianDistr.getName()] =
@@ -41,8 +43,6 @@ PreDeclFactory::PreDeclFactory() {
       &predecl::PreDeclList::uniformChoiceDistr;
   decls[predecl::PreDeclList::uniformVectorDistr.getName()] =
     &predecl::PreDeclList::uniformVectorDistr;
-  decls[predecl::PreDeclList::exponentialDistr.getName()] =
-    &predecl::PreDeclList::exponentialDistr;
 
   // Predecl Functions
   decls[predecl::PreDeclList::loadRealMatrixFuncDecl.getName()] =
