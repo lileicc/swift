@@ -1065,7 +1065,9 @@ void MHTranslator::transAllEvidence(
       continue;
     }
     coreWorldInit->addStmt(new code::CallExpr(
-      new code::Identifier(UtilSetEviFuncName), 
+      new code::TemplateExpr(
+        new code::Identifier(UtilSetEviFuncName), 
+        std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(evi->getLeft()->getTyp()).getName())}),
       std::vector<code::Expr*> {var, transExpr(evi->getRight())}));
 
     // check_obs() / update_obs() 
