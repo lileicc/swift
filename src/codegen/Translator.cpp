@@ -343,18 +343,13 @@ void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
                                     new code::Identifier(localnumvarname),
                                     code::OpKind::BO_SPLUS);
       insidebody->addStmt(st);
-      // resize the instance vector to make sure it get enough size
-      // removed by leili
-      //      st = code::CallExpr::createMethodCall(inst_var_name,
-      //          VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>( {
-      //              new code::Identifier(numvar) }));
-      //      insidebody->addStmt(st);
+      // TODO: For efficiency purpose, we can remove the following <append> statement.
       // append the origin attributes
       std::vector<EXPR> origin_values;
       for (size_t originid = 0; originid < numst->size(); originid++)
         origin_values.push_back(
             new code::Identifier(numst->getVar(originid)->getVarName()));
-      st = CREATE_INSTANCE(name, "", origin_values,
+      st = CREATE_INSTANCE(name, "_inst_"+name, origin_values,
                            new code::Identifier(localnumvarname));
       insidebody->addStmt(st);
       code::Expr* szexp = new code::IntegerLiteral(1);
