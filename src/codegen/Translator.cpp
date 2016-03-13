@@ -241,7 +241,6 @@ code::FunctionDecl* Translator::transSampleAlg() {
           new code::Identifier(WEIGHT_VAR_REF_NAME), code::OpKind::BO_ASSIGN));
   fun->addStmt(new code::ForStmt(init, cond, step, body));
   return fun;
-  //TODO adding other algorithms
 }
 
 void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
@@ -394,9 +393,9 @@ void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
     // :::==> ensure_num
     fun->addStmt(
         new code::CallExpr(new code::Identifier(ensureFun->getName())));
-    // TODO create functions for number statement and their likelihood
+    // TODO create functions for number statement and their likelihood (support multiple numberstmt)
   }
-  // markt he markvar
+  // mark the markvar
   // ::: => marknumvar = curr_loop
   fun->addStmt(
       new code::BinaryOperator(new code::Identifier(marknumvar),
@@ -1063,7 +1062,6 @@ code::Expr* Translator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   code::Expr* list = new code::ListInitExpr(args);
   std::vector<code::Expr*> maparg;
   maparg.push_back(list);
-  // TODO: just a hack for the moment, need to support templated type natively
   code::Type maptype(MAP_BASE_TYPE, { fromType, toType });
   return new code::CallClassConstructor(maptype, maparg);
 }
@@ -1273,8 +1271,7 @@ code::Expr* Translator::transDistribution(
                                         code::OpKind::BO_COMMA);
       }
     } else {
-      // TODO
-      //    Note: Actually, it is a general way of dynamic initialization
+      // Note: Actually, it is a general way of dynamic initialization
       std::string distvarname = UNIFORM_CHOICE_DISTRIBUTION_NAME
           + std::to_string((size_t) &(dist->getArgs()));
       if (valuevar.empty()) {
@@ -1684,7 +1681,7 @@ code::Expr* Translator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    // TODO
+    // Note: Boolean is converted to 0/1
     return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
