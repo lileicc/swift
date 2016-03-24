@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
     std::cout
-        << "\t[main] [-v] -i <input filename>... -o <output filename> [-e ParticleFilter [--particle ParticleNumber]] [--ir <filename for printing ir>]"
+        << "\t[main] [-v] -i <input filename>... -o <output filename> [-e ParticleFilter [--particle ParticleNumber]] [--ir <filename for printing ir>] [--log [true,false]]"
         << std::endl;
     exit(0);
   }
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-v") == 0)
       verbose = true;
-    if (strcmp(argv[i], "-i") == 0) { 
+    if (strcmp(argv[i], "-i") == 0) {
       if(i + 1 < argc && argv[i+1] && argv[i+1][0] != '-') {
         for(++i; i < argc && argv[i] && argv[i][0] != '-'; ++ i)
           inp.push_back(argv[i]);
@@ -65,6 +65,12 @@ int main(int argc, char** argv) {
         ++ i;
       }
     }
+    if (strcmp(argv[i], "--log") == 0 && i + 1 < argc && argv[i+1]) {
+      bool loglik;
+      strcmp(argv[i + 1], "false") == 0 ? loglik = false : loglik = true;
+      swift::codegen::Translator::updateLogLikelihoodFlag(loglik);
+      ++ i;
+    }
   }
 
   swift::absyn::BlogProgram* blog_absyn = NULL;
@@ -89,10 +95,10 @@ int main(int argc, char** argv) {
       }
     }
   }
-  
+
   if (verbose)
     blog_absyn->print(stdout, 0);
-  
+
   // preprocess of input blog program
   swift::preprocess::Preprocessor preproc;
   preproc.process(blog_absyn);
@@ -141,25 +147,25 @@ int main(int argc, char** argv) {
   } else {
     printf("<%s> engine not found", engine_type.c_str());
   }
-  
+
   if (trans != nullptr) {
     trans->translate(model);
     swift::code::Code* program = trans->getResult();
-    
+
     if (program == NULL) {
       fprintf(stderr, "Error in algorithm-specific program translating!");
       delete trans;
       delete blog_absyn;
       return 1;
     }
-    
+
     // print code
     swift::printer::Printer * prt = new swift::printer::CPPPrinter(
                                                                    std::string(out));
     program->print(prt);
-    
+
     printf("correctly translated model file");
-    if(inp.size() == 1) 
+    if(inp.size() == 1)
       printf(" <%s>!\n", inp[0]);
     else {
       printf("s!");
