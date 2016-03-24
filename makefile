@@ -6,6 +6,7 @@ LIB_FLAGS=-larmadillo
 EXEC=$(MAIN)
 SRC=src/absyn/*.cpp \
   src/analyzer/*.cpp \
+  src/analyzer/ConjugatePriors/*.cpp \
   src/ir/*.cpp \
   src/fabrica/*.cpp \
   src/msg/*.cpp \
@@ -22,7 +23,6 @@ SRC=src/absyn/*.cpp \
   src/parse/lexer.cpp
 YACCDIR=lib/byacc-20130925
 
-
 help:
 	@echo 'Makefile for swift compiler                                            '
 	@echo '                                                                       '
@@ -34,7 +34,7 @@ help:
 
 compile: $(SRC)
 	$(CXX) $(CXX_CFLAGS) $(SRC) -o $(EXEC) $(LIB_FLAGS)
-	
+
 genparser: $(YACCDIR)/yacc
 	cd src/parse; flex -o lexer.cpp blog.flex; ../../$(YACCDIR)/yacc -v -d -o parser.cpp blog.yacc
 
