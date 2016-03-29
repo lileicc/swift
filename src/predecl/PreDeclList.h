@@ -6,6 +6,7 @@
 #include "BinomialDistrDecl.h"
 #include "BooleanDistrDecl.h"
 #include "CategoricalDistrDecl.h"
+#include "IsotropicMultivarGaussianDistrDecl.h"
 #include "DirichletDistrDecl.h"
 #include "DiscreteDistrDecl.h"
 #include "ExponentialDistrDecl.h"
@@ -56,6 +57,7 @@ public:
   static const BinomialDistrDecl binomialDistr;
   static const BooleanDistrDecl booleanDistr;
   static const CategoricalDistrDecl categoricalDistr;
+  static const IsotropicMultivarGaussianDistrDecl isotropicmultivargaussianDistr;
   static const DirichletDistrDecl dirichletDistr;
   static const DiscreteDistrDecl discreteDistr;
   static const ExponentialDistrDecl exponentialDistr;
