@@ -7,6 +7,8 @@
 
 #include "Preprocessor.h"
 
+#include "..\absyn\ArrayExpr.h"
+
 #include <cassert>
 #include <memory>
 #include <utility>
@@ -164,6 +166,39 @@ absyn::Expr* Preprocessor::parse_expr(absyn::Expr* expr) {
     ret = parse_expr(args[i]);
     if (ret != NULL) args[i] = ret;
   }
+
+  if (arr != NULL) {
+    // ensure <dim> field in ArrayExpr
+    int base_dim = -1;
+    absyn::ArrayExpr* sub;
+    bool ok=true;
+    for (size_t i = 0; i < arr->size(); i++) {
+      sub = dynamic_cast<absyn::ArrayExpr*>(arr->get(i));
+      if (sub != NULL) {
+        if (base_dim < 0) base_dim = sub->getDim();
+        else
+        if (base_dim != sub->getDim()) {
+          ok = false;
+          if (sub->getDim() > base_dim) base_dim = sub->getDim();
+        }
+      }
+      else {
+        if (base_dim < 0) base_dim = 0;
+        else 
+          if (base_dim != 0) ok=false;
+      }
+    }
+    if (!ok) {
+      error(arr->line, arr->col,
+        "Illegal <ArrayExpr>: Every element in the array should have the same dimension.");
+    }
+
+    if (base_dim < 0) base_dim = 0;
+    if (arr->getDim() != base_dim + 1) {
+      arr->setDim(base_dim + 1);
+    }
+  }
+
   return NULL;
 }
 
