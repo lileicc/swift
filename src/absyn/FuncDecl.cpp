@@ -11,7 +11,11 @@ namespace swift {
 namespace absyn {
 
 FuncDecl::FuncDecl(int l, int c, bool random, Ty typ, Symbol func, Expr* expr) :
-    Decl(l, c), random(random), typ(typ), func(func), expr(expr) {
+    Decl(l, c), random(random), is_extern(false), typ(typ), func(func), expr(expr) {
+}
+
+FuncDecl::FuncDecl(int l, int c, Ty typ, Symbol func) :
+    Decl(l, c), random(false), is_extern(true), typ(typ), func(func), expr(NULL) {
 }
 
 FuncDecl::~FuncDecl() {
@@ -29,6 +33,10 @@ const Symbol& FuncDecl::getFuncName() const {
 
 bool FuncDecl::isRandom() const {
   return random;
+}
+
+bool FuncDecl::isExtern() const {
+  return is_extern;
 }
 
 Expr*& FuncDecl::getExpr() {
@@ -50,7 +58,7 @@ void FuncDecl::addArg(VarDecl var) {
 // For Debugging Use
 void FuncDecl::print(FILE* file, int indent) {
   fprintf(file, "%*s(FuncDecl:\n", indent, "");
-  fprintf(file, "%*s:kind %s\n", indent + 2, "", (random ? "random" : "fixed"));
+  fprintf(file, "%*s:kind %s\n", indent + 2, "", (random ? "random" : (is_extern ? "extern" : "fixed")));
   fprintf(file, "%*s:type %s\n", indent + 2, "", typ.toString().c_str());
   fprintf(file, "%*s:func %s\n", indent + 2, "", func.getValue().c_str());
   if (args.size() > 0) {

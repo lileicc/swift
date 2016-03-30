@@ -36,7 +36,7 @@ compile: $(SRC)
 	$(CXX) $(CXX_CFLAGS) $(SRC) -o $(EXEC) $(LIB_FLAGS)
 	
 genparser: $(YACCDIR)/yacc
-	cd src/parse; flex -olexer.cpp blog.flex; ../../$(YACCDIR)/yacc -v -d -o parser.cpp blog.yacc
+	cd src/parse; flex -o lexer.cpp blog.flex; ../../$(YACCDIR)/yacc -v -d -o parser.cpp blog.yacc
 
 $(YACCDIR)/yacc:
 	cd $(YACCDIR); ./configure; make

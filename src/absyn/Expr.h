@@ -20,6 +20,7 @@ public:
   virtual ~Expr();
 
   void add(Expr* e);
+  void add_front(Expr* e);
   Expr* get(size_t id);
   std::vector<Expr*>& getAllExpr();
   size_t size();
