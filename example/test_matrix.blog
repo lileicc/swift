@@ -1,0 +1,17 @@
+fixed Real x = 1;
+fixed Real y = 0;
+fixed Real z = -1;
+fixed RealMatrix A = [x,y,z];
+fixed RealMatrix B = [x;y;z];
+fixed RealMatrix W = [1,0.0,0;0.0,1,0;0.0,0,1];
+
+fixed Real scale(Real k) = A * transpose(A) * k;
+
+random RealMatrix C ~ MultivarGaussian(B,W);
+random RealMatrix D ~ MultivarGaussian([3.0;3.0;3.0],W);
+
+obs D = vstack(2,2,2);
+
+query scale(1.5);
+query C[0];
+query D[0] + (B * A)[0][0];
