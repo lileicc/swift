@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <string>
+#include <vector>
 
 #include "../code/CodeForwardDeclaration.h"
 
@@ -15,6 +16,10 @@ public:
 
   // main framework of the program
   virtual void print(code::Code* prog)=0;
+  
+  // add a single header comment
+  //   i.e. #include in C++; import for Java
+  virtual void addHeader(std::string h);
 
   // Statements and Expressions
   virtual void print(code::ArraySubscriptExpr* term)=0;
@@ -71,6 +76,8 @@ protected:
 
   void printIndent();
   void printLine();
+  
+  std::vector<std::string> header;
 };
 
 }

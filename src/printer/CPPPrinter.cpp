@@ -190,6 +190,9 @@ void CPPPrinter::printPrefix() {
 }
 
 void CPPPrinter::addHeader(std::string h) {
+  if(h.size() == 0) return;
+  if(h[0]!='<' && h[0]!='\"') h="\""+h;
+  if(h[h.size()-1]!='>' && h[h.size()-1]!='\"') h.push_back('\"');
   header.push_back(h);
 }
 

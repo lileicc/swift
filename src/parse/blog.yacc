@@ -536,7 +536,7 @@ expression:
     operation_expr {$$ = $1;}
   | literal {$$ = $1;}
   | function_call {$$ = $1;}
-  | list_expr {$$ = $1;} // TODO: [BUG] this causes shift/reduce conflicts
+  | list_expr {$$ = $1;}
   | map_construct_expression {$$ = $1;}
   | quantified_formula { $$ = $1; }
   | set_expr { $$ = $1; }

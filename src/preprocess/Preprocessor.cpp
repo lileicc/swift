@@ -7,7 +7,7 @@
 
 #include "Preprocessor.h"
 
-#include "..\absyn\ArrayExpr.h"
+#include "../absyn/ArrayExpr.h"
 
 #include <cassert>
 #include <memory>

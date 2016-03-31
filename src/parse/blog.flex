@@ -119,7 +119,7 @@ Comment                 {TraditionalComment}|{EndOfLineComment}|{DocumentationCo
 [Ll][Ii][Ss][Tt] { return LIST; }
 [Mm][Aa][Pp] { return MAP; }
 [Dd][Ii][Tt][Rr][Ii][Bb][Uu][Tt][Ii][Oo][Nn] { return DISTRIBUTION; }
-[Ee][Xe][Tt][Ee][Rr][Nn] { return EXTERN; }
+[Ee][Xx][Tt][Ee][Rr][Nn] { return EXTERN; }
 
 
 "true"	{ 
