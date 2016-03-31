@@ -204,14 +204,16 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
     error(fd->line, fd->col, "function < " + name + " > contains more than 1 timestep arguments!");
   }
 
-  if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom())) {
+  if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom(), fd->isExtern())) {
     error(fd->line, fd->col,
         "function < " + name
             + " > with the same argument type already defined");
   }
   else {
-    // Process Timestep
-    functory.getFunc(name, vds)->processTemporal(tyFactory.getTimestepTy());
+    if (!fd->isExtern()) {
+      // Process Timestep
+      functory.getFunc(name, vds)->processTemporal(tyFactory.getTimestepTy());
+    }
   }
 }
 
@@ -1325,6 +1327,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
 }
 
 void Semant::transFuncBody(absyn::FuncDecl* fd) {
+  if (fd->isExtern()) return ; // external function has no body
+
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
   const std::string& name = fd->getFuncName().getValue();
   std::vector<std::shared_ptr<ir::VarDecl> > vds;

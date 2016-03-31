@@ -2130,10 +2130,13 @@ code::Expr* PFTranslator::transFunctionCall(
       getterfunname = getGetterFunName(fc->getRefer()->getName());
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     case ir::IRConstant::FIXED:
-      getterfunname = getFixedFunName(fc->getRefer()->getName());
-      if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
-        // This fixed function is actually a constant variable
-        return new code::Identifier(getterfunname);
+      getterfunname = fc->getRefer()->getName();
+      if (!fc->getRefer()->isExtern()) {
+        getterfunname = getFixedFunName(fc->getRefer()->getName());
+        if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
+          // This fixed function is actually a constant variable
+          return new code::Identifier(getterfunname);
+        }
       }
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     default:
