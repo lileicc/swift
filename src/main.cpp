@@ -14,6 +14,7 @@
 #include "codegen/PFTranslator.h"
 #include "codegen/MHTranslator.h"
 #include "codegen/GibbsTranslator.h"
+#include "util/Configuration.h"
 
 extern swift::absyn::BlogProgram* parse(const char* inp);
 int main(int argc, char** argv) {
@@ -22,23 +23,28 @@ int main(int argc, char** argv) {
     std::cout
         << "\t[main] [-v] -i <input filename>... -o <output filename> " << std::endl
         << "\t            [-n <number of samples, default = 10^6>]" << std::endl
-        << "\t            [-e ParticleFilter [--particle <ParticleNumber>] " << std::endl
-        << "\t                LWSampler|MHSampler|GibbsSampler            ]" << std::endl
+        << "\t            [-e LWSampler |" << std::endl
+        << "\t                ParticleFilter [--particle <ParticleNumber>] |" << std::endl
+        << "\t                MHSampler [--burn-in <number of burn-in samples>] |" << std::endl
+        << "\t                GibbsSampler [--burn-in <number of burn-in samples>] ]" << std::endl
         << "\t            [--ir <filename for printing ir>]" << std::endl
+        << "\t            [--hist-buckets <number of buckets>]" << std::endl
+        << "\t            [--model-output <model output filename>]" << std::endl
         << "\t            [--include <filenames for external source code>]" << std::endl;
     exit(0);
   }
+  swift::Configuration* config = swift::Configuration::getConfiguration();
   std::vector<const char*> inp;
   std::vector<std::string> extraHeaders;
   const char* out = "";
   const char* irfile = nullptr;
   bool verbose = false;
   std::string engine_type = "LWSampler";
-  int particle_N = 0, iter_N = 0;
+  int particle_N = 0, iter_N = 0, burn_in_N = 0, bucket_N = 0;
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-v") == 0)
       verbose = true;
-    if (strcmp(argv[i], "-i") == 0) { 
+    if (strcmp(argv[i], "-i") == 0) {
       if(i + 1 < argc && argv[i+1] && argv[i+1][0] != '-') {
         for(++i; i < argc && argv[i] && argv[i][0] != '-'; ++ i)
           inp.push_back(argv[i]);
@@ -70,6 +76,20 @@ int main(int argc, char** argv) {
         ++ i;
       }
     }
+    if (strcmp(argv[i], "--burn-in") == 0 && i + 1 < argc && argv[i+1]) {
+      int burn_in;
+      if(sscanf(argv[i + 1], "%d", &burn_in) == 1 && burn_in > 0) {
+        burn_in_N = burn_in;
+        ++ i;
+      }
+    }
+    if (strcmp(argv[i], "--hist-buckets") == 0 && i + 1 < argc && argv[i+1]) {
+      int bckts;
+      if(sscanf(argv[i + 1], "%d", &bckts) == 1 && bckts > 0) {
+        bucket_N = bckts;
+        ++ i;
+      }
+    }
     if (strcmp(argv[i], "-n") == 0 && i + 1 < argc && argv[i+1]) {
       int iter;
       if(sscanf(argv[i + 1], "%d", &iter) == 1 && iter > 0) {
@@ -78,6 +98,11 @@ int main(int argc, char** argv) {
       }
     }
   }
+
+  // set the global configuration
+  config->setValue("hist-buckets", bucket_N);
+  // set the number of burn-in samples
+  config->setValue("burn-in", burn_in_N);
 
   swift::absyn::BlogProgram* blog_absyn = NULL;
   if(inp.size() == 0) {
@@ -101,10 +126,10 @@ int main(int argc, char** argv) {
       }
     }
   }
-  
+
   if (verbose)
     blog_absyn->print(stdout, 0);
-  
+
   // preprocess of input blog program
   swift::preprocess::Preprocessor preproc;
   preproc.process(blog_absyn);
@@ -153,29 +178,29 @@ int main(int argc, char** argv) {
   } else {
     printf("<%s> engine not found", engine_type.c_str());
   }
-  
+
   if (trans != nullptr) {
     trans->translate(model);
     swift::code::Code* program = trans->getResult();
-    
+
     if (program == NULL) {
       fprintf(stderr, "Error in algorithm-specific program translating!");
       delete trans;
       delete blog_absyn;
       return 1;
     }
-    
+
     // print code
     swift::printer::Printer * prt = new swift::printer::CPPPrinter(
                                                                    std::string(out));
-                                                                   
+
     for(size_t i = 0; i < extraHeaders.size(); ++ i)
       prt->addHeader(extraHeaders[i]);
-      
+
     program->print(prt);
-    
+
     printf("correctly translated model file");
-    if(inp.size() == 1) 
+    if(inp.size() == 1)
       printf(" <%s>!\n", inp[0]);
     else {
       printf("s!");
