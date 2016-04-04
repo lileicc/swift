@@ -1,11 +1,11 @@
 /**
-* Simple test for DiagonalMultivarGaussian model.
+* Simple test for DiagGaussian model.
 */
 
 fixed RealMatrix mean = [0.0;0.0;0.0];
 fixed RealMatrix cov = [1.0;1.0;1.0];
 
-Random RealMatrix r ~ DiagonalMultivarGaussian(mean, cov);
+Random RealMatrix r ~ DiagGaussian(mean, cov);
 
 query r[0];
 query r[1];

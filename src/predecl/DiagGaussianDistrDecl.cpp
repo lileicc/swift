@@ -1,18 +1,18 @@
-#include "DiagonalMultivarGaussianDistrDecl.h"
+#include "DiagGaussianDistrDecl.h"
 
 #include "../ir/DoubleLiteral.h"
 #include "../ir/IntLiteral.h"
 
 namespace swift {
 namespace predecl {
-DiagonalMultivarGaussianDistrDecl::DiagonalMultivarGaussianDistrDecl() :
-    PreDecl(std::string("DiagonalMultivarGaussian")) {
+DiagGaussianDistrDecl::DiagGaussianDistrDecl() :
+    PreDecl(std::string("DiagGaussian")) {
 }
 
-DiagonalMultivarGaussianDistrDecl::~DiagonalMultivarGaussianDistrDecl() {
+DiagGaussianDistrDecl::~DiagGaussianDistrDecl() {
 }
 
-std::shared_ptr<ir::Expr> DiagonalMultivarGaussianDistrDecl::getNew(
+std::shared_ptr<ir::Expr> DiagGaussianDistrDecl::getNew(
     std::vector<std::shared_ptr<ir::Expr>>& args,
     fabrica::TypeFactory* fact) const {
   // Type Checking

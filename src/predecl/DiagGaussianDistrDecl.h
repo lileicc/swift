@@ -4,10 +4,10 @@
 namespace swift {
 namespace predecl {
 
-class DiagonalMultivarGaussianDistrDecl: public swift::predecl::PreDecl {
+class DiagGaussianDistrDecl: public swift::predecl::PreDecl {
 public:
-  DiagonalMultivarGaussianDistrDecl();
-  virtual ~DiagonalMultivarGaussianDistrDecl();
+  DiagGaussianDistrDecl();
+  virtual ~DiagGaussianDistrDecl();
 
   virtual std::shared_ptr<ir::Expr>
   getNew(std::vector<std::shared_ptr<ir::Expr>>& args,

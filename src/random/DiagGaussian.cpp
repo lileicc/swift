@@ -1,5 +1,5 @@
 /*
- * DiagonalMultivarGaussian.cpp
+ * DiagGaussian.cpp
  *
  * Diagonal Multivariate Gaussian (normal) distribution with parameters
  * mean and covvector.
@@ -10,21 +10,21 @@
 
 #include <cmath>
 #include <cassert>
-#include "DiagonalMultivarGaussian.h"
+#include "DiagGaussian.h"
 
 namespace swift {
 namespace random {
 
-DiagonalMultivarGaussian::DiagonalMultivarGaussian()
+DiagGaussian::DiagGaussian()
     :dist(0.0,1.0),
     is_gen_ok(false), is_loglike_ok(false),
     sqrt2PI(std::sqrt(2*PI)), log2PI(std::log(2*PI)) {
 }
 
-DiagonalMultivarGaussian::~DiagonalMultivarGaussian() {
+DiagGaussian::~DiagGaussian() {
 }
 
-void DiagonalMultivarGaussian::init(const arma::mat& _mean, const arma::mat& _covvector) {
+void DiagGaussian::init(const arma::mat& _mean, const arma::mat& _covvector) {
   mean = _mean;
   covvector = _covvector;
 
@@ -43,7 +43,7 @@ void DiagonalMultivarGaussian::init(const arma::mat& _mean, const arma::mat& _co
   k = mean.n_rows;
 }
 
-arma::mat DiagonalMultivarGaussian::gen() {
+arma::mat DiagGaussian::gen() {
   if(!is_gen_ok) {
     c.set_size(mean.n_rows, mean.n_cols);
     is_gen_ok = true;
@@ -52,11 +52,11 @@ arma::mat DiagonalMultivarGaussian::gen() {
   return mean + covvector % c;
 }
 
-double DiagonalMultivarGaussian::likeli(const arma::mat& x) {
+double DiagGaussian::likeli(const arma::mat& x) {
   return std::exp(loglikeli(x)); // might not be the most efficient way?
 }
 
-double DiagonalMultivarGaussian::loglikeli(const arma::mat& x) {
+double DiagGaussian::loglikeli(const arma::mat& x) {
   if(!is_loglike_ok) {
     log_coef = -0.5 * log2PI - arma::accu(arma::log(covvector));
     cov_inv = arma::ones(k, 1) / arma::square(covvector);

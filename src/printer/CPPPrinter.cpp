@@ -264,7 +264,7 @@ void CPPPrinter::print(code::Code* prog) {
       // Support Matrix
       fprintf(file, "\n// Matrix Library included\n");
       fprintf(file, "#include \"armadillo\"\n");
-      fprintf(file, "#include \"random/DiagonalMultivarGaussian.h\"\n");
+      fprintf(file, "#include \"random/DiagGaussian.h\"\n");
       fprintf(file, "#include \"random/Dirichlet.h\"\n");
       fprintf(file, "#include \"random/Discrete.h\"\n");
       fprintf(file, "#include \"random/MultivarGaussian.h\"\n");

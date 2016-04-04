@@ -1,5 +1,5 @@
 /*
- * DiagonalMultivarGaussian.h
+ * DiagGaussian.h
  *
  * Diagonal Multivariate Gaussian (normal) distribution with parameters
  * mean and covvector.
@@ -17,12 +17,12 @@
 namespace swift {
 namespace random {
 
-class DiagonalMultivarGaussian: public swift::random::SwiftDistribution<arma::mat> {
+class DiagGaussian: public swift::random::SwiftDistribution<arma::mat> {
 
 public:
 
-  DiagonalMultivarGaussian();
-  virtual ~DiagonalMultivarGaussian();
+  DiagGaussian();
+  virtual ~DiagGaussian();
   void init(const arma::mat& mean, const arma::mat& covvector);
   arma::mat gen();
   double likeli(const arma::mat& x);
