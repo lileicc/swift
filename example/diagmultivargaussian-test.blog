@@ -1,0 +1,17 @@
+/**
+* Simple test for DiagonalMultivarGaussian model.
+*/
+
+fixed RealMatrix mean = vstack(0,0,0);
+fixed RealMatrix cov = vstack(1,1,1);
+
+Random RealMatrix r ~ DiagonalMultivarGaussian(mean, cov);
+
+query r[0];
+query r[1];
+query r[2];
+
+Random Boolean check ~ if r[0] < 0 then true else false;
+
+obs check = false;
+query r[0];
