@@ -2,7 +2,8 @@
  * DiagGaussian.cpp
  *
  * Diagonal Multivariate Gaussian (normal) distribution with parameters
- * mean and covvector.
+ * mean and covvector. The covvector should be the entries along the diagonal
+ * of the covariance matrix.
  *
  *  Created on: March 11, 2016
  *      Author: Tony Duan
@@ -49,7 +50,7 @@ arma::mat DiagGaussian::gen() {
     is_gen_ok = true;
   }
   c.imbue([&]() { return dist(engine); });
-  return mean + covvector % c;
+  return mean + arma::sqrt(covvector) % c;
 }
 
 double DiagGaussian::likeli(const arma::mat& x) {
@@ -58,7 +59,7 @@ double DiagGaussian::likeli(const arma::mat& x) {
 
 double DiagGaussian::loglikeli(const arma::mat& x) {
   if(!is_loglike_ok) {
-    log_coef = -0.5 * k * log2PI - arma::accu(arma::log(covvector));
+    log_coef = -0.5 * k * log2PI - arma::accu(arma::log(arma::sqrt(covvector)));
     is_loglike_ok = true;
   }
   arma::mat v = x - mean;

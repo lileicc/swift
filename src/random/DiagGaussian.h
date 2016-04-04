@@ -2,7 +2,8 @@
  * DiagGaussian.h
  *
  * Diagonal Multivariate Gaussian (normal) distribution with parameters
- * mean and covvector.
+ * mean and covvector. The covvector should be the entries along the diagonal
+ * of the covariance matrix.
  *
  *  Created on: March 11, 2016
  *      Author: Tony Duan
