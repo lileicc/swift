@@ -7,10 +7,6 @@ fixed RealMatrix cov = [1.0;1.0;1.0];
 
 Random RealMatrix r ~ DiagGaussian(mean, cov);
 
-query r[0];
-query r[1];
-query r[2];
-
 Random Boolean check ~ if r[0] < 0 then true else false;
 
 obs check = false;
