@@ -58,7 +58,6 @@ public:
   static const BooleanDistrDecl booleanDistr;
   static const CategoricalDistrDecl categoricalDistr;
   static const DiagonalMultivarGaussianDistrDecl diagonalmultivargaussianDistr;
-  static const IsotropicMultivarGaussianDistrDecl isotropicmultivargaussianDistr;
   static const DirichletDistrDecl dirichletDistr;
   static const DiscreteDistrDecl discreteDistr;
   static const ExponentialDistrDecl exponentialDistr;
