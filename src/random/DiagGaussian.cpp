@@ -59,7 +59,7 @@ double DiagGaussian::likeli(const arma::mat& x) {
 
 double DiagGaussian::loglikeli(const arma::mat& x) {
   if(!is_loglike_ok) {
-    log_coef = -0.5 * k * log2PI - arma::accu(arma::log(arma::sqrt(covvector)));
+    log_coef = -0.5 * k * log2PI - 0.5 * arma::accu(covvector);
     is_loglike_ok = true;
   }
   arma::mat v = x - mean;
