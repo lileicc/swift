@@ -8,8 +8,11 @@
 #include "CategoricalDistrDecl.h"
 #include "DirichletDistrDecl.h"
 #include "DiscreteDistrDecl.h"
+#include "ExponentialDistrDecl.h"
 #include "GammaDistrDecl.h"
 #include "GaussianDistrDecl.h"
+#include "GeometricDistrDecl.h"
+#include "InvGammaDistrDecl.h"
 #include "MultivarGaussianDistrDecl.h"
 #include "MultinomialDistrDecl.h"
 #include "PoissonDistrDecl.h"
@@ -55,8 +58,11 @@ public:
   static const CategoricalDistrDecl categoricalDistr;
   static const DirichletDistrDecl dirichletDistr;
   static const DiscreteDistrDecl discreteDistr;
+  static const ExponentialDistrDecl exponentialDistr;
   static const GammaDistrDecl gammaDistr;
   static const GaussianDistrDecl gaussianDistr;
+  static const GeometricDistrDecl geometricDistr;
+  static const InvGammaDistrDecl invGammaDistr;
   static const MultivarGaussianDistrDecl multivargaussianDistr;
   static const MultinomialDistrDecl multinomialDistr;
   static const PoissonDistrDecl poissonDistr;
@@ -71,7 +77,7 @@ public:
   static const ToRealFuncDecl toRealFuncDecl;
   static const ToMatrixFuncDecl toMatrixFuncDecl;
   static const ToStringFuncDecl toStringFuncDecl;
-  
+
   // Functions using Builtin Function Interface
   static const std::map<std::string, std::shared_ptr<PreDecl>> funcStore; // used to store builtin functions using function interface
   static const std::vector<std::string> mathFuncList;

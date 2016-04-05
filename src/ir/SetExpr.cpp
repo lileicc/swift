@@ -18,5 +18,9 @@ void SetExpr::print(FILE* file, int indent) const {
 
 }
 
+std::string SetExpr::toString() {
+  return "";
+}
+
 }
 }

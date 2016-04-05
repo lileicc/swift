@@ -19,21 +19,30 @@ bool Translator::COMPUTE_LIKELIHOOD_IN_LOG =
     swift::Configuration::getConfiguration()->getBoolValue(
         "COMPUTE_LIKELIHOOD_IN_LOG");
 
+const std::string Translator::KEYWORD_THIS = "this";
 const std::string Translator::VECTOR_CLASS_NAME = "vector";
 const std::string Translator::VECTOR_RESIZE_METHOD_NAME = "resize";
 const std::string Translator::VECTOR_ADD_METHOD_NAME = "push_back";
 const std::string Translator::APPEND_FUN_NAME = "append";
 const std::string Translator::DYNAMICTABLE_CLASS_NAME = "DynamicTable";
 const std::string Translator::DYNAMICTABLE_RESIZE_METHOD_NAME = "resize";
+
+const code::Type Translator::AUTO_TYPE("auto");
+const code::Type Translator::AUTO_REF_TYPE("auto",true);
+
 const code::Type Translator::INT_TYPE("int");
 const code::Type Translator::INT_REF_TYPE("int", true);
 const code::Type Translator::INT_CONST_TYPE("int", false, false, true);
 const code::Type Translator::INT_VECTOR_TYPE(VECTOR_CLASS_NAME,
                                                 { INT_TYPE });
+const code::Type Translator::INT_VECTOR_REF_TYPE(VECTOR_CLASS_NAME,
+                                                { INT_TYPE }, true);
 const code::Type Translator::DOUBLE_TYPE("double");
 const code::Type Translator::DOUBLE_REF_TYPE("double", true);
 const code::Type Translator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {
                                                        DOUBLE_TYPE });
+const code::Type Translator::DOUBLE_VECTOR_REF_TYPE(VECTOR_CLASS_NAME, {
+                                                       DOUBLE_TYPE }, true);
 const code::Type Translator::STRING_TYPE("string");
 const code::Type Translator::CHAR_TYPE("char");
 const code::Type Translator::TIMESTEP_TYPE("unsigned");
@@ -114,7 +123,7 @@ const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
 // Precison Parameter
 const double Translator::ZERO_EPS = 1e-30;
 
-Translator::Translator() {
+Translator::Translator(): errorMsg(stdout) {
   useTag = false;
   prog = new code::Code();
   coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
@@ -128,7 +137,7 @@ Translator::Translator() {
 }
 
 Translator::~Translator() {
-  if (!useTag)
+  if (!useTag && prog != NULL)
     delete prog;
 }
 
@@ -232,7 +241,6 @@ code::FunctionDecl* Translator::transSampleAlg() {
           new code::Identifier(WEIGHT_VAR_REF_NAME), code::OpKind::BO_ASSIGN));
   fun->addStmt(new code::ForStmt(init, cond, step, body));
   return fun;
-  //TODO adding other algorithms
 }
 
 void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
@@ -334,18 +342,13 @@ void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
                                     new code::Identifier(localnumvarname),
                                     code::OpKind::BO_SPLUS);
       insidebody->addStmt(st);
-      // resize the instance vector to make sure it get enough size
-      // removed by leili
-      //      st = code::CallExpr::createMethodCall(inst_var_name,
-      //          VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>( {
-      //              new code::Identifier(numvar) }));
-      //      insidebody->addStmt(st);
+      // TODO: For efficiency purpose, we can remove the following <append> statement.
       // append the origin attributes
       std::vector<EXPR> origin_values;
       for (size_t originid = 0; originid < numst->size(); originid++)
         origin_values.push_back(
             new code::Identifier(numst->getVar(originid)->getVarName()));
-      st = CREATE_INSTANCE(name, "", origin_values,
+      st = CREATE_INSTANCE(name, "_inst_"+name, origin_values,
                            new code::Identifier(localnumvarname));
       insidebody->addStmt(st);
       code::Expr* szexp = new code::IntegerLiteral(1);
@@ -390,9 +393,9 @@ void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
     // :::==> ensure_num
     fun->addStmt(
         new code::CallExpr(new code::Identifier(ensureFun->getName())));
-    // TODO create functions for number statement and their likelihood
+    // TODO create functions for number statement and their likelihood (support multiple numberstmt)
   }
-  // markt he markvar
+  // mark the markvar
   // ::: => marknumvar = curr_loop
   fun->addStmt(
       new code::BinaryOperator(new code::Identifier(marknumvar),
@@ -1059,7 +1062,6 @@ code::Expr* Translator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   code::Expr* list = new code::ListInitExpr(args);
   std::vector<code::Expr*> maparg;
   maparg.push_back(list);
-  // TODO: just a hack for the moment, need to support templated type natively
   code::Type maptype(MAP_BASE_TYPE, { fromType, toType });
   return new code::CallClassConstructor(maptype, maparg);
 }
@@ -1269,8 +1271,7 @@ code::Expr* Translator::transDistribution(
                                         code::OpKind::BO_COMMA);
       }
     } else {
-      // TODO
-      //    Note: Actually, it is a general way of dynamic initialization
+      // Note: Actually, it is a general way of dynamic initialization
       std::string distvarname = UNIFORM_CHOICE_DISTRIBUTION_NAME
           + std::to_string((size_t) &(dist->getArgs()));
       if (valuevar.empty()) {
@@ -1680,7 +1681,7 @@ code::Expr* Translator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    // TODO
+    // Note: Boolean is converted to 0/1
     return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
@@ -1743,17 +1744,20 @@ code::Expr* Translator::transFunctionCall(
         args);
     }
 
-    return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
+    return new code::CallExpr(new code::Identifier(fc->getName()), args);
   }
   switch (fc->getKind()) {
     case ir::IRConstant::RANDOM:
       getterfunname = getGetterFunName(fc->getRefer()->getName());
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     case ir::IRConstant::FIXED:
-      getterfunname = getFixedFunName(fc->getRefer()->getName());
-      if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
-        // This fixed function is actually a constant variable
-        return new code::Identifier(getterfunname);
+      getterfunname = fc->getRefer()->getName();
+      if (!fc->getRefer()->isExtern()) {
+        getterfunname = getFixedFunName(fc->getRefer()->getName());
+        if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
+          // This fixed function is actually a constant variable
+          return new code::Identifier(getterfunname);
+        }
       }
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     default:

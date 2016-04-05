@@ -19,7 +19,7 @@ Query::~Query() {
     delete expr;
 }
 
-Expr* Query::getExpr() {
+Expr*& Query::getExpr() {
   return expr;
 }
 

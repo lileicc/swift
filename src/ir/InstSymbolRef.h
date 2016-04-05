@@ -12,6 +12,7 @@ public:
 
   const InstSymbol* getInst() const;
 
+  virtual std::string toString();
   void print(FILE*, int) const;
 
 private:

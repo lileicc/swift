@@ -204,14 +204,16 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
     error(fd->line, fd->col, "function < " + name + " > contains more than 1 timestep arguments!");
   }
 
-  if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom())) {
+  if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom(), fd->isExtern())) {
     error(fd->line, fd->col,
         "function < " + name
             + " > with the same argument type already defined");
   }
   else {
-    // Process Timestep
-    functory.getFunc(name, vds)->processTemporal(tyFactory.getTimestepTy());
+    if (!fd->isExtern()) {
+      // Process Timestep
+      functory.getFunc(name, vds)->processTemporal(tyFactory.getTimestepTy());
+    }
   }
 }
 
@@ -896,7 +898,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::CardExpr> Semant::processCardExpr(absyn::Expr* expr) {
+std::shared_ptr<ir::Expr> Semant::processCardExpr(absyn::Expr* expr) {
   std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
   cd->setTyp(lookupTy(ir::IRConstString::INT));
   std::shared_ptr<ir::Expr> b = transExpr(expr);
@@ -906,13 +908,20 @@ std::shared_ptr<ir::CardExpr> Semant::processCardExpr(absyn::Expr* expr) {
       "Invalid Cardinality Expression! Body must be a SetExpr!");
     return cd;
   }
+  auto lst_st = std::dynamic_pointer_cast<ir::ListSet>(st);
+  if (lst_st != nullptr) {
+    auto ret = std::make_shared<ir::IntLiteral>(lst_st->getArgs().size());
+    ret->setRandom(false);
+    ret->setTyp(lookupTy(ir::IRConstString::INT));
+    return ret;
+  }
   cd->setBody(st);
   // randomness checking
   cd->setRandom(st->isRandom());
   return cd;
 }
 
-std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::CardinalityExpr* expr) {
   std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
   cd->setTyp(lookupTy(ir::IRConstString::INT));
   if (expr->size() != 1) {
@@ -967,8 +976,6 @@ std::shared_ptr<ir::Expr> Semant::transVarRef(std::string var) {
       std::vector<std::shared_ptr<ir::VarDecl> >());
   if (func != NULL) {
     // Void Function Call
-    // TODO: To Change to Void Function Call
-    //std::shared_ptr<ir::VoidFuncCall> ret(new ir::VoidFuncCall(func));
     auto ret = std::make_shared<ir::FunctionCall>(func);
     ret->setTyp(func->getRetTyp());
     // randomness
@@ -1129,13 +1136,12 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
 std::shared_ptr<ir::Expr> Semant::transDistrb(
   std::string name, std::vector<std::shared_ptr<ir::Expr>> args,
   int line, int col) {
-  // TODO: add type checking for predecl distribution
   const predecl::PreDecl* distr = predeclFactory.getDecl(name);
   
   if (distr == NULL) {
     // not predeclared distribution
     warning(line, col, "No function defined for <" + name + ">! Customized distribution assumed! No type checking will be performed!");
-    
+    // TODO: it might be also a user-defined function! <To support *extern* declaration!>
     auto dist = std::make_shared<ir::Distribution>(name);
     dist->setArgs(args);
     dist->setRandom(true);
@@ -1321,6 +1327,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
 }
 
 void Semant::transFuncBody(absyn::FuncDecl* fd) {
+  if (fd->isExtern()) return ; // external function has no body
+
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
   const std::string& name = fd->getFuncName().getValue();
   std::vector<std::shared_ptr<ir::VarDecl> > vds;
@@ -1383,6 +1391,14 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
                                        " A internal type conversion will be applied! if the matrix is not a scalar, a run-time error will occur.");
             special_case = true;
           }
+        }
+
+        // When return type is a Integer but return type is a NameTy. We accept this and produce a warning
+        if (rettyp->getTyp() == ir::IRConstant::NAMETY && 
+           fun->getBody()->getTyp()->getTyp() == ir::IRConstant::INT) {
+            warning(fd->line, fd->col, "The return type of the body is Int. But the Declared Type is NameTy!"
+              " Please make sure that the return value is always *NON-NEGATIVE*!");
+            special_case = true;
         }
       }
       if (!special_case) {
@@ -1523,6 +1539,7 @@ void Semant::transEvidence(absyn::Evidence* ne) {
   //         left side  : function call | #TypeName
   //         right side : non-random expression
   if (rhs->isRandom()
+      || !lhs->isRandom()
       || ((std::dynamic_pointer_cast<ir::FunctionCall>(lhs) == nullptr)
           && !isCardAll(lhs))) {
     error(ne->line, ne->col,

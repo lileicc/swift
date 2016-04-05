@@ -67,5 +67,15 @@ void CondSet::print(FILE* file, int indent) const {
   }
 }
 
+std::string CondSet::toString() {
+  std::string ret = "{"+var->toString();
+  if (getFunc())
+    ret.append(" : "+getFunc()->toString());
+  if (getCond()) {
+    ret.append(" on " + getCond()->toString());
+  }
+  return ret + "}";
+}
+
 }
 }

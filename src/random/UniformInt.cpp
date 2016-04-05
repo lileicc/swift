@@ -11,7 +11,7 @@ namespace swift {
 namespace random {
 
 UniformInt::UniformInt() :
-    a(0), b(1), det(1), logdet(0), dist(0,1) {
+    a(0), b(0), det(0), len(1), loglen(0), dist(0,0) {
   is_loglike_ok = true;
   is_dist_ok = true;
 }
@@ -24,6 +24,7 @@ void UniformInt::init(int a, int b) {
   this->b = b;
   if (b >= a && b - a != det) {
     this->det = b - a;
+    this->len = b - a + 1;
     is_dist_ok = false;
     is_loglike_ok = false;
   }
@@ -41,16 +42,16 @@ int UniformInt::gen() {
 }
 
 double UniformInt::likeli(const int& x) {
-  return ((x >= a) && (x <= b)) ? 1.0 / det : 0;
+  return ((x >= a) && (x <= b)) ? 1.0 / len : 0;
 }
 
 double UniformInt::loglikeli(const int& x) {
   if (x >= a && x <= b) {
     if (!is_loglike_ok) {
-      logdet = -std::log(det);
+      loglen = -std::log(len);
       is_loglike_ok = true;
     }
-    return logdet;
+    return loglen;
   } else
     return -INFINITY;
 }

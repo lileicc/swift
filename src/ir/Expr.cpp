@@ -34,5 +34,9 @@ std::shared_ptr<Expr> Expr::get(size_t k) const {
   return args[k];
 }
 
+std::string Expr::toString() {
+  return "";
+}
+
 }
 }

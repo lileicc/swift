@@ -20,5 +20,9 @@ void TimestepLiteral::print(FILE* file, int indent) const {
   fprintf(file, "%*sTimestepLiteral: %u\n", indent, "", value);
 }
 
+std::string TimestepLiteral::toString() {
+  return "@" + std::to_string(value);
+}
+
 }
 }

@@ -8,6 +8,8 @@ class ListSet: public swift::ir::SetExpr {
 public:
   ListSet();
   virtual ~ListSet();
+
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 };
 

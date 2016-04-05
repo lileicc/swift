@@ -13,6 +13,7 @@
 #include "../ir/IRHeader.h"
 #include "../code/Code.h"
 #include "../util/Configuration.h"
+#include "../msg/ErrorMsg.h"
 
 namespace swift {
 namespace codegen {
@@ -37,6 +38,8 @@ public:
   code::Code* getResult();
 
 protected:
+  msg::ErrorMsg errorMsg;
+
   std::shared_ptr<ir::BlogModel> model;
 
   /**
@@ -292,14 +295,21 @@ protected:
   static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false, bool isPtr = false); // map ir type to code type
   static bool isObjectType(const ir::Ty *ty);
 
+  static const std::string KEYWORD_THIS;
+
+  static const code::Type AUTO_TYPE;
+  static const code::Type AUTO_REF_TYPE;
+
   static const code::Type INT_TYPE;
   static const code::Type INT_VECTOR_TYPE;
+  static const code::Type INT_VECTOR_REF_TYPE;
   static const code::Type INT_REF_TYPE;
   static const code::Type INT_CONST_TYPE; // this is to define global constant values
 
   static const code::Type DOUBLE_TYPE;
   static const code::Type DOUBLE_REF_TYPE;
   static const code::Type DOUBLE_VECTOR_TYPE;
+  static const code::Type DOUBLE_VECTOR_REF_TYPE;
 
   static const code::Type STRING_TYPE;
 

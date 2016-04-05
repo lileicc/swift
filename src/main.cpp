@@ -12,22 +12,29 @@
 #include "ir/BlogModel.h"
 #include "printer/CPPPrinter.h"
 #include "codegen/PFTranslator.h"
+#include "codegen/MHTranslator.h"
+#include "codegen/GibbsTranslator.h"
 
 extern swift::absyn::BlogProgram* parse(const char* inp);
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
     std::cout
-        << "\t[main] [-v] -i <input filename>... -o <output filename> [-e ParticleFilter [--particle ParticleNumber]] [--ir <filename for printing ir>]"
-        << std::endl;
+        << "\t[main] [-v] -i <input filename>... -o <output filename> " << std::endl
+        << "\t            [-n <number of samples, default = 10^6>]" << std::endl
+        << "\t            [-e ParticleFilter [--particle <ParticleNumber>] " << std::endl
+        << "\t                LWSampler|MHSampler|GibbsSampler            ]" << std::endl
+        << "\t            [--ir <filename for printing ir>]" << std::endl
+        << "\t            [--include <filenames for external source code>]" << std::endl;
     exit(0);
   }
   std::vector<const char*> inp;
+  std::vector<std::string> extraHeaders;
   const char* out = "";
   const char* irfile = nullptr;
   bool verbose = false;
   std::string engine_type = "LWSampler";
-  int particle_N = 0;
+  int particle_N = 0, iter_N = 0;
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-v") == 0)
       verbose = true;
@@ -49,10 +56,24 @@ int main(int argc, char** argv) {
         i--;
       }
     }
+    if (strcmp(argv[i], "--include") == 0) {
+      if(i + 1 < argc && argv[i+1] && argv[i+1][0] != '-') {
+        for(++i; i < argc && argv[i] && argv[i][0] != '-'; ++ i)
+          extraHeaders.push_back(argv[i]);
+        -- i;
+      }
+    }
     if (strcmp(argv[i], "--particle") == 0 && i + 1 < argc && argv[i+1]) {
       int part;
       if(sscanf(argv[i + 1], "%d", &part) == 1 && part > 0) {
         particle_N = part;
+        ++ i;
+      }
+    }
+    if (strcmp(argv[i], "-n") == 0 && i + 1 < argc && argv[i+1]) {
+      int iter;
+      if(sscanf(argv[i + 1], "%d", &iter) == 1 && iter > 0) {
+        iter_N = iter;
         ++ i;
       }
     }
@@ -101,6 +122,7 @@ int main(int argc, char** argv) {
 
   if (!sem.Okay()) {
     fprintf(stderr, "Error in semantic checking!");
+    delete blog_absyn;
     // TODO print the error message!
     return 1;
   }
@@ -118,17 +140,38 @@ int main(int argc, char** argv) {
     if(particle_N>0)
       PF_trans->setParticleNum(particle_N);
     trans = PF_trans;
+  } else if (engine_type == "MHSampler") {
+    auto MH_trans = new swift::codegen::MHTranslator();
+    if(iter_N>0)
+      MH_trans->setIterationNum(iter_N);
+    trans = MH_trans;
+  } else if (engine_type == "GibbsSampler") {
+    auto gibbs_trans = new swift::codegen::GibbsTranslator();
+    if(iter_N>0)
+      gibbs_trans->setIterationNum(iter_N);
+    trans = gibbs_trans;
   } else {
-    printf("%s engine not found", engine_type.c_str());
+    printf("<%s> engine not found", engine_type.c_str());
   }
   
   if (trans != nullptr) {
     trans->translate(model);
     swift::code::Code* program = trans->getResult();
     
+    if (program == NULL) {
+      fprintf(stderr, "Error in algorithm-specific program translating!");
+      delete trans;
+      delete blog_absyn;
+      return 1;
+    }
+    
     // print code
     swift::printer::Printer * prt = new swift::printer::CPPPrinter(
                                                                    std::string(out));
+                                                                   
+    for(size_t i = 0; i < extraHeaders.size(); ++ i)
+      prt->addHeader(extraHeaders[i]);
+      
     program->print(prt);
     
     printf("correctly translated model file");
@@ -144,6 +187,7 @@ int main(int argc, char** argv) {
     delete prt;
   }
 
+  delete trans;
   delete blog_absyn;
   return 0;
 }

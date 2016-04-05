@@ -7,11 +7,14 @@
 
 #include "ClassConstructor.h"
 #include "BinaryOperator.h"
+#include "CallExpr.h"
+#include "Identifier.h"
 
 namespace swift {
 namespace code {
 
 ClassConstructor::~ClassConstructor() {
+  if (initExpr != NULL) delete initExpr;
 }
 
 ClassConstructor* ClassConstructor::createClassConstructor(ClassDecl* cls,
@@ -27,7 +30,7 @@ void ClassConstructor::print(printer::Printer* prt) {
 }
 
 ClassConstructor::ClassConstructor(ClassDecl* cls, Type ty) :
-    FunctionDecl(cls, cls->getName(), ty, false), initExpr(nullptr) {
+    FunctionDecl(cls, cls->getName(), ty, false), initExpr(NULL) {
 }
 
 void ClassConstructor::addInitExpr(Expr* initExpr) {
@@ -36,6 +39,21 @@ void ClassConstructor::addInitExpr(Expr* initExpr) {
         OpKind::BO_COMMA);
   } else
     this->initExpr = initExpr;
+}
+
+void ClassConstructor::addInitExpr(std::string varName, Expr* expr) {
+  if (expr == NULL)
+    addInitExpr(new code::CallExpr(new Identifier(varName)));
+  else
+    addInitExpr(new code::CallExpr(new Identifier(varName), std::vector<Expr*>{expr}));
+}
+
+void ClassConstructor::addInitExpr(std::string varName, std::vector<Expr*> expr) {
+  addInitExpr(new code::CallExpr(new Identifier(varName), expr));
+}
+
+Expr* ClassConstructor::getInitExpr() {
+  return initExpr;
 }
 
 } /* namespace code */

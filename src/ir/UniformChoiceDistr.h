@@ -11,6 +11,8 @@ public:
   virtual ~UniformChoiceDistr();
 
   std::shared_ptr<SetExpr> getBody() const;
+
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
   // Special Randomness checking for Arguments

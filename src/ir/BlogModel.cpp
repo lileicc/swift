@@ -13,6 +13,9 @@ BlogModel::~BlogModel() {
 }
 
 void BlogModel::addFunction(std::shared_ptr<FuncDefn> func) {
+  if (func->isExtern())
+    externFunc.push_back(func);
+  else
   if (func->isFixed())
     fixFunc.push_back(func);
   else
@@ -42,6 +45,10 @@ const std::vector<std::shared_ptr<FuncDefn>>& BlogModel::getFixFuncs() {
 
 const std::vector<std::shared_ptr<FuncDefn>>& BlogModel::getRandFuncs() {
   return randFunc;
+}
+
+const std::vector<std::shared_ptr<FuncDefn>>& BlogModel::getExternFuncs() {
+  return externFunc;
 }
 
 const std::vector<std::shared_ptr<Query>>& BlogModel::getQueries() {

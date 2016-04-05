@@ -1,0 +1,21 @@
+/*
+ * This example demonstrates how to import external C++ function (i.e. sqr(), loadData();)
+ * User can write a customized function in an external C++ header file: user_util.h
+ *   double sqr(double x) {...}
+ *   double loadData() {...}
+ * Then use swift option
+ *    swift --include "user_util.h"
+ *  to ask swift to include the external C++ file in the target code
+ */
+
+extern Real sqr(Real x);
+extern Real loadData();
+
+fixed Real a = 1.0;
+fixed Real b = 2.0 - 1;
+random Real x ~ Gaussian(b, sqr(a));
+random Real y ~ Gaussian(x, 1);
+
+obs y = loadData();
+
+query x;

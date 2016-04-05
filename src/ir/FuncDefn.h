@@ -10,7 +10,7 @@ namespace ir {
 
 class FuncDefn {
 public:
-  FuncDefn(bool isrand, const std::string& name, const Ty* retTyp);
+  FuncDefn(bool isrand, const std::string& name, const Ty* retTyp, bool isextern=false);
   virtual ~FuncDefn();
 
   const Ty * getRetTyp() const;
@@ -24,6 +24,7 @@ public:
   const std::vector<std::shared_ptr<VarDecl> >& getArgs() const;
   bool isRand() const;
   bool isFixed() const;
+  bool isExtern() const;
   // Temporal Features
   bool isTemporal() const;
   std::shared_ptr<VarDecl> getTemporalArg();
@@ -37,7 +38,7 @@ private:
   std::string name;
   std::vector<std::shared_ptr<VarDecl> > args;
   const Ty* retTyp;
-  bool isrand;
+  bool isrand, isextern;
   std::shared_ptr<Clause> body;
   std::shared_ptr<VarDecl> tmparg;
   bool istmp;

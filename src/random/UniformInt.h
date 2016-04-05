@@ -24,8 +24,8 @@ private:
   std::uniform_int_distribution<int> dist;
   int a;
   int b;
-  int det;
-  double logdet;
+  int det, len;
+  double loglen;
   bool is_loglike_ok, is_dist_ok;
 };
 

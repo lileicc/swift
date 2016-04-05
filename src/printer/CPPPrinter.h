@@ -1,6 +1,5 @@
 #pragma once
 
-#include <vector>
 #include "Printer.h"
 
 namespace swift {
@@ -18,11 +17,11 @@ public:
   CPPPrinter(std::string);
   virtual ~CPPPrinter();
 
-  // add a single include
-  void addHeader(std::string h);
-
   // main framework of the program
   void print(code::Code* prog);
+  
+  // add a single include
+  void addHeader(std::string h);
 
   // Statements and Expressions
   void print(code::ArraySubscriptExpr* term);
@@ -48,6 +47,7 @@ public:
   void print(code::LambdaExpr* term);
   void print(code::ListInitExpr* term);
   void print(code::NamespaceDecl* term);
+  void print(code::NewExpr* term);
   void print(code::NullLiteral* term);
   void print(code::ParamVarDecl* term);
   void print(code::ReturnStmt* term);
@@ -63,8 +63,6 @@ protected:
   void print(std::vector<code::Expr*>& exprs);
 
 private:
-  std::vector<std::string> header;
-
   bool isforward; // whether the current phase is to print forward declaration
   bool isheader; // whether the current phase is to print the header file declarations
   // Note: when process a print method of a Stmt, we assume isforward == false

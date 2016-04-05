@@ -25,6 +25,7 @@ public:
   const predecl::PreDecl* getRefer() const;
 
   const std::string& getDistrName() const;
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
   // Special Check for Randomness

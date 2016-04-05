@@ -1,7 +1,7 @@
 /*
  * Analyzer.h
  *
- *  Created on: Feb 13, 2014
+ *  Created on: Apr 16, 2015
  *      Author: yiwu
  */
 
@@ -9,21 +9,23 @@
 
 #include <memory>
 #include "../ir/BlogModel.h"
+#include "../msg/ErrorMsg.h"
 
 namespace swift {
 namespace analyzer {
 
 class Analyzer {
 public:
-  Analyzer();
-  ~Analyzer();
+  Analyzer(std::shared_ptr<ir::BlogModel> _model = nullptr);
+  virtual ~Analyzer();
  
-  void process(ir::BlogModel* model);
+  virtual bool process() = 0;
+  
+  virtual void setModel(std::shared_ptr<ir::BlogModel> _model);
 
-private:
-  // Process Temporal Information
-  //   i.e. Markov Order
-  void processTemporal(ir::BlogModel* model);
+protected:
+  std::shared_ptr<ir::BlogModel> model;
+  msg::ErrorMsg errMsg;
 };
 
 }

@@ -384,7 +384,6 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
     );
   }
   return fun;
-  //TODO adding other algorithms
 }
 
 void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
@@ -944,6 +943,9 @@ code::Stmt* PFTranslator::transMultiCaseBranch(std::shared_ptr<ir::Branch> br,
 code::Stmt* PFTranslator::transBranch(std::shared_ptr<ir::Branch> br,
                                        std::string retvar,
                                        std::string valuevar) {
+  if (br->getArgDim() > 1)
+    return transMultiCaseBranch(br, retvar, valuevar); // Special Multi-Case Expr
+
   code::SwitchStmt* sst = new code::SwitchStmt(transExpr(br->getVar()));
   code::CaseStmt* cst;
   for (size_t i = 0; i < br->size(); i++) {
@@ -1250,7 +1252,6 @@ code::Expr* PFTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   code::Expr* list = new code::ListInitExpr(args);
   std::vector<code::Expr*> maparg;
   maparg.push_back(list);
-  // TODO: just a hack for the moment, need to support templated type natively
   code::Type maptype(MAP_BASE_TYPE, { fromType, toType });
   return new code::CallClassConstructor(maptype, maparg);
 }
@@ -1460,8 +1461,7 @@ code::Expr* PFTranslator::transDistribution(
                                         code::OpKind::BO_COMMA);
       }
     } else {
-      // TODO
-      //    Note: Actually, it is a general way of dynamic initialization
+      // Note: Actually, it is a general way of dynamic initialization
       std::string distvarname = UNIFORM_CHOICE_DISTRIBUTION_NAME
           + std::to_string((size_t) &(dist->getArgs()));
       if (valuevar.empty()) {
@@ -2057,7 +2057,6 @@ code::Expr* PFTranslator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    // TODO
     return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
@@ -2124,17 +2123,20 @@ code::Expr* PFTranslator::transFunctionCall(
           std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(fc->getTyp()).getName())}),
         args);
     }
-    return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
+    return new code::CallExpr(new code::Identifier(fc->getName()), args);
   }
   switch (fc->getKind()) {
     case ir::IRConstant::RANDOM:
       getterfunname = getGetterFunName(fc->getRefer()->getName());
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     case ir::IRConstant::FIXED:
-      getterfunname = getFixedFunName(fc->getRefer()->getName());
-      if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
-        // This fixed function is actually a constant variable
-        return new code::Identifier(getterfunname);
+      getterfunname = fc->getRefer()->getName();
+      if (!fc->getRefer()->isExtern()) {
+        getterfunname = getFixedFunName(fc->getRefer()->getName());
+        if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
+          // This fixed function is actually a constant variable
+          return new code::Identifier(getterfunname);
+        }
       }
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     default:
