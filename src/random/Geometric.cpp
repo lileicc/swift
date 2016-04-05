@@ -14,7 +14,7 @@ Geometric::Geometric() {
   p = q = 0.5;
   logp = logq = std::log(0.5);
   is_loglike_ok = true;
-  dist = std::geometric_distribution<int>(0.5);
+  dist = std::geometric_distribution<double>(0.5);
   is_dist_ok = true;
 }
 
@@ -34,17 +34,17 @@ void Geometric::init(double p) {
 
 int Geometric::gen() {
   if (!is_dist_ok) {
-    dist = std::geometric_distribution<int>(p);
+    dist = std::geometric_distribution<double>(p);
     is_dist_ok = true;
   }
   return dist(engine);
 }
 
-double Geometric::likeli(const int& x) {
+double Geometric::likeli(const double& x) {
   return pow(q, x) * p;
 }
 
-double Geometric::loglikeli(const int& x) {
+double Geometric::loglikeli(const double& x) {
   if (x < 0)
     return - INFINITY;
   if (!is_loglike_ok) {

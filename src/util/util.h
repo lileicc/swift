@@ -19,6 +19,9 @@
 #include <cstdio>
 #include <random>
 #include <array>
+#include <fstream>
+#include <sstream>
+#include <iterator>
 
 namespace swift {
 
@@ -425,5 +428,76 @@ inline double randn() {
   }\
 }
 
+//TODO: Add support for variable arguments.
+// Util for loading a single variable from a file by name
+double loadValue(std::string filename, std::string varname) {
+  std::string line;
+  ifstream data(filename);
+  if (data.is_open()) {
+    while (getline(data, line)) {
+      istringstream iss(line);
+      std::vector<std::string> tokens{istream_iterator<string>{iss}};
+      if (tokens[0] != varname)
+        continue;
+
+      //We shouldn't have any arguments here
+      std::string num_args = tokens[1];
+      if (std::stoi(num_args) != 0) {
+        std::cerr << "[ Run-Time Error ] >> Malormed data file at < " + filename + " >!"<<std::endl;
+        std::exit(0);
+      }
+
+      //Number of vars should be 1 here.
+      std::string num_vals = tokens[2 + atoi(num_args)];
+      if (std::stoi(num_vals) != 1) {
+        std::cerr << "[ Run-Time Error ] >> Malormed data file at < " + filename + " >!"<<std::endl;
+        std::exit(0);
+      }
+
+      //Assuming a single value in the "value" position (i.e. this variable is not a vector)
+      std::string value = tokens[3];
+      return std::stof(value);
+    }
+  }
 }
 
+// Util for loading a vector from a file by name
+std::vector<double> loadArray(std::string filename, std::string varname) {
+  std::string line;
+  ifstream data(filename);
+  if (data.is_open()) {
+    while (getline(data, line)) {
+      istringstream iss(line);
+      std::vector<std::string> tokens{istream_iterator<string>{iss}};
+      if (tokens[0] != varname)
+        continue;
+
+      i = 1;
+      //We shouldn't have any arguments here
+      std::string num_args = tokens[i];
+      if (std::stoi(num_args) != 0) {
+        std::cerr << "[ Run-Time Error ] >> Malormed data file at < " + filename + " >!"<<std::endl;
+        std::exit(0);
+      }
+
+      //ignoring args
+      i = i + std::stoi(num_args)
+      ++i;
+
+      //Number of vars should be 1 here.
+      std::string num_vals = tokens[i];
+      ++i;
+
+      std::vector<double> data;
+      for (int j=i; j < i + std::stoi(num_vals); j++) {
+        double num = std::stof(tokens[j]);
+        data.push_back(num);
+      }
+
+      return data;
+    }
+  }
+}
+
+
+}
