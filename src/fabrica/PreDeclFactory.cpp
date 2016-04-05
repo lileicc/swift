@@ -29,6 +29,8 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::gaussianDistr;
   decls[predecl::PreDeclList::geometricDistr.getName()] =
     &predecl::PreDeclList::geometricDistr;
+  decls[predecl::PreDeclList::diaggaussianDistr.getName()] =
+    &predecl::PreDeclList::diaggaussianDistr;
   decls[predecl::PreDeclList::multivargaussianDistr.getName()] =
     &predecl::PreDeclList::multivargaussianDistr;
   decls[predecl::PreDeclList::multinomialDistr.getName()] =

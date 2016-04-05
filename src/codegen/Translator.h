@@ -51,7 +51,7 @@ protected:
   inline ORIGINDEFN DECLARE_ORIGIN_FIELD(TYPEDEFN typedf, std::string originname,
       TYPE origintype);
   /**
-   *  create BLOG instance, which can be distinct symbols, 
+   *  create BLOG instance, which can be distinct symbols,
    *  or instance generated in possible worlds
    *
    *  @param tyname         blog type name
@@ -62,7 +62,7 @@ protected:
    *  @return an assignment statement in target code
    */
   inline STMT CREATE_INSTANCE(std::string tyname, std::string instname, std::vector<EXPR> originvalues = std::vector<EXPR>(), EXPR ncopy = nullptr);
-  
+
   inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
 
   /**
@@ -71,7 +71,7 @@ protected:
    * @return
    */
   inline SAMPLEFUN DECLARE_SAMPLEFUN();
-  
+
   inline SITE DECLARE_STORE_SITE();
 
   code::Code* prog; // holder for result target code
@@ -143,7 +143,7 @@ protected:
   /**
   * Check whether this fixed function needs memorization
   * @Param fd: fixed function with at least one argument
-  * @Param dims: the dimensions of the pre-allocated memory required for memozation 
+  * @Param dims: the dimensions of the pre-allocated memory required for memozation
   */
   bool checkFixedFunNeedMemo(std::shared_ptr<ir::FuncDefn> fd, std::vector<int>& dims);
   /**
@@ -180,7 +180,7 @@ protected:
 
   code::Expr* transMapExpr(std::shared_ptr<ir::MapExpr> mex);
   /**
-   * translate the operation expression 
+   * translate the operation expression
    */
   code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       std::vector<code::Expr*> args);
@@ -200,7 +200,7 @@ protected:
 
   code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, std::string valuevar =
                             std::string());
-  
+
   /**
    *  translate the origin function call (origin reference)
    *
@@ -258,8 +258,8 @@ protected:
   void addFunValueAssignStmt(code::FunctionDecl* fun, std::string valuevarname,
                              std::vector<code::ParamVarDecl*>& valueindex,
                              std::string valuerefname);
-  
-  
+
+
   /**
    * create a field for function value
    */
@@ -643,4 +643,3 @@ std::string getInstanceStringArrayName(std::string name) {
 
 } /* namespace codegen */
 } /* namespace swift */
-
