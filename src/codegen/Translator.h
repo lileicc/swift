@@ -37,10 +37,6 @@ public:
   virtual void translate(std::shared_ptr<ir::BlogModel> model);
   code::Code* getResult();
 
-  static void updateLogLikelihoodFlag(bool loglik) {
-    Translator::COMPUTE_LIKELIHOOD_IN_LOG = loglik;
-  }
-
 protected:
   msg::ErrorMsg errorMsg;
 
@@ -92,6 +88,8 @@ protected:
 
   code::FunctionDecl* mainFun; //main function
   code::FunctionDecl* coreClsPrint; // print function for answers
+
+  bool COMPUTE_LIKELIHOOD_IN_LOG;
 
   /**
    * translate the sampling algorithm

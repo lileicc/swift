@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
     if (strcmp(argv[i], "--log") == 0 && i + 1 < argc && argv[i+1]) {
       bool loglik;
       strcmp(argv[i + 1], "false") == 0 ? loglik = false : loglik = true;
-      swift::codegen::Translator::updateLogLikelihoodFlag(loglik);
+      swift::Configuration::getConfiguration()->setValue("COMPUTE_LIKELIHOOD_IN_LOG", loglik);
       ++ i;
     }
   }

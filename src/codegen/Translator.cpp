@@ -14,10 +14,6 @@
 
 namespace swift {
 namespace codegen {
-swift::Configuration* config = swift::Configuration::getConfiguration();
-bool Translator::COMPUTE_LIKELIHOOD_IN_LOG =
-    swift::Configuration::getConfiguration()->getBoolValue(
-        "COMPUTE_LIKELIHOOD_IN_LOG");
 
 const std::string Translator::KEYWORD_THIS = "this";
 const std::string Translator::VECTOR_CLASS_NAME = "vector";
@@ -134,6 +130,9 @@ Translator::Translator(): errorMsg(stdout) {
   coreClsPrint = NULL;
   coreClsDebug = NULL;
   mainFun = NULL;
+
+  swift::Configuration* config = swift::Configuration::getConfiguration();
+  COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
 }
 
 Translator::~Translator() {
@@ -639,7 +638,7 @@ code::FunctionDecl* Translator::transFixedFun(
   declared_funs[fixedfun->getName()] = fixedfun;
 
   if (dims.size() > 0) { // need memorization
-    code::Type valueRefType = valuetype; 
+    code::Type valueRefType = valuetype;
     valueRefType.setRef(true);
     // create mark value
     addFunValueRefStmt(fixedfun, getMarkVarName(fixedfunname), fixedfun->getParams(), MARK_VAR_REF_NAME, BOOL_REF_TYPE);
@@ -907,7 +906,7 @@ code::Expr* Translator::transOriginRefer(
     std::shared_ptr<ir::OriginRefer> originref, std::string valuevar) {
   code::Expr* res = transExpr(originref->getOriginArg());
   res = ACCESS_ORIGIN_FIELD(originref->getRefer()->getSrc()->getName(), originref->getRefer()->getName(), res);
-  
+
   if (!valuevar.empty()) {
     // everything other than DistributionExpr needs to check the equality to compute the log likelihood
     std::vector<code::Expr*> cmparg;
@@ -930,7 +929,7 @@ code::Expr* Translator::transCardExpr(std::shared_ptr<ir::CardExpr> cardexp,
       cardexp->getBody());
   assert(setexp != nullptr);
   // Note: For CardExpr, we can directly ignore the func field of this SetExpr
-  
+
   // can only handle conditional set for the moment.
   std::shared_ptr<ir::VarDecl> var = setexp->getVar();
   const ir::NameTy* tp = dynamic_cast<const ir::NameTy*>(var->getTyp());
@@ -1035,7 +1034,7 @@ code::Expr* Translator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
 }
 
 /*
- *  Note: Translation Sample 
+ *  Note: Translation Sample
  *    Input: forall A a : cond(a)
  *    Output:
  *        _forall(__get_num_A(), [&](int a)->bool{return cond(a);})
@@ -1103,7 +1102,7 @@ code::Expr* Translator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
         kind = code::OpKind::BO_PLUS;
       break;
     case ir::IRConstant::MINUS:
-      if (args.size() == 1) 
+      if (args.size() == 1)
         kind = code::OpKind::UO_MINUS;
       else
         kind = code::OpKind::BO_MINUS;
@@ -1207,7 +1206,7 @@ code::Expr* Translator::transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat) {
       args.push_back(new code::IntegerLiteral(0));
     }
   }
-  code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE, 
+  code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE,
     std::vector<code::Expr*>{new code::ListInitExpr(args)});
   code::Expr* func = new code::CallExpr(new code::Identifier(TO_MATRIX_FUN_NAME),
     std::vector<code::Expr*>{container, new code::IntegerLiteral((int)row), new code::IntegerLiteral((int)col)});
@@ -1566,7 +1565,7 @@ void Translator::transAllEvidence(
     // Firstly Translate all rejection sampling stmts
     transEvidence(fun, evid, false);
   }
-  
+
   for (auto evid : evids) {
     // Firstly Translate all likelihood weighing stmts
     transEvidence(fun, evid, true);
@@ -1607,13 +1606,13 @@ void Translator::transQuery(code::FunctionDecl* fun,
   }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
   code::FieldDecl::createFieldDecl(
       coreCls, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
   std::vector<code::Expr*> args;
@@ -1867,7 +1866,7 @@ inline STMT Translator::CREATE_INSTANCE(std::string tyname,
 
   return st;
 }
-  
+
 inline EXPR Translator::ACCESS_ORIGIN_FIELD(std::string tyname,
                                                std::string originname,
                                                EXPR originarg) {
@@ -1891,4 +1890,3 @@ inline SAMPLEFUN Translator::DECLARE_SAMPLEFUN() {
 
 } /* namespace codegen */
 } /* namespace swift */
-
