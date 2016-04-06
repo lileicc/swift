@@ -219,7 +219,7 @@ public:
     if (isTyped) { // typed object
       for (auto& it : table) {
 #ifndef NO_PRINT
-        printf("%s -> %.8lf\n", 
+        printf("%s -> %.8lf\n",
           (it.first >= 0 && it.first < inst_n
           ? instances->at(it.first) : typeName + "(#" + toString(it.first) + ")").c_str(),
           it.second);
