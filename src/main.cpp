@@ -45,7 +45,6 @@ int main(int argc, char** argv) {
   int particle_N = 0, iter_N = 0, burn_in_N = 0, bucket_N = 0;
 
   for (int i = 1; i < argc; i++) {
-
     if (strcmp(argv[i], "-v") == 0) {
       verbose = true;
     }
@@ -100,6 +99,20 @@ int main(int argc, char** argv) {
       }
       config->setValue("N_HIST_BUCKETS", bucket_N);
     }
+    if (strcmp(argv[i], "--burn-in") == 0 && i + 1 < argc && argv[i+1]) {
+      int burn_in;
+      if(sscanf(argv[i + 1], "%d", &burn_in) == 1 && burn_in > 0) {
+        burn_in_N = burn_in;
+        ++ i;
+      }
+    }
+    if (strcmp(argv[i], "--hist-buckets") == 0 && i + 1 < argc && argv[i+1]) {
+      int bckts;
+      if(sscanf(argv[i + 1], "%d", &bckts) == 1 && bckts > 0) {
+        bucket_N = bckts;
+        ++ i;
+      }
+    }
     if (strcmp(argv[i], "-n") == 0 && i + 1 < argc && argv[i+1]) {
       int iter;
       if(sscanf(argv[i + 1], "%d", &iter) == 1 && iter > 0) {
@@ -109,6 +122,11 @@ int main(int argc, char** argv) {
       config->setValue("N_SAMPLES", iter_N);
     }
   }
+
+  // set the global configuration
+  config->setValue("hist-buckets", bucket_N);
+  // set the number of burn-in samples
+  config->setValue("burn-in", burn_in_N);
 
   swift::absyn::BlogProgram* blog_absyn = NULL;
   if(inp.size() == 0) {
