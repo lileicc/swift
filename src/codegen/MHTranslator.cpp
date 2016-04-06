@@ -212,22 +212,22 @@ void MHTranslator::addDefualtMethods(std::string name, code::ClassDecl* clsdef, 
   mp[MCMC_Clear_MethodName] = f_ptr;
   // double getlikeli()
   //    --> filled later
-  mp[MCMC_GetLike_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_GetLike_MethodName, DOUBLE_TYPE); 
+  mp[MCMC_GetLike_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_GetLike_MethodName, DOUBLE_TYPE);
   // double getcachelikeli()
   //    --> filled later
-  mp[MCMC_GetCacheLike_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_GetCacheLike_MethodName, DOUBLE_TYPE); 
+  mp[MCMC_GetCacheLike_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_GetCacheLike_MethodName, DOUBLE_TYPE);
   // void sample()
   //    --> filled later
-  mp[MCMC_SampleVal_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_SampleVal_MethodName, VOID_TYPE); 
+  mp[MCMC_SampleVal_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_SampleVal_MethodName, VOID_TYPE);
   // void sample_cache()
   //    --> filled later
-  mp[MCMC_SampleCache_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_SampleCache_MethodName, VOID_TYPE); 
+  mp[MCMC_SampleCache_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_SampleCache_MethodName, VOID_TYPE);
   // void active_edge()
   //    --> filled later
-  mp[MCMC_ActiveEdge_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_ActiveEdge_MethodName, VOID_TYPE); 
+  mp[MCMC_ActiveEdge_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_ActiveEdge_MethodName, VOID_TYPE);
   // void remove_edge()
   //    --> filled later
-  mp[MCMC_RemoveEdge_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_RemoveEdge_MethodName, VOID_TYPE); 
+  mp[MCMC_RemoveEdge_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_RemoveEdge_MethodName, VOID_TYPE);
   // void mcmc_resample()
   //    --> Special Treatment!
   mp[MCMC_Resample_MethodName] = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_Resample_MethodName, VOID_TYPE);
@@ -250,7 +250,7 @@ void MHTranslator::addEvidenceCheckSpecialMethods(std::string name, code::ClassD
 
 void MHTranslator::addNumberVarSpecialMethods(std::string name, code::ClassDecl* clsdef, int prop_size) {
   code::FunctionDecl* f_ptr;
-  
+
   // Number Variable Related special functions
   auto& mp = varMethods[name]; // NOTE: should be Referenced!
   // inline int get_property_size() {return prop_size;}
@@ -296,7 +296,7 @@ void MHTranslator::addObjectRefSpecialMethods(std::string name, std::string objT
         new code::Identifier(KEYWORD_THIS),
         new code::Identifier(MCMC_Val_VarName)
     }));
-  mp[MCMC_ClearRef_MethodName] = f_ptr; 
+  mp[MCMC_ClearRef_MethodName] = f_ptr;
 
   // update_reference() {_util_update_reference(NumVar, this, val);}
   f_ptr = code::FunctionDecl::createFunctionDecl(clsdef, MCMC_UpdateRef_MethodName, VOID_TYPE);
@@ -341,7 +341,7 @@ code::Stmt* MHTranslator::createLoopMethodCall(
     if (dims[i] != 0) {
       std::string iter_var = TEMP_LOOP_VAR_NAME + std::to_string(cnt--);
       code::DeclStmt* init = new code::DeclStmt(
-        new code::VarDecl(NULL, iter_var, 
+        new code::VarDecl(NULL, iter_var,
           INT_TYPE, new code::IntegerLiteral(0)));
       code::Expr* cond = new code::BinaryOperator(
         new code::Identifier(iter_var),new code::IntegerLiteral(dims[i]),code::OpKind::BO_LT);
@@ -403,8 +403,8 @@ MHTranslator::MHTranslator() {
   Translator();
   mcmc_analyzer = NULL;
   contig_analyzer = NULL;
-  iterNum = DEFAULT_TOTAL_NUM_ITERATIONS;
-  burnInNum = iterNum / 2;
+  iterNum = Translator::config->getIntValue("N_SAMPLES");
+  burnInNum = Translator::config->getIntValue("N_BURN_IN_SAMPLES");
   coreQuery = code::FunctionDecl::createFunctionDecl(coreNs,CoreQueryFuncName,VOID_TYPE);
   coreStorageInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreStorageInitFuncName, VOID_TYPE);
   coreWorldInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreWorldInitFuncName, VOID_TYPE);
@@ -433,7 +433,7 @@ void MHTranslator::setBurnInNum(int bi) {
 void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
 
   if (!init_MHTranslator(model)) return ;
-  
+
   translate_fixed_part();
 
   translate_mcmc_data_structure();
@@ -443,7 +443,7 @@ void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
 
   // create initStorage() and GarbageCollect()
   createStorageInit();
-  
+
   translate_mcmc_obj_methods();
 
   translate_mcmc_query_evidences();
@@ -566,7 +566,7 @@ void MHTranslator::translate_mcmc_query_evidences() {
   //    include: eval_query(), print()
   transAllQuery(model->getQueries());
 
-  // translate evidence 
+  // translate evidence
   //    include: initWorld(), check_obs()/update_obs()
   transAllEvidence(model->getEvidences());
 }
@@ -609,13 +609,13 @@ void MHTranslator::transTypeDomainDef(std::shared_ptr<ir::TypeDomain> ty) {
   if (ty->getAllNumberStmt().size() == 0) return ;
 
   std::string numvar = getNameOfNumberVar(name);
-  
+
   auto clsdef = code::ClassDecl::createClassDecl(coreNs, numvar, std::vector<code::Type>{NumberVar_Base_Type});
   bayesVars[name] = clsdef;
-  
+
   // create class constructor
   varMethods[name][name] = code::ClassConstructor::createClassConstructor(clsdef); // empty constructor
-  
+
   addDefualtMethods(name, clsdef, INT_REF_TYPE, true);
 
   addNumberVarSpecialMethods(name, clsdef, mcmc_analyzer->getPropSize(ty));
@@ -672,7 +672,7 @@ void MHTranslator::transRandomFuncDef(std::shared_ptr<ir::FuncDefn> fun) {
       std::vector<code::Type>{code::Type(varName, false, true), code::Type(std::to_string(fun->getArgs().size()))}));
   }
   else { // just a pointer
-    code::VarDecl::createVarDecl(coreNs, storeName, 
+    code::VarDecl::createVarDecl(coreNs, storeName,
       code::Type(varName, false, true));
   }
 }
@@ -799,7 +799,7 @@ void MHTranslator::transSampleMethod(std::string name, std::shared_ptr<ir::Claus
 
   // translate sample()/sample_cache()/getlikeli()/getcachelikeli()
   cur_context = coreNs; // register all the distributions
-  cur_constructor = &coreStorageInit->getBody(); // initialization of all static distributions 
+  cur_constructor = &coreStorageInit->getBody(); // initialization of all static distributions
   cur_method_name = MCMC_GetVal_MethodName; // getval();
   cur_likeli_method_name = MCMC_GetLike_MethodName; // getlikeli();
   // sample()
@@ -831,7 +831,7 @@ void MHTranslator::transDependency(std::shared_ptr<ir::Clause> cls, code::Compou
 
   for (auto& v : contig_list) {
     auto var = createRandomVarRef(v);
-    cmp.addStmt(createPtrMethodCall(var, contig_method_name, 
+    cmp.addStmt(createPtrMethodCall(var, contig_method_name,
       std::vector<code::Expr*>{new code::Identifier(KEYWORD_THIS)}));
   }
   for (auto& v : child_list) {
@@ -930,7 +930,7 @@ void MHTranslator::transObjectProperty(std::shared_ptr<ir::TypeDomain> ty, std::
   // ensure_size(){ if (n > capacity) { ... }; }
   code::CompoundStmt* cmp = new code::CompoundStmt();
   code::IfStmt* ifst = new code::IfStmt(
-    new code::BinaryOperator(new code::Identifier(TEMP_N_NAME), new code::Identifier(MCMC_Capacity_VarName), code::OpKind::BO_GT), 
+    new code::BinaryOperator(new code::Identifier(TEMP_N_NAME), new code::Identifier(MCMC_Capacity_VarName), code::OpKind::BO_GT),
     cmp);
   mp[MCMC_EnsureSize_MethodName]->addStmt(ifst);
 
@@ -978,7 +978,7 @@ void MHTranslator::transObjectProperty(std::shared_ptr<ir::TypeDomain> ty, std::
     mp[MCMC_EnsureCache_MethodName]->addStmt(
       createLoopMethodCall(store_name, MCMC_Global_EnsureCache_MethodName, TEMP_IND_NAME, dims));
     /*
-     * ensure_size() { 
+     * ensure_size() {
      * ....
      *   for (int i = capacity; i < n; ++ i) ...
      *       var[..][i][...] = new varDecl(...,i,...)
@@ -990,7 +990,7 @@ void MHTranslator::transObjectProperty(std::shared_ptr<ir::TypeDomain> ty, std::
 
   // ensure_size(){ .... capacity = n}
   cmp->addStmt(new code::BinaryOperator(
-    new code::Identifier(MCMC_Capacity_VarName), 
+    new code::Identifier(MCMC_Capacity_VarName),
     new code::Identifier(TEMP_N_NAME), code::OpKind::BO_ASSIGN));
 }
 
@@ -1027,18 +1027,18 @@ void MHTranslator::transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query
   }
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
   code::VarDecl::createVarDecl(
       coreNs, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
   std::vector<code::Expr*> args;
   args.push_back(transExpr(qr->getVar()));
-  args.push_back(new code::IntegerLiteral(1)); 
+  args.push_back(new code::IntegerLiteral(1));
   fun->addStmt(
       code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
                                        args));
@@ -1054,7 +1054,7 @@ void MHTranslator::transAllEvidence(
   std::vector<std::shared_ptr<ir::Evidence> > evids) {
   //TODO: to use generic rejection sampling for initialization
   //      [ now we assume that no rejection is needed! ]
-  
+
   cur_context = NULL;
   cur_method_name = MCMC_GetVal_MethodName;
   for (auto& evi : evids) {
@@ -1066,11 +1066,11 @@ void MHTranslator::transAllEvidence(
     }
     coreWorldInit->addStmt(new code::CallExpr(
       new code::TemplateExpr(
-        new code::Identifier(UtilSetEviFuncName), 
+        new code::Identifier(UtilSetEviFuncName),
         std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(evi->getLeft()->getTyp()).getName())}),
       std::vector<code::Expr*> {var, transExpr(evi->getRight())}));
 
-    // check_obs() / update_obs() 
+    // check_obs() / update_obs()
     auto& contig_list = contig_analyzer->getContig(evi->getLeft());
     if (contig_list.size() != 0) {
       for (auto& v : contig_list) {
@@ -1104,7 +1104,7 @@ void MHTranslator::transAllEvidence(
 
 code::FunctionDecl* MHTranslator::transSampleAlg() {
   // general framework of MCMC sampling
-  /*  
+  /*
    *  for(int loop = 0; loop < LOOP; ++ loop) {mcmc_sample_single_iter(); eval_query();}
    *  print();
    */
@@ -1146,13 +1146,13 @@ void MHTranslator::createMain() {
           new code::CallExpr(
               new code::Identifier("std::chrono::system_clock::now"))));
   mainFun->addStmt(st);
-  
+
   mainFun->addStmt(
-    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME), 
+    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME),
     new code::CallExpr(new code::Identifier(CoreStorageInitFuncName)),code::OpKind::BO_SCOPE)
   );
   mainFun->addStmt(
-    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME), 
+    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME),
     new code::CallExpr(new code::Identifier(CoreWorldInitFuncName)),code::OpKind::BO_SCOPE)
   );
 
@@ -1186,7 +1186,7 @@ void MHTranslator::createMain() {
 
   // main sample algorithm
   mainFun->addStmt(
-    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME), 
+    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME),
     new code::CallExpr(new code::Identifier(MAIN_SAMPLING_FUN_NAME)),code::OpKind::BO_SCOPE)
   );
 
@@ -1215,7 +1215,7 @@ void MHTranslator::createMain() {
 
   // GarbageCollection
   mainFun->addStmt(
-    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME), 
+    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME),
     new code::CallExpr(new code::Identifier(CoreGarbageCollectFuncName)),code::OpKind::BO_SCOPE)
   );
 }
@@ -1268,7 +1268,7 @@ code::FunctionDecl* MHTranslator::transFixedFun(
     coreNs, fixedfunname, valuetype);
   fixedfun->setParams(transParamVarDecls(fixedfun, fd));
   declared_funs[fixedfun->getName()] = fixedfun;
-  
+
   if (dims.size() > 0) { // need memorization
     code::Expr* tar = NULL;
     code::Type valueRefType = valuetype;
@@ -1295,7 +1295,7 @@ code::FunctionDecl* MHTranslator::transFixedFun(
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
     fixedfun->addStmt(stmt);
     fixedfun->addStmt(new code::BinaryOperator(
-      new code::Identifier(MARK_VAR_REF_NAME), 
+      new code::Identifier(MARK_VAR_REF_NAME),
       new code::BooleanLiteral(true),
       code::OpKind::BO_ASSIGN));
   }
@@ -1517,7 +1517,7 @@ code::Expr* MHTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
   if (form != nullptr && args.size() == 1) {
     used = true;
     res = transQuantForm(form, args[0]);
-    
+
     errorMsg.error(-1, -1, "[MHTranslator] : [Quantitative Formula (forall, exist)] is not supported now!");
   }
 
@@ -1634,7 +1634,7 @@ code::Expr* MHTranslator::transCardExpr(std::shared_ptr<ir::CardExpr> cardexp,
   args.push_back(func);
   code::Expr* res = new code::CallExpr(new code::Identifier(FILTER_COUNT_NAME),
                                        args);
-  
+
   if (valuevar.size() != 0) {
     if (COMPUTE_LIKELIHOOD_IN_LOG) {
       res = new code::CallExpr(
@@ -1645,7 +1645,7 @@ code::Expr* MHTranslator::transCardExpr(std::shared_ptr<ir::CardExpr> cardexp,
       res = new code::BinaryOperator(res, new code::Identifier(valuevar), code::OpKind::BO_EQU);
     }
   }
-  
+
   return res;
 }
 
@@ -1677,7 +1677,7 @@ code::Expr* MHTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
   std::string tyname = tp->getRefer()->getName();
   std::string numvarstore = getStoreOfNumberVar(tyname);
 
-  code::Expr* tot_inst = 
+  code::Expr* tot_inst =
     (tp->getRefer()->getNumberStmtSize() > 0 ?
      createPtrMethodCall(new code::Identifier(numvarstore), cur_method_name) :
      new code::IntegerLiteral(tp->getRefer()->getPreLen()));
@@ -1721,7 +1721,7 @@ code::Expr* MHTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
 }
 
 /*
- *  Note: Translation Sample 
+ *  Note: Translation Sample
  *    Input: forall A a : cond(a)
  *    Output:
  *        _forall(numvar->cur_method(), [&](int a)->bool{return cond(a);})
@@ -1924,7 +1924,7 @@ code::Expr* MHTranslator::transDistribution(
     assert(tp);
     std::string tyname = tp->getRefer()->getName();
     std::string numvarstore = getStoreOfNumberVar(tyname);
-    code::Expr* num = 
+    code::Expr* num =
       (tp->getRefer()->getNumberStmtSize() == 0 ?
        new code::IntegerLiteral(tp->getRefer()->getPreLen()):
        createPtrMethodCall(new code::Identifier(numvarstore), cur_method_name));
@@ -1946,7 +1946,7 @@ code::Expr* MHTranslator::transDistribution(
             distvarname,
             DISTRIBUTION_INIT_FUN_NAME,
             std::vector<code::Expr*>(
-                { new code::IntegerLiteral(0), 
+                { new code::IntegerLiteral(0),
                   new code::BinaryOperator( num, new code::IntegerLiteral(1), code::OpKind::BO_MINUS) }));
         // :::=> dist.gen()
         code::Expr* callgen = code::CallExpr::createMethodCall(
@@ -1966,7 +1966,7 @@ code::Expr* MHTranslator::transDistribution(
         // put init just before sampling
         // :::=> dist.init(0, get_num_of_type)
         code::Expr* callinit = code::CallExpr::createMethodCall(
-            distvarname, 
+            distvarname,
             DISTRIBUTION_INIT_FUN_NAME,
             std::vector<code::Expr*>(
                 { new code::IntegerLiteral(0), new code::BinaryOperator(
