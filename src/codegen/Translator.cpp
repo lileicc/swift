@@ -120,6 +120,13 @@ const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
 const double Translator::ZERO_EPS = 1e-30;
 
 Translator::Translator(): errorMsg(stdout) {
+
+  //Get the configuration object so we can get config variables
+  swift::Configuration* config = swift::Configuration::getConfiguration();
+
+  //Flag sets whether or not to use log likelihood
+  COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
+
   useTag = false;
   prog = new code::Code();
   coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
@@ -130,9 +137,6 @@ Translator::Translator(): errorMsg(stdout) {
   coreClsPrint = NULL;
   coreClsDebug = NULL;
   mainFun = NULL;
-
-  swift::Configuration* config = swift::Configuration::getConfiguration();
-  COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
 }
 
 Translator::~Translator() {
