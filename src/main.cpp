@@ -65,6 +65,8 @@ int main(int argc, char** argv) {
         ++ i;
       }
     }
+
+    // Checking for log likelihood flag on command line. Usage: "--log [true|false]"
     if (strcmp(argv[i], "--log") == 0 && i + 1 < argc && argv[i+1]) {
       bool loglik;
       strcmp(argv[i + 1], "false") == 0 ? loglik = false : loglik = true;
