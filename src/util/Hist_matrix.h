@@ -44,6 +44,11 @@ public:
 
   void add(mat element, double weight) {
     mat cur;
+    if (isLogarithm) {
+      cur = element * std::exp(weight);
+    } else {
+      cur = element * weight;
+    }
     if (init_flag) {
       sum += cur;
       if (isLogarithm) {
@@ -56,13 +61,6 @@ public:
       sum = cur;
       sum_wei = weight;
     }
-    if (isLogarithm) {
-      cur = element * std::exp(weight);
-    }
-    else {
-      cur = element * weight;
-    }
-
     table.push_back(std::make_pair(element, weight));
   }
   ;
@@ -109,7 +107,7 @@ public:
       printf(">> query : %s\n", str.c_str());
     if (isLogarithm) sum_wei = std::exp(sum_wei);
     mat mean = sum / sum_wei;
-    mat cov = mean, var = mean;
+    mat cov = mean * trans(mean), var = mean;
     cov.zeros(); var.zeros();
     for (auto& it : table) {
       cov += (isLogarithm ? exp(it.second) : it.second) * ((it.first - mean) * trans(it.first - mean));
@@ -118,9 +116,9 @@ public:
     cov /= sum_wei;
     var /= sum_wei;
 #ifndef NO_PRINT
-    mean.print("Mean : ");
-    var.print( "Var  : ");
-    cov.print( "Cov  : ");
+    mean.print("Mean     : ");
+    var.print( "DiagVar  : ");
+    cov.print( "Cov      : ");
 #endif
     clear();
   }

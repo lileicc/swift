@@ -15,3 +15,4 @@ obs D = vstack(2,2,2);
 query scale(1.5);
 query C[0];
 query D[0] + (B * A)[0][0];
+query C;

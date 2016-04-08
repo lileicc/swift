@@ -11,3 +11,4 @@ Random Boolean check ~ if r[0] < 0 then true else false;
 
 obs check = false;
 query r[0];
+query r;
