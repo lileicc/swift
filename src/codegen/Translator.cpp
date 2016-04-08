@@ -1790,7 +1790,7 @@ void Translator::createMain() {
                                                 coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;
-  args.push_back(new code::IntegerLiteral(TOTAL_NUM_SAMPLES));
+  args.push_back(new code::IntegerLiteral(Translator::config->getIntValue("N_SAMPLES")));
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
                                         MAIN_SAMPLING_FUN_NAME, args);
   mainFun->addStmt(st);

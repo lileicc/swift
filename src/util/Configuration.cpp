@@ -17,10 +17,12 @@ namespace swift {
 Configuration* Configuration::config = NULL;
 
 Configuration::Configuration() {
+  // handle all defaults
   setValue("COMPUTE_LIKELIHOOD_IN_LOG", true);
   setValue("N_SAMPLES", 1000000);
   setValue("N_BURN_IN_SAMPLES", 500000);
   setValue("N_HIST_BUCKETS", 20);
+  setValue("MODEL_OUT_FILENAME", "");
 }
 
 Configuration* Configuration::getConfiguration() {

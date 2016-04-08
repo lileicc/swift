@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
         << "\t                GibbsSampler [--burn-in <number of burn-in samples>] ]" << std::endl
         << "\t            [--ir <filename for printing ir>]" << std::endl
         << "\t            [--hist-buckets <number of buckets>]" << std::endl
+        << "\t            [--model-output <model output filename> ]" << std::endl
         << "\t            [--include <filenames for external source code>]" << std::endl;
     exit(0);
   }
@@ -39,6 +40,7 @@ int main(int argc, char** argv) {
   std::vector<const char*> inp;
   std::vector<std::string> extraHeaders;
   const char* out = "";
+  const char* model_out = nullptr;
   const char* irfile = nullptr;
   bool verbose = false;
   std::string engine_type = "LWSampler";
@@ -99,6 +101,10 @@ int main(int argc, char** argv) {
         ++ i;
       }
       config->setValue("N_HIST_BUCKETS", bucket_N);
+    }
+    if (strcmp(argv[i]), "--model-output") == 0 && i + 1 < argc && argv[i+1]) {
+      model_out = argv[++i];
+      config->setValue("MODEL_OUT_FILENAME", model_out);
     }
     if (strcmp(argv[i], "-n") == 0 && i + 1 < argc && argv[i+1]) {
       int iter;
