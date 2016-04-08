@@ -20,11 +20,16 @@ int main(int argc, char** argv) {
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
     std::cout
-        << "\t[main] [-v] -i <input filename>... -o <output filename> [-e ParticleFilter [--particle ParticleNumber]] [--ir <filename for printing ir>] [--log [true,false]]"
-        << std::endl;
+        << "\t[main] [-v] -i <input filename>... -o <output filename> " << std::endl
+        << "\t            [-n <number of samples, default = 10^6>]" << std::endl
+        << "\t            [-e ParticleFilter [--particle <ParticleNumber>] " << std::endl
+        << "\t                LWSampler|MHSampler|GibbsSampler            ]" << std::endl
+        << "\t            [--ir <filename for printing ir>]" << std::endl
+        << "\t            [--include <filenames for external source code>]" << std::endl;
     exit(0);
   }
   std::vector<const char*> inp;
+  std::vector<std::string> extraHeaders;
   const char* out = "";
   const char* irfile = nullptr;
   bool verbose = false;
@@ -49,6 +54,13 @@ int main(int argc, char** argv) {
       if (i >= argc || (irfile && irfile[0] == '-')) {
         irfile = "";
         i--;
+      }
+    }
+    if (strcmp(argv[i], "--include") == 0) {
+      if(i + 1 < argc && argv[i+1] && argv[i+1][0] != '-') {
+        for(++i; i < argc && argv[i] && argv[i][0] != '-'; ++ i)
+          extraHeaders.push_back(argv[i]);
+        -- i;
       }
     }
     if (strcmp(argv[i], "--particle") == 0 && i + 1 < argc && argv[i+1]) {
@@ -164,6 +176,10 @@ int main(int argc, char** argv) {
     // print code
     swift::printer::Printer * prt = new swift::printer::CPPPrinter(
                                                                    std::string(out));
+
+    for(size_t i = 0; i < extraHeaders.size(); ++ i)
+      prt->addHeader(extraHeaders[i]);
+
     program->print(prt);
 
     printf("correctly translated model file");

@@ -29,7 +29,7 @@ public:
    * add a function with name, return type, and a list of arguments
    */
   bool addFuncDefn(const std::string& name, const ir::Ty* retTy,
-      std::vector<std::shared_ptr<ir::VarDecl> > args, bool isRand);
+      std::vector<std::shared_ptr<ir::VarDecl> > args, bool isRand, bool isExtern = false);
 
   /**
    * look up the table to find the function with the same signature

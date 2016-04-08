@@ -24,8 +24,8 @@ std::shared_ptr<ir::Expr> MultivarGaussianDistrDecl::getNew(
     return nullptr;
   
   std::string name = this->getName();
-  if(args[1]->getTyp() != fact->getTy(ir::IRConstString::DOUBLE))
-    name = name + "Indep";
+  if(args[1]->getTyp() == fact->getTy(ir::IRConstString::DOUBLE))
+    name = name + "Indep"; // TODO: to generally support more special multivar-gaussian
 
   auto ret = std::make_shared<ir::Distribution>(name, this);
   ret->setArgs(args);

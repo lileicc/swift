@@ -24,6 +24,7 @@ public:
 
   const std::vector<std::shared_ptr<FuncDefn>>& getFixFuncs();
   const std::vector<std::shared_ptr<FuncDefn>>& getRandFuncs();
+  const std::vector<std::shared_ptr<FuncDefn>>& getExternFuncs();
   const std::vector<std::shared_ptr<Query>>& getQueries();
   const std::vector<std::shared_ptr<Evidence>>& getEvidences();
   const std::vector<std::shared_ptr<TypeDomain>>& getTypes();
@@ -44,6 +45,7 @@ public:
 private:
   std::vector<std::shared_ptr<FuncDefn>> fixFunc;
   std::vector<std::shared_ptr<FuncDefn>> randFunc;
+  std::vector<std::shared_ptr<FuncDefn>> externFunc;
   std::vector<std::shared_ptr<Query>> query;
   std::vector<std::shared_ptr<Evidence>> evidence;
   std::vector<std::shared_ptr<TypeDomain>> types;

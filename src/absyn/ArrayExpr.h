@@ -19,6 +19,7 @@ public:
   virtual ~ArrayExpr();
 
   int getDim();
+  void setDim(int d);
 
   // For Debugging Use
   void print(FILE* file, int indent);

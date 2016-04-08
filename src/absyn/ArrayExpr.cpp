@@ -21,6 +21,10 @@ int ArrayExpr::getDim() {
   return dim;
 }
 
+void ArrayExpr::setDim(int d) {
+  dim = d;
+}
+
 // For Debugging Use
 void ArrayExpr::print(FILE* file, int indent) {
   fprintf(file, "%*s(ArrayExpr:\n", indent, "");

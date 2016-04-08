@@ -1065,7 +1065,9 @@ void MHTranslator::transAllEvidence(
       continue;
     }
     coreWorldInit->addStmt(new code::CallExpr(
-      new code::Identifier(UtilSetEviFuncName), 
+      new code::TemplateExpr(
+        new code::Identifier(UtilSetEviFuncName), 
+        std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(evi->getLeft()->getTyp()).getName())}),
       std::vector<code::Expr*> {var, transExpr(evi->getRight())}));
 
     // check_obs() / update_obs() 
@@ -1760,7 +1762,6 @@ code::Expr* MHTranslator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   code::Expr* list = new code::ListInitExpr(args);
   std::vector<code::Expr*> maparg;
   maparg.push_back(list);
-  // TODO: just a hack for the moment, need to support templated type natively
   code::Type maptype(MAP_BASE_TYPE, { fromType, toType });
   return new code::CallClassConstructor(maptype, maparg);
 }
@@ -1988,8 +1989,7 @@ code::Expr* MHTranslator::transDistribution(
         }
       }
     } else {
-      // TODO
-      //    Note: Actually, it is a general way of dynamic initialization
+      // Note: Actually, it is a general way of dynamic initialization
       std::string distvarname = UNIFORM_CHOICE_DISTRIBUTION_NAME
           + std::to_string((size_t) &(dist->getArgs()));
       if (valuevar.empty()) {
@@ -2105,7 +2105,6 @@ code::Expr* MHTranslator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    // TODO
     return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
@@ -2178,7 +2177,14 @@ code::Expr* MHTranslator::transFunctionCall(
   std::string name = fc->getRefer()->getName();
 
   if (fc->getKind() == ir::IRConstant::FIXED) {
-    return new code::CallExpr(new code::Identifier(getFixedFunName(name)), args);
+    if (!fc->getRefer()->isExtern()) {
+      name = getFixedFunName(name);
+      if (constValTable.count(name) > 0 && args.size() == 0) {
+        // This fixed function is actually a constant variable
+        return new code::Identifier(name);
+      }
+    }
+    return new code::CallExpr(new code::Identifier(name), args);
   }
 
   if (fc->getKind() == ir::IRConstant::RANDOM) {

@@ -204,14 +204,16 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
     error(fd->line, fd->col, "function < " + name + " > contains more than 1 timestep arguments!");
   }
 
-  if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom())) {
+  if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom(), fd->isExtern())) {
     error(fd->line, fd->col,
         "function < " + name
             + " > with the same argument type already defined");
   }
   else {
-    // Process Timestep
-    functory.getFunc(name, vds)->processTemporal(tyFactory.getTimestepTy());
+    if (!fd->isExtern()) {
+      // Process Timestep
+      functory.getFunc(name, vds)->processTemporal(tyFactory.getTimestepTy());
+    }
   }
 }
 
@@ -974,8 +976,6 @@ std::shared_ptr<ir::Expr> Semant::transVarRef(std::string var) {
       std::vector<std::shared_ptr<ir::VarDecl> >());
   if (func != NULL) {
     // Void Function Call
-    // TODO: To Change to Void Function Call
-    //std::shared_ptr<ir::VoidFuncCall> ret(new ir::VoidFuncCall(func));
     auto ret = std::make_shared<ir::FunctionCall>(func);
     ret->setTyp(func->getRetTyp());
     // randomness
@@ -1136,13 +1136,12 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
 std::shared_ptr<ir::Expr> Semant::transDistrb(
   std::string name, std::vector<std::shared_ptr<ir::Expr>> args,
   int line, int col) {
-  // TODO: add type checking for predecl distribution
   const predecl::PreDecl* distr = predeclFactory.getDecl(name);
   
   if (distr == NULL) {
     // not predeclared distribution
     warning(line, col, "No function defined for <" + name + ">! Customized distribution assumed! No type checking will be performed!");
-    
+    // TODO: it might be also a user-defined function! <To support *extern* declaration!>
     auto dist = std::make_shared<ir::Distribution>(name);
     dist->setArgs(args);
     dist->setRandom(true);
@@ -1328,6 +1327,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
 }
 
 void Semant::transFuncBody(absyn::FuncDecl* fd) {
+  if (fd->isExtern()) return ; // external function has no body
+
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
   const std::string& name = fd->getFuncName().getValue();
   std::vector<std::shared_ptr<ir::VarDecl> > vds;

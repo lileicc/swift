@@ -190,6 +190,9 @@ void CPPPrinter::printPrefix() {
 }
 
 void CPPPrinter::addHeader(std::string h) {
+  if(h.size() == 0) return;
+  if(h[0]!='<' && h[0]!='\"') h="\""+h;
+  if(h[h.size()-1]!='>' && h[h.size()-1]!='\"') h.push_back('\"');
   header.push_back(h);
 }
 
@@ -235,8 +238,10 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Categorical.h\"\n");
   fprintf(file, "#include \"random/Exponential.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
+  fprintf(file, "#include \"random/Gamma.h\"\n");
   fprintf(file, "#include \"random/Geometric.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
+  fprintf(file, "#include \"random/InvGamma.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"random/UniformReal.h\"\n");
@@ -259,6 +264,7 @@ void CPPPrinter::print(code::Code* prog) {
       // Support Matrix
       fprintf(file, "\n// Matrix Library included\n");
       fprintf(file, "#include \"armadillo\"\n");
+      fprintf(file, "#include \"random/DiagGaussian.h\"\n");
       fprintf(file, "#include \"random/Dirichlet.h\"\n");
       fprintf(file, "#include \"random/Discrete.h\"\n");
       fprintf(file, "#include \"random/MultivarGaussian.h\"\n");

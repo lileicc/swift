@@ -19,7 +19,7 @@ namespace swift {
 namespace absyn {
 
 class FuncDecl: public Decl {
-  bool random;
+  bool random, is_extern;
   Ty typ;
   Symbol func;
   Expr* expr;
@@ -27,12 +27,14 @@ class FuncDecl: public Decl {
 
 public:
   FuncDecl(int l, int c, bool random, Ty typ, Symbol func, Expr* expr);
+  FuncDecl(int l, int c, Ty typ, Symbol func); // declaration for external function
   virtual ~FuncDecl();
 
   const Ty& getRetTyp() const;
   const Symbol& getFuncName() const;
   Expr*& getExpr();
   bool isRandom() const;
+  bool isExtern() const;
   size_t argSize() const;
   void addArg(VarDecl var);
   const VarDecl& getArg(int k) const;
