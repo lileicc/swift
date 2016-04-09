@@ -419,7 +419,6 @@ MHTranslator::~MHTranslator() {
 
 void MHTranslator::setIterationNum(int iter) {
   iterNum = iter;
-  // burnInNum = iterNum / 2;
 }
 
 void MHTranslator::setBurnInNum(int bi) {

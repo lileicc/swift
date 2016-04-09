@@ -1,15 +1,24 @@
 #!/bin/bash
 
-./swift -i example/$1.blog -o src/$1.cpp
+fname=example/$1.blog
+fname=${fname##*/}
+fname=${fname%.*}
+
+if [[ ! -f example/$1.blog ]] ; then
+    echo 'File' example/$1.blog ' is not there, aborting.'
+    exit
+fi
+
+./swift -i example/$1.blog -o src/$fname.cpp
 
 cd src
 
-g++ -Ofast -std=c++11 $1.cpp random/*.cpp -o $1 -larmadillo
+g++ -Ofast -std=c++11 $fname.cpp random/*.cpp -o $fname -larmadillo
 
-mv $1.cpp ../out
-mv $1 ../out
+mv $fname.cpp ../out
+mv $fname ../out
 
-echo "Running "$1
+echo "Running "$fname
 cd ..
 
-./out/$1
+./out/$fname
