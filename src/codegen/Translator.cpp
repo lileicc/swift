@@ -119,6 +119,9 @@ const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
 // Precison Parameter
 const double Translator::ZERO_EPS = 1e-30;
 
+// Initialize static variable. It will be later updated in the constructor
+bool Translator::COMPUTE_LIKELIHOOD_IN_LOG = true;
+
 Translator::Translator(): errorMsg(stdout) {
 
   //Get the configuration object so we can get config variables
