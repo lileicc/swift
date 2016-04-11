@@ -1,6 +1,8 @@
 /*
  * Configuration.cpp
  *
+ *  Stores shared configuration state for use by Translators.
+ *
  *  Created on: Jan 28, 2014
  *      Author: leili
  */
@@ -15,7 +17,12 @@ namespace swift {
 Configuration* Configuration::config = NULL;
 
 Configuration::Configuration() {
+  // handle all defaults
   setValue("COMPUTE_LIKELIHOOD_IN_LOG", true);
+  setValue("N_SAMPLES", 1000000);
+  setValue("N_BURN_IN_SAMPLES", 500000);
+  setValue("N_HIST_BUCKETS", 20);
+  setValue("MODEL_OUT_FILENAME", "");
 }
 
 Configuration* Configuration::getConfiguration() {
@@ -50,6 +57,10 @@ void Configuration::setValue(std::string name, const char* value) {
 
 void Configuration::setValue(std::string name, bool value) {
   property[name] = (value ? "true": "false");
+}
+
+void Configuration::setValue(std::string name, int value) {
+  property[name] = std::to_string(value);
 }
 
 std::string Configuration::getValue(std::string name) {

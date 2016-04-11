@@ -14,9 +14,10 @@
 
 namespace swift {
 namespace codegen {
-swift::Configuration* config = swift::Configuration::getConfiguration();
+
+swift::Configuration* Translator::config = swift::Configuration::getConfiguration();
 bool Translator::COMPUTE_LIKELIHOOD_IN_LOG =
-    swift::Configuration::getConfiguration()->getBoolValue(
+    Translator::config->getBoolValue(
         "COMPUTE_LIKELIHOOD_IN_LOG");
 
 const std::string Translator::KEYWORD_THIS = "this";
@@ -1795,7 +1796,7 @@ void Translator::createMain() {
                                                 coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;
-  args.push_back(new code::IntegerLiteral(TOTAL_NUM_SAMPLES));
+  args.push_back(new code::IntegerLiteral(Translator::config->getIntValue("N_SAMPLES")));
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
                                         MAIN_SAMPLING_FUN_NAME, args);
   mainFun->addStmt(st);
