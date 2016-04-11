@@ -6,6 +6,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include "../predecl/PreDecl.h"
 #include "../predecl/MatrixStackFuncDecl.h"
 #include "../predecl/SetAggrFuncDecl.h"
@@ -1597,13 +1598,14 @@ void Translator::transQuery(code::FunctionDecl* fun,
       initArgs.push_back(new code::BinaryOperator(NULL,
         new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
     }
-
-    //Hack for CP6 - nd
-    std::string varname = qr.getVar()->toString();
-    std::string filename = Configuration.getConfiguration()->getValue("MODEL_OUT_FILENAME");
-    if (filename != "")
-      initArgs.push_back(filename + "_" + varname + ".mat");
   }
+
+  //Hack for CP6 - nd
+  std::string varname = qr->getVar()->toString();
+  std::string filename = swift::Configuration::getConfiguration()->getValue("MODEL_OUT_FILENAME");
+  if (filename != "")
+    initArgs.push_back(new code::StringLiteral(filename + "_" + varname + ".mat"));
+
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
           (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?

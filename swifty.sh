@@ -9,7 +9,7 @@ if [[ ! -f example/$1.blog ]] ; then
     exit
 fi
 
-./swift -i example/$1.blog -o src/$fname.cpp
+./swift -i example/$1.blog -o src/$fname.cpp --model-output data
 
 cd src
 

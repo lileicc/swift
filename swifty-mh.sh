@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./swift -e MHSampler -i example/$1.blog -o src/$1.cpp
+./swift -e MHSampler -i example/$1.blog -o src/$1.cpp --model-output out
 
 cd src
 

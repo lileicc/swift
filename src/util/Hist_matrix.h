@@ -29,14 +29,15 @@ private:
   mat sum;
   double sum_wei;
   bool init_flag;
+  std::string filename;
 public:
   void clear() {
     init_flag = false;
     table.clear();
   }
 
-  Hist(bool isLogarithm = true) :
-    isLogarithm(isLogarithm) {
+  Hist(bool isLogarithm = true, std::string filename = "") :
+    isLogarithm(isLogarithm), filename(filename) {
     clear();
   }
   ;

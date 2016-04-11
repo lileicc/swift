@@ -179,7 +179,7 @@ mat loadRealMatrix(std::string filename, int x1 = -1, int x2 = -1, int y1 = -1, 
 
 void saveRealMatrix(std::string filename, mat matrix) {
   //TODO: Use configuration to set a data output directory
-  bool status = mat.save(filename.c_str());
+  bool status = matrix.save(filename.c_str());
   if (!status) {
     std::cerr << "[ Run-Time Error ] >> Failed to save matrix at < " + filename + " >!"<<std::endl;
     std::exit(0);

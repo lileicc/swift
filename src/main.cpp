@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
       }
       config->setValue("N_HIST_BUCKETS", bucket_N);
     }
-    if (strcmp(argv[i]), "--model-output") == 0 && i + 1 < argc && argv[i+1]) {
+    if (strcmp(argv[i], "--model-output") == 0 && i + 1 < argc && argv[i+1]) {
       model_out = argv[++i];
       config->setValue("MODEL_OUT_FILENAME", model_out);
     }

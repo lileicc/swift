@@ -28,7 +28,7 @@ public:
     table.clear();
   }
 
-  Hist(bool isLogarithm = true, std::str filename = "") : //fileame is a hack for CP 6 -nd
+  Hist(bool isLogarithm = true, std::string filename = "") : //filename is a hack for CP 6 -nd
       isLogarithm(isLogarithm), filename(filename) {
     clear();
   }
@@ -125,6 +125,7 @@ private:
   int inst_n;
   const std::vector<std::string>* instances;
   std::string typeName;
+  std::string filename;
 public:
   void clear() {
     table.clear();
@@ -138,6 +139,11 @@ public:
       isLogarithm(isLogarithm), isTyped(false) {
     clear();
   };
+
+  Hist(bool isLogarithm = true, std::string filename = "") :
+  isLogarithm(isLogarithm), filename(filename) {
+    clear();
+  }
 
   Hist(bool isLogarithm, std::string _type, const std::vector<std::string>* _inst = NULL)
     :isLogarithm(isLogarithm){
@@ -260,6 +266,8 @@ private:
   bool bucketFixed, init_flag;
   int n;
 
+  std::string filename;
+
   inline void add_to_bucket(double p, double w) {
     int k;
     if (p <= lo) {
@@ -315,6 +323,11 @@ public:
     hi = -1e100;
     bucketFixed = false;
     init_flag = false;
+  }
+
+  Hist(bool isLogarithm = true, std::string filename = "") :
+  isLogarithm(isLogarithm), filename(filename) {
+    clear();
   }
 
   Hist(bool isLogarithm = true, int bucket_n = 20) :
