@@ -1600,7 +1600,7 @@ void Translator::transQuery(code::FunctionDecl* fun,
 
     //Hack for CP6 - nd
     std::string varname = qr.getVar()->toString();
-    std::string filename = Configuration.getConfiguration()->getValue("OUTPUT_FILENAME");
+    std::string filename = Configuration.getConfiguration()->getValue("MODEL_OUT_FILENAME");
     if (filename != "")
       initArgs.push_back(filename + "_" + varname + ".mat");
   }
