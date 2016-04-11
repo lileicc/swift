@@ -1601,7 +1601,7 @@ void Translator::transQuery(code::FunctionDecl* fun,
   }
 
   //Hack for CP6 - nd
-  std::string varname = qr->getVar()->toString();
+  std::string varname = qr->str();
   std::string filename = swift::Configuration::getConfiguration()->getValue("MODEL_OUT_FILENAME");
   if (filename != "")
     initArgs.push_back(new code::StringLiteral(filename + "_" + varname + ".mat"));
