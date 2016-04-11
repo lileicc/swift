@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
         << "\t                LWSampler|MHSampler|GibbsSampler            ]" << std::endl
         << "\t            [--ir <filename for printing ir>]" << std::endl
         << "\t            [--include <filenames for external source code>]" << std::endl
-        << "\t            [--log true|false, whether using log-likelihood, default = true ]" << std::endl;
+        << "\t            [--log true|false (whether using log-likelihood, default = true) ]" << std::endl;
     exit(0);
   }
   std::vector<const char*> inp;
