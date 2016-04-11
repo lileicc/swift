@@ -1,7 +1,7 @@
 /*
  * Hist_matrix.h
  *   Special hist for matrix
- * 
+ *
  *  Created on: Sept 17, 2014
  *      Author: yiwu
  */
@@ -10,6 +10,8 @@
 #include "Hist.h"
 
 #include "armadillo"
+
+#include "util_matrix.h"
 
 using namespace arma;
 
@@ -122,6 +124,11 @@ public:
     var.print( "Var  : ");
     cov.print( "Cov  : ");
 #endif
+
+    //hack for cp6
+    if (filename != "") {
+      saveRealMatrix(filename, table.back().first);
+    }
     clear();
   }
 

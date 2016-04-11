@@ -22,13 +22,14 @@ class Hist {
 private:
   std::map<T, double> table;
   const bool isLogarithm;
+  std::string filename;
 public:
   void clear() {
     table.clear();
   }
 
-  Hist(bool isLogarithm = true) :
-      isLogarithm(isLogarithm) {
+  Hist(bool isLogarithm = true, std::str filename = "") : //fileame is a hack for CP 6 -nd
+      isLogarithm(isLogarithm), filename(filename) {
     clear();
   }
   ;
@@ -219,7 +220,7 @@ public:
     if (isTyped) { // typed object
       for (auto& it : table) {
 #ifndef NO_PRINT
-        printf("%s -> %.8lf\n", 
+        printf("%s -> %.8lf\n",
           (it.first >= 0 && it.first < inst_n
           ? instances->at(it.first) : typeName + "(#" + toString(it.first) + ")").c_str(),
           it.second);
