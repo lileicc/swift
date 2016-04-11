@@ -89,8 +89,6 @@ protected:
   code::FunctionDecl* mainFun; //main function
   code::FunctionDecl* coreClsPrint; // print function for answers
 
-  bool COMPUTE_LIKELIHOOD_IN_LOG;
-
   /**
    * translate the sampling algorithm
    * @return
