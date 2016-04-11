@@ -25,7 +25,8 @@ int main(int argc, char** argv) {
         << "\t            [-e ParticleFilter [--particle <ParticleNumber>] " << std::endl
         << "\t                LWSampler|MHSampler|GibbsSampler            ]" << std::endl
         << "\t            [--ir <filename for printing ir>]" << std::endl
-        << "\t            [--include <filenames for external source code>]" << std::endl;
+        << "\t            [--include <filenames for external source code>]" << std::endl
+        << "\t            [--log true|false (whether using log-likelihood, default = true) ]" << std::endl;
     exit(0);
   }
   std::vector<const char*> inp;
@@ -76,6 +77,14 @@ int main(int argc, char** argv) {
         iter_N = iter;
         ++ i;
       }
+    }
+
+    // Checking for log likelihood flag on command line. Usage: "--log [true|false]"
+    if (strcmp(argv[i], "--log") == 0 && i + 1 < argc && argv[i+1]) {
+      bool loglik;
+      strcmp(argv[i + 1], "false") == 0 ? loglik = false : loglik = true;
+      swift::Configuration::getConfiguration()->setValue("COMPUTE_LIKELIHOOD_IN_LOG", loglik);
+      ++ i;
     }
   }
 
