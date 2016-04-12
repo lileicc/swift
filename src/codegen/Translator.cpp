@@ -15,11 +15,6 @@
 namespace swift {
 namespace codegen {
 
-swift::Configuration* Translator::config = swift::Configuration::getConfiguration();
-bool Translator::COMPUTE_LIKELIHOOD_IN_LOG =
-    Translator::config->getBoolValue(
-        "COMPUTE_LIKELIHOOD_IN_LOG");
-
 const std::string Translator::KEYWORD_THIS = "this";
 const std::string Translator::VECTOR_CLASS_NAME = "vector";
 const std::string Translator::VECTOR_RESIZE_METHOD_NAME = "resize";
@@ -124,7 +119,17 @@ const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
 // Precison Parameter
 const double Translator::ZERO_EPS = 1e-30;
 
+// Initialize static variable. It will be later updated in the constructor
+bool Translator::COMPUTE_LIKELIHOOD_IN_LOG = true;
+
 Translator::Translator(): errorMsg(stdout) {
+
+  //Get the configuration object so we can get config variables
+  swift::Configuration* config = swift::Configuration::getConfiguration();
+
+  //Flag sets whether or not to use log likelihood
+  COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
+
   useTag = false;
   prog = new code::Code();
   coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
@@ -1887,4 +1892,3 @@ inline SAMPLEFUN Translator::DECLARE_SAMPLEFUN() {
 
 } /* namespace codegen */
 } /* namespace swift */
-

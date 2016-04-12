@@ -32,7 +32,8 @@ int main(int argc, char** argv) {
         << "\t            [--ir <filename for printing ir>]" << std::endl
         << "\t            [--hist-buckets <number of buckets>]" << std::endl
         << "\t            [--model-output <model output filename> ]" << std::endl
-        << "\t            [--include <filenames for external source code>]" << std::endl;
+        << "\t            [--include <filenames for external source code>]" << std::endl
+        << "\t            [--log true|false (whether using log-likelihood, default = true) ]" << std::endl;
     exit(0);
   }
 
@@ -113,6 +114,14 @@ int main(int argc, char** argv) {
         ++ i;
       }
       config->setValue("N_SAMPLES", iter_N);
+    }
+
+    // Checking for log likelihood flag on command line. Usage: "--log [true|false]"
+    if (strcmp(argv[i], "--log") == 0 && i + 1 < argc && argv[i+1]) {
+      bool loglik;
+      strcmp(argv[i + 1], "false") == 0 ? loglik = false : loglik = true;
+      swift::Configuration::getConfiguration()->setValue("COMPUTE_LIKELIHOOD_IN_LOG", loglik);
+      ++ i;
     }
   }
 
