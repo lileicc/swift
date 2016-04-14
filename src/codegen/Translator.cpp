@@ -124,9 +124,6 @@ bool Translator::COMPUTE_LIKELIHOOD_IN_LOG = true;
 
 Translator::Translator(): errorMsg(stdout) {
 
-  //Get the configuration object so we can get config variables
-  swift::Configuration* config = swift::Configuration::getConfiguration();
-
   //Flag sets whether or not to use log likelihood
   COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
 
@@ -1795,7 +1792,7 @@ void Translator::createMain() {
                                                 coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;
-  args.push_back(new code::IntegerLiteral(Translator::config->getIntValue("N_SAMPLES")));
+  args.push_back(new code::IntegerLiteral(iterNum));
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
                                         MAIN_SAMPLING_FUN_NAME, args);
   mainFun->addStmt(st);

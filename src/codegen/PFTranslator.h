@@ -22,12 +22,11 @@ public:
   void setParticleNum(int part);
   void setTimeLimit(int tm);
   void setDepend(int dep);
-  
+
 protected:
   /**
   * how many particles to sample in total : default parameter for PF
   */
-  static const int DEFAULT_TOTAL_NUM_PARTICLES;
   int particleNum;
 
   // Time Series Features
@@ -43,12 +42,12 @@ protected:
   code::FunctionDecl* coreTemporalClsClear; // clear function for temporal varaibles
   static const std::string MAIN_CLEAR_FUN_NAME;
   static const std::string TemporalClsName;
-  
+
   //Constant Variable Names of Parameters of Particle Filtering
   static const std::string TIMESTEP_LIMIT_VAR_NAME; // variable for Maximum TimeStep
   static const std::string PARTICLE_NUM_VAR_NAME; // variable for Number of Particles
   static const std::string DEPEND_NUM_VAE_NAME; // variable for dependency
-  
+
   // Internal Varaibles for Memorization Particles
   static const std::string STAT_MEMO_VAR_NAME;
   static const std::string TEMP_MEMO_VAR_NAME;
@@ -101,7 +100,7 @@ protected:
   inline ORIGINDEFN DECLARE_ORIGIN_FIELD(TYPEDEFN typedf, std::string originname,
       TYPE origintype);
   /**
-   *  create BLOG instance, which can be distinct symbols, 
+   *  create BLOG instance, which can be distinct symbols,
    *  or instance generated in possible worlds
    *
    *  @param tyname         blog type name
@@ -112,7 +111,7 @@ protected:
    *  @return an assignment statement in target code
    */
   inline STMT CREATE_INSTANCE(std::string tyname, std::string instname, std::vector<EXPR> originvalues = std::vector<EXPR>(), EXPR ncopy = nullptr, bool inGetter = false);
-  
+
   inline EXPR ACCESS_ORIGIN_FIELD(std::string tyname, std::string originname, EXPR originarg);
 
   /**
@@ -121,7 +120,7 @@ protected:
    * @return
    */
   inline SAMPLEFUN DECLARE_SAMPLEFUN();
-  
+
   inline SITE DECLARE_STORE_SITE();
 
   /**
@@ -146,7 +145,7 @@ protected:
    * create main function
    */
   void createMain();
-  
+
   /**
    * translate the blog function to getter function
    * ::: random Color truecolor(Ball b) => int get_truecolor(int i)
@@ -200,7 +199,7 @@ protected:
 
   code::Expr* transMapExpr(std::shared_ptr<ir::MapExpr> mex);
   /**
-   * translate the operation expression 
+   * translate the operation expression
    */
   code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       std::vector<code::Expr*> args);
@@ -220,7 +219,7 @@ protected:
 
   code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, std::string valuevar =
                             std::string());
-  
+
   /**
    *  translate the origin function call (origin reference)
    *
@@ -265,7 +264,7 @@ protected:
    * translate n-th query
    */
   void transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs,
-      std::vector<std::vector<code::Stmt*> >& printFuncs, 
+      std::vector<std::vector<code::Stmt*> >& printFuncs,
       std::shared_ptr<ir::Query> qr, int n);
   /**
    * create reference to blog function value
@@ -280,8 +279,8 @@ protected:
   void addFunValueAssignStmt(code::FunctionDecl* fun, std::string valuevarname,
                              std::vector<code::ParamVarDecl*>& valueindex,
                              std::string valuerefname);
-  
-  
+
+
   /**
    * create a field for function value
    */
@@ -317,7 +316,7 @@ protected:
   static code::Stmt* referStaticStateStmt(code::DeclContext* context);
   static code::Stmt* referTempStateStmt(code::DeclContext* context, std::string tempVar);
   static code::Expr* referVarFromState(code::Expr*);
-  static code::ForStmt* createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body = NULL, 
+  static code::ForStmt* createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body = NULL,
       bool isVarDefined = false, bool isLess = true);
   static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
   static bool isTemporalType(code::Type ty);

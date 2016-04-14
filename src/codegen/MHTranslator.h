@@ -24,8 +24,6 @@ public:
   virtual ~MHTranslator();
   void translate(std::shared_ptr<swift::ir::BlogModel> model);
   code::Code* getResult();
-  void setIterationNum(int iter);
-  void setBurnInNum(int iter);
 
 protected:
   /*
@@ -40,11 +38,6 @@ protected:
   analyzer::MCMCAnalyzer* mcmc_analyzer;
   analyzer::ContigAnalyzer* contig_analyzer;
 
-  /**
-  * how many interations to sample in total : default parameter for MCMC
-  */
-  static const int DEFAULT_TOTAL_NUM_ITERATIONS;
-  int iterNum;
   int burnInNum; // by defualt: burnIn = iterNum/2
 
   // All the bayesVar to declare
