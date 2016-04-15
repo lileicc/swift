@@ -38,7 +38,7 @@ protected:
   analyzer::MCMCAnalyzer* mcmc_analyzer;
   analyzer::ContigAnalyzer* contig_analyzer;
 
-  int burnInNum; // by defualt: burnIn = iterNum/2
+  int burnInNum; // default 500000 (see Configuration)
 
   // All the bayesVar to declare
   std::map<std::string, code::ClassDecl*> bayesVars;

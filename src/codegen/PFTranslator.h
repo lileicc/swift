@@ -25,9 +25,9 @@ public:
 
 protected:
   /**
-  * how many particles to sample in total : default parameter for PF
+  * how many particles to sample in total
   */
-  int particleNum;
+  int particleNum; // default 1000 (see Configuration)
 
   // Time Series Features
   int ModelDependency;
