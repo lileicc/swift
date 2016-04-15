@@ -98,7 +98,6 @@ const std::string Translator::UNIFORM_CHOICE_DISTRIBUTION_NAME =
     "UniformChoice";
 const int Translator::INIT_SAMPLE_NUM = 0;
 const int Translator::NULLSYMBOL_VALUE = -1;
-const int Translator::TOTAL_NUM_SAMPLES = 1000000;
 
 // internal predefined functions
 const std::string Translator::GEN_FULL_SET_NAME = "_gen_full";
@@ -126,6 +125,7 @@ Translator::Translator(): errorMsg(stdout) {
 
   //Flag sets whether or not to use log likelihood
   COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
+  iterNum = config->getIntValue("N_SAMPLES");
 
   useTag = false;
   prog = new code::Code();
@@ -1600,6 +1600,11 @@ void Translator::transQuery(code::FunctionDecl* fun,
         new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
     }
   }
+  // if double, push another initial argument to the Histogram constructor
+  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+  }
+
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
           (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?

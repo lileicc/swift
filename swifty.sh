@@ -15,8 +15,8 @@ cd src
 
 g++ -Ofast -std=c++11 $fname.cpp random/*.cpp -o $fname -larmadillo
 
-mv $fname.cpp ../out
-mv $fname ../out
+mv $fname.cpp ../out/$fname.cpp
+mv $fname ../out/$fname
 
 echo "Running "$fname
 cd ..
