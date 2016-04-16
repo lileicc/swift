@@ -14,42 +14,57 @@
 #include "codegen/PFTranslator.h"
 #include "codegen/MHTranslator.h"
 #include "codegen/GibbsTranslator.h"
+#include "util/Configuration.h"
 
 extern swift::absyn::BlogProgram* parse(const char* inp);
+
 int main(int argc, char** argv) {
+
   if (argc < 3) {
     std::cout << "Help: " << argc << std::endl;
     std::cout
         << "\t[main] [-v] -i <input filename>... -o <output filename> " << std::endl
         << "\t            [-n <number of samples, default = 10^6>]" << std::endl
-        << "\t            [-e ParticleFilter [--particle <ParticleNumber>] " << std::endl
-        << "\t                LWSampler|MHSampler|GibbsSampler            ]" << std::endl
+        << "\t            [-e LWSampler |" << std::endl
+        << "\t                ParticleFilter [--particle <number of particles, default = 1000>] |" << std::endl
+        << "\t                MHSampler [--burn-in <number of burn-in samples, default = number samples / 2>] |" << std::endl
+        << "\t                GibbsSampler [--burn-in <number of burn-in samples, default = number samples / 2>] ]" << std::endl
         << "\t            [--ir <filename for printing ir>]" << std::endl
+        << "\t            [--hist-buckets <number of buckets for histograms, default = 20>]" << std::endl
+        << "\t            [--model-output <model output filename> ]" << std::endl
         << "\t            [--include <filenames for external source code>]" << std::endl
         << "\t            [--log true|false (whether using log-likelihood, default = true) ]" << std::endl;
     exit(0);
   }
+
+  swift::Configuration* config = swift::Configuration::getConfiguration();
   std::vector<const char*> inp;
   std::vector<std::string> extraHeaders;
   const char* out = "";
+  const char* model_out = nullptr;
   const char* irfile = nullptr;
   bool verbose = false;
   std::string engine_type = "LWSampler";
-  int particle_N = 0, iter_N = 0;
+
   for (int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-v") == 0)
+
+    if (strcmp(argv[i], "-v") == 0) {
       verbose = true;
+    }
     if (strcmp(argv[i], "-i") == 0) {
       if(i + 1 < argc && argv[i+1] && argv[i+1][0] != '-') {
-        for(++i; i < argc && argv[i] && argv[i][0] != '-'; ++ i)
+        for(++i; i < argc && argv[i] && argv[i][0] != '-'; ++ i) {
           inp.push_back(argv[i]);
+        }
         -- i;
       }
     }
-    if (strcmp(argv[i], "-o") == 0)
+    if (strcmp(argv[i], "-o") == 0) {
       out = argv[++i];
-    if (strcmp(argv[i], "-e") == 0)
+    }
+    if (strcmp(argv[i], "-e") == 0) {
       engine_type = std::string(argv[++i]);
+    }
     if (strcmp(argv[i], "--ir") == 0) {
       irfile = argv[++i];
       if (i >= argc || (irfile && irfile[0] == '-')) {
@@ -67,23 +82,41 @@ int main(int argc, char** argv) {
     if (strcmp(argv[i], "--particle") == 0 && i + 1 < argc && argv[i+1]) {
       int part;
       if(sscanf(argv[i + 1], "%d", &part) == 1 && part > 0) {
-        particle_N = part;
+        config->setValue("N_PF_PARTICLES", part);
+        ++ i;
+      }
+    }
+    if (strcmp(argv[i], "--burn-in") == 0 && i + 1 < argc && argv[i+1]) {
+      int burn_in;
+      if(sscanf(argv[i + 1], "%d", &burn_in) == 1 && burn_in > 0) {
+        config->setValue("N_BURN_IN_SAMPLES", burn_in);
+        ++ i;
+      }
+    }
+    if (strcmp(argv[i], "--hist-buckets") == 0 && i + 1 < argc && argv[i+1]) {
+      int bckts;
+      if(sscanf(argv[i + 1], "%d", &bckts) == 1 && bckts > 0) {
+        config->setValue("N_HIST_BUCKETS", bckts);
         ++ i;
       }
     }
     if (strcmp(argv[i], "-n") == 0 && i + 1 < argc && argv[i+1]) {
       int iter;
       if(sscanf(argv[i + 1], "%d", &iter) == 1 && iter > 0) {
-        iter_N = iter;
+        config->setValue("N_SAMPLES", iter);
         ++ i;
       }
+    }
+    if (strcmp(argv[i], "--model-output") == 0 && i + 1 < argc && argv[i+1]) {
+      model_out = argv[++i];
+      config->setValue("MODEL_OUT_FILENAME", model_out);
     }
 
     // Checking for log likelihood flag on command line. Usage: "--log [true|false]"
     if (strcmp(argv[i], "--log") == 0 && i + 1 < argc && argv[i+1]) {
       bool loglik;
       strcmp(argv[i + 1], "false") == 0 ? loglik = false : loglik = true;
-      swift::Configuration::getConfiguration()->setValue("COMPUTE_LIKELIHOOD_IN_LOG", loglik);
+      config->setValue("COMPUTE_LIKELIHOOD_IN_LOG", loglik);
       ++ i;
     }
   }
@@ -111,8 +144,9 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (verbose)
+  if (verbose) {
     blog_absyn->print(stdout, 0);
+  }
 
   // preprocess of input blog program
   swift::preprocess::Preprocessor preproc;
@@ -146,18 +180,12 @@ int main(int argc, char** argv) {
     trans = new swift::codegen::Translator();
   } else if (engine_type == "ParticleFilter") {
     auto PF_trans = new swift::codegen::PFTranslator();
-    if(particle_N>0)
-      PF_trans->setParticleNum(particle_N);
     trans = PF_trans;
   } else if (engine_type == "MHSampler") {
     auto MH_trans = new swift::codegen::MHTranslator();
-    if(iter_N>0)
-      MH_trans->setIterationNum(iter_N);
     trans = MH_trans;
   } else if (engine_type == "GibbsSampler") {
     auto gibbs_trans = new swift::codegen::GibbsTranslator();
-    if(iter_N>0)
-      gibbs_trans->setIterationNum(iter_N);
     trans = gibbs_trans;
   } else {
     printf("<%s> engine not found", engine_type.c_str());
@@ -175,8 +203,7 @@ int main(int argc, char** argv) {
     }
 
     // print code
-    swift::printer::Printer * prt = new swift::printer::CPPPrinter(
-                                                                   std::string(out));
+    swift::printer::Printer * prt = new swift::printer::CPPPrinter(std::string(out));
 
     for(size_t i = 0; i < extraHeaders.size(); ++ i)
       prt->addHeader(extraHeaders[i]);

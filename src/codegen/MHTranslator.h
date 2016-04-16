@@ -24,9 +24,7 @@ public:
   virtual ~MHTranslator();
   void translate(std::shared_ptr<swift::ir::BlogModel> model);
   code::Code* getResult();
-  void setIterationNum(int iter);
-  void setBurnInNum(int iter);
-  
+
 protected:
   /*
    * Translation Steps called in translate()
@@ -40,19 +38,14 @@ protected:
   analyzer::MCMCAnalyzer* mcmc_analyzer;
   analyzer::ContigAnalyzer* contig_analyzer;
 
-  /**
-  * how many interations to sample in total : default parameter for MCMC
-  */
-  static const int DEFAULT_TOTAL_NUM_ITERATIONS;
-  int iterNum;
-  int burnInNum; // by defualt: burnIn = iterNum/2
+  int burnInNum; // default 500000 (see Configuration)
 
   // All the bayesVar to declare
   std::map<std::string, code::ClassDecl*> bayesVars;
 
   // The function declaration for each random varibales
   std::map<std::string, std::map<std::string, code::FunctionDecl*> > varMethods;
-  
+
   // Main Functions
   code::FunctionDecl* coreQuery;
   code::FunctionDecl* coreStorageInit;
@@ -141,7 +134,7 @@ protected:
 
   // Predefined Types
   static const code::Type NumberVar_Base_Type;
-  
+
 
   ////////////////////////////////////////////////
   // Util Functions for MCMC
@@ -152,7 +145,7 @@ protected:
   std::string getStoreOfRandomVar(std::string name);
 
   // create method call for a pointer
-  code::Expr* createPtrMethodCall(code::Expr* ptr, std::string method_name, 
+  code::Expr* createPtrMethodCall(code::Expr* ptr, std::string method_name,
     std::vector<code::Expr*> args = std::vector<code::Expr*>());
 
   // create a reference to a random variable
@@ -183,7 +176,7 @@ protected:
   * @param: upper bound looping range, default = TEMP_N_VAR_NAME("_n")
   * @param: dimensions of indices, if dims[i]==0, that dimension should range from lo to hi
   */
-  code::Stmt* createLoopNewObject(std::string store_name, std::string var_name, 
+  code::Stmt* createLoopNewObject(std::string store_name, std::string var_name,
     std::string lo_var, std::string hi_var, std::vector<int> dims);
 
   // Check whether need expand cls to fill active_edge()/remove_edge()
@@ -212,7 +205,7 @@ protected:
   void transSampleMethod(std::string name, std::shared_ptr<ir::Clause> body);
 
   // translate active_edge()/remove_edge()
-  void transDependency(std::shared_ptr<ir::Clause> cls, 
+  void transDependency(std::shared_ptr<ir::Clause> cls,
                         code::CompoundStmt& cmp,
                         std::string child_method_name,
                         std::string contig_method_name);
@@ -302,12 +295,12 @@ protected:
    * retvar is for return variable
    * if valuevar is nonempty, then it will calculate weight instead of sampling
    */
-  code::Expr* transExpr(std::shared_ptr<ir::Expr> expr, 
+  code::Expr* transExpr(std::shared_ptr<ir::Expr> expr,
     std::string valuevar = std::string());
 
   code::Expr* transMapExpr(std::shared_ptr<ir::MapExpr> mex);
   /**
-   * translate the operation expression 
+   * translate the operation expression
    */
   code::Expr* transOprExpr(std::shared_ptr<ir::OprExpr> opr,
       std::vector<code::Expr*> args);
@@ -325,13 +318,13 @@ protected:
 
   code::Expr* transConstSymbol(std::shared_ptr<ir::ConstSymbol> cs);
 
-  code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp, 
+  code::Expr* transCardExpr(std::shared_ptr<ir::CardExpr> cardexp,
     std::string valuevar = std::string(),
     bool is_return_value = true);
-  
+
   /**
    *  @deprecated: TODO: currently MCMC do not support origin function!
-   * 
+   *
    *  translate the origin function call (origin reference)
    *
    *  @param originref origin function
@@ -364,7 +357,7 @@ protected:
   void addFunValueAssignStmt(code::FunctionDecl* fun, std::string valuevarname,
                              std::vector<code::ParamVarDecl*>& valueindex,
                              std::string valuerefname);
-  
+
   /**
    * create a field for function value
    */

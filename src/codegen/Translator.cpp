@@ -98,7 +98,6 @@ const std::string Translator::UNIFORM_CHOICE_DISTRIBUTION_NAME =
     "UniformChoice";
 const int Translator::INIT_SAMPLE_NUM = 0;
 const int Translator::NULLSYMBOL_VALUE = -1;
-const int Translator::TOTAL_NUM_SAMPLES = 1000000;
 
 // internal predefined functions
 const std::string Translator::GEN_FULL_SET_NAME = "_gen_full";
@@ -124,11 +123,9 @@ bool Translator::COMPUTE_LIKELIHOOD_IN_LOG = true;
 
 Translator::Translator(): errorMsg(stdout) {
 
-  //Get the configuration object so we can get config variables
-  swift::Configuration* config = swift::Configuration::getConfiguration();
-
   //Flag sets whether or not to use log likelihood
   COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
+  iterNum = config->getIntValue("N_SAMPLES"); // default is 10^6
 
   useTag = false;
   prog = new code::Code();
@@ -1603,6 +1600,11 @@ void Translator::transQuery(code::FunctionDecl* fun,
         new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
     }
   }
+  // if double, push another initial argument to the Histogram constructor
+  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+  }
+
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
           (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
@@ -1795,7 +1797,7 @@ void Translator::createMain() {
                                                 coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;
-  args.push_back(new code::IntegerLiteral(TOTAL_NUM_SAMPLES));
+  args.push_back(new code::IntegerLiteral(iterNum));
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
                                         MAIN_SAMPLING_FUN_NAME, args);
   mainFun->addStmt(st);
