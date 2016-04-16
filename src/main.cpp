@@ -26,11 +26,11 @@ int main(int argc, char** argv) {
         << "\t[main] [-v] -i <input filename>... -o <output filename> " << std::endl
         << "\t            [-n <number of samples, default = 10^6>]" << std::endl
         << "\t            [-e LWSampler |" << std::endl
-        << "\t                ParticleFilter [--particle <ParticleNumber>] |" << std::endl
-        << "\t                MHSampler [--burn-in <number of burn-in samples>] |" << std::endl
-        << "\t                GibbsSampler [--burn-in <number of burn-in samples>] ]" << std::endl
+        << "\t                ParticleFilter [--particle <number of particles, default = 1000>] |" << std::endl
+        << "\t                MHSampler [--burn-in <number of burn-in samples, default = number samples / 2>] |" << std::endl
+        << "\t                GibbsSampler [--burn-in <number of burn-in samples, default = number samples / 2>] ]" << std::endl
         << "\t            [--ir <filename for printing ir>]" << std::endl
-        << "\t            [--hist-buckets <number of buckets>]" << std::endl
+        << "\t            [--hist-buckets <number of buckets for histograms, default = 20>]" << std::endl
         << "\t            [--model-output <model output filename> ]" << std::endl
         << "\t            [--include <filenames for external source code>]" << std::endl
         << "\t            [--log true|false (whether using log-likelihood, default = true) ]" << std::endl;

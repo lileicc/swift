@@ -401,7 +401,10 @@ MHTranslator::MHTranslator() {
   Translator();
   mcmc_analyzer = NULL;
   contig_analyzer = NULL;
-  burnInNum = config->getIntValue("N_BURN_IN_SAMPLES");
+  burnInNum = config->getIntValue("N_BURN_IN_SAMPLES"); // default is -1
+  if (burnInNum < 0) {
+    burnInNum = iterNum / 2;
+  }
   coreQuery = code::FunctionDecl::createFunctionDecl(coreNs,CoreQueryFuncName,VOID_TYPE);
   coreStorageInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreStorageInitFuncName, VOID_TYPE);
   coreWorldInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreWorldInitFuncName, VOID_TYPE);

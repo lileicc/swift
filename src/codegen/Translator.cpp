@@ -125,7 +125,7 @@ Translator::Translator(): errorMsg(stdout) {
 
   //Flag sets whether or not to use log likelihood
   COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
-  iterNum = config->getIntValue("N_SAMPLES");
+  iterNum = config->getIntValue("N_SAMPLES"); // default is 10^6
 
   useTag = false;
   prog = new code::Code();
