@@ -16,11 +16,6 @@
 namespace swift {
 namespace codegen {
 
-swift::Configuration* Translator::config = swift::Configuration::getConfiguration();
-bool Translator::COMPUTE_LIKELIHOOD_IN_LOG =
-    Translator::config->getBoolValue(
-        "COMPUTE_LIKELIHOOD_IN_LOG");
-
 const std::string Translator::KEYWORD_THIS = "this";
 const std::string Translator::VECTOR_CLASS_NAME = "vector";
 const std::string Translator::VECTOR_RESIZE_METHOD_NAME = "resize";
@@ -104,7 +99,6 @@ const std::string Translator::UNIFORM_CHOICE_DISTRIBUTION_NAME =
     "UniformChoice";
 const int Translator::INIT_SAMPLE_NUM = 0;
 const int Translator::NULLSYMBOL_VALUE = -1;
-const int Translator::TOTAL_NUM_SAMPLES = 1000000;
 
 // internal predefined functions
 const std::string Translator::GEN_FULL_SET_NAME = "_gen_full";
@@ -125,7 +119,15 @@ const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
 // Precison Parameter
 const double Translator::ZERO_EPS = 1e-30;
 
+// Initialize static variable. It will be later updated in the constructor
+bool Translator::COMPUTE_LIKELIHOOD_IN_LOG = true;
+
 Translator::Translator(): errorMsg(stdout) {
+
+  //Flag sets whether or not to use log likelihood
+  COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
+  iterNum = config->getIntValue("N_SAMPLES"); // default is 10^6
+
   useTag = false;
   prog = new code::Code();
   coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
@@ -1606,6 +1608,11 @@ void Translator::transQuery(code::FunctionDecl* fun,
   if (filename != "")
     initArgs.push_back(new code::StringLiteral(filename + "_" + varname + ".mat"));
 
+  // if double, push another initial argument to the Histogram constructor
+  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+  }
+
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
           (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
@@ -1798,7 +1805,7 @@ void Translator::createMain() {
                                                 coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;
-  args.push_back(new code::IntegerLiteral(Translator::config->getIntValue("N_SAMPLES")));
+  args.push_back(new code::IntegerLiteral(iterNum));
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
                                         MAIN_SAMPLING_FUN_NAME, args);
   mainFun->addStmt(st);

@@ -17,8 +17,6 @@
 namespace swift {
 namespace codegen {
 
-const int MHTranslator::DEFAULT_TOTAL_NUM_ITERATIONS = Translator::TOTAL_NUM_SAMPLES;
-
 const std::string MHTranslator::CoreQueryFuncName = "_eval_query";
 const std::string MHTranslator::CoreStorageInitFuncName = "_init_storage";
 const std::string MHTranslator::CoreWorldInitFuncName = "_init_world";
@@ -403,8 +401,10 @@ MHTranslator::MHTranslator() {
   Translator();
   mcmc_analyzer = NULL;
   contig_analyzer = NULL;
-  iterNum = Translator::config->getIntValue("N_SAMPLES");
-  burnInNum = Translator::config->getIntValue("N_BURN_IN_SAMPLES");
+  burnInNum = config->getIntValue("N_BURN_IN_SAMPLES"); // default is -1
+  if (burnInNum < 0) {
+    burnInNum = iterNum / 2;
+  }
   coreQuery = code::FunctionDecl::createFunctionDecl(coreNs,CoreQueryFuncName,VOID_TYPE);
   coreStorageInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreStorageInitFuncName, VOID_TYPE);
   coreWorldInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreWorldInitFuncName, VOID_TYPE);
@@ -415,14 +415,6 @@ MHTranslator::MHTranslator() {
 MHTranslator::~MHTranslator() {
   if(mcmc_analyzer != NULL) delete mcmc_analyzer;
   if(contig_analyzer != NULL) delete contig_analyzer;
-}
-
-void MHTranslator::setIterationNum(int iter) {
-  iterNum = iter;
-}
-
-void MHTranslator::setBurnInNum(int bi) {
-  burnInNum = bi;
 }
 
 /////////////////////////////////////////
@@ -1024,6 +1016,11 @@ void MHTranslator::transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query
         new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
     }
   }
+  // if double, push another initial argument to the Histogram constructor
+  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+  }
+
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
           (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?

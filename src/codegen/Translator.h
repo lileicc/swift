@@ -40,6 +40,11 @@ public:
 protected:
   msg::ErrorMsg errorMsg;
 
+  // each instance of Translator (or child classes) has the global config
+  swift::Configuration* config = swift::Configuration::getConfiguration();
+
+  int iterNum; // default 10^6 (see Configuration)
+
   std::shared_ptr<ir::BlogModel> model;
 
   /**
@@ -554,8 +559,6 @@ protected:
   static bool COMPUTE_LIKELIHOOD_IN_LOG;
 
   static const double ZERO_EPS;
-
-  static swift::Configuration* config;
 
   std::set<std::string> constValTable;
 
