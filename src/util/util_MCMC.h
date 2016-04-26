@@ -19,6 +19,7 @@
 #include <cstdio>
 #include <random>
 #include <array>
+#include <chrono>
 
 #include "MCMC.h"
 #include "DynamicTable.h"
@@ -142,4 +143,16 @@ inline void _util_update_evidence(BayesVar<T>* ptr, bool flag) {
   ptr->is_obs = flag;
 }
 
+
+//////////////////////////////////////////
+// Some Special Proposal Distributions  //
+//////////////////////////////////////////
+static std::default_random_engine _mcmc_engine = 
+  std::default_random_engine((unsigned)std::chrono::system_clock::now().time_since_epoch().count());
+// Util for Uni-Gaussian Proposal
+double _gaussian_prop(double x) {
+  static double var = 1.0;
+  static std::normal_distribution<double> ndist(0, var);
+  return ndist(_mcmc_engine) + x;
+}
 }

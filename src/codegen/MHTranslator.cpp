@@ -35,6 +35,7 @@ const std::string MHTranslator::BurnInVarName = "_BURN_IN";
 
 // BayesVar Method Name
 const std::string MHTranslator::MCMC_Global_MHAlgo_MethodName = "mh_parent_resample_arg";
+const std::string MHTranslator::MCMC_Global_MHAlgo_SymProp_MethodName = "mh_symmetric_resample_arg";
 const std::string MHTranslator::MCMC_Global_MHNumVarAlgo_MethodName = "mh_parent_resample_numvar_arg";
 const std::string MHTranslator::MCMC_Global_Clear_MethodName = "clear_arg";
 const std::string MHTranslator::MCMC_Global_GetVal_MethodName = "getval_arg";
@@ -95,6 +96,9 @@ const std::string MHTranslator::UtilUpdateObsFuncName = "_util_update_evidence";
 const std::string MHTranslator::UtilClearRefFuncName = "_util_clear_reference";
 const std::string MHTranslator::UtilCalcRefDiffFuncName = "_util_calc_reference_diff";
 const std::string MHTranslator::UtilFreeObjFuncName = "_free_obj";
+
+// Util MCMC Proposal Distrib Name
+const std::string MHTranslator::UtilPropUniGaussName = "_gaussian_prop";
 
 // Types
 const code::Type MHTranslator::NumberVar_Base_Type = code::Type("NumberVar");

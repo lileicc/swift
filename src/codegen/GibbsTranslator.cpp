@@ -172,13 +172,27 @@ void GibbsTranslator::setSampleAlgorithm() {
       }
       else {
         // Conjugacy Checking Failure
+
+        // Check if special built-in proposal can be applied
+        if (config->getBoolValue("USE_GAUSSIAN_PROPOSAL") &&
+          fun->getRetTyp()->getTyp() == ir::IRConstant::DOUBLE) {
+          // Using Gaussian Proposal
+          errorMsg.warning(-1, -1, "[GibbsTranslator]: Conjugacy Analysis Failed for Random Function <" + name + ">! Default sampling algorithm will be [MH with Gaussian Proposal]!.");
+          varMethods[name][MCMC_Resample_MethodName]->addStmt(
+            new code::CallExpr(
+            new code::Identifier(MCMC_Global_MHAlgo_SymProp_MethodName), 
+            std::vector<code::Expr*>{new code::Identifier(KEYWORD_THIS), new code::Identifier(UtilPropUniGaussName)}));
+          continue;
+        }
+
         errorMsg.warning(-1,-1,"[GibbsTranslator]: Conjugacy Analysis Failed for Random Function <"+name+">! Default sampling algorithm will be [Parental MH]!\n"+
           "   >> Tip: You can manually write method *[" + MCMC_CalcPosterior_MethodName + "]* to sample from the posterior distribution and uncomment the method call in ["+MCMC_Resample_MethodName+"].");
 
         varMethods[name][MCMC_Resample_MethodName]->addStmt(
           new code::CallExpr(
-          new code::Identifier("//"+MCMC_Global_GibbsConjugateAlgo_MethodName), // add this commented method call in the resample method
+          new code::Identifier(MCMC_Global_MHAlgo_MethodName), // add this commented method call in the resample method
           std::vector<code::Expr*>{new code::Identifier(KEYWORD_THIS)}));
+        continue;
       }
     }
 
