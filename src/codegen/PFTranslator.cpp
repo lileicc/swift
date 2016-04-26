@@ -16,8 +16,6 @@
 namespace swift {
 namespace codegen {
 
-const int PFTranslator::DEFAULT_TOTAL_NUM_PARTICLES = Translator::TOTAL_NUM_SAMPLES;
-
 const std::string PFTranslator::StaticClsName = "BLOG_Static_State";
 const std::string PFTranslator::TemporalClsName = "BLOG_Temporal_State";
 const std::string PFTranslator::MAIN_CLEAR_FUN_NAME = "_clear_marks";
@@ -71,7 +69,7 @@ code::Stmt* PFTranslator::referTempStateStmt(code::DeclContext* context, std::st
     new code::BinaryOperator(
       NULL,
       new code::ArraySubscriptExpr(
-        new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), 
+        new code::ArraySubscriptExpr(new code::Identifier(PTR_TEMP_MEMO_VAR_NAME),
                                    new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
         TS_loc),
       code::OpKind::UO_DEREF)));
@@ -81,10 +79,10 @@ code::Expr* PFTranslator::referVarFromState(code::Expr* var) {
   return new code::BinaryOperator(new code::Identifier(CUR_STATE_VAR_NAME), var, code::OpKind::BO_FIELD);
 }
 
-code::ForStmt* PFTranslator::createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body, 
+code::ForStmt* PFTranslator::createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body,
       bool isVarDefined, bool isLess) {
   code::Stmt* init = NULL;
-  if (isVarDefined)  
+  if (isVarDefined)
     init = new code::BinaryOperator(new code::Identifier(loop_var),new code::IntegerLiteral(0),code::OpKind::BO_ASSIGN);
   else
     init = new code::DeclStmt(new code::VarDecl(NULL, loop_var, INT_TYPE, new code::IntegerLiteral(0)));
@@ -96,7 +94,7 @@ code::ForStmt* PFTranslator::createForeachLoop(std::string loop_var, std::string
 }
 
 code::Expr* PFTranslator::createVarPlusDetExpr(std::string varName, int det) {
-  if (det == 0) 
+  if (det == 0)
     return new code::Identifier(varName);
   code::OpKind opr = (det > 0 ? code::OpKind::BO_PLUS : (det = -det, code::OpKind::BO_MINUS));
   return new code::BinaryOperator(new code::Identifier(varName), new code::IntegerLiteral(det), opr);
@@ -140,7 +138,7 @@ PFTranslator::PFTranslator() {
   coreStaticCls = NULL;
   coreTemporalCls = NULL;
   coreTemporalClsClear = NULL;
-  particleNum = DEFAULT_TOTAL_NUM_PARTICLES;
+  particleNum = config->getIntValue("N_PF_PARTICLES");
   ModelDependency = 0;
   ModelTimeLimit = 0;
 }
@@ -169,7 +167,7 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
     // create Data Structure for Memorization of Particles
     coreStaticCls = code::ClassDecl::createClassDecl(coreNs, StaticClsName);
     coreTemporalCls = code::ClassDecl::createClassDecl(coreNs, TemporalClsName);
-    
+
     /*
     translated code for basic data structures looks like:
       Static_State stat_memo[SampleN];
@@ -179,12 +177,12 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
       Temp_State* backup_ptr[SampleN][Dependency];
     */
     // Basic Memorization Data Structure for variables
-    code::VarDecl::createVarDecl(coreNs, STAT_MEMO_VAR_NAME, 
+    code::VarDecl::createVarDecl(coreNs, STAT_MEMO_VAR_NAME,
       std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), STAT_MEMO_TYPE);
     code::VarDecl::createVarDecl(coreNs, PTR_STAT_MEMO_VAR_NAME,
       std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME) }), STAT_MEMO_TYPE);
     code::VarDecl::createVarDecl(coreNs, TEMP_MEMO_VAR_NAME,
-      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME), 
+      std::vector<EXPR>({ new code::Identifier(PARTICLE_NUM_VAR_NAME),
                           new code::Identifier(DEPEND_NUM_VAE_NAME) }), TEMP_MEMO_TYPE);
     // Pointer to Memorization Data Structures
     code::VarDecl::createVarDecl(coreNs, PTR_TEMP_MEMO_VAR_NAME,
@@ -217,11 +215,11 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
 
   // translate evidence
   transAllEvidence(model->getEvidences());
-  
+
   transSampleAlg();
-  
+
   transAllQuery(model->getQueries());
-  
+
   createMain();
 }
 
@@ -252,7 +250,7 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
     code::CallExpr::createMethodCall(
       new code::ArraySubscriptExpr(new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
       MAIN_INIT_FUN_NAME),true));
-  
+
   /*
     :::=>
     for (cur_t = 0; cur_t <= TimeLimit; cur_t ++) {
@@ -282,8 +280,8 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
   body_time->addStmt(new code::CallExpr(
     new code::TemplateExpr(
       new code::Identifier(PF_COPY_PTR_FUN_NAME),
-      std::vector<code::Expr*>({ 
-        new code::Identifier(PARTICLE_NUM_VAR_NAME), 
+      std::vector<code::Expr*>({
+        new code::Identifier(PARTICLE_NUM_VAR_NAME),
         new code::Identifier(DEPEND_NUM_VAE_NAME)
       })),
     std::vector<code::Expr*>({
@@ -310,7 +308,7 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
               new code::Identifier(GLOBAL_WEIGHT_VARNAME),
               new code::Identifier(CURRENT_SAMPLE_NUM_VARNAME)),
           new code::Identifier(WEIGHT_VAR_REF_NAME), code::OpKind::BO_ASSIGN));
-  
+
   // :::==> print();
   body_time->addStmt(new code::CallExpr(new code::Identifier(ANSWER_PRINT_METHOD_NAME)));
 
@@ -327,7 +325,7 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
         std::vector<code::Expr*>({new code::Identifier(GLOBAL_WEIGHT_VARNAME)})));
   }
 
-  /* :::=> 
+  /* :::=>
     resample<SampleN,Dependency,Static_State,Temp_State>(
       weight, stat_memo, ptr_stat_memo,
       ptr_temp_memo, backup_ptr);
@@ -339,7 +337,7 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
         new code::Identifier(PARTICLE_NUM_VAR_NAME),
         new code::Identifier(DEPEND_NUM_VAE_NAME)})),
     std::vector<code::Expr*>({
-      new code::Identifier(GLOBAL_WEIGHT_VARNAME), 
+      new code::Identifier(GLOBAL_WEIGHT_VARNAME),
       new code::Identifier(STAT_MEMO_VAR_NAME), new code::Identifier(PTR_STAT_MEMO_VAR_NAME),
       new code::Identifier(PTR_TEMP_MEMO_VAR_NAME), new code::Identifier(PTR_BACKUP_VAR_NAME)}))
   );
@@ -362,7 +360,7 @@ code::FunctionDecl* PFTranslator::transSampleAlg() {
                    "< " << func->getName() << " >" << std::endl;
       continue;
     }
-    bool pb_ok = true; 
+    bool pb_ok = true;
     for (size_t i = 0; i < func->argSize() && pb_ok; ++i) {
       auto ty = dynamic_cast<const ir::NameTy*>(func->getArg(i)->getTyp());
       if (ty == NULL || ty->getRefer()->getNumberStmtSize() > 0) {
@@ -394,7 +392,7 @@ void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
     std::vector<code::Expr*> names;
     for (auto& n : td->getInstNames())
       names.push_back(new code::StringLiteral(n));
-    coreNs->addDeclFront(new code::VarDecl(coreNs, arrName, ARRAY_STRING_CONST_TYPE, 
+    coreNs->addDeclFront(new code::VarDecl(coreNs, arrName, ARRAY_STRING_CONST_TYPE,
                                       new code::ListInitExpr(names)));
   }
   // create a class for this declared type
@@ -418,7 +416,7 @@ void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   }
   std::string numvar = getVarOfNumType(name);
   /*
-   * TODO: 
+   * TODO:
    * We currently DO NOT support temporal number statment for typeDomain
    */
   // create a field in the main class:::    int numvar;
@@ -447,7 +445,7 @@ void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   // :::=> ensure_numvar();
   coreStaticClsInit->addStmt(
       new code::CallExpr(new code::Identifier(ensureFun->getName()))); // StaticMemo
-  // TODO: 
+  // TODO:
   //    to support number statement with temporal arguments
   // create the function for getting number of objects in this instance, i.e.
   // numvar
@@ -564,7 +562,7 @@ void PFTranslator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
   fun->addStmt(
       new code::BinaryOperator(new code::Identifier(marknumvar),
                                createVarPlusDetExpr(CURRENT_SAMPLE_NUM_VARNAME,1),
-                               code::OpKind::BO_ASSIGN)); 
+                               code::OpKind::BO_ASSIGN));
   fun->addStmt(new code::ReturnStmt(new code::Identifier(numvar)));
 }
 
@@ -573,7 +571,7 @@ void PFTranslator::transFun(std::shared_ptr<ir::FuncDefn> fd) {
     // translate random function
     // create gettfunname function
     transGetterFun(fd);
-    
+
     // add likelihood function::: double likeli_fun(int, ...);
     transLikeliFun(fd);
 
@@ -613,7 +611,7 @@ code::FunctionDecl* PFTranslator::transGetterFun(
   getterfun->setParams(transParamVarDecls(getterfun, fd));
   declared_funs[getterfun->getName()] = getterfun;
 
-  code::Stmt *st = (isTemp ? referTempStateStmt(getterfun,fd->getTemporalArg()->getVarName()) 
+  code::Stmt *st = (isTemp ? referTempStateStmt(getterfun,fd->getTemporalArg()->getVarName())
                            : referStaticStateStmt(getterfun));
   getterfun->addStmt(st);
 
@@ -654,7 +652,7 @@ code::FunctionDecl* PFTranslator::transGetterFun(
        new code::Identifier(MARK_VAR_REF_NAME),
        flagVar,
        code::OpKind::BO_ASSIGN);
-  
+
   getterfun->addStmt(st);
   // special treatment for bool
   if (valuetype == BOOL_TYPE) {
@@ -740,7 +738,7 @@ code::FunctionDecl* PFTranslator::transSetterFun(
       new code::ParamVarDecl(setterfun, VALUE_ARG_NAME, valuetype));
   setterfun->setParams(args_with_value);
 
-  code::Expr* flagVar = (isTemp ? createVarPlusDetExpr(fd->getTemporalArg()->getVarName(),1) 
+  code::Expr* flagVar = (isTemp ? createVarPlusDetExpr(fd->getTemporalArg()->getVarName(),1)
                                   : new code::IntegerLiteral(1));
   st = new code::BinaryOperator(
       new code::Identifier(MARK_VAR_REF_NAME),
@@ -801,7 +799,7 @@ code::FunctionDecl* PFTranslator::transFixedFun(
     coreNs, fixedfunname, valuetype);
   fixedfun->setParams(transParamVarDecls(fixedfun, fd));
   declared_funs[fixedfun->getName()] = fixedfun;
-  
+
   if (dims.size() > 0) { // need memorization
     code::Expr* tar = NULL;
     code::Type valueRefType = valuetype;
@@ -836,7 +834,7 @@ code::FunctionDecl* PFTranslator::transFixedFun(
       new code::ReturnStmt(new code::Identifier(VALUE_VAR_REF_NAME)));
     fixedfun->addStmt(stmt);
     fixedfun->addStmt(new code::BinaryOperator(
-      new code::Identifier(MARK_VAR_REF_NAME), 
+      new code::Identifier(MARK_VAR_REF_NAME),
       fd->isTemporal() ? createVarPlusDetExpr(fd->getTemporalArg()->getVarName(), 1) : new code::BooleanLiteral(true),
       code::OpKind::BO_ASSIGN));
   }
@@ -1091,7 +1089,7 @@ code::Expr* PFTranslator::transOriginRefer(
     std::shared_ptr<ir::OriginRefer> originref, std::string valuevar) {
   code::Expr* res = transExpr(originref->getOriginArg());
   res = ACCESS_ORIGIN_FIELD(originref->getRefer()->getSrc()->getName(), originref->getRefer()->getName(), res);
-  
+
   if (!valuevar.empty()) {
     // everything other than DistributionExpr needs to check the equality to compute the log likelihood
     std::vector<code::Expr*> cmparg;
@@ -1219,7 +1217,7 @@ code::Expr* PFTranslator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
 }
 
 /*
- *  Note: Translation Sample 
+ *  Note: Translation Sample
  *    Input: forall A a : cond(a)
  *    Output:
  *        _forall(__get_num_A(), [&](int a)->bool{return cond(a);})
@@ -1704,8 +1702,8 @@ void PFTranslator::transEvidence(std::vector<std::vector<code::Stmt*> >&setterFu
   int id = 0;
   // Update the random functions associated with observations
   if (leftexp != nullptr) {
-    if (leftexp->isTemporal() 
-        && std::dynamic_pointer_cast<ir::TimestepLiteral>(leftexp->getTemporalArg())) 
+    if (leftexp->isTemporal()
+        && std::dynamic_pointer_cast<ir::TimestepLiteral>(leftexp->getTemporalArg()))
         // Now we only accept timestep literal. This should be checked in Semant!
     {
       id = std::dynamic_pointer_cast<ir::TimestepLiteral>(leftexp->getTemporalArg())->getValue();
@@ -1822,8 +1820,8 @@ void PFTranslator::transAllEvidence(
   ==> void setup_temporal_evidence(){}
   */
   code::VarDecl::createVarDecl(coreNs, TMP_EVI_STORE_NAME,
-    std::vector<EXPR>({ 
-      new code::BinaryOperator(new code::Identifier(TIMESTEP_LIMIT_VAR_NAME), 
+    std::vector<EXPR>({
+      new code::BinaryOperator(new code::Identifier(TIMESTEP_LIMIT_VAR_NAME),
       new code::IntegerLiteral(1), code::OpKind::BO_PLUS) }
     ),TMP_EVI_STORE_TYPE);
   tempEvidenceInit = code::FunctionDecl::createFunctionDecl(
@@ -1835,7 +1833,7 @@ void PFTranslator::transAllEvidence(
   std::vector<std::vector<code::Stmt*> > setterFuncs(model->getTempLimit() + 1);
   std::vector<std::vector<code::Stmt*> > likeliFuncs(model->getTempLimit() + 1);
 
-  //TODO: 
+  //TODO:
   //  gather timestep information for evidence in Semant
   for (auto evid : evids) {
     // Firstly Translate all rejection sampling stmts
@@ -1851,10 +1849,10 @@ void PFTranslator::transAllEvidence(
     if (leftexp == nullptr) continue; // not likelihood evidence at all!
     transEvidence(setterFuncs, likeliFuncs, evid, true);
   }
-  
+
   /*
    * for each timestep
-   * ==> 
+   * ==>
    *  evidenceTable[3] = [&](double& __local_weight)->bool {
    *  __local_weight *= __set_O(3, 0);
    *  return true;
@@ -1918,7 +1916,7 @@ void PFTranslator::transAllQuery(
 
   // Output Timestep Counter
   cmp->addStmt(new code::CallExpr( new code::Identifier("printf"),
-    std::vector<code::Expr*>{ new code::StringLiteral("++++++++++++++++ TimeStep @%d ++++++++++++++++\\n"), 
+    std::vector<code::Expr*>{ new code::StringLiteral("++++++++++++++++ TimeStep @%d ++++++++++++++++\\n"),
                               new code::Identifier(CUR_TIMESTEP_VAR_NAME)})
   );
 
@@ -1992,7 +1990,7 @@ void PFTranslator::transAllQuery(
 }
 
 void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs,
-                               std::vector<std::vector<code::Stmt*> >& printFuncs, 
+                               std::vector<std::vector<code::Stmt*> >& printFuncs,
                                std::shared_ptr<ir::Query> qr, int n) {
   // Register Printer Class
   std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
@@ -2006,15 +2004,20 @@ void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs
         new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
     }
   }
+  // if double, push another initial argument to the Histogram constructor
+  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+  }
+
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
   code::VarDecl::createVarDecl(
       coreNs, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
   // The timestep this query should be processed
@@ -2038,7 +2041,7 @@ void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs
   args.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
   queryFuncs[id].push_back(code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
     args));
-  
+
   // add print this result in print()
   // :::=> answer_id.print("query expr");
   printFuncs[id].push_back(
@@ -2167,13 +2170,13 @@ void PFTranslator::createMain() {
               coreNs->getName() }),
                                                 coreCls->getName())));
   mainFun->addStmt(st);
-  
+
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
                                         MAIN_SAMPLING_FUN_NAME);
   mainFun->addStmt(st);
   */
   mainFun->addStmt(
-    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME), 
+    new code::BinaryOperator(new code::Identifier(MAIN_NAMESPACE_NAME),
     new code::CallExpr(new code::Identifier(MAIN_SAMPLING_FUN_NAME)),code::OpKind::BO_SCOPE)
   );
   // calculate duration
@@ -2242,7 +2245,7 @@ inline STMT PFTranslator::CREATE_INSTANCE(std::string tyname,
 
   return st;
 }
-  
+
 inline EXPR PFTranslator::ACCESS_ORIGIN_FIELD(std::string tyname,
                                                std::string originname,
                                                EXPR originarg) {
