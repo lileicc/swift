@@ -175,13 +175,16 @@ void GibbsTranslator::setSampleAlgorithm() {
 
         // Check if special built-in proposal can be applied
         if (config->getBoolValue("USE_GAUSSIAN_PROPOSAL") &&
-          fun->getRetTyp()->getTyp() == ir::IRConstant::DOUBLE) {
+            (fun->getRetTyp()->getTyp() == ir::IRConstant::DOUBLE
+            || fun->getRetTyp()->getTyp() == ir::IRConstant::MATRIX)) {
           // Using Gaussian Proposal
           errorMsg.warning(-1, -1, "[GibbsTranslator]: Conjugacy Analysis Failed for Random Function <" + name + ">! Default sampling algorithm will be [MH with Gaussian Proposal]!.");
+          std::string proposal_name = 
+            (fun->getRetTyp()->getTyp() == ir::IRConstant::DOUBLE ? UtilPropUniGaussName : UtilPropMultiGaussName);
           varMethods[name][MCMC_Resample_MethodName]->addStmt(
             new code::CallExpr(
             new code::Identifier(MCMC_Global_MHAlgo_SymProp_MethodName), 
-            std::vector<code::Expr*>{new code::Identifier(KEYWORD_THIS), new code::Identifier(UtilPropUniGaussName)}));
+            std::vector<code::Expr*>{new code::Identifier(KEYWORD_THIS), new code::Identifier(proposal_name)}));
           continue;
         }
 
