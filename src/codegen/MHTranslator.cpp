@@ -97,6 +97,7 @@ const std::string MHTranslator::UtilFreeObjFuncName = "_free_obj";
 
 // Util MCMC Proposal Distrib Name
 const std::string MHTranslator::UtilPropUniGaussName = "_gaussian_prop";
+const std::string MHTranslator::UtilPropMultiGaussName = "_multigaussian_prop";
 
 // Types
 const code::Type MHTranslator::NumberVar_Base_Type = code::Type("NumberVar");

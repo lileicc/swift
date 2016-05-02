@@ -135,6 +135,7 @@ protected:
 
   // Util MCMC Proposal Distrib Name
   static const std::string UtilPropUniGaussName;
+  static const std::string UtilPropMultiGaussName;
 
 
   // Predefined Types
