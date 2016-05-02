@@ -34,6 +34,11 @@ namespace swift {
 #define _predecl_colsum(a) (arma::sum(a,0))
 #define _predecl_rowsum(a) (arma::sum(a,1))
 
+static const double MAT_EPS = 1e-10;
+bool operator == (const mat&a, const mat&b) { return arma::approx_equal(a, b, "absdiff", MAT_EPS); }
+bool operator != (const mat&a, const mat&b) { return arma::approx_equal(a, b, "absdiff", MAT_EPS); }
+
+
 // Special Case for toInt
 template<>
 inline int toInt<arma::mat>(const arma::mat& a) {
