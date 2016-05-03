@@ -330,6 +330,12 @@ public:
     clear();
   }
 
+  Hist(bool isLogarithm = true, std::string filename = "", int bucket_n = 20) : //filename is hack for cp6
+    isLogarithm(isLogarithm) {
+    clear(bucket_n);
+  }
+  ;
+
   Hist(bool isLogarithm = true, int bucket_n = 20) :
     isLogarithm(isLogarithm) {
     clear(bucket_n);
@@ -412,6 +418,10 @@ public:
       printf("%c%lf, %lf] -> %.8lf\n", (i == 0 ? '[' : '('), (i == 0 ? left_bound : cur), (i == n - 1 ? right_bound : cur + det), bucket[i]);
 #endif
       cur += det;
+    }
+
+    if (filename != "") {
+      saveRealValue(filename, table.back().first)
     }
     clear();
   }

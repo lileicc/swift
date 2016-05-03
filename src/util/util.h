@@ -20,6 +20,9 @@
 #include <random>
 #include <array>
 
+#include "armadillo"
+using namespace arma;
+
 namespace swift {
 
 // Type Conversion Functions
@@ -425,5 +428,15 @@ inline double randn() {
   }\
 }
 
+void saveRealValue(std::string filename, double value) {
+  //TODO: Use configuration to set a data output directory
+  arma::mat m = { value };
+
+  bool status = m.save(filename.c_str(), csv_ascii);
+  if (!status) {
+    std::cerr << "[ Run-Time Error ] >> Failed to save matrix at < " + filename + " >!"<<std::endl;
+    std::exit(0);
+  }
 }
 
+}
