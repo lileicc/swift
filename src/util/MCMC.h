@@ -148,8 +148,11 @@ public:
   /*
     w_i <- w_i * P( Y_new_value | Y_new_parents  ) / P( Y_old_value | Y_old_parent  )
   */
-  virtual void gibbs_resample_arg(BayesVar* cur_node);
-  virtual void mh_parent_resample_arg(BayesVar* curnode);
+  virtual void gibbs_resample_arg(BayesVar* cur_node); // gibbs for discrete variables
+  virtual void mh_parent_resample_arg(BayesVar* curnode); // MH with parental proposal
+  // MH with symmetric proposal g()
+  // i.e. g(x->y) = g(y->x)
+  virtual void mh_symmetric_resample_arg(BayesVar* curnode, std::function<Tp(Tp)> g); 
   virtual void conjugacy_analysis(Tp& nxt_val) {}; // to be filled later for conjugacy analysis
   virtual void conjugate_gibbs_resample_arg(BayesVar* curnode);
 
@@ -352,7 +355,65 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
     cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
   }
   else cur_node->val = old_val; // reject
+}
 
+// MH with a symmetric proposal distribution g()
+template<class Tp>
+void BayesVar<Tp>::mh_symmetric_resample_arg(BayesVar* cur_node, std::function<Tp(Tp)> g) {
+  auto& child = cur_node->child;
+  Tp old_val = cur_node->val;
+  Tp nxt_val = g(old_val); // propose a new value based on the current state
+  if (nxt_val == old_val) return ;
+
+  double old_w = 0;
+  for (auto&c : child)
+    old_w += c->getlikeli();
+  old_w -= std::log(_active_list.size());
+
+  double nxt_w = 0;
+  cur_node->val = nxt_val;
+
+  if (!cur_node->check_obs()) {
+    return;
+  }
+
+  for (auto&c : child)
+    nxt_w += c->getcachelikeli();
+  nxt_w -= std::log(_active_list.size() + cur_node->get_reference_diff(old_val, nxt_val));
+  cur_node->is_active = true;
+
+  cur_node->clear_cache();
+  
+
+  double alpha = std::min(1.0, std::exp(nxt_w - old_w));
+  double loc = uni_r_dist(engine);
+  bool acceptance = (loc <= alpha);
+
+  if (acceptance) { // accept
+    cur_node->val = old_val;
+    cur_node->update_obs(false);
+
+    if (contig.size() > 0) {
+      backup = contig;
+      for (auto&c : backup) {
+        c->remove_edge();
+      }
+
+      cur_node->clear_reference();  // only has content when this returns an object
+
+      cur_node->val = nxt_val;
+
+      cur_node->update_reference(); // only has content when this returns an object
+
+      for (auto&c : backup) {
+        c->active_edge();
+      }
+    } else 
+       cur_node->val = nxt_val;
+
+    cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
+  }
+  else cur_node->val = old_val; // reject
 }
 
 template<class Tp>

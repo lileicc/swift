@@ -24,6 +24,8 @@ Configuration::Configuration() {
   setValue("N_BURN_IN_SAMPLES", -1);
   setValue("N_HIST_BUCKETS", 20);
   setValue("MODEL_OUT_FILENAME", "");
+  // Sampler Options
+  setValue("USE_GAUSSIAN_PROPOSAL", true);
 }
 
 Configuration* Configuration::getConfiguration() {

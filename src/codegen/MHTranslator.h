@@ -68,9 +68,11 @@ protected:
   static const std::string TotalRoundVarName;
   static const std::string BurnInVarName;
 
-  // BayesVar Method Name
+  // BayesVar Sampler Method Name
   static const std::string MCMC_Global_MHAlgo_MethodName;
+  static const std::string MCMC_Global_MHAlgo_SymProp_MethodName;
   static const std::string MCMC_Global_MHNumVarAlgo_MethodName;
+  // BayesVar Method Name
   static const std::string MCMC_Global_Clear_MethodName;
   static const std::string MCMC_Global_GetVal_MethodName;
   static const std::string MCMC_Global_GetCache_MethodName;
@@ -130,6 +132,10 @@ protected:
   static const std::string UtilClearRefFuncName;
   static const std::string UtilCalcRefDiffFuncName;
   static const std::string UtilFreeObjFuncName;
+
+  // Util MCMC Proposal Distrib Name
+  static const std::string UtilPropUniGaussName;
+  static const std::string UtilPropMultiGaussName;
 
 
   // Predefined Types
