@@ -15,6 +15,7 @@
 #include <functional>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <cstdio>
 #include <random>
@@ -348,6 +349,26 @@ inline double randn() {
   return stdnorm(generator);
 }
 
+//////////////////////////////////////
+//  Util for Saving Output
+/////////////////////////////////////
+
+void saveRealValue(std::string filename, double value) {
+  //TODO: Use configuration to set a data output directory
+  ofstream fout(filename);
+
+  if (fout.bad()) {
+    std::cerr << "[ Run-Time Error ] >> Failed to save real value at < " + filename + " >!"<<std::endl;
+    std::exit(0);
+  }
+  
+  fout.setf(ios::fixed);
+  fout.precision(10);
+  fout << value << endl;
+  fout.close();
+}
+
+
 
 ///////// Utils for Perturbation in Liu-West Filter /////////
 // Perturbation for Double variable #func#
@@ -426,4 +447,3 @@ inline double randn() {
 }
 
 }
-
