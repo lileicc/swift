@@ -1602,17 +1602,17 @@ void Translator::transQuery(code::FunctionDecl* fun,
     }
   }
 
+  // if double, push another initial argument to the Histogram constructor
+  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+  }
+  
   //Hack for CP6 - nd
   //every random variable is stored in an individual mat file
   std::string varname = qr->str();
   std::string filename = swift::Configuration::getConfiguration()->getValue("MODEL_OUT_FILENAME");
   if (filename != "")
     initArgs.push_back(new code::StringLiteral(filename + "_" + varname + ".mat"));
-
-  // if double, push another initial argument to the Histogram constructor
-  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
-    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
-  }
 
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
