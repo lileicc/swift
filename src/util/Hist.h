@@ -28,7 +28,8 @@ public:
     table.clear();
   }
 
-  Hist(bool isLogarithm = true, std::string filename = "") : //filename is a hack for CP 6 -nd
+  // store_to_file is now only implemented for real and real matrix
+  Hist(bool isLogarithm = true, std::string filename = "") :
       isLogarithm(isLogarithm), filename(filename) {
     clear();
   }
@@ -135,18 +136,16 @@ public:
     isTyped = false;
   }
 
-  Hist(bool isLogarithm = true) :
-      isLogarithm(isLogarithm), isTyped(false) {
+  // for int
+  Hist(bool isLogarithm = true, std::string filename = "") :
+      isLogarithm(isLogarithm), isTyped(false), filename(filename) {
     clear();
   };
 
-  Hist(bool isLogarithm = true, std::string filename = "") :
-  isLogarithm(isLogarithm), filename(filename) {
-    clear();
-  }
-
-  Hist(bool isLogarithm, std::string _type, const std::vector<std::string>* _inst = NULL)
-    :isLogarithm(isLogarithm){
+  // for typed objects
+  Hist(bool isLogarithm, std::string _type, const std::vector<std::string>* _inst = NULL,
+       std::string filename = ""):
+       isLogarithm(isLogarithm), filename(filename) {
     clear();
     if (_type.size() > 0) {
       typeName = _type;
@@ -325,22 +324,12 @@ public:
     init_flag = false;
   }
 
-  Hist(bool isLogarithm = true, std::string filename = "") :
-  isLogarithm(isLogarithm), filename(filename) {
-    clear();
-  }
-
-  Hist(bool isLogarithm = true, std::string filename = "", int bucket_n = 20) : //filename is hack for cp6
-    isLogarithm(isLogarithm) {
+  Hist(bool isLogarithm = true, int bucket_n = 20, std::string filename = "") :
+    isLogarithm(isLogarithm), filename(filename) {
     clear(bucket_n);
   }
   ;
 
-  Hist(bool isLogarithm = true, int bucket_n = 20) :
-    isLogarithm(isLogarithm) {
-    clear(bucket_n);
-  }
-  ;
   virtual ~Hist() {
   }
   ;
