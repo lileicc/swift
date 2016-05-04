@@ -1603,6 +1603,7 @@ void Translator::transQuery(code::FunctionDecl* fun,
   }
 
   //Hack for CP6 - nd
+  //every random variable is stored in an individual mat file
   std::string varname = qr->str();
   std::string filename = swift::Configuration::getConfiguration()->getValue("MODEL_OUT_FILENAME");
   if (filename != "")
