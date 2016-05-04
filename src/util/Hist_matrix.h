@@ -1,7 +1,7 @@
 /*
  * Hist_matrix.h
  *   Special hist for matrix
- * 
+ *
  *  Created on: Sept 17, 2014
  *      Author: yiwu
  */
@@ -10,6 +10,8 @@
 #include "Hist.h"
 
 #include "armadillo"
+
+#include "util_matrix.h"
 
 using namespace arma;
 
@@ -27,14 +29,15 @@ private:
   mat sum;
   double sum_wei;
   bool init_flag;
+  std::string filename;
 public:
   void clear() {
     init_flag = false;
     table.clear();
   }
 
-  Hist(bool isLogarithm = true) :
-    isLogarithm(isLogarithm) {
+  Hist(bool isLogarithm = true, std::string filename = "") :
+    isLogarithm(isLogarithm), filename(filename) {
     clear();
   }
   ;
@@ -120,6 +123,11 @@ public:
     var.print( "DiagVar  : ");
     cov.print( "Cov      : ");
 #endif
+
+    //hack for cp6
+    if (filename != "") {
+      saveRealMatrix(filename, table.back().first);
+    }
     clear();
   }
 

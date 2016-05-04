@@ -6,6 +6,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include "../predecl/PreDecl.h"
 #include "../predecl/MatrixStackFuncDecl.h"
 #include "../predecl/SetAggrFuncDecl.h"
@@ -1600,9 +1601,18 @@ void Translator::transQuery(code::FunctionDecl* fun,
         new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
     }
   }
+
   // if double, push another initial argument to the Histogram constructor
   if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
     initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+  }
+  
+  //Hack for CP6 - nd
+  //every random variable is stored in an individual mat file
+  std::string filename = swift::Configuration::getConfiguration()->getValue("MODEL_OUT_FILENAME");
+  if (filename != "") {
+    std::string varname = qr->str();
+    initArgs.push_back(new code::StringLiteral(filename + "_" + varname + ".mat"));
   }
 
   code::Expr* initvalue = new code::CallClassConstructor(
