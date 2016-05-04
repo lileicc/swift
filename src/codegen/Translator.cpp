@@ -1609,10 +1609,11 @@ void Translator::transQuery(code::FunctionDecl* fun,
   
   //Hack for CP6 - nd
   //every random variable is stored in an individual mat file
-  std::string varname = qr->str();
   std::string filename = swift::Configuration::getConfiguration()->getValue("MODEL_OUT_FILENAME");
-  if (filename != "")
+  if (filename != "") {
+    std::string varname = qr->str();
     initArgs.push_back(new code::StringLiteral(filename + "_" + varname + ".mat"));
+  }
 
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
