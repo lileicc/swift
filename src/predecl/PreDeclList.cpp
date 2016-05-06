@@ -59,6 +59,9 @@ const PoissonDistrDecl PreDeclList::poissonDistr =
 const TruncatedGaussDistrDecl PreDeclList::truncatedGaussDistr =
     TruncatedGaussDistrDecl();
 
+const PrecisionGaussianDistrDecl PreDeclList::precisiongaussianDistr =
+    PrecisionGaussianDistrDecl();
+
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
 
