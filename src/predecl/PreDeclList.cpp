@@ -53,6 +53,9 @@ const MultinomialDistrDecl PreDeclList::multinomialDistr =
 const PoissonDistrDecl PreDeclList::poissonDistr =
     PoissonDistrDecl();
 
+const PrecisionGaussianDistrDecl PreDeclList::precisiongaussianDistr =
+    PrecisionGaussianDistrDecl();
+
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
 
