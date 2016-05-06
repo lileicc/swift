@@ -15,6 +15,7 @@
 #include <functional>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <cstdio>
 #include <random>
@@ -348,6 +349,26 @@ inline double randn() {
   return stdnorm(generator);
 }
 
+//////////////////////////////////////
+//  Util for Saving Output
+/////////////////////////////////////
+
+void saveRealValue(std::string filename, double value) {
+  //TODO: Use configuration to set a data output directory
+  std::ofstream fout(filename);
+
+  if (fout.bad()) {
+    std::cerr << "[ Run-Time Error ] >> Failed to save real value at < " + filename + " >!"<<std::endl;
+    std::exit(0);
+  }
+
+  fout.setf(std::ios::fixed);
+  fout.precision(10);
+  fout << value << std::endl;
+  fout.close();
+}
+
+
 
 ///////// Utils for Perturbation in Liu-West Filter /////////
 // Perturbation for Double variable #func#
@@ -395,14 +416,14 @@ inline double randn() {
 // Perturbation for MultiDimensional Random Function
 //    --> currently only support at most 2D random var
 #define __perturb_dim1(func) {\
-  int _n = _stat_memo[0].__value_##func .size(); \
+  int _n = _stat_memo[0].__value_##func .data.size(); \
   for (int _i = 0; _i < _n; ++_i) {\
     __perturb(##func [_i]); \
   }\
 }
 #define __perturb_dim2(func) {\
-  int _n = _stat_memo[0].__value_##func.size(); \
-  int _m = _stat_memo[0].__value_##func [0].size(); \
+  int _n = _stat_memo[0].__value_##func.data.size(); \
+  int _m = _stat_memo[0].__value_##func .data[0].size(); \
   for (int _i = 0; _i < _n; ++_i) {\
     for (int _j = 0; _j < _m; ++_j) {\
       __perturb(##func [_i][_j]); \
@@ -410,14 +431,14 @@ inline double randn() {
   }\
 }
 #define __perturb_matrix_dim1(func) {\
-  int _n = _stat_memo[0].__value_##func .size(); \
+  int _n = _stat_memo[0].__value_##func .data.size(); \
   for (int _i = 0; _i < _n; ++_i) {\
     __perturb_matrix(##func [_i]); \
   }\
 }
 #define __perturb_matrix_dim2(func) {\
-  int _n = _stat_memo[0].__value_##func.size(); \
-  int _m = _stat_memo[0].__value_##func [0].size(); \
+  int _n = _stat_memo[0].__value_##func.data.size(); \
+  int _m = _stat_memo[0].__value_##func .data[0].size(); \
   for (int _i = 0; _i < _n; ++_i) {\
     for (int _j = 0; _j < _m; ++_j) {\
       __perturb_matrix(##func [_i][_j]); \
@@ -426,4 +447,3 @@ inline double randn() {
 }
 
 }
-

@@ -56,5 +56,12 @@ void QuantForm::print(FILE* file, int indent) const {
   }
 }
 
+std::string QuantForm::toString() {
+  std::string ret=(op==ir::IRConstant::FORALL ? "forall" : "exist");
+  ret.append(" " + var->toString() + ": ");
+  if (get(0) != NULL) ret.append(get(0)->toString());
+  return ret;
+}
+
 }
 }

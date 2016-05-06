@@ -10,6 +10,8 @@ public:
   virtual ~DoubleLiteral();
 
   double getValue() const;
+
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
 private:

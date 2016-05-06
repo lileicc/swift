@@ -13,6 +13,8 @@ public:
   virtual ~StringLiteral();
 
   const std::string& getValue() const;
+
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
 private:

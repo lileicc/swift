@@ -10,6 +10,9 @@
 #include "Type.h"
 #include "FunctionDecl.h"
 
+#include <string>
+#include <vector>
+
 namespace swift {
 namespace code {
 
@@ -19,7 +22,10 @@ public:
   static ClassConstructor* createClassConstructor(ClassDecl * cls,
       std::vector<ParamVarDecl*> params = std::vector<ParamVarDecl*>());
   void addInitExpr(Expr* initExpr);
+  void addInitExpr(std::string varName, Expr* expr = NULL);
+  void addInitExpr(std::string varName, std::vector<Expr*> expr);
   void print(printer::Printer* prt);
+  Expr* getInitExpr();
 protected:
   ClassConstructor(ClassDecl * cls, Type ty);
 private:

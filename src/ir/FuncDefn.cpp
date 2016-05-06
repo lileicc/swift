@@ -9,8 +9,8 @@ using namespace std;
 namespace swift {
 namespace ir {
 
-FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp) :
-    name(name), retTyp(retTyp), isrand(isrand), body(nullptr), tmparg(nullptr), istmp(false) {
+FuncDefn::FuncDefn(bool isrand, const std::string& name, const Ty* retTyp, bool isextern) :
+    name(name), retTyp(retTyp), isrand(isrand), isextern(isextern), body(nullptr), tmparg(nullptr), istmp(false) {
 }
 
 FuncDefn::~FuncDefn() {
@@ -60,6 +60,10 @@ bool FuncDefn::isFixed() const {
   return !isrand;
 }
 
+bool FuncDefn::isExtern() const {
+  return isextern;
+}
+
 bool FuncDefn::isTemporal() const {
   return istmp;
 }
@@ -95,7 +99,7 @@ std::string FuncDefn::toSignature() const {
 }
 
 void FuncDefn::print(FILE* file, int indent) const {
-  fprintf(file, "%*sFuncDefn: %s\n", indent, "", (isrand ? "Random" : "Fixed"));
+  fprintf(file, "%*sFuncDefn: %s\n", indent, "", (isrand ? "Random" : (isextern ? "Extern" : "Fixed")));
   fprintf(file, "%*s%s %s\n", indent + 2, "", getRetTyp()->toString().c_str(), toSignature().c_str());
   if (getBody() != nullptr) {
     getBody()->print(file, indent + 4);

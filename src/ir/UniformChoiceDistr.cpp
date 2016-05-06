@@ -26,5 +26,9 @@ void UniformChoiceDistr::print(FILE* file, int indent) const {
   body->print(file, indent + 2);
 }
 
+std::string UniformChoiceDistr::toString() {
+  return "UniformChoice(" + body->toString() + ")";
+}
+
 }
 }

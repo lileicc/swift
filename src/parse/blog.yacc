@@ -129,7 +129,7 @@ BlogProgram* parse(const char* inp) {
 // define the "terminal symbol" token types I'm going to use (in CAPS
 // by convention), and associate each with a field of the union:
 %token ELSE IF THEN
-%token TYPE RANDOM FIXED ORIGIN DISTINCT QUERY OBS PARAM LIST MAP DISTRIBUTION CASE IN
+%token TYPE RANDOM FIXED ORIGIN DISTINCT QUERY OBS PARAM LIST MAP DISTRIBUTION EXTERN CASE IN
 %token EXISTS_ FORALL_
 %token FOR
 %token NULLITY
@@ -155,7 +155,7 @@ BlogProgram* parse(const char* inp) {
   evidence_stmt query_stmt;
 %type <numstdec> number_stmt;
 %type <origdec> origin_func_decl;
-%type <funcdec> fixed_func_decl rand_func_decl;
+%type <funcdec> fixed_func_decl rand_func_decl extern_func_decl;
 %type <distdec> distinct_decl;
 %type <stmt> evidence value_evidence;
 %type <exp> expression literal operation_expr unary_operation_expr
@@ -236,6 +236,7 @@ declaration_stmt:
     type_decl { $$ = $1; }
   | fixed_func_decl { $$ = $1; }
   | rand_func_decl { $$ = $1; }
+  | extern_func_decl { $$ = $1; }
   | origin_func_decl { $$ = $1; }
   | number_stmt {$$ = $1; }
   | distinct_decl  { $$ = $1; }
@@ -286,6 +287,12 @@ var_decl:
 extra_commas:
   COMMA COMMA
 | extra_commas COMMA
+;
+
+extra_semis:
+  SEMI SEMI
+| extra_semis SEMI
+;
   
 type_var_lst:
     type_var_lst COMMA var_decl{ 
@@ -324,6 +331,23 @@ fixed_func_decl:
   | FIXED error
   {
     yyerror("error in fixed function declaration");
+  }
+    ;
+    
+extern_func_decl:
+    EXTERN type ID opt_parenthesized_type_var_lst
+    { 
+      $$ = new FuncDecl(curr_line, curr_col, *($2), Symbol($3->getValue()));
+      if($4 != NULL){
+        for(size_t i = 0; i < $4->size(); i++){
+          $$->addArg((*$4)[i]);
+        }
+        delete($4);
+      }
+    }
+  | EXTERN error
+  {
+    yyerror("error in external function declaration");
   }
     ;
 
@@ -463,7 +487,7 @@ id_or_subid_list:
     }
   | id_or_subid_list extra_commas id_or_subid
     {
-      yyerror("missing comma");
+      yyerror("extra comma");
     }
 
   ;
@@ -484,7 +508,7 @@ id_or_subid:
 //TODO: DistributionDec/ClassName
 distribution_decl:
     DISTRIBUTION ID EQ_ refer_name LPAREN opt_expression_list RPAREN
-    { }
+    { yyerror("customized distribution declaration is not supported yet"); }
     ;
 
 refer_name:
@@ -651,7 +675,9 @@ expression_list:
       $$->push_back($1);
     }
   ;
-  
+
+//TODO: to better support recursive list expression: i.e. [[a], [b], [c]]
+//      currently <dim> in ArrayExpr is incorrect
 list_expr:
     LBRACKET opt_expression_list RBRACKET
     { $$ = new ArrayExpr(curr_line, curr_col);
@@ -659,13 +685,38 @@ list_expr:
          $$->add((*$2)[i]);
       }
     }
-| LBRACKET semi_colon_separated_expression_list RBRACKET { yyerror("semi colon separated list init expression not supported yet"); }
+  | LBRACKET semi_colon_separated_expression_list RBRACKET {
+    // TODO: semi_colon_expr should not recursively accept semi_colon_expr
+    $$ = new ArrayExpr(curr_line, curr_col, 2);
+    for (size_t i = 0; i < $2->size(); i ++ ) {
+      $$->add((*$2)[i]);
+    }
+  }
   ;
   
-//TODO: ExprList  
 semi_colon_separated_expression_list:
-    expression_list SEMI semi_colon_separated_expression_list { }
-  | expression_list SEMI expression_list { }
+    expression_list SEMI semi_colon_separated_expression_list {
+      $$ = $3;
+      $$->insert($$->begin(), new ArrayExpr(curr_line, curr_col));
+      for(size_t i = 0; i < $1->size(); i ++ ) {
+        (*$$)[0]->add((*$1)[i]);
+      }
+    }
+  | expression_list extra_semis semi_colon_separated_expression_list
+  {
+    yyerror("extra semi-colons in semi-colon separated expression list");
+  }
+  | expression_list SEMI expression_list { 
+      $$ = new vector<Expr*>();
+      $$->push_back(new ArrayExpr(curr_line, curr_col));
+      $$->push_back(new ArrayExpr(curr_line, curr_col));
+      for (size_t i = 0; i < $1->size(); i++ ) {
+        (*$$)[0]->add((*$1)[i]);
+      }
+      for (size_t i = 0; i < $3->size(); i++ ) {
+        (*$$)[1]->add((*$3)[i]);
+      }
+    }
   ;
   
 map_construct_expression:

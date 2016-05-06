@@ -6,6 +6,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include "../predecl/PreDecl.h"
 #include "../predecl/MatrixStackFuncDecl.h"
 #include "../predecl/SetAggrFuncDecl.h"
@@ -14,26 +15,31 @@
 
 namespace swift {
 namespace codegen {
-swift::Configuration* config = swift::Configuration::getConfiguration();
-bool Translator::COMPUTE_LIKELIHOOD_IN_LOG =
-    swift::Configuration::getConfiguration()->getBoolValue(
-        "COMPUTE_LIKELIHOOD_IN_LOG");
 
+const std::string Translator::KEYWORD_THIS = "this";
 const std::string Translator::VECTOR_CLASS_NAME = "vector";
 const std::string Translator::VECTOR_RESIZE_METHOD_NAME = "resize";
 const std::string Translator::VECTOR_ADD_METHOD_NAME = "push_back";
 const std::string Translator::APPEND_FUN_NAME = "append";
 const std::string Translator::DYNAMICTABLE_CLASS_NAME = "DynamicTable";
 const std::string Translator::DYNAMICTABLE_RESIZE_METHOD_NAME = "resize";
+
+const code::Type Translator::AUTO_TYPE("auto");
+const code::Type Translator::AUTO_REF_TYPE("auto",true);
+
 const code::Type Translator::INT_TYPE("int");
 const code::Type Translator::INT_REF_TYPE("int", true);
 const code::Type Translator::INT_CONST_TYPE("int", false, false, true);
 const code::Type Translator::INT_VECTOR_TYPE(VECTOR_CLASS_NAME,
                                                 { INT_TYPE });
+const code::Type Translator::INT_VECTOR_REF_TYPE(VECTOR_CLASS_NAME,
+                                                { INT_TYPE }, true);
 const code::Type Translator::DOUBLE_TYPE("double");
 const code::Type Translator::DOUBLE_REF_TYPE("double", true);
 const code::Type Translator::DOUBLE_VECTOR_TYPE(VECTOR_CLASS_NAME, {
                                                        DOUBLE_TYPE });
+const code::Type Translator::DOUBLE_VECTOR_REF_TYPE(VECTOR_CLASS_NAME, {
+                                                       DOUBLE_TYPE }, true);
 const code::Type Translator::STRING_TYPE("string");
 const code::Type Translator::CHAR_TYPE("char");
 const code::Type Translator::TIMESTEP_TYPE("unsigned");
@@ -93,7 +99,6 @@ const std::string Translator::UNIFORM_CHOICE_DISTRIBUTION_NAME =
     "UniformChoice";
 const int Translator::INIT_SAMPLE_NUM = 0;
 const int Translator::NULLSYMBOL_VALUE = -1;
-const int Translator::TOTAL_NUM_SAMPLES = 1000000;
 
 // internal predefined functions
 const std::string Translator::GEN_FULL_SET_NAME = "_gen_full";
@@ -114,7 +119,15 @@ const std::string Translator::TO_MATRIX_FUN_NAME = "_to_matrix";
 // Precison Parameter
 const double Translator::ZERO_EPS = 1e-30;
 
-Translator::Translator() {
+// Initialize static variable. It will be later updated in the constructor
+bool Translator::COMPUTE_LIKELIHOOD_IN_LOG = true;
+
+Translator::Translator(): errorMsg(stdout) {
+
+  //Flag sets whether or not to use log likelihood
+  COMPUTE_LIKELIHOOD_IN_LOG = config->getBoolValue("COMPUTE_LIKELIHOOD_IN_LOG");
+  iterNum = config->getIntValue("N_SAMPLES"); // default is 10^6
+
   useTag = false;
   prog = new code::Code();
   coreNs = new code::NamespaceDecl(MAIN_NAMESPACE_NAME);
@@ -128,7 +141,7 @@ Translator::Translator() {
 }
 
 Translator::~Translator() {
-  if (!useTag)
+  if (!useTag && prog != NULL)
     delete prog;
 }
 
@@ -232,7 +245,6 @@ code::FunctionDecl* Translator::transSampleAlg() {
           new code::Identifier(WEIGHT_VAR_REF_NAME), code::OpKind::BO_ASSIGN));
   fun->addStmt(new code::ForStmt(init, cond, step, body));
   return fun;
-  //TODO adding other algorithms
 }
 
 void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
@@ -334,18 +346,13 @@ void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
                                     new code::Identifier(localnumvarname),
                                     code::OpKind::BO_SPLUS);
       insidebody->addStmt(st);
-      // resize the instance vector to make sure it get enough size
-      // removed by leili
-      //      st = code::CallExpr::createMethodCall(inst_var_name,
-      //          VECTOR_RESIZE_METHOD_NAME, std::vector<code::Expr*>( {
-      //              new code::Identifier(numvar) }));
-      //      insidebody->addStmt(st);
+      // TODO: For efficiency purpose, we can remove the following <append> statement.
       // append the origin attributes
       std::vector<EXPR> origin_values;
       for (size_t originid = 0; originid < numst->size(); originid++)
         origin_values.push_back(
             new code::Identifier(numst->getVar(originid)->getVarName()));
-      st = CREATE_INSTANCE(name, "", origin_values,
+      st = CREATE_INSTANCE(name, "_inst_"+name, origin_values,
                            new code::Identifier(localnumvarname));
       insidebody->addStmt(st);
       code::Expr* szexp = new code::IntegerLiteral(1);
@@ -390,9 +397,9 @@ void Translator::transTypeDomain(std::shared_ptr<ir::TypeDomain> td) {
     // :::==> ensure_num
     fun->addStmt(
         new code::CallExpr(new code::Identifier(ensureFun->getName())));
-    // TODO create functions for number statement and their likelihood
+    // TODO create functions for number statement and their likelihood (support multiple numberstmt)
   }
-  // markt he markvar
+  // mark the markvar
   // ::: => marknumvar = curr_loop
   fun->addStmt(
       new code::BinaryOperator(new code::Identifier(marknumvar),
@@ -630,7 +637,7 @@ code::FunctionDecl* Translator::transFixedFun(
   declared_funs[fixedfun->getName()] = fixedfun;
 
   if (dims.size() > 0) { // need memorization
-    code::Type valueRefType = valuetype; 
+    code::Type valueRefType = valuetype;
     valueRefType.setRef(true);
     // create mark value
     addFunValueRefStmt(fixedfun, getMarkVarName(fixedfunname), fixedfun->getParams(), MARK_VAR_REF_NAME, BOOL_REF_TYPE);
@@ -898,7 +905,7 @@ code::Expr* Translator::transOriginRefer(
     std::shared_ptr<ir::OriginRefer> originref, std::string valuevar) {
   code::Expr* res = transExpr(originref->getOriginArg());
   res = ACCESS_ORIGIN_FIELD(originref->getRefer()->getSrc()->getName(), originref->getRefer()->getName(), res);
-  
+
   if (!valuevar.empty()) {
     // everything other than DistributionExpr needs to check the equality to compute the log likelihood
     std::vector<code::Expr*> cmparg;
@@ -921,7 +928,7 @@ code::Expr* Translator::transCardExpr(std::shared_ptr<ir::CardExpr> cardexp,
       cardexp->getBody());
   assert(setexp != nullptr);
   // Note: For CardExpr, we can directly ignore the func field of this SetExpr
-  
+
   // can only handle conditional set for the moment.
   std::shared_ptr<ir::VarDecl> var = setexp->getVar();
   const ir::NameTy* tp = dynamic_cast<const ir::NameTy*>(var->getTyp());
@@ -1026,7 +1033,7 @@ code::Expr* Translator::transSetExpr(std::shared_ptr<ir::SetExpr> e) {
 }
 
 /*
- *  Note: Translation Sample 
+ *  Note: Translation Sample
  *    Input: forall A a : cond(a)
  *    Output:
  *        _forall(__get_num_A(), [&](int a)->bool{return cond(a);})
@@ -1059,7 +1066,6 @@ code::Expr* Translator::transMapExpr(std::shared_ptr<ir::MapExpr> mex) {
   code::Expr* list = new code::ListInitExpr(args);
   std::vector<code::Expr*> maparg;
   maparg.push_back(list);
-  // TODO: just a hack for the moment, need to support templated type natively
   code::Type maptype(MAP_BASE_TYPE, { fromType, toType });
   return new code::CallClassConstructor(maptype, maparg);
 }
@@ -1094,7 +1100,7 @@ code::Expr* Translator::transOprExpr(std::shared_ptr<ir::OprExpr> opr,
         kind = code::OpKind::BO_PLUS;
       break;
     case ir::IRConstant::MINUS:
-      if (args.size() == 1) 
+      if (args.size() == 1)
         kind = code::OpKind::UO_MINUS;
       else
         kind = code::OpKind::BO_MINUS;
@@ -1198,7 +1204,7 @@ code::Expr* Translator::transMatrixExpr(std::shared_ptr<ir::MatrixExpr> mat) {
       args.push_back(new code::IntegerLiteral(0));
     }
   }
-  code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE, 
+  code::Expr* container = new code::CallClassConstructor(MATRIX_CONTAINER_TYPE,
     std::vector<code::Expr*>{new code::ListInitExpr(args)});
   code::Expr* func = new code::CallExpr(new code::Identifier(TO_MATRIX_FUN_NAME),
     std::vector<code::Expr*>{container, new code::IntegerLiteral((int)row), new code::IntegerLiteral((int)col)});
@@ -1269,8 +1275,7 @@ code::Expr* Translator::transDistribution(
                                         code::OpKind::BO_COMMA);
       }
     } else {
-      // TODO
-      //    Note: Actually, it is a general way of dynamic initialization
+      // Note: Actually, it is a general way of dynamic initialization
       std::string distvarname = UNIFORM_CHOICE_DISTRIBUTION_NAME
           + std::to_string((size_t) &(dist->getArgs()));
       if (valuevar.empty()) {
@@ -1557,7 +1562,7 @@ void Translator::transAllEvidence(
     // Firstly Translate all rejection sampling stmts
     transEvidence(fun, evid, false);
   }
-  
+
   for (auto evid : evids) {
     // Firstly Translate all likelihood weighing stmts
     transEvidence(fun, evid, true);
@@ -1596,15 +1601,29 @@ void Translator::transQuery(code::FunctionDecl* fun,
         new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
     }
   }
+
+  // if double, push another initial argument to the Histogram constructor
+  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+  }
+  
+  //Hack for CP6 - nd
+  //every random variable is stored in an individual mat file
+  std::string filename = swift::Configuration::getConfiguration()->getValue("MODEL_OUT_FILENAME");
+  if (filename != "") {
+    std::string varname = qr->str();
+    initArgs.push_back(new code::StringLiteral(filename + "_" + varname + ".mat"));
+  }
+
   code::Expr* initvalue = new code::CallClassConstructor(
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
   code::FieldDecl::createFieldDecl(
       coreCls, answervarname,
       code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ? 
+          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
       initvalue);
   std::vector<code::Expr*> args;
@@ -1680,7 +1699,7 @@ code::Expr* Translator::transConstSymbol(
   std::shared_ptr<ir::BoolLiteral> bl = std::dynamic_pointer_cast<
       ir::BoolLiteral>(cs);
   if (bl) {
-    // TODO
+    // Note: Boolean is converted to 0/1
     return new code::IntegerLiteral(bl->getValue());
   }
   std::shared_ptr<ir::DoubleLiteral> dl = std::dynamic_pointer_cast<
@@ -1743,17 +1762,20 @@ code::Expr* Translator::transFunctionCall(
         args);
     }
 
-    return new code::CallExpr(new code::Identifier(fc->getBuiltinRefer()->getName()), args);
+    return new code::CallExpr(new code::Identifier(fc->getName()), args);
   }
   switch (fc->getKind()) {
     case ir::IRConstant::RANDOM:
       getterfunname = getGetterFunName(fc->getRefer()->getName());
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     case ir::IRConstant::FIXED:
-      getterfunname = getFixedFunName(fc->getRefer()->getName());
-      if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
-        // This fixed function is actually a constant variable
-        return new code::Identifier(getterfunname);
+      getterfunname = fc->getRefer()->getName();
+      if (!fc->getRefer()->isExtern()) {
+        getterfunname = getFixedFunName(fc->getRefer()->getName());
+        if (constValTable.count(getterfunname) > 0 && args.size() == 0) {
+          // This fixed function is actually a constant variable
+          return new code::Identifier(getterfunname);
+        }
       }
       return new code::CallExpr(new code::Identifier(getterfunname), args);
     default:
@@ -1785,7 +1807,7 @@ void Translator::createMain() {
                                                 coreCls->getName())));
   mainFun->addStmt(st);
   std::vector<code::Expr*> args;
-  args.push_back(new code::IntegerLiteral(TOTAL_NUM_SAMPLES));
+  args.push_back(new code::IntegerLiteral(iterNum));
   st = code::CallExpr::createMethodCall(SAMPLER_VAR_NAME,
                                         MAIN_SAMPLING_FUN_NAME, args);
   mainFun->addStmt(st);
@@ -1858,7 +1880,7 @@ inline STMT Translator::CREATE_INSTANCE(std::string tyname,
 
   return st;
 }
-  
+
 inline EXPR Translator::ACCESS_ORIGIN_FIELD(std::string tyname,
                                                std::string originname,
                                                EXPR originarg) {
@@ -1882,4 +1904,3 @@ inline SAMPLEFUN Translator::DECLARE_SAMPLEFUN() {
 
 } /* namespace codegen */
 } /* namespace swift */
-

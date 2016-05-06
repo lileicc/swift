@@ -12,7 +12,7 @@ public:
 
   IRConstant getKind() const;
   virtual void print(FILE* file, int indent) const;
-
+  std::string toString();
 private:
   IRConstant kind;
 };

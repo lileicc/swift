@@ -5,8 +5,9 @@
  *      Author: leili
  */
 
-#include <vector>
 #pragma once
+
+#include <vector>
 
 template <typename _T, size_t _dim>
 struct _mdvector {
@@ -87,8 +88,9 @@ public:
     return data[i];
   }
   
-private:
   typename _mdvector<_T, _dim>::type data;
+  
+private:
   std::vector<size_t> maxsize;
 };
 

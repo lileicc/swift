@@ -18,6 +18,8 @@ public:
   void setFunc(std::shared_ptr<Expr> f);
   std::shared_ptr<Expr> getCond() const;
   void setCond(std::shared_ptr<Expr> c);
+
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
 private:

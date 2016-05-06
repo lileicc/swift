@@ -35,6 +35,7 @@ class IntegerLiteral;
 class LambdaExpr;
 class ListInitExpr;
 class NamespaceDecl;
+class NewExpr;
 class NullLiteral;
 class ParamVarDecl;
 class ReturnStmt;

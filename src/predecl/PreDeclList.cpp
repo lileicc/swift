@@ -20,13 +20,17 @@ const BooleanDistrDecl PreDeclList::booleanDistr =
 const CategoricalDistrDecl PreDeclList::categoricalDistr =
     CategoricalDistrDecl();
 
+const DiagGaussianDistrDecl PreDeclList::diaggaussianDistr =
+    DiagGaussianDistrDecl();
+
 const DirichletDistrDecl PreDeclList::dirichletDistr =
     DirichletDistrDecl();
 
-const DiscreteDistrDecl PreDeclList::discreteDistr = 
+const DiscreteDistrDecl PreDeclList::discreteDistr =
     DiscreteDistrDecl();
 
-const PoissonDistrDecl PreDeclList::poissonDistr = PoissonDistrDecl();
+const ExponentialDistrDecl PreDeclList::exponentialDistr =
+    ExponentialDistrDecl();
 
 const GammaDistrDecl PreDeclList::gammaDistr =
     GammaDistrDecl();
@@ -34,11 +38,23 @@ const GammaDistrDecl PreDeclList::gammaDistr =
 const GaussianDistrDecl PreDeclList::gaussianDistr =
     GaussianDistrDecl();
 
+const GeometricDistrDecl PreDeclList::geometricDistr =
+    GeometricDistrDecl();
+
+const InvGammaDistrDecl PreDeclList::invGammaDistr =
+    InvGammaDistrDecl();
+
 const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
     MultivarGaussianDistrDecl();
 
 const MultinomialDistrDecl PreDeclList::multinomialDistr =
     MultinomialDistrDecl();
+
+const PoissonDistrDecl PreDeclList::poissonDistr =
+    PoissonDistrDecl();
+
+const PrecisionGaussianDistrDecl PreDeclList::precisiongaussianDistr =
+    PrecisionGaussianDistrDecl();
 
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
@@ -55,7 +71,7 @@ const UniformVectorDistrDecl PreDeclList::uniformVectorDistr =
 // PreDecl Functions
 const LoadRealMatrixFuncDecl PreDeclList::loadRealMatrixFuncDecl =
     LoadRealMatrixFuncDecl();
-const PrevFuncDecl PreDeclList::prevFuncDecl = 
+const PrevFuncDecl PreDeclList::prevFuncDecl =
     PrevFuncDecl();
 const ToIntFuncDecl PreDeclList::toIntFuncDecl =
     ToIntFuncDecl();

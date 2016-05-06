@@ -32,5 +32,9 @@ void CardExpr::print(FILE* file, int indent) const {
   getBody()->print(file, indent + 4);
 }
 
+std::string CardExpr::toString() {
+  return "#" + getBody()->toString();
+}
+
 }
 }
