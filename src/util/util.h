@@ -355,16 +355,16 @@ inline double randn() {
 
 void saveRealValue(std::string filename, double value) {
   //TODO: Use configuration to set a data output directory
-  ofstream fout(filename);
+  std::ofstream fout(filename);
 
   if (fout.bad()) {
     std::cerr << "[ Run-Time Error ] >> Failed to save real value at < " + filename + " >!"<<std::endl;
     std::exit(0);
   }
-  
-  fout.setf(ios::fixed);
+
+  fout.setf(std::ios::fixed);
   fout.precision(10);
-  fout << value << endl;
+  fout << value << std::endl;
   fout.close();
 }
 
