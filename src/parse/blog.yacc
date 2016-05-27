@@ -804,6 +804,48 @@ tuple_set:
   
 evidence_stmt:
   OBS evidence {$$ = $2; }
+  | OBS evidence FOR type_var_lst
+  {
+    if ($4 != NULL) {
+      $$ = new Evidence(curr_line, curr_col, 
+                      ((Evidence*)$2)->getLeft(),
+                      ((Evidence*)$2)->getRight(),
+                      *((vector<VarDecl>*)$4));
+      ((Evidence*)$2)->clear();
+      delete $2;
+      delete $4;
+    }
+    else {
+      $$ = $2;
+      yyerror("invalid *for-loop* in obs statement");
+    }
+  }
+  | OBS evidence FOR type_var_lst COLON expression
+  {
+    if ($4 != NULL && $6 != NULL) {
+      $$ = new Evidence(curr_line, curr_col, 
+                      ((Evidence*)$2)->getLeft(),
+                      ((Evidence*)$2)->getRight(),
+                      *((vector<VarDecl>*)$4),
+                      $6);
+      ((Evidence*)$2)->clear();
+      delete $2;
+      delete $4;
+    }
+    else {
+      $$ = $2;
+      if ($4 != NULL) delete $4;
+      yyerror("invalid *for-loop* in obs statement");
+    }
+  }
+  | OBS error FOR type_var_lst
+  {
+    yyerror("incorrect obs statement");
+  }
+  | OBS error FOR type_var_lst COLON expression
+  {
+    yyerror("incorrect obs statement");
+  }
   | OBS error
   {
     yyerror("incorrect obs statement");
