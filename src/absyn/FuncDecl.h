@@ -38,6 +38,7 @@ public:
   size_t argSize() const;
   void addArg(VarDecl var);
   const VarDecl& getArg(int k) const;
+  const std::vector<VarDecl>& getArgs() const;
 
   // For Debugging Use
   void print(FILE* file, int indent);

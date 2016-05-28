@@ -51,6 +51,10 @@ const VarDecl& FuncDecl::getArg(int k) const {
   return args[k];
 }
 
+const std::vector<VarDecl>& FuncDecl::getArgs() const {
+  return args;
+}
+
 void FuncDecl::addArg(VarDecl var) {
   args.push_back(var);
 }

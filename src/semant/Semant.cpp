@@ -190,19 +190,9 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
         "Function name < " + name + " >already defined as Type Name");
     return;
   }
-  std::vector<std::shared_ptr<ir::VarDecl> > vds;
-  for (size_t i = 0; i < fd->argSize(); i++) {
-    vds.push_back(transVarDecl(fd->getArg(i)));
-  }
-  // Function can contain at most one Timestep argument
-  int timestep_count = 0;
-  for (auto&v : vds) {
-    if (v->getTyp() == tyFactory.getTimestepTy())
-      ++ timestep_count;
-  }
-  if (timestep_count > 1) {
-    error(fd->line, fd->col, "function < " + name + " > contains more than 1 timestep arguments!");
-  }
+  
+  // translate arguments
+  std::vector<std::shared_ptr<ir::VarDecl> > vds = transVarDecls(fd->getArgs());
 
   if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom(), fd->isExtern())) {
     error(fd->line, fd->col,
@@ -943,7 +933,7 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
             + "> in Quant Form cannot be a type name!");
   }
   // Add Local Variable
-  local_var[ptr->getVar()->getVarName()].push(ptr->getVar());
+  add_local_var(ptr->getVar());
 
   ptr->setCond(transExpr(expr->getCond()));
 
@@ -953,10 +943,8 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   }
 
   // Remove Local Variable
-  auto it = local_var.find(ptr->getVar()->getVarName());
-  it->second.pop();
-  if (it->second.empty())
-    local_var.erase(it);
+  del_local_var(ptr->getVar());
+
   // randomness
   // TODO: to check randomness in some special cases
   ptr->setRandom(true);
@@ -1045,17 +1033,17 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
   // Add Local Variable
   if (var->getTyp() != NULL
       && var->getVarName().size() > 0&& expr->getCond() != NULL)
-    local_var[var->getVarName()].push(var);
+      add_local_var(var);
+
   std::shared_ptr<ir::Expr> e =
       expr->getCond() == NULL ? nullptr : transExpr(expr->getCond());
+
   // Remove Local Variable
   if (var->getTyp() != NULL
       && var->getVarName().size() > 0&& expr->getCond() != NULL) {
-    auto it = local_var.find(var->getVarName());
-    it->second.pop();
-    if (it->second.empty())
-      local_var.erase(it);
+    del_local_var(var);
   }
+
   auto ptr = std::make_shared<ir::CondSet>(var, nullptr, e);
 
   if (e != nullptr && e->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
@@ -1091,7 +1079,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
   // Add Local Variable
   if (var->getTyp() != NULL
     && var->getVarName().size() > 0)
-    local_var[var->getVarName()].push(var);
+    add_local_var(var);
+
   std::shared_ptr<ir::Expr> cond =
     expr->getCond() == NULL ? nullptr : transExpr(expr->getCond());
   std::shared_ptr<ir::Expr> func = 
@@ -1099,10 +1088,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
   // Remove Local Variable
   if (var->getTyp() != NULL
     && var->getVarName().size() > 0) {
-    auto it = local_var.find(var->getVarName());
-    it->second.pop();
-    if (it->second.empty())
-      local_var.erase(it);
+    del_local_var(var);
   }
 
   // Process Expression applied on variable defined in the setExpr
@@ -1331,18 +1317,13 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
 
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
   const std::string& name = fd->getFuncName().getValue();
-  std::vector<std::shared_ptr<ir::VarDecl> > vds;
-  for (size_t i = 0; i < fd->argSize(); i++) {
-    vds.push_back(transVarDecl(fd->getArg(i)));
-  }
+  std::vector<std::shared_ptr<ir::VarDecl> > vds = transVarDecls(fd->getArgs());
   std::shared_ptr<ir::FuncDefn> fun = functory.getFunc(name, vds);
   if (fun != NULL) {
     // Add Local Variables
-    for (auto&v : fun->getArgs())
-      local_var[v->getVarName()].push(v);
+    for (auto&v : fun->getArgs()) add_local_var(v);
     // Add Temporal Variables
-    if (fun->isTemporal())
-      local_var[fun->getTemporalArg()->getVarName()].push(fun->getTemporalArg());
+    if (fun->isTemporal()) add_local_var(fun->getTemporalArg());
 
     fun->setBody(transClause(fd->getExpr()));
     // Type checking for Function Declaration
@@ -1423,19 +1404,9 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
     }
 
     // Remove Temporal Variables
-    if(fun->isTemporal()) {
-      auto it = local_var.find(fun->getTemporalArg()->getVarName());
-      it->second.pop();
-      if (it->second.empty())
-        local_var.erase(it);
-    }
+    if(fun->isTemporal()) del_local_var(fun->getTemporalArg());
     // Remove Local Variables
-    for (auto&v : fun->getArgs()) {
-      auto it = local_var.find(v->getVarName());
-      it->second.pop();
-      if (it->second.empty())
-        local_var.erase(it);
-    }
+    for (auto&v : fun->getArgs()) del_local_var(v);
   }
 }
 
@@ -1489,17 +1460,13 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
     return;
   }
 
-  // Add Local Variable
-  for (auto&v : numst->getAllVars())
-    local_var[v->getVarName()].push(v);
+  // Add Local Variables
+  for (auto&v : numst->getAllVars()) add_local_var(v);
+
   numst->setBody(transClause(nd->getExpr()));
 
-  for (auto&v : numst->getAllVars()) {
-    auto it = local_var.find(v->getVarName());
-    it->second.pop();
-    if (it->second.empty())
-      local_var.erase(it);
-  }
+  // Remove Local Variables
+  for (auto&v : numst->getAllVars()) del_local_var(v);
 
   if (numst->getBody()->getTyp() != lookupTy(ir::IRConstString::INT)) {
     error(nd->line, nd->col,
@@ -1511,8 +1478,39 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
 }
 
 void Semant::transEvidence(absyn::Evidence* ne) {
+  // special check for for-loop in evidence stmt
+  std::vector<std::shared_ptr<ir::VarDecl> > vds;
+  std::shared_ptr<ir::Expr> cond = nullptr;
+  if (ne->getVarDecls().size() > 0) { // has for loops
+    vds = transVarDecls(ne->getVarDecls());
+    // add local variables
+    for (auto&v : vds) add_local_var(v);
+
+    // parse condition expression
+    if (ne->getCond() != NULL) {
+      auto cd = ne->getCond();
+      cond = transExpr(cd);
+      if (cond == nullptr) {
+        error(cd->line, cd->col, "Illegal expression in the condition of the for-loop!");
+      }
+      else {
+        if (cond->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
+          cond = nullptr;
+          error(cd->line, cd->col, "Condition expression must return BOOL!");
+        }
+      }
+    }
+  }
+
   auto lhs = transExpr(ne->getLeft());
   auto rhs = transExpr(ne->getRight());
+
+  // remove local variables
+  if (vds.size() > 0) {
+    for (auto&v : vds) del_local_var(v);
+  }
+
+  // Type checking
   if (std::dynamic_pointer_cast<ir::Expr>(lhs) == nullptr) {
     error(ne->line, ne->col, "Left hand side of Evidence must be an Expression!");
     return;
@@ -1560,8 +1558,16 @@ void Semant::transEvidence(absyn::Evidence* ne) {
       }
     }
   }
-  model->addEvidence(
+
+  if (vds.size() == 0) { // normal evidence
+    model->addEvidence(
       std::make_shared<ir::Evidence>(lhs, rhs));
+  }
+  else { // this evidence stmt contains a for-loop
+    auto evi = std::make_shared<ir::Evidence>(lhs, rhs, vds, cond);
+    evi->processTemporal(tyFactory.getTimestepTy());
+    model->addEvidence(evi);
+  }
 }
 
 void Semant::transQuery(absyn::Query* nq) {
@@ -1611,6 +1617,27 @@ const std::shared_ptr<ir::VarDecl> Semant::transVarDecl(
     const absyn::VarDecl & vd) {
   const ir::Ty* ty = transTy(vd.getTyp());
   return std::make_shared<ir::VarDecl>(ty, vd.getVar().getValue());
+}
+
+std::vector<std::shared_ptr<ir::VarDecl> > Semant::transVarDecls(
+  const std::vector<absyn::VarDecl> & vds,
+  bool error_check) {
+  std::vector<std::shared_ptr<ir::VarDecl> > ret;
+  for (size_t i = 0; i < vds.size(); i++) {
+    ret.push_back(transVarDecl(vds[i]));
+  }
+  if (error_check) {
+    // An argument list can contain at most one Timestep argument
+    int timestep_count = 0;
+    for (size_t i = 0; i < vds.size(); ++i) {
+      if (ret[i]->getTyp() == tyFactory.getTimestepTy()) {
+        if (++timestep_count > 1) {
+          error(vds[i].line, vds[i].col, "An argument declaration list can only contain at most 1 timestep argument!");
+        }
+      }
+    }
+  }
+  return ret;
 }
 
 bool Semant::isCardAll(std::shared_ptr<ir::Expr> ptr) {
@@ -1668,6 +1695,19 @@ const ir::Ty* Semant::getSuperType(const ir::Ty* A, const ir::Ty* B) {
   if (isSubType(A, B)) return B;
   if (isSubType(B, A)) return A;
   return NULL;
+}
+
+void Semant::add_local_var(std::shared_ptr<ir::VarDecl> var) {
+  if (var == nullptr) return ;
+  local_var[var->getVarName()].push(var);
+}
+
+void Semant::del_local_var(std::shared_ptr<ir::VarDecl> var) {
+  if (var == nullptr) return ;
+  auto it = local_var.find(var->getVarName());
+  it->second.pop();
+  if (it->second.empty())
+    local_var.erase(it);
 }
 
 bool Semant::Okay() {

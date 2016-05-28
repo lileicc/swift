@@ -155,6 +155,7 @@ private:
    * function header or quantified formula
    */
   const std::shared_ptr<ir::VarDecl> transVarDecl(const absyn::VarDecl & vd);
+  std::vector<std::shared_ptr<ir::VarDecl> > transVarDecls(const std::vector<absyn::VarDecl> & vds, bool error_check = true);
 
   /**
    * lookup the nametype in tyFactory, if not exist, produce an error
@@ -187,6 +188,10 @@ private:
       -> otherwise, return NULL
   */
   const ir::Ty* getSuperType(const ir::Ty*A, const ir::Ty* B);
+
+  // Util functions for adding/removing local variables
+  void add_local_var(std::shared_ptr<ir::VarDecl> var);
+  void del_local_var(std::shared_ptr<ir::VarDecl> var);
 
   void error(int line, int col, std::string info);
   void warning(int line, int col, std::string info);
