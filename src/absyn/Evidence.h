@@ -31,9 +31,10 @@ public:
   Expr* getLeft();
   Expr* getRight();
   void setLeft(Expr* e);
-  void setRight(Expr *);
+  void setRight(Expr * e);
   
-  Expr* getCond() const;
+  Expr* getCond();
+  void setCond(Expr* e);
   const VarDecl& getVarDecl(size_t i) const;
   const std::vector<VarDecl>& getVarDecls() const;
 

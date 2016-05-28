@@ -47,8 +47,12 @@ void Evidence::setRight(Expr* e) {
   right = e;
 }
 
-Expr* Evidence::getCond() const {
+Expr* Evidence::getCond() {
   return cond;
+}
+
+void Evidence::setCond(Expr* e) {
+  cond = e;
 }
 
 const VarDecl& Evidence::getVarDecl(size_t i) const {

@@ -53,6 +53,13 @@ void Preprocessor::processSetEvidence(absyn::BlogProgram*& prog) {
       error(ev->line, ev->col, "For Set Evidence, we DO NOT support TupleSetExpr with Mutiple Variables!");
       return ;
     }
+
+    if (ev->getVarDecls().size() > 0) {
+      //TODO: to support set evidence with for-loop
+      error(ev->line, ev->col, "For Set Evidence, we DO NOT support for-loop now!");
+      return;
+    }
+
     absyn::VarDecl lvar(lts != NULL ? lts->getVarDecl(0) : lcs->getVar());
     // Set Evidence: obs {CondSet} = {ListSet}
 
@@ -226,6 +233,10 @@ void Preprocessor::processMacro(absyn::BlogProgram*& prog) {
       if (ret != NULL) evi->setLeft(ret);
       ret = parse_expr(evi->getRight());
       if (ret != NULL) evi->setRight(ret);
+      if (evi->getCond() != NULL) {
+        ret = parse_expr(evi->getCond());
+        if (ret != NULL) evi->setCond(ret);
+      }
     }
   }
 }

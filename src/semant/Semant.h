@@ -155,7 +155,7 @@ private:
    * function header or quantified formula
    */
   const std::shared_ptr<ir::VarDecl> transVarDecl(const absyn::VarDecl & vd);
-  std::vector<std::shared_ptr<ir::VarDecl> > transVarDecls(const std::vector<absyn::VarDecl> & vds, bool error_check = true);
+  std::vector<std::shared_ptr<ir::VarDecl> > transVarDecls(const std::vector<absyn::VarDecl> & vds, bool error_check = false);
 
   /**
    * lookup the nametype in tyFactory, if not exist, produce an error

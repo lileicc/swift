@@ -361,6 +361,11 @@ bool ContigAnalyzer::process() {
   for (auto&evi : model->getEvidences()) {
     process_fetch(evi->getLeft(), false);
 
+    if (evi->hasForLoop() && restrictVar[evi->getLeft()].size() > 0) {
+      errMsg.error(-1, -1, "[Contigency Analyzer] : < Switching Variable > in < Evidence with For-Loop > is currently not supported!");
+      continue;
+    }
+
     stack_child.clear();
     stack_contig.clear();
     generate_conting(evi->getLeft());

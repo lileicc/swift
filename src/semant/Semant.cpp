@@ -192,7 +192,7 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
   }
   
   // translate arguments
-  std::vector<std::shared_ptr<ir::VarDecl> > vds = transVarDecls(fd->getArgs());
+  std::vector<std::shared_ptr<ir::VarDecl> > vds = transVarDecls(fd->getArgs(), fd->isRandom());
 
   if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom(), fd->isExtern())) {
     error(fd->line, fd->col,
@@ -1482,7 +1482,7 @@ void Semant::transEvidence(absyn::Evidence* ne) {
   std::vector<std::shared_ptr<ir::VarDecl> > vds;
   std::shared_ptr<ir::Expr> cond = nullptr;
   if (ne->getVarDecls().size() > 0) { // has for loops
-    vds = transVarDecls(ne->getVarDecls());
+    vds = transVarDecls(ne->getVarDecls(), true);
     // add local variables
     for (auto&v : vds) add_local_var(v);
 
@@ -1633,6 +1633,14 @@ std::vector<std::shared_ptr<ir::VarDecl> > Semant::transVarDecls(
       if (ret[i]->getTyp() == tyFactory.getTimestepTy()) {
         if (++timestep_count > 1) {
           error(vds[i].line, vds[i].col, "An argument declaration list can only contain at most 1 timestep argument!");
+        }
+      }
+      else {
+        // besides Timestep, we only allow NameTy
+        // TODO: to support general types, e.g, Int
+        if (ret[i]->getTyp()->getTyp() != ir::IRConstant::NAMETY) {
+          error(vds[i].line, vds[i].col, 
+                "Now we only support < Declared Type > in the argument list. < " + ret[i]->getTyp()->toString() + " > is not supported yet.");
         }
       }
     }
