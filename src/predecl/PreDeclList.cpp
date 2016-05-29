@@ -84,7 +84,7 @@ const ToStringFuncDecl PreDeclList::toStringFuncDecl =
 // general math function: both for real and matrix
 const std::vector<std::string> PreDeclList::mathFuncList{ "abs", "exp", "log", "sqrt", "round", "floor", "ceil", "tan", "sin", "cos" };
 // matrix initialization functions
-const std::vector<std::string> PreDeclList::matConstructFuncList{ "eye", "zeros" };
+const std::vector<std::string> PreDeclList::matConstructFuncList{ "eye", "zeros", "randu", "randn" };
 const MatrixConstructFuncDecl PreDeclList::onesFuncDecl =
     MatrixConstructFuncDecl("ones"); // Should be mannually register in PredeclFunctory
 // function from matrix to real
