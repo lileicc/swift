@@ -249,6 +249,7 @@ protected:
    */
   void transEvidence(std::vector<std::vector<code::Stmt*> >&setterFuncs,
       std::vector<std::vector<code::Stmt*> >&likeliFuncs,
+      code::FunctionDecl* mainFunc,
       std::shared_ptr<ir::Evidence> evid, bool transFuncApp = true);
 
   /**
@@ -316,11 +317,12 @@ protected:
   static code::Stmt* referStaticStateStmt(code::DeclContext* context);
   static code::Stmt* referTempStateStmt(code::DeclContext* context, std::string tempVar);
   static code::Expr* referVarFromState(code::Expr*);
-  static code::ForStmt* createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body = NULL,
-      bool isVarDefined = false, bool isLess = true);
   static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
   static bool isTemporalType(code::Type ty);
   static code::Expr* tempTableEntryRefer(std::string table, int ts = -1);
+
+  // generating for-loop for evidence
+  code::Stmt* createForLoopEvidence(const std::shared_ptr<ir::Evidence>& evi, code::Stmt* st);
 
   // Utils for Liu-West Filter
   // Record all the random function names accociated with at least *ONE* observation

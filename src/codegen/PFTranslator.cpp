@@ -79,20 +79,6 @@ code::Expr* PFTranslator::referVarFromState(code::Expr* var) {
   return new code::BinaryOperator(new code::Identifier(CUR_STATE_VAR_NAME), var, code::OpKind::BO_FIELD);
 }
 
-code::ForStmt* PFTranslator::createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body,
-      bool isVarDefined, bool isLess) {
-  code::Stmt* init = NULL;
-  if (isVarDefined)
-    init = new code::BinaryOperator(new code::Identifier(loop_var),new code::IntegerLiteral(0),code::OpKind::BO_ASSIGN);
-  else
-    init = new code::DeclStmt(new code::VarDecl(NULL, loop_var, INT_TYPE, new code::IntegerLiteral(0)));
-  return new code::ForStmt(init,
-    new code::BinaryOperator(new code::Identifier(loop_var),new code::Identifier(loop_n),
-                             (isLess ? code::OpKind::BO_LT : code::OpKind::BO_LEQ)),
-    new code::BinaryOperator(new code::Identifier(loop_var),NULL,code::OpKind::UO_INC),
-    body);
-}
-
 code::Expr* PFTranslator::createVarPlusDetExpr(std::string varName, int det) {
   if (det == 0)
     return new code::Identifier(varName);
@@ -113,6 +99,44 @@ code::Expr* PFTranslator::tempTableEntryRefer(std::string table, int ts) {
   else ind = new code::IntegerLiteral(ts);
   code::Expr* entry = new code::ArraySubscriptExpr(new code::Identifier(table), ind);
   return entry;
+}
+
+// Generate for-loop for evidences
+code::Stmt* PFTranslator::createForLoopEvidence(const std::shared_ptr<ir::Evidence>& evi, code::Stmt* st) {
+  if (!evi->hasForLoop()) return st;
+  if (evi->getCond() != nullptr) {
+    st = new code::IfStmt(transExpr(evi->getCond()), st);
+  }
+  auto& vds = evi->getArgs();
+  // ATTENTION: size_t is *NON-NEGATIVE*! We need to convert it to integer since size() may be 0
+  //            it may only happen for PFTranslator since we may remove the temporal argument from the list
+  for (int k = ((int)vds.size()) - 1; k >= 0; --k) {
+    // everything is nameTy
+    auto ty = dynamic_cast<const ir::NameTy*>(vds[k]->getTyp());
+    assert(ty != NULL);
+    code::Expr* loop_n = NULL;
+    if (ty->getRefer()->getNumberStmtSize() == 0)
+      loop_n = new code::IntegerLiteral(ty->getRefer()->getPreLen());
+    else {
+      std::string getnumvarfunname = getGetterFunName(getVarOfNumType(ty->toString()));
+      loop_n = new code::CallExpr(new code::Identifier(getnumvarfunname));
+    }
+    assert(loop_n != NULL);
+    st = createForeachLoop(vds[k]->getVarName(), loop_n, st, false, true);
+  }
+
+  if (evi->isTemporal()) {
+    auto ret = new code::CompoundStmt();
+    ret->addStmt(new code::DeclStmt(
+      new code::VarDecl(NULL, 
+        evi->getTemporalArg()->getVarName(), 
+        TIMESTEP_TYPE, 
+        new code::Identifier(CUR_TIMESTEP_VAR_NAME))));
+    ret->addStmt(st);
+    st = ret;
+  }
+
+  return st;
 }
 
 // Special Utils for Liu-West Filter
@@ -1693,6 +1717,7 @@ void PFTranslator::addFunValueAssignStmt(
 
 void PFTranslator::transEvidence(std::vector<std::vector<code::Stmt*> >&setterFuncs,
                                   std::vector<std::vector<code::Stmt*> >&likeliFuncs,
+                                  code::FunctionDecl* mainFunc,
                                   std::shared_ptr<ir::Evidence> evid, bool transFuncApp) {
   const std::shared_ptr<ir::Expr>& left = evid->getLeft();
   // check whether left is a function application variable
@@ -1702,16 +1727,16 @@ void PFTranslator::transEvidence(std::vector<std::vector<code::Stmt*> >&setterFu
   int id = 0;
   // Update the random functions associated with observations
   if (leftexp != nullptr) {
-    if (leftexp->isTemporal()
-        && std::dynamic_pointer_cast<ir::TimestepLiteral>(leftexp->getTemporalArg()))
-        // Now we only accept timestep literal. This should be checked in Semant!
-    {
-      id = std::dynamic_pointer_cast<ir::TimestepLiteral>(leftexp->getTemporalArg())->getValue();
+    if (leftexp->isTemporal()) {
+      // only accept [1] timestep literal [2] for-loop with a timestep argument (this implies id = -1)
+      id = evid->getTimestep();
     }
     if (leftexp->getRefer()->isRand()) {
       obsFuncStore.insert(leftexp->getRefer()->getName());
     }
   }
+
+  code::Stmt* st = NULL;
 
   if (leftexp && transFuncApp) {
     // left side of the evidence is a function application
@@ -1729,7 +1754,13 @@ void PFTranslator::transEvidence(std::vector<std::vector<code::Stmt*> >&setterFu
     // assign the right side of the evidence to left function application variable
     args.push_back(transExpr(evid->getRight()));
     // call setter function
-    setterFuncs[id].push_back(new code::CallExpr(new code::Identifier(setterfunname), args));
+    st = new code::CallExpr(new code::Identifier(setterfunname), args);
+    // check for-loop
+    if (evid->hasForLoop()) st = createForLoopEvidence(evid, st);
+    if (id < 0)
+      mainFunc->addStmt(st);
+    else
+      setterFuncs[id].push_back(st);
 
     // calculate likelihood
     // :::=> weight += likeli(...);
@@ -1740,26 +1771,18 @@ void PFTranslator::transEvidence(std::vector<std::vector<code::Stmt*> >&setterFu
     for (auto a : leftexp->getArgs()) {
       args.push_back(transExpr(a));
     }
-    code::Stmt* st = new code::BinaryOperator(
+    st = new code::BinaryOperator(
         new code::Identifier(WEIGHT_VAR_REF_NAME),
         new code::CallExpr(new code::Identifier(likelifunname), args),
         COMPUTE_LIKELIHOOD_IN_LOG ?
             code::OpKind::BO_SPLUS : code::OpKind::BO_SMUL);
-    likeliFuncs[id].push_back(st);
-    // add checking for infinity
-    // :::=> if (isfinite(weight)) weight += ...
-    /*
-    code::Expr* cond;
-    if (COMPUTE_LIKELIHOOD_IN_LOG) {
-      cond = new code::CallExpr(
-          new code::Identifier(ISFINITE_FUN_NAME), std::vector<code::Expr*>( {
-              new code::Identifier(WEIGHT_VAR_REF_NAME) }));
-    } else {
-      cond = new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME),
-                                      new code::FloatingLiteral(0),
-                                      code::OpKind::BO_GT);
-    }
-    */
+    // check for-loop
+    if (evid->hasForLoop()) st = createForLoopEvidence(evid, st);
+    if (id < 0)
+      mainFunc->addStmt(st);
+    else
+      likeliFuncs[id].push_back(st);
+
     // TODO: To polish the following
     // NOTE: Now remove the if statement since we will print rejection terms firstly
     return;
@@ -1780,8 +1803,11 @@ void PFTranslator::transEvidence(std::vector<std::vector<code::Stmt*> >&setterFu
     code::Expr* cond = new code::BinaryOperator(transCardExpr(cardexp),
                                                 transExpr(evid->getRight()),
                                                 code::OpKind::BO_NEQ);
-    code::Stmt* st = new code::ReturnStmt(new code::BooleanLiteral(false));
-    st = new code::IfStmt(cond, st);
+    st = new code::IfStmt(cond, new code::ReturnStmt(new code::BooleanLiteral(false)));
+
+    // check for loop
+    if (evid->hasForLoop()) st = createForLoopEvidence(evid, st);
+    assert(id > -1); // only static param allowed
     setterFuncs[id].push_back(st);
     return;
   }
@@ -1808,12 +1834,7 @@ void PFTranslator::transAllEvidence(
   main_fun->addStmt(new code::BinaryOperator(
     new code::Identifier(WEIGHT_VAR_REF_NAME),
     new code::FloatingLiteral(COMPUTE_LIKELIHOOD_IN_LOG ? 0 : 1.0), code::OpKind::BO_ASSIGN));
-  code::Expr* cond = tempTableEntryRefer(TMP_EVI_STORE_NAME, -1);
-  code::CallExpr* eviCall = new code::CallExpr(tempTableEntryRefer(TMP_EVI_STORE_NAME),
-    std::vector<code::Expr*> {new code::Identifier(WEIGHT_VAR_REF_NAME)});
-  code::IfStmt* ifstmt = new code::IfStmt(cond, new code::ReturnStmt(eviCall));
-  main_fun->addStmt(ifstmt);
-  main_fun->addStmt(new code::ReturnStmt(new code::BooleanLiteral(true)));
+  
   /*
   Register data structure to store all the evidences
   ==> std::function<bool(double&)> evidenceTable[_TimeLim_+1];
@@ -1839,7 +1860,7 @@ void PFTranslator::transAllEvidence(
     // Firstly Translate all rejection sampling stmts
     // TODO:
     //   Now we assume all rejection sampling contain no timestep!!! to add timestep support
-    transEvidence(setterFuncs, likeliFuncs, evid, false);
+    transEvidence(setterFuncs, likeliFuncs, main_fun, evid, false);
   }
 
   for (auto evid : evids) {
@@ -1847,8 +1868,19 @@ void PFTranslator::transAllEvidence(
     std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
       ir::FunctionCall>(evid->getLeft());
     if (leftexp == nullptr) continue; // not likelihood evidence at all!
-    transEvidence(setterFuncs, likeliFuncs, evid, true);
+    transEvidence(setterFuncs, likeliFuncs, main_fun, evid, true);
   }
+
+  /*
+   * if (_evidenceTable[_cur_time])
+   *   return _evidenceTable[_cur_time](__local_weight);
+   */
+  code::Expr* cond = tempTableEntryRefer(TMP_EVI_STORE_NAME, -1);
+  code::CallExpr* eviCall = new code::CallExpr(tempTableEntryRefer(TMP_EVI_STORE_NAME),
+    std::vector<code::Expr*> {new code::Identifier(WEIGHT_VAR_REF_NAME)});
+  code::IfStmt* ifstmt = new code::IfStmt(cond, new code::ReturnStmt(eviCall));
+  main_fun->addStmt(ifstmt);
+  main_fun->addStmt(new code::ReturnStmt(new code::BooleanLiteral(true)));
 
   /*
    * for each timestep

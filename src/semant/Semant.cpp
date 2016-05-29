@@ -1544,30 +1544,50 @@ void Semant::transEvidence(absyn::Evidence* ne) {
         "Evidence format not correct! We assume < FunctionCall | #TypeName = Non-Random Expr >!");
     return; // TODO: build internal function to avoid this
   }
+
+  std::shared_ptr<ir::Evidence> evi;
+  if (vds.size() == 0) {
+    // No for loop
+    evi = std::make_shared<ir::Evidence>(lhs, rhs);
+  }
+  else {
+    // for loop
+    evi = std::make_shared<ir::Evidence>(lhs, rhs, vds, cond);
+    evi->processTemporal(tyFactory.getTimestepTy());
+  }
+
   // Temporal Evidence Checking
   // TODO: currently we only allowed temporal evidence with timestep = TS_Literal
   //    --> to support arbitrary timestep argument in future
   if (std::dynamic_pointer_cast<ir::FunctionCall>(lhs) != nullptr) {
     auto func = std::dynamic_pointer_cast<ir::FunctionCall>(lhs);
     if (func->isTemporal()) {
-      if (std::dynamic_pointer_cast<ir::TimestepLiteral>(func->getTemporalArg()) == nullptr) {
+      auto ts = std::dynamic_pointer_cast<ir::TimestepLiteral>(func->getTemporalArg());
+      if (ts == nullptr) { // not fixed temporal
+        auto ref = std::dynamic_pointer_cast<ir::VarRefer>(func->getTemporalArg());
+        if (!evi->hasForLoop() || !evi->isTemporal() || ref == nullptr || ref->getRefer() != evi->getTemporalArg()) {
+          error(ne->line, ne->col,
+            "Illegal Timestep Argument in the left hand side!\
+                       We currently only accept fixed timestep as argument in temporal evidence.");
+          return;
+        }
+      }
+      else { // is a fixed-time temporal evidence
+        evi->setTimestep(ts->getValue());
+      }
+    }
+    else {
+      // observed varibale is static
+      if (evi->isTemporal()) {
         error(ne->line, ne->col,
-          "Illegal Timestep Argument in the left hand side!\
-           We currently only accept fixed timestep as argument in temporal evidence.");
-        return ;
+          "Illegal Timestep Argument in the for-loop!\
+                                 Observed variable is static.");
+        return;
       }
     }
   }
 
-  if (vds.size() == 0) { // normal evidence
-    model->addEvidence(
-      std::make_shared<ir::Evidence>(lhs, rhs));
-  }
-  else { // this evidence stmt contains a for-loop
-    auto evi = std::make_shared<ir::Evidence>(lhs, rhs, vds, cond);
-    evi->processTemporal(tyFactory.getTimestepTy());
-    model->addEvidence(evi);
-  }
+  model->addEvidence(evi);
 }
 
 void Semant::transQuery(absyn::Query* nq) {

@@ -300,6 +300,13 @@ protected:
   static code::Type mapIRTypeToCodeType(const ir::Ty * ty, bool isRef = false, bool isPtr = false); // map ir type to code type
   static bool isObjectType(const ir::Ty *ty);
 
+  // Util function for create a for-loop
+  static code::ForStmt* createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body = NULL,
+    bool isVarDefined = false, bool isLess = true);
+  static code::ForStmt* createForeachLoop(std::string loop_var, code::Expr* loop_n, code::Stmt* body = NULL,
+    bool isVarDefined = false, bool isLess = true);
+
+
   static const std::string KEYWORD_THIS;
 
   static const code::Type AUTO_TYPE;

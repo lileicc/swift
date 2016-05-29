@@ -452,6 +452,11 @@ void MHTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
 }
 
 bool MHTranslator::init_MHTranslator(std::shared_ptr<swift::ir::BlogModel> model) {
+  if (model->isTemporal()) {
+    errorMsg.error(-1, -1, "[MCMCTranslator] : Temporal Models are not supported! Please use < PFTranslator >!");
+    return false;
+  }
+
   if (!COMPUTE_LIKELIHOOD_IN_LOG) {
     errorMsg.warning(-1, -1, "[MCMCTranslator] : [Compute in *Log* Likelihood] is *required* now! We will automatically ensure using Loglikelihood.");
     COMPUTE_LIKELIHOOD_IN_LOG = true;
@@ -1065,15 +1070,41 @@ void MHTranslator::transAllEvidence(
       errorMsg.error(-1, -1, "[MHTranslator] : Left side of evidence must be a random variable! < " + evi->getLeft()->toString() + " > is not allowed!");
       continue;
     }
-    coreWorldInit->addStmt(new code::CallExpr(
+
+    code::Stmt* st = new code::CallExpr(
       new code::TemplateExpr(
-        new code::Identifier(UtilSetEviFuncName),
-        std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(evi->getLeft()->getTyp()).getName())}),
-      std::vector<code::Expr*> {var, transExpr(evi->getRight())}));
+      new code::Identifier(UtilSetEviFuncName),
+      std::vector<code::Expr*>{new code::Identifier(mapIRTypeToCodeType(evi->getLeft()->getTyp()).getName())}),
+      std::vector<code::Expr*> {var, transExpr(evi->getRight())});
+
+    // check for-loop
+    if (evi->hasForLoop()) { // generate for loop
+      if (evi->getCond() != nullptr) {
+        st = new code::IfStmt(transExpr(evi->getCond()), st);
+      }
+      for (int k = (int)evi->getArgs().size() - 1; k >= 0; --k) {
+        // everything is nameTy
+        auto ty = dynamic_cast<const ir::NameTy*>(evi->getArg(k)->getTyp());
+        assert(ty != NULL);
+        code::Expr* loop_n = NULL;
+        if (ty->getRefer()->getNumberStmtSize() == 0)
+          loop_n = new code::IntegerLiteral(ty->getRefer()->getPreLen());
+        else {
+          std::string numvarstore = getStoreOfNumberVar(ty->getRefer()->getName());
+          loop_n = createPtrMethodCall(new code::Identifier(numvarstore), MCMC_GetVal_MethodName);
+        }
+        assert(loop_n != NULL);
+        st = createForeachLoop(evi->getArg(k)->getVarName(), loop_n, st, false, true);
+      }
+    }
+    coreWorldInit->addStmt(st);
 
     // check_obs() / update_obs()
     auto& contig_list = contig_analyzer->getContig(evi->getLeft());
     if (contig_list.size() != 0) {
+      // When there is a switching variable on the left side, we do not allow for-loop
+      assert(!evi->hasForLoop());
+
       for (auto& v : contig_list) {
         std::string name = getRandomVarRefName(v);
         if (name.size() == 0) continue;

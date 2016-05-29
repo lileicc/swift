@@ -27,6 +27,13 @@ public:
   bool isTemporal() const;
   std::shared_ptr<VarDecl> getTemporalArg();
   void processTemporal(const Ty* timety);
+  /*
+   * not isTemporal() --> getTimestep() == 0
+   *     isTemporal() --> / getTimestep() == -1: there is a temporal for-loop
+   *                      \ getTimestep() == constant: fixed timestep evidence
+   */
+  void setTimestep(int t);
+  int getTimestep() const;
 
   void print(FILE* file, int indent);
 
@@ -43,6 +50,7 @@ private:
   // temporal argument in the for loop
   bool istmp;
   std::shared_ptr<VarDecl> tmparg;
+  int ts;
   // condition in the for loop
   std::shared_ptr<Expr> cond;
 };

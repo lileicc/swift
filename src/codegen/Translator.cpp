@@ -146,6 +146,11 @@ Translator::~Translator() {
 }
 
 void Translator::translate(std::shared_ptr<ir::BlogModel> model) {
+  if (model->isTemporal()) {
+    errorMsg.error(-1, -1, "[LWTranslator] Temporal Models are not supported! Please switch to < PFTranslator >");
+    return ;
+  }
+
   this->model = model;
 
   // Special Check for Matrix Usage
@@ -1482,6 +1487,8 @@ void Translator::addFunValueAssignStmt(
 
 void Translator::transEvidence(code::FunctionDecl* fun,
                                   std::shared_ptr<ir::Evidence> evid, bool transFuncApp) {
+  code::Stmt* st = NULL;
+
   const std::shared_ptr<ir::Expr>& left = evid->getLeft();
   // check whether left is a function application variable
   std::shared_ptr<ir::FunctionCall> leftexp = std::dynamic_pointer_cast<
@@ -1499,30 +1506,11 @@ void Translator::transEvidence(code::FunctionDecl* fun,
     args.push_back(transExpr(evid->getRight()));
     // call setter function and calculate likelihood
     // :::=> weight += set_evidence();
-    code::Stmt* st = new code::BinaryOperator(
+    st = new code::BinaryOperator(
         new code::Identifier(WEIGHT_VAR_REF_NAME),
         new code::CallExpr(new code::Identifier(setterfunname), args),
         COMPUTE_LIKELIHOOD_IN_LOG ?
             code::OpKind::BO_SPLUS : code::OpKind::BO_SMUL);
-    // add checking for infinity
-    // :::=> if (isfinite(weight)) weight += ...
-    /*
-    code::Expr* cond;
-    if (COMPUTE_LIKELIHOOD_IN_LOG) {
-      cond = new code::CallExpr(
-          new code::Identifier(ISFINITE_FUN_NAME), std::vector<code::Expr*>( {
-              new code::Identifier(WEIGHT_VAR_REF_NAME) }));
-    } else {
-      cond = new code::BinaryOperator(new code::Identifier(WEIGHT_VAR_REF_NAME),
-                                      new code::FloatingLiteral(0),
-                                      code::OpKind::BO_GT);
-    }
-    */
-    // TODO: To polish the following
-    // NOTE: Now remove the if statement since we will print rejection terms firstly
-    //st = new code::IfStmt(cond, st);
-    fun->addStmt(st);
-    return;
   }
 
   // check whether left is a cardinality expression
@@ -1541,11 +1529,32 @@ void Translator::transEvidence(code::FunctionDecl* fun,
                                                 code::OpKind::BO_NEQ);
     code::Stmt* st = new code::ReturnStmt(new code::BooleanLiteral(false));
     st = new code::IfStmt(cond, st);
-    fun->addStmt(st);
-    return;
   }
   // TODO adding support for other evidence
   // 1. better setting evidence for Cardinality evidence
+
+  if (st != NULL) {
+    if (evid->hasForLoop()) { // generate for loop
+      if (evid->getCond() != nullptr) {
+        st = new code::IfStmt(transExpr(evid->getCond()), st);
+      }
+      for (int k = (int)evid->getArgs().size() - 1; k >= 0; --k) {
+        // everything is nameTy
+        auto ty = dynamic_cast<const ir::NameTy*>(evid->getArg(k)->getTyp());
+        assert(ty != NULL);
+        code::Expr* loop_n = NULL;
+        if (ty->getRefer()->getNumberStmtSize() == 0)
+          loop_n = new code::IntegerLiteral(ty->getRefer()->getPreLen());
+        else {
+          std::string getnumvarfunname = getGetterFunName(getVarOfNumType(ty->toString()));
+          loop_n = new code::CallExpr(new code::Identifier(getnumvarfunname));
+        }
+        assert(loop_n != NULL);
+        st = createForeachLoop(evid->getArg(k)->getVarName(),loop_n,st,false,true);
+      }
+    }
+    fun->addStmt(st);
+  }
 }
 
 void Translator::transAllEvidence(
@@ -1900,6 +1909,26 @@ inline SAMPLEFUN Translator::DECLARE_SAMPLEFUN() {
       new code::ParamVarDecl(fun, LOCAL_NUM_SAMPLE_ARG_NAME, INT_TYPE));
   fun->setParams(args);
   return fun;
+}
+
+////////////////////// Global Util Functions /////////////////
+code::ForStmt* Translator::createForeachLoop(std::string loop_var, code::Expr* loop_n, code::Stmt* body,
+  bool isVarDefined, bool isLess) {
+  code::Stmt* init = NULL;
+  if (isVarDefined)
+    init = new code::BinaryOperator(new code::Identifier(loop_var), new code::IntegerLiteral(0), code::OpKind::BO_ASSIGN);
+  else
+    init = new code::DeclStmt(new code::VarDecl(NULL, loop_var, INT_TYPE, new code::IntegerLiteral(0)));
+  return new code::ForStmt(init,
+    new code::BinaryOperator(new code::Identifier(loop_var), loop_n,
+    (isLess ? code::OpKind::BO_LT : code::OpKind::BO_LEQ)),
+    new code::BinaryOperator(new code::Identifier(loop_var), NULL, code::OpKind::UO_INC),
+    body);
+}
+
+code::ForStmt* Translator::createForeachLoop(std::string loop_var, std::string loop_n, code::Stmt* body,
+  bool isVarDefined, bool isLess) {
+  return createForeachLoop(loop_var, new code::Identifier(loop_n), body, isVarDefined, isLess);
 }
 
 } /* namespace codegen */

@@ -10,14 +10,14 @@ namespace ir {
 
 Evidence::Evidence(std::shared_ptr<Expr> left,
     std::shared_ptr<Expr> right) :
-    left(left), right(right), flag_forloop(false), istmp(false), tmparg(nullptr), cond(nullptr) {
+    left(left), right(right), flag_forloop(false), istmp(false), tmparg(nullptr), ts(0), cond(nullptr) {
 }
 
 Evidence::Evidence(
   std::shared_ptr<Expr> left, std::shared_ptr<Expr> right,
   std::vector<std::shared_ptr<VarDecl> > args,
   std::shared_ptr<Expr> cond) :
-  left(left), right(right), args(args), istmp(false), tmparg(nullptr), cond(cond) {
+  left(left), right(right), args(args), istmp(false), tmparg(nullptr), ts(0), cond(cond) {
   if (args.size() == 0) {
     flag_forloop = false;
     cond = nullptr; // Condition is only allowed when args is non-empty
@@ -66,10 +66,20 @@ std::shared_ptr<VarDecl> Evidence::getTemporalArg() {
   return tmparg;
 }
 
+void Evidence::setTimestep(int t) {
+  ts = t;
+  istmp = (t >= 0);
+}
+
+int Evidence::getTimestep() const {
+  return ts;
+}
+
 void Evidence::processTemporal(const Ty* timety) {
   for (size_t i = 0; i < args.size(); ++i) {
     if (args[i]->getTyp() == timety) {
       istmp = true;
+      ts = -1;
       tmparg = args[i];
       args.erase(args.begin() + i);
       break;
