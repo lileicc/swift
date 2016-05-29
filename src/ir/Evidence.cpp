@@ -10,14 +10,14 @@ namespace ir {
 
 Evidence::Evidence(std::shared_ptr<Expr> left,
     std::shared_ptr<Expr> right) :
-    left(left), right(right), cond(nullptr), tmparg(nullptr), flag_forloop(false), istmp(false) {
+    left(left), right(right), flag_forloop(false), istmp(false), tmparg(nullptr), cond(nullptr) {
 }
 
 Evidence::Evidence(
   std::shared_ptr<Expr> left, std::shared_ptr<Expr> right,
   std::vector<std::shared_ptr<VarDecl> > args,
   std::shared_ptr<Expr> cond) :
-  left(left), right(right), args(args), cond(cond), tmparg(nullptr), istmp(false) {
+  left(left), right(right), args(args), istmp(false), tmparg(nullptr), cond(cond) {
   if (args.size() == 0) {
     flag_forloop = false;
     cond = nullptr; // Condition is only allowed when args is non-empty
@@ -92,7 +92,7 @@ void Evidence::print(FILE* file, int indent) {
     if (istmp) {
       fprintf(file, "  %s", tmparg->toString().c_str());
     }
-    for (int i = 0; i < args.size(); ++i) {
+    for (size_t i = 0; i < args.size(); ++i) {
       fprintf(file, "  %s", args[i]->toString().c_str());
     }
     fprintf(file, "\n");
