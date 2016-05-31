@@ -26,7 +26,8 @@ int main(int argc, char** argv) {
         << "\t[main] [-v] -i <input filename>... -o <output filename> " << std::endl
         << "\t            [-n <number of samples, default = 10^6>]" << std::endl
         << "\t            [-e LWSampler |" << std::endl
-        << "\t                ParticleFilter [--particle <number of particles, default = 1000>] |" << std::endl
+        << "\t                ParticleFilter [--particle <number of particles, default = 1000>]" << std::endl
+        << "\t                               [--timestep <number of timesteps, default = maximum timestep literal detected in the model>] |" << std::endl
         << "\t                MHSampler [--burn-in <number of burn-in samples, default = number samples / 2>] |" << std::endl
         << "\t                GibbsSampler [--burn-in <number of burn-in samples, default = number samples / 2>] ]" << std::endl
         << "\t            [--ir <filename for printing ir>]" << std::endl
@@ -83,6 +84,13 @@ int main(int argc, char** argv) {
       int part;
       if(sscanf(argv[i + 1], "%d", &part) == 1 && part > 0) {
         config->setValue("N_PF_PARTICLES", part);
+        ++ i;
+      }
+    }
+    if (strcmp(argv[i], "--timestep") == 0 && i + 1 < argc && argv[i+1]) {
+      int mt;
+      if(sscanf(argv[i + 1], "%d", &mt) == 1 && mt > 0) {
+        config->setValue("MAX_TIMESTEP", mt);
         ++ i;
       }
     }

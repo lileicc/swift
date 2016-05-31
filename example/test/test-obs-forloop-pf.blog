@@ -1,0 +1,12 @@
+type Data;
+distinct Data D[10];
+
+fixed RealMatrix A = randn(3, 10);
+
+random Real mu ~ Gaussian(0, 1);
+
+random Real B(Data d, Timestep t) ~ Gaussian(mu, 1);
+
+obs B(d, t) = A[toInt(t)][toInt(d)] for Timestep t, Data d: @0 <= t & t <= @2;
+
+query mu;

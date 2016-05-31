@@ -343,7 +343,7 @@ void pointer_copy(int t, State* ptr[SampleN][Dependency], State state[SampleN][D
 inline unsigned prev(unsigned u) {return u - 1;}
 inline unsigned prev(unsigned u, int t) {return u - t;}
 
-inline double randn() {
+inline double _randn() {
   static std::default_random_engine generator;
   static std::normal_distribution<double> stdnorm(0, 1);
   return stdnorm(generator);
@@ -355,16 +355,16 @@ inline double randn() {
 
 void saveRealValue(std::string filename, double value) {
   //TODO: Use configuration to set a data output directory
-  ofstream fout(filename);
+  std::ofstream fout(filename);
 
   if (fout.bad()) {
     std::cerr << "[ Run-Time Error ] >> Failed to save real value at < " + filename + " >!"<<std::endl;
     std::exit(0);
   }
   
-  fout.setf(ios::fixed);
+  fout.setf(std::ios::fixed);
   fout.precision(10);
-  fout << value << endl;
+  fout << value << std::endl;
   fout.close();
 }
 
@@ -388,7 +388,7 @@ void saveRealValue(std::string filename, double value) {
   for (int i = 0; i < _ParticleN_; ++i) {\
     old_val = _stat_memo[i].__value_##func; \
     new_val = rho * old_val + (1 - rho) * mean + \
-    sqrt(1 - rho * rho) * stddev * randn(); \
+    sqrt(1 - rho * rho) * stddev * _randn(); \
     _stat_memo[i].__value_##func = new_val; \
   }\
 }

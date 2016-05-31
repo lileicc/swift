@@ -178,6 +178,15 @@ void PFTranslator::translate(std::shared_ptr<swift::ir::BlogModel> model) {
     ModelDependency = model->getMarkovOrder();
   if (model->getTempLimit() > (unsigned)ModelTimeLimit)
     ModelTimeLimit = model->getTempLimit();
+  if (config->getIntValue("MAX_TIMESTEP") > -1) {
+    // user explicitly specified the maximum number of timesteps
+    int mt = config->getIntValue("MAX_TIMESTEP");
+    if (ModelTimeLimit > mt) {
+      errorMsg.warning(-1, -1, "[PFTranslator] Maximum timestep detected < " + std::to_string(ModelTimeLimit) + " >, \
+                                              larger than the user specified value < " + std::to_string(mt) + " >");
+    }
+    ModelTimeLimit = mt;
+  }
 
   if (coreStaticCls == NULL) {
     // add global constant values
