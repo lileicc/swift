@@ -826,7 +826,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
 
     auto ptr = fc->getNew(args, &tyFactory);
     if (ptr == nullptr) {
-      warning(expr->line, expr->col, "Function/Distribution < " + func + " > is Built-in! Type Checking Error for Built-in Function/Distribution!");
+      error(expr->line, expr->col, "Function/Distribution < " + func + " > is Built-in! Type Checking Error for Built-in Function/Distribution!");
     }
     else {
       // TODO: here is a hack!!!! Better Checking for Markov Order (@MarkovOrder)
@@ -842,6 +842,11 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
       // Special Checking: Usage of Matrix
       if (ptr->getTyp() != NULL && ptr->getTyp()->getTyp() == ir::IRConstant::MATRIX)
         lookupTy(ir::IRConstString::MATRIX);
+
+      // Special Open Var Check for Distributions
+      auto dist_ptr = std::dynamic_pointer_cast<ir::Distribution>(ptr);
+      if (dist_ptr != nullptr)
+        dist_ptr->setOpenVarRef(has_open_var_ref());
 
       return ptr;
     }
@@ -957,6 +962,7 @@ std::shared_ptr<ir::Expr> Semant::transVarRef(std::string var) {
     // Local Variable
     std::shared_ptr<ir::VarRefer> ret = std::make_shared<ir::VarRefer>(
         local_var[var].top());
+    add_local_var_ref(ret);  // add reference to the VarDecl
     ret->setTyp(ret->getRefer()->getTyp());
     return ret; // randomness is false
   }
@@ -1131,6 +1137,7 @@ std::shared_ptr<ir::Expr> Semant::transDistrb(
     auto dist = std::make_shared<ir::Distribution>(name);
     dist->setArgs(args);
     dist->setRandom(true);
+    dist->setOpenVarRef(has_open_var_ref());
     dist->processArgRandomness();
     return dist;
   }
@@ -1141,6 +1148,12 @@ std::shared_ptr<ir::Expr> Semant::transDistrb(
         "Type Checking failed for <" + name + "> distribution!");
     return std::make_shared<ir::Distribution>(name, distr);
   }
+  
+  // special open var check
+  auto ret_distr = std::dynamic_pointer_cast<ir::Distribution>(ret);
+  if (ret_distr != nullptr)
+    ret_distr->setOpenVarRef(has_open_var_ref());
+
   return ret;
 }
 
@@ -1405,8 +1418,9 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
 
     // Remove Temporal Variables
     if(fun->isTemporal()) del_local_var(fun->getTemporalArg());
-    // Remove Local Variables
-    for (auto&v : fun->getArgs()) del_local_var(v);
+    // Remove Local Variables & check arg references
+    for (auto&v : fun->getArgs())
+      del_local_var(v);
   }
 }
 
@@ -1736,6 +1750,16 @@ void Semant::del_local_var(std::shared_ptr<ir::VarDecl> var) {
   it->second.pop();
   if (it->second.empty())
     local_var.erase(it);
+  if (local_var_ref.count(var))
+    local_var_ref.erase(var);
+}
+
+void Semant::add_local_var_ref(std::shared_ptr<ir::VarRefer> var) {
+  local_var_ref[var->getRefer()].push_back(var);
+}
+
+bool Semant::has_open_var_ref() {
+  return local_var_ref.size() > 0;
 }
 
 bool Semant::Okay() {

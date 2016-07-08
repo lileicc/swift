@@ -193,6 +193,10 @@ private:
   void add_local_var(std::shared_ptr<ir::VarDecl> var);
   void del_local_var(std::shared_ptr<ir::VarDecl> var);
 
+  // Util functions for updating local var reference counter
+  void add_local_var_ref(std::shared_ptr<ir::VarRefer> ref);
+  bool has_open_var_ref();
+
   void error(int line, int col, std::string info);
   void warning(int line, int col, std::string info);
 
@@ -204,6 +208,9 @@ private:
 
   //stack used to store local variable
   std::map<std::string, std::stack<std::shared_ptr<ir::VarDecl> > > local_var;
+  
+  // store local var references
+  std::map<std::shared_ptr<ir::VarDecl>, std::vector<std::shared_ptr<ir::VarRefer>> > local_var_ref;
 
   bool isResultUsed;
 };

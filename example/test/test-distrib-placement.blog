@@ -1,0 +1,11 @@
+type Data;
+distinct Data D[10];
+random Real X ~ Gaussian(0, 1);
+random Boolean A(Data d) ~ BooleanDistrib(0.5);
+random Real Y(Data d) ~
+  if A(d) then Gaussian(toInt(d), 1)
+  else Gaussian(X + toInt(d), 1);
+
+obs Y(d) = toInt(d) for Data d;
+
+query X;  

@@ -6,7 +6,7 @@ namespace ir {
 
 Distribution::Distribution(const std::string& name,
     const predecl::PreDecl* refer) :
-    refer(refer), name(name), arg_rand(false) {
+    refer(refer), name(name), arg_rand(false), has_open_ref(false) {
 }
 
 Distribution::~Distribution() {
@@ -14,6 +14,14 @@ Distribution::~Distribution() {
 
 bool Distribution::isArgRandom() const {
   return arg_rand;
+}
+
+bool Distribution::hasOpenVarRef() const {
+  return has_open_ref;
+}
+
+void Distribution::setOpenVarRef(bool flag) {
+  has_open_ref = flag;
 }
 
 void Distribution::processArgRandomness() {

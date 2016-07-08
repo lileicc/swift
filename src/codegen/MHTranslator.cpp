@@ -2069,7 +2069,7 @@ code::Expr* MHTranslator::transDistribution(
   if (cur_context != NULL) {
     code::VarDecl::createVarDecl(cur_context, distvarname, code::Type(name));
   }
-  if (dist->isArgRandom()) {
+  if (dist->isArgRandom() || dist->hasOpenVarRef()) {
     if (valuevar.empty()) {
       // Sample value from the distribution
       // define a field in the main class corresponding to the distribution
