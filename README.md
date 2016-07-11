@@ -3,6 +3,7 @@ A compiler for BLOG probabilistic programming language (http://bayesianlogic.git
 
 ### Check the paper: 
 Appeared IJCAI 2016: http://www.ijcai.org/Proceedings/16/Papers/512.pdf
+
 Arxiv Version: https://arxiv.org/abs/1606.09242 (arxiv)
 
 ### Code style:
