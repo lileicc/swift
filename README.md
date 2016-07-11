@@ -1,6 +1,7 @@
 #swift
 A compiler for BLOG probabilistic programming language
 
+Check the *Swift* paper: https://arxiv.org/abs/1606.09242
 
 ###Code style:
 1.  double spaces for indentation
