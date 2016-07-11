@@ -18,8 +18,7 @@ Arxiv Version: https://arxiv.org/abs/1606.09242 (arxiv)
 
 ### How to Use:
 1. Compile the Swift compiler: make compile (also see compile.bat in windows)
-2. Generate target C++ code:```./swift -i <Model File> -o <Target C++ File> -e <Algorithm>``` (swift.exe in Windows)
-   Note: Run ```./swift``` to see all the command line options
+2. Generate target C++ code:```./swift -i <Model File> -o <Target C++ File> -e <Algorithm>``` (swift.exe in Windows). Run ```./swift``` to see all the command line options
 3. Compile your target code: ```g++ -o -O3 <target> <your C++ file> random/* -larmadillo``` (see swifty.sh)
 4. Run your final binary!
 
