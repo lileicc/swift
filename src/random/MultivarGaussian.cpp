@@ -4,7 +4,7 @@
  *  Created on: Sept 15, 2014
  *      Author: yiwu
  */
- 
+
 #include <cmath>
 #include <cassert>
 #include "MultivarGaussian.h"
@@ -29,12 +29,12 @@ void MultivarGaussian::init(const arma::mat& _mean, const arma::mat& _cov) {
     mean = arma::trans(mean);
   assert(mean.n_cols == 1);
   assert(mean.n_rows == cov.n_rows && cov.n_cols == cov.n_rows);
-  
+
   is_gen_ok = false;
   is_like_ok = false;
   is_loglike_ok = false;
-  
-  
+
+
 
   // Variables for computing cpd
   k = mean.n_rows;

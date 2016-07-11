@@ -24,8 +24,16 @@ void Expr::add(Expr* e) {
   args.push_back(e);
 }
 
+void Expr::add_front(Expr* e) {
+  args.insert(args.begin(), e);
+}
+
 Expr* Expr::get(size_t id) {
   return args[id];
+}
+
+std::vector<Expr*>& Expr::getAllExpr() {
+  return args;
 }
 
 size_t Expr::size() {

@@ -190,6 +190,9 @@ void CPPPrinter::printPrefix() {
 }
 
 void CPPPrinter::addHeader(std::string h) {
+  if(h.size() == 0) return;
+  if(h[0]!='<' && h[0]!='\"') h="\""+h;
+  if(h[h.size()-1]!='>' && h[h.size()-1]!='\"') h.push_back('\"');
   header.push_back(h);
 }
 
@@ -233,9 +236,12 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Binomial.h\"\n");
   fprintf(file, "#include \"random/BooleanDistrib.h\"\n");
   fprintf(file, "#include \"random/Categorical.h\"\n");
+  fprintf(file, "#include \"random/Exponential.h\"\n");
   fprintf(file, "#include \"random/Gaussian.h\"\n");
+  fprintf(file, "#include \"random/Gamma.h\"\n");
   fprintf(file, "#include \"random/Geometric.h\"\n");
   fprintf(file, "#include \"random/Poisson.h\"\n");
+  fprintf(file, "#include \"random/InvGamma.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"random/UniformReal.h\"\n");
@@ -252,21 +258,30 @@ void CPPPrinter::print(code::Code* prog) {
     s->print(this);
   printLine();
 
-  // Check for Special Printing Option 
-  for (auto s : prog->getAllOptions())
+  // Check for Special Printing Option
+  for (auto s : prog->getAllOptions()) {
     if (s == "matrix") {
       // Support Matrix
       fprintf(file, "\n// Matrix Library included\n");
       fprintf(file, "#include \"armadillo\"\n");
+      fprintf(file, "#include \"random/DiagGaussian.h\"\n");
       fprintf(file, "#include \"random/Dirichlet.h\"\n");
       fprintf(file, "#include \"random/Discrete.h\"\n");
       fprintf(file, "#include \"random/MultivarGaussian.h\"\n");
+      fprintf(file, "#include \"random/MultivarGaussianIndep.h\"\n");
       fprintf(file, "#include \"random/Multinomial.h\"\n");
       fprintf(file, "#include \"random/UniformVector.h\"\n");
       fprintf(file, "#include \"util/Hist_matrix.h\"\n");
       fprintf(file, "#include \"util/util_matrix.h\"\n");
       fprintf(file, "using namespace arma;\n\n");
+    } else
+    if (s == "MCMC" || s == "mcmc") {
+      // Support MCMC algorithms (Parental-MH, Gibbs)
+      fprintf(file, "\n// MCMC Library included\n");
+      fprintf(file, "#include \"util/MCMC.h\"\n");
+      fprintf(file, "#include \"util/util_MCMC.h\"\n");
     }
+  }
 
   //fprintf(file, "#define bool char\n"); // currently a hack for bool type, since elements in vector<bool> cannot be referenced
   fprintf(file, "using namespace std;\n");
@@ -405,6 +420,20 @@ void CPPPrinter::print(code::CallExpr* term) {
   printLine();
 }
 
+void CPPPrinter::print(code::NewExpr* term) {
+  printIndent();
+  bool backup = newline;
+  newline = false;
+
+  fprintf(file, "new ");
+  term->getExpr()->print(this);
+
+  newline = backup;
+  if (backup)
+    fprintf(file, ";");
+  printLine();
+}
+
 void CPPPrinter::print(code::TemplateExpr* term) {
   printIndent();
   bool backup = newline;
@@ -423,7 +452,7 @@ void CPPPrinter::print(code::TemplateExpr* term) {
   for (auto p : term->getArgs()) {
     if (not_first)
       fprintf(file, ",");
-    else 
+    else
       not_first = true;
     p->print(this);
   }
@@ -459,7 +488,25 @@ void CPPPrinter::print(code::ClassDecl* term) {
   } else
   if (isheader) { // print everything except body of FunctionDecl
     printIndent();
-    fprintf(file, "class %s {", term->getName().c_str());
+    fprintf(file, "class %s", term->getName().c_str());
+    // inheritance
+    if (term->getInherit().size() > 0) {
+      bool backup = newline;
+      newline = false;
+
+      auto& h = term->getInherit();
+      for (size_t i = 0; i < h.size(); ++i) {
+        if (i == 0)
+          fprintf(file, ":");
+        else
+          fprintf(file, ",");
+        fprintf(file, " public ");
+        h[i].print(this);
+      }
+
+      newline = backup;
+    }
+    fprintf(file, " {");
     printLine();
     printIndent();
     fprintf(file, "public:");
@@ -529,7 +576,7 @@ void CPPPrinter::print(code::FloatingLiteral* term) {
   printIndent();
   // Special Case!
   //   Generally Here we keep 8 digits after decimal point
-  if (term->getVal() < 1e-6) 
+  if (term->getVal() < 1e-6)
     fprintf(file, "%s", std::to_string(term->getVal()).c_str());
   else {
     fprintf(file, "%.8lf", term->getVal());
@@ -624,7 +671,9 @@ void CPPPrinter::print(code::FunctionDecl* term, bool hasRetType) {
     fprintf(file, ")");
     newline = backup;
     printLine();
-
+    for (auto&d : term->getAllDecls()) {
+      d->print(this);
+    }
     term->getBody().print(this);
   }
 }
@@ -922,7 +971,53 @@ void CPPPrinter::print(std::vector<code::Expr*>& exprs) {
 }
 
 void CPPPrinter::print(code::ClassConstructor* term) {
-  print(term, false);
+  if (isforward) return;
+  bool backup;
+  if (isheader) {
+    printIndent();
+    backup = newline;
+    newline = false;
+    fprintf(file, "%s(", term->getName().c_str());
+    bool not_first = false;
+    for (auto p : term->getParams()) {
+      if (not_first)
+        fprintf(file, ",");
+      else
+        not_first = true;
+      p->print(this);
+    }
+    fprintf(file, ");");
+    newline = backup;
+    printLine();
+  }
+  else {
+    printIndent();
+    backup = newline;
+    newline = false;
+    printPrefix();
+    fprintf(file, "%s(", term->getName().c_str());
+    bool not_first = false;
+    for (auto p : term->getParams()) {
+      if (not_first)
+        fprintf(file, ", ");
+      else
+        not_first = true;
+      p->print(this);
+    }
+    fprintf(file, ")");
+
+    // print initial expression
+    if (term->getInitExpr() != NULL) {
+      fprintf(file, ":");
+      term->getInitExpr()->print(this);
+    }
+
+    newline = backup;
+    printLine();
+
+    term->getBody().print(this);
+  }
+
 }
 
 void CPPPrinter::print(code::CallClassConstructor* term) {
@@ -934,4 +1029,3 @@ void CPPPrinter::print(code::CallClassConstructor* term) {
 
 }
 }
-

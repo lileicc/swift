@@ -25,7 +25,7 @@ public:
   NumStDecl(int l, int c, Symbol typ, Expr* expr);
   virtual ~NumStDecl();
 
-  Expr* getExpr();
+  Expr*& getExpr();
   const Symbol& getTyp();
   size_t argSize();
   const Symbol& getArgOrigin(int k);

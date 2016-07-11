@@ -75,8 +75,8 @@ private:
 
   std::shared_ptr<ir::MapExpr> transExpr(absyn::MapExpr* expr);
 
-  std::shared_ptr<ir::CardExpr> processCardExpr(absyn::Expr* expr); // Special Treatment for CardExpr
-  std::shared_ptr<ir::CardExpr> transExpr(absyn::CardinalityExpr* expr);
+  std::shared_ptr<ir::Expr> processCardExpr(absyn::Expr* expr); // Special Treatment for CardExpr
+  std::shared_ptr<ir::Expr> transExpr(absyn::CardinalityExpr* expr);
 
   std::shared_ptr<ir::QuantForm> transExpr(absyn::QuantExpr* expr);
 
@@ -155,6 +155,7 @@ private:
    * function header or quantified formula
    */
   const std::shared_ptr<ir::VarDecl> transVarDecl(const absyn::VarDecl & vd);
+  std::vector<std::shared_ptr<ir::VarDecl> > transVarDecls(const std::vector<absyn::VarDecl> & vds, bool error_check = false);
 
   /**
    * lookup the nametype in tyFactory, if not exist, produce an error
@@ -188,6 +189,14 @@ private:
   */
   const ir::Ty* getSuperType(const ir::Ty*A, const ir::Ty* B);
 
+  // Util functions for adding/removing local variables
+  void add_local_var(std::shared_ptr<ir::VarDecl> var);
+  void del_local_var(std::shared_ptr<ir::VarDecl> var);
+
+  // Util functions for updating local var reference counter
+  void add_local_var_ref(std::shared_ptr<ir::VarRefer> ref);
+  bool has_open_var_ref();
+
   void error(int line, int col, std::string info);
   void warning(int line, int col, std::string info);
 
@@ -199,6 +208,9 @@ private:
 
   //stack used to store local variable
   std::map<std::string, std::stack<std::shared_ptr<ir::VarDecl> > > local_var;
+  
+  // store local var references
+  std::map<std::shared_ptr<ir::VarDecl>, std::vector<std::shared_ptr<ir::VarRefer>> > local_var_ref;
 
   bool isResultUsed;
 };

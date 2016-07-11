@@ -1,0 +1,14 @@
+/**
+* Simple test for DiagGaussian model.
+*/
+
+fixed RealMatrix mean = [0.0;0.0;0.0];
+fixed RealMatrix cov = [1.0;1.0;1.0];
+
+Random RealMatrix r ~ DiagGaussian(mean, cov);
+
+Random Boolean check ~ if r[0] < 0 then true else false;
+
+obs check = false;
+query r[0];
+query r;

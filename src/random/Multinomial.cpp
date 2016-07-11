@@ -93,7 +93,7 @@ double Multinomial::likeli(const std::vector<int>& x) {
   double ret = 1;
   for (size_t i = 0; i < x.size(); ++i) {
     if (x[i] > 0) {
-      ret *= std::pow(weight[i], x[i]);
+      ret *= std::pow(weight[i] / sum_wei, x[i]);
     }
   }
   return ret;
@@ -113,7 +113,7 @@ double Multinomial::loglikeli(const std::vector<int>& x) {
     else {
       is_logwei_ok[i] = true;
       ret += 
-        x[i] * (log_weight[i] = std::log(weight[i]));
+        x[i] * (log_weight[i] = std::log(weight[i] / sum_wei));
     }
   }
   return ret;

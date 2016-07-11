@@ -25,15 +25,20 @@ public:
   const predecl::PreDecl* getRefer() const;
 
   const std::string& getDistrName() const;
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
   // Special Check for Randomness
   bool isArgRandom() const;
+  // whether there is an open variable reference
+  bool hasOpenVarRef() const;
+  void setOpenVarRef(bool flag);
   virtual void processArgRandomness();
 protected:
   const predecl::PreDecl* refer;
   std::string name;
   bool arg_rand;
+  bool has_open_ref;
 };
 
 }

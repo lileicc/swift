@@ -190,28 +190,20 @@ void Semant::transFuncDecl(absyn::FuncDecl* fd) {
         "Function name < " + name + " >already defined as Type Name");
     return;
   }
-  std::vector<std::shared_ptr<ir::VarDecl> > vds;
-  for (size_t i = 0; i < fd->argSize(); i++) {
-    vds.push_back(transVarDecl(fd->getArg(i)));
-  }
-  // Function can contain at most one Timestep argument
-  int timestep_count = 0;
-  for (auto&v : vds) {
-    if (v->getTyp() == tyFactory.getTimestepTy())
-      ++ timestep_count;
-  }
-  if (timestep_count > 1) {
-    error(fd->line, fd->col, "function < " + name + " > contains more than 1 timestep arguments!");
-  }
+  
+  // translate arguments
+  std::vector<std::shared_ptr<ir::VarDecl> > vds = transVarDecls(fd->getArgs(), fd->isRandom());
 
-  if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom())) {
+  if (!functory.addFuncDefn(name, rettyp, vds, fd->isRandom(), fd->isExtern())) {
     error(fd->line, fd->col,
         "function < " + name
             + " > with the same argument type already defined");
   }
   else {
-    // Process Timestep
-    functory.getFunc(name, vds)->processTemporal(tyFactory.getTimestepTy());
+    if (!fd->isExtern()) {
+      // Process Timestep
+      functory.getFunc(name, vds)->processTemporal(tyFactory.getTimestepTy());
+    }
   }
 }
 
@@ -834,7 +826,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
 
     auto ptr = fc->getNew(args, &tyFactory);
     if (ptr == nullptr) {
-      warning(expr->line, expr->col, "Function/Distribution < " + func + " > is Built-in! Type Checking Error for Built-in Function/Distribution!");
+      error(expr->line, expr->col, "Function/Distribution < " + func + " > is Built-in! Type Checking Error for Built-in Function/Distribution!");
     }
     else {
       // TODO: here is a hack!!!! Better Checking for Markov Order (@MarkovOrder)
@@ -850,6 +842,11 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
       // Special Checking: Usage of Matrix
       if (ptr->getTyp() != NULL && ptr->getTyp()->getTyp() == ir::IRConstant::MATRIX)
         lookupTy(ir::IRConstString::MATRIX);
+
+      // Special Open Var Check for Distributions
+      auto dist_ptr = std::dynamic_pointer_cast<ir::Distribution>(ptr);
+      if (dist_ptr != nullptr)
+        dist_ptr->setOpenVarRef(has_open_var_ref());
 
       return ptr;
     }
@@ -896,7 +893,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::FuncApp* expr) {
   return ptr;
 }
 
-std::shared_ptr<ir::CardExpr> Semant::processCardExpr(absyn::Expr* expr) {
+std::shared_ptr<ir::Expr> Semant::processCardExpr(absyn::Expr* expr) {
   std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
   cd->setTyp(lookupTy(ir::IRConstString::INT));
   std::shared_ptr<ir::Expr> b = transExpr(expr);
@@ -906,13 +903,20 @@ std::shared_ptr<ir::CardExpr> Semant::processCardExpr(absyn::Expr* expr) {
       "Invalid Cardinality Expression! Body must be a SetExpr!");
     return cd;
   }
+  auto lst_st = std::dynamic_pointer_cast<ir::ListSet>(st);
+  if (lst_st != nullptr) {
+    auto ret = std::make_shared<ir::IntLiteral>(lst_st->getArgs().size());
+    ret->setRandom(false);
+    ret->setTyp(lookupTy(ir::IRConstString::INT));
+    return ret;
+  }
   cd->setBody(st);
   // randomness checking
   cd->setRandom(st->isRandom());
   return cd;
 }
 
-std::shared_ptr<ir::CardExpr> Semant::transExpr(absyn::CardinalityExpr* expr) {
+std::shared_ptr<ir::Expr> Semant::transExpr(absyn::CardinalityExpr* expr) {
   std::shared_ptr<ir::CardExpr> cd(new ir::CardExpr());
   cd->setTyp(lookupTy(ir::IRConstString::INT));
   if (expr->size() != 1) {
@@ -934,7 +938,7 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
             + "> in Quant Form cannot be a type name!");
   }
   // Add Local Variable
-  local_var[ptr->getVar()->getVarName()].push(ptr->getVar());
+  add_local_var(ptr->getVar());
 
   ptr->setCond(transExpr(expr->getCond()));
 
@@ -944,10 +948,8 @@ std::shared_ptr<ir::QuantForm> Semant::transExpr(absyn::QuantExpr* expr) {
   }
 
   // Remove Local Variable
-  auto it = local_var.find(ptr->getVar()->getVarName());
-  it->second.pop();
-  if (it->second.empty())
-    local_var.erase(it);
+  del_local_var(ptr->getVar());
+
   // randomness
   // TODO: to check randomness in some special cases
   ptr->setRandom(true);
@@ -960,6 +962,7 @@ std::shared_ptr<ir::Expr> Semant::transVarRef(std::string var) {
     // Local Variable
     std::shared_ptr<ir::VarRefer> ret = std::make_shared<ir::VarRefer>(
         local_var[var].top());
+    add_local_var_ref(ret);  // add reference to the VarDecl
     ret->setTyp(ret->getRefer()->getTyp());
     return ret; // randomness is false
   }
@@ -967,8 +970,6 @@ std::shared_ptr<ir::Expr> Semant::transVarRef(std::string var) {
       std::vector<std::shared_ptr<ir::VarDecl> >());
   if (func != NULL) {
     // Void Function Call
-    // TODO: To Change to Void Function Call
-    //std::shared_ptr<ir::VoidFuncCall> ret(new ir::VoidFuncCall(func));
     auto ret = std::make_shared<ir::FunctionCall>(func);
     ret->setTyp(func->getRetTyp());
     // randomness
@@ -1038,17 +1039,17 @@ std::shared_ptr<ir::CondSet> Semant::transExpr(absyn::CondSet* expr) {
   // Add Local Variable
   if (var->getTyp() != NULL
       && var->getVarName().size() > 0&& expr->getCond() != NULL)
-    local_var[var->getVarName()].push(var);
+      add_local_var(var);
+
   std::shared_ptr<ir::Expr> e =
       expr->getCond() == NULL ? nullptr : transExpr(expr->getCond());
+
   // Remove Local Variable
   if (var->getTyp() != NULL
       && var->getVarName().size() > 0&& expr->getCond() != NULL) {
-    auto it = local_var.find(var->getVarName());
-    it->second.pop();
-    if (it->second.empty())
-      local_var.erase(it);
+    del_local_var(var);
   }
+
   auto ptr = std::make_shared<ir::CondSet>(var, nullptr, e);
 
   if (e != nullptr && e->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
@@ -1084,7 +1085,8 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
   // Add Local Variable
   if (var->getTyp() != NULL
     && var->getVarName().size() > 0)
-    local_var[var->getVarName()].push(var);
+    add_local_var(var);
+
   std::shared_ptr<ir::Expr> cond =
     expr->getCond() == NULL ? nullptr : transExpr(expr->getCond());
   std::shared_ptr<ir::Expr> func = 
@@ -1092,10 +1094,7 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
   // Remove Local Variable
   if (var->getTyp() != NULL
     && var->getVarName().size() > 0) {
-    auto it = local_var.find(var->getVarName());
-    it->second.pop();
-    if (it->second.empty())
-      local_var.erase(it);
+    del_local_var(var);
   }
 
   // Process Expression applied on variable defined in the setExpr
@@ -1129,16 +1128,16 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::TupleSetExpr* expr) {
 std::shared_ptr<ir::Expr> Semant::transDistrb(
   std::string name, std::vector<std::shared_ptr<ir::Expr>> args,
   int line, int col) {
-  // TODO: add type checking for predecl distribution
   const predecl::PreDecl* distr = predeclFactory.getDecl(name);
   
   if (distr == NULL) {
     // not predeclared distribution
     warning(line, col, "No function defined for <" + name + ">! Customized distribution assumed! No type checking will be performed!");
-    
+    // TODO: it might be also a user-defined function! <To support *extern* declaration!>
     auto dist = std::make_shared<ir::Distribution>(name);
     dist->setArgs(args);
     dist->setRandom(true);
+    dist->setOpenVarRef(has_open_var_ref());
     dist->processArgRandomness();
     return dist;
   }
@@ -1149,6 +1148,12 @@ std::shared_ptr<ir::Expr> Semant::transDistrb(
         "Type Checking failed for <" + name + "> distribution!");
     return std::make_shared<ir::Distribution>(name, distr);
   }
+  
+  // special open var check
+  auto ret_distr = std::dynamic_pointer_cast<ir::Distribution>(ret);
+  if (ret_distr != nullptr)
+    ret_distr->setOpenVarRef(has_open_var_ref());
+
   return ret;
 }
 
@@ -1321,20 +1326,17 @@ std::shared_ptr<ir::Expr> Semant::transExpr(absyn::ArrayExpr* expr) {
 }
 
 void Semant::transFuncBody(absyn::FuncDecl* fd) {
+  if (fd->isExtern()) return ; // external function has no body
+
   const ir::Ty* rettyp = transTy(fd->getRetTyp());
   const std::string& name = fd->getFuncName().getValue();
-  std::vector<std::shared_ptr<ir::VarDecl> > vds;
-  for (size_t i = 0; i < fd->argSize(); i++) {
-    vds.push_back(transVarDecl(fd->getArg(i)));
-  }
+  std::vector<std::shared_ptr<ir::VarDecl> > vds = transVarDecls(fd->getArgs());
   std::shared_ptr<ir::FuncDefn> fun = functory.getFunc(name, vds);
   if (fun != NULL) {
     // Add Local Variables
-    for (auto&v : fun->getArgs())
-      local_var[v->getVarName()].push(v);
+    for (auto&v : fun->getArgs()) add_local_var(v);
     // Add Temporal Variables
-    if (fun->isTemporal())
-      local_var[fun->getTemporalArg()->getVarName()].push(fun->getTemporalArg());
+    if (fun->isTemporal()) add_local_var(fun->getTemporalArg());
 
     fun->setBody(transClause(fd->getExpr()));
     // Type checking for Function Declaration
@@ -1384,6 +1386,14 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
             special_case = true;
           }
         }
+
+        // When return type is a Integer but return type is a NameTy. We accept this and produce a warning
+        if (rettyp->getTyp() == ir::IRConstant::NAMETY && 
+           fun->getBody()->getTyp()->getTyp() == ir::IRConstant::INT) {
+            warning(fd->line, fd->col, "The return type of the body is Int. But the Declared Type is NameTy!"
+              " Please make sure that the return value is always *NON-NEGATIVE*!");
+            special_case = true;
+        }
       }
       if (!special_case) {
         fprintf(stderr, "func<%s> rettyp = %s  bodytyp = %s\n", fun->getName().c_str(), fun->getRetTyp()->toString().c_str(),
@@ -1407,19 +1417,10 @@ void Semant::transFuncBody(absyn::FuncDecl* fd) {
     }
 
     // Remove Temporal Variables
-    if(fun->isTemporal()) {
-      auto it = local_var.find(fun->getTemporalArg()->getVarName());
-      it->second.pop();
-      if (it->second.empty())
-        local_var.erase(it);
-    }
-    // Remove Local Variables
-    for (auto&v : fun->getArgs()) {
-      auto it = local_var.find(v->getVarName());
-      it->second.pop();
-      if (it->second.empty())
-        local_var.erase(it);
-    }
+    if(fun->isTemporal()) del_local_var(fun->getTemporalArg());
+    // Remove Local Variables & check arg references
+    for (auto&v : fun->getArgs())
+      del_local_var(v);
   }
 }
 
@@ -1473,17 +1474,13 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
     return;
   }
 
-  // Add Local Variable
-  for (auto&v : numst->getAllVars())
-    local_var[v->getVarName()].push(v);
+  // Add Local Variables
+  for (auto&v : numst->getAllVars()) add_local_var(v);
+
   numst->setBody(transClause(nd->getExpr()));
 
-  for (auto&v : numst->getAllVars()) {
-    auto it = local_var.find(v->getVarName());
-    it->second.pop();
-    if (it->second.empty())
-      local_var.erase(it);
-  }
+  // Remove Local Variables
+  for (auto&v : numst->getAllVars()) del_local_var(v);
 
   if (numst->getBody()->getTyp() != lookupTy(ir::IRConstString::INT)) {
     error(nd->line, nd->col,
@@ -1495,8 +1492,39 @@ void Semant::transNumSt(absyn::NumStDecl* nd) {
 }
 
 void Semant::transEvidence(absyn::Evidence* ne) {
+  // special check for for-loop in evidence stmt
+  std::vector<std::shared_ptr<ir::VarDecl> > vds;
+  std::shared_ptr<ir::Expr> cond = nullptr;
+  if (ne->getVarDecls().size() > 0) { // has for loops
+    vds = transVarDecls(ne->getVarDecls(), true);
+    // add local variables
+    for (auto&v : vds) add_local_var(v);
+
+    // parse condition expression
+    if (ne->getCond() != NULL) {
+      auto cd = ne->getCond();
+      cond = transExpr(cd);
+      if (cond == nullptr) {
+        error(cd->line, cd->col, "Illegal expression in the condition of the for-loop!");
+      }
+      else {
+        if (cond->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
+          cond = nullptr;
+          error(cd->line, cd->col, "Condition expression must return BOOL!");
+        }
+      }
+    }
+  }
+
   auto lhs = transExpr(ne->getLeft());
   auto rhs = transExpr(ne->getRight());
+
+  // remove local variables
+  if (vds.size() > 0) {
+    for (auto&v : vds) del_local_var(v);
+  }
+
+  // Type checking
   if (std::dynamic_pointer_cast<ir::Expr>(lhs) == nullptr) {
     error(ne->line, ne->col, "Left hand side of Evidence must be an Expression!");
     return;
@@ -1523,28 +1551,57 @@ void Semant::transEvidence(absyn::Evidence* ne) {
   //         left side  : function call | #TypeName
   //         right side : non-random expression
   if (rhs->isRandom()
+      || !lhs->isRandom()
       || ((std::dynamic_pointer_cast<ir::FunctionCall>(lhs) == nullptr)
           && !isCardAll(lhs))) {
     error(ne->line, ne->col,
         "Evidence format not correct! We assume < FunctionCall | #TypeName = Non-Random Expr >!");
     return; // TODO: build internal function to avoid this
   }
+
+  std::shared_ptr<ir::Evidence> evi;
+  if (vds.size() == 0) {
+    // No for loop
+    evi = std::make_shared<ir::Evidence>(lhs, rhs);
+  }
+  else {
+    // for loop
+    evi = std::make_shared<ir::Evidence>(lhs, rhs, vds, cond);
+    evi->processTemporal(tyFactory.getTimestepTy());
+  }
+
   // Temporal Evidence Checking
   // TODO: currently we only allowed temporal evidence with timestep = TS_Literal
   //    --> to support arbitrary timestep argument in future
   if (std::dynamic_pointer_cast<ir::FunctionCall>(lhs) != nullptr) {
     auto func = std::dynamic_pointer_cast<ir::FunctionCall>(lhs);
     if (func->isTemporal()) {
-      if (std::dynamic_pointer_cast<ir::TimestepLiteral>(func->getTemporalArg()) == nullptr) {
+      auto ts = std::dynamic_pointer_cast<ir::TimestepLiteral>(func->getTemporalArg());
+      if (ts == nullptr) { // not fixed temporal
+        auto ref = std::dynamic_pointer_cast<ir::VarRefer>(func->getTemporalArg());
+        if (!evi->hasForLoop() || !evi->isTemporal() || ref == nullptr || ref->getRefer() != evi->getTemporalArg()) {
+          error(ne->line, ne->col,
+            "Illegal Timestep Argument in the left hand side!\
+                       We currently only accept fixed timestep as argument in temporal evidence.");
+          return;
+        }
+      }
+      else { // is a fixed-time temporal evidence
+        evi->setTimestep(ts->getValue());
+      }
+    }
+    else {
+      // observed varibale is static
+      if (evi->isTemporal()) {
         error(ne->line, ne->col,
-          "Illegal Timestep Argument in the left hand side!\
-           We currently only accept fixed timestep as argument in temporal evidence.");
-        return ;
+          "Illegal Timestep Argument in the for-loop!\
+                                 Observed variable is static.");
+        return;
       }
     }
   }
-  model->addEvidence(
-      std::make_shared<ir::Evidence>(lhs, rhs));
+
+  model->addEvidence(evi);
 }
 
 void Semant::transQuery(absyn::Query* nq) {
@@ -1594,6 +1651,35 @@ const std::shared_ptr<ir::VarDecl> Semant::transVarDecl(
     const absyn::VarDecl & vd) {
   const ir::Ty* ty = transTy(vd.getTyp());
   return std::make_shared<ir::VarDecl>(ty, vd.getVar().getValue());
+}
+
+std::vector<std::shared_ptr<ir::VarDecl> > Semant::transVarDecls(
+  const std::vector<absyn::VarDecl> & vds,
+  bool error_check) {
+  std::vector<std::shared_ptr<ir::VarDecl> > ret;
+  for (size_t i = 0; i < vds.size(); i++) {
+    ret.push_back(transVarDecl(vds[i]));
+  }
+  if (error_check) {
+    // An argument list can contain at most one Timestep argument
+    int timestep_count = 0;
+    for (size_t i = 0; i < vds.size(); ++i) {
+      if (ret[i]->getTyp() == tyFactory.getTimestepTy()) {
+        if (++timestep_count > 1) {
+          error(vds[i].line, vds[i].col, "An argument declaration list can only contain at most 1 timestep argument!");
+        }
+      }
+      else {
+        // besides Timestep, we only allow NameTy
+        // TODO: to support general types, e.g, Int
+        if (ret[i]->getTyp()->getTyp() != ir::IRConstant::NAMETY) {
+          error(vds[i].line, vds[i].col, 
+                "Now we only support < Declared Type > in the argument list. < " + ret[i]->getTyp()->toString() + " > is not supported yet.");
+        }
+      }
+    }
+  }
+  return ret;
 }
 
 bool Semant::isCardAll(std::shared_ptr<ir::Expr> ptr) {
@@ -1651,6 +1737,29 @@ const ir::Ty* Semant::getSuperType(const ir::Ty* A, const ir::Ty* B) {
   if (isSubType(A, B)) return B;
   if (isSubType(B, A)) return A;
   return NULL;
+}
+
+void Semant::add_local_var(std::shared_ptr<ir::VarDecl> var) {
+  if (var == nullptr) return ;
+  local_var[var->getVarName()].push(var);
+}
+
+void Semant::del_local_var(std::shared_ptr<ir::VarDecl> var) {
+  if (var == nullptr) return ;
+  auto it = local_var.find(var->getVarName());
+  it->second.pop();
+  if (it->second.empty())
+    local_var.erase(it);
+  if (local_var_ref.count(var))
+    local_var_ref.erase(var);
+}
+
+void Semant::add_local_var_ref(std::shared_ptr<ir::VarRefer> var) {
+  local_var_ref[var->getRefer()].push_back(var);
+}
+
+bool Semant::has_open_var_ref() {
+  return local_var_ref.size() > 0;
 }
 
 bool Semant::Okay() {

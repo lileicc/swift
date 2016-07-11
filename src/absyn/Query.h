@@ -18,7 +18,7 @@ public:
   Query(int l, int c, Expr* expr);
   virtual ~Query();
 
-  Expr* getExpr();
+  Expr*& getExpr();
 
   // For Debugging Use
   void print(FILE* file, int indent);

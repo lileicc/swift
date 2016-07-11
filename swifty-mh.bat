@@ -1,0 +1,1 @@
+swift -e MHSampler -i %1.blog -o %1.cpp

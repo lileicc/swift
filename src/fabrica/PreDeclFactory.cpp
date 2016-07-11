@@ -21,10 +21,16 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::dirichletDistr;
   decls[predecl::PreDeclList::discreteDistr.getName()] =
     &predecl::PreDeclList::discreteDistr;
+  decls[predecl::PreDeclList::exponentialDistr.getName()] =
+    &predecl::PreDeclList::exponentialDistr;
   decls[predecl::PreDeclList::gammaDistr.getName()] =
     &predecl::PreDeclList::gammaDistr;
   decls[predecl::PreDeclList::gaussianDistr.getName()] =
     &predecl::PreDeclList::gaussianDistr;
+  decls[predecl::PreDeclList::geometricDistr.getName()] =
+    &predecl::PreDeclList::geometricDistr;
+  decls[predecl::PreDeclList::diaggaussianDistr.getName()] =
+    &predecl::PreDeclList::diaggaussianDistr;
   decls[predecl::PreDeclList::multivargaussianDistr.getName()] =
     &predecl::PreDeclList::multivargaussianDistr;
   decls[predecl::PreDeclList::multinomialDistr.getName()] =

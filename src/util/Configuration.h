@@ -19,6 +19,7 @@ public:
   void setValue(std::string name, std::string value);
   void setValue(std::string name, const char* value);
   void setValue(std::string name, bool value);
+  void setValue(std::string name, int value);
   std::string getValue(std::string name);
   bool getBoolValue(std::string name);
   int getIntValue(std::string name);

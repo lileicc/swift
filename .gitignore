@@ -160,6 +160,9 @@ swift.vcxproj.filters
 *.tmp
 *.exe
 *.dll
+*_back.*
 test_room/*
 /bird/
 /SwiftTarget/
+swift
+out

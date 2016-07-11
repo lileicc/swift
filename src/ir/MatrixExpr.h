@@ -8,6 +8,8 @@ class MatrixExpr: public swift::ir::Expr {
 public:
   MatrixExpr();
   virtual ~MatrixExpr();
+
+  virtual std::string toString();
   // For Debugging Use
   void print(FILE* file, int indent) const;
 

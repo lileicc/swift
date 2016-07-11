@@ -32,6 +32,7 @@
 #include "LambdaExpr.h"
 #include "ListInitExpr.h"
 #include "NamespaceDecl.h"
+#include "NewExpr.h"
 #include "NullLiteral.h"
 #include "ParamVarDecl.h"
 #include "Type.h"

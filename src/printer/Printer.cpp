@@ -31,5 +31,9 @@ void Printer::printLine() {
     fprintf(file, "\n");
 }
 
+void Printer::addHeader(std::string h) {
+  header.push_back(h);
+}
+
 }
 }

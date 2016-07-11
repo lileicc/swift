@@ -21,6 +21,8 @@ public:
   void addSymbol(std::shared_ptr<ConstSymbol> c);
   std::shared_ptr<ConstSymbol> getSymbol(size_t k) const;
   const std::vector<std::shared_ptr<ConstSymbol>>& getSymbols() const;
+
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
 private:

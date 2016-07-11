@@ -23,6 +23,8 @@
 #include <cstdarg>
 #include <initializer_list>
 
+#include "util_MCMC.h"
+
 #include "armadillo"
 
 using namespace arma;
@@ -31,6 +33,13 @@ namespace swift {
 
 #define _predecl_colsum(a) (arma::sum(a,0))
 #define _predecl_rowsum(a) (arma::sum(a,1))
+
+// now a hack to fix the compilation issue
+// in armadillo, a==b yields a matrix instead of a bool
+static const double MAT_EPS = 1e-10;
+bool operator == (const mat&a, const mat&b) { return arma::approx_equal(a, b, "absdiff", MAT_EPS); }
+bool operator != (const mat&a, const mat&b) { return !arma::approx_equal(a, b, "absdiff", MAT_EPS); }
+
 
 // Special Case for toInt
 template<>
@@ -175,5 +184,27 @@ mat loadRealMatrix(std::string filename, int x1 = -1, int x2 = -1, int y1 = -1, 
   if (y1 < 0 || y2 < 0)
     return ret->rows(x1, x2);
   return ret->submat(x1, y1, x2, y2);
+}
+
+void saveRealMatrix(std::string filename, mat matrix) {
+  //TODO: Use configuration to set a data output directory
+  bool status = matrix.save(filename.c_str(), csv_ascii);
+  if (!status) {
+    std::cerr << "[ Run-Time Error ] >> Failed to save matrix at < " + filename + " >!"<<std::endl;
+    std::exit(0);
+  }
+}
+
+////////////////////////////////////////
+//     MCMC proposals
+////////////////////////////////////////
+// Util for Uni-Gaussian Proposal
+mat _multigaussian_prop(const mat& x) {
+  static double var = 0.01;
+  static std::normal_distribution<double> ndist(0, var);
+  mat ret = x;
+  std::uniform_int_distribution<int> dpos(0, ret.n_elem - 1);
+  ret[dpos(_mcmc_engine)] += ndist(_mcmc_engine);
+  return ret;
 }
 }

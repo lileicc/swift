@@ -24,5 +24,14 @@ void OprExpr::print(FILE* file, int indent) const {
   }
 }
 
+std::string OprExpr::toString() {
+  std::string ret = "(Opr#" + std::to_string((int)op)+": ";
+  for (size_t i = 0; i < args.size(); i++) {
+    if (i>0) ret.push_back(',');
+    ret.append(args[i]->toString());
+  }
+  return ret + ")";
+}
+
 }
 }

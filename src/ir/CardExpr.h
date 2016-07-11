@@ -13,6 +13,8 @@ public:
   const Ty* getType() const;
   void setBody(std::shared_ptr<SetExpr> b);
   std::shared_ptr<SetExpr> getBody() const;
+
+  virtual std::string toString();
   void print(FILE* file, int indent) const;
 
 private:

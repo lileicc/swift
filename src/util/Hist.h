@@ -22,13 +22,15 @@ class Hist {
 private:
   std::map<T, double> table;
   const bool isLogarithm;
+  std::string filename;
 public:
   void clear() {
     table.clear();
   }
 
-  Hist(bool isLogarithm = true) :
-      isLogarithm(isLogarithm) {
+  // store_to_file is now only implemented for real and real matrix
+  Hist(bool isLogarithm = true, std::string filename = "") :
+      isLogarithm(isLogarithm), filename(filename) {
     clear();
   }
   ;
@@ -124,6 +126,7 @@ private:
   int inst_n;
   const std::vector<std::string>* instances;
   std::string typeName;
+  std::string filename;
 public:
   void clear() {
     table.clear();
@@ -133,13 +136,16 @@ public:
     isTyped = false;
   }
 
-  Hist(bool isLogarithm = true) :
-      isLogarithm(isLogarithm), isTyped(false) {
+  // for int
+  Hist(bool isLogarithm = true, std::string filename = "") :
+      isLogarithm(isLogarithm), isTyped(false), filename(filename) {
     clear();
   };
 
-  Hist(bool isLogarithm, std::string _type, const std::vector<std::string>* _inst = NULL)
-    :isLogarithm(isLogarithm){
+  // for typed objects
+  Hist(bool isLogarithm, std::string _type, const std::vector<std::string>* _inst = NULL,
+       std::string filename = ""):
+       isLogarithm(isLogarithm), filename(filename) {
     clear();
     if (_type.size() > 0) {
       typeName = _type;
@@ -219,7 +225,7 @@ public:
     if (isTyped) { // typed object
       for (auto& it : table) {
 #ifndef NO_PRINT
-        printf("%s -> %.8lf\n", 
+        printf("%s -> %.8lf\n",
           (it.first >= 0 && it.first < inst_n
           ? instances->at(it.first) : typeName + "(#" + toString(it.first) + ")").c_str(),
           it.second);
@@ -258,6 +264,8 @@ private:
   double left_bound, right_bound;
   bool bucketFixed, init_flag;
   int n;
+
+  std::string filename;
 
   inline void add_to_bucket(double p, double w) {
     int k;
@@ -316,11 +324,12 @@ public:
     init_flag = false;
   }
 
-  Hist(bool isLogarithm = true, int bucket_n = 20) :
-    isLogarithm(isLogarithm) {
+  Hist(bool isLogarithm = true, int bucket_n = 20, std::string filename = "") :
+    isLogarithm(isLogarithm), filename(filename) {
     clear(bucket_n);
   }
   ;
+
   virtual ~Hist() {
   }
   ;
@@ -398,6 +407,10 @@ public:
       printf("%c%lf, %lf] -> %.8lf\n", (i == 0 ? '[' : '('), (i == 0 ? left_bound : cur), (i == n - 1 ? right_bound : cur + det), bucket[i]);
 #endif
       cur += det;
+    }
+
+    if (filename != "") {
+      saveRealValue(filename, table.back().first)
     }
     clear();
   }

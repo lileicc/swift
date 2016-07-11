@@ -58,5 +58,15 @@ void MapExpr::print(FILE* file, int indent) const {
   }
 }
 
+std::string MapExpr::toString() {
+  std::string ret = "{";
+  for (size_t i = 0; i < mapSize(); ++i) {
+    if (i > 0) ret.push_back(',');
+    ret.append(getFrom(i)->toString()+"->"+getTo(i)->toString());
+  }
+  ret.push_back('}');
+  return ret;
+}
+
 }
 }

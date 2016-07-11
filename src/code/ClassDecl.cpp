@@ -10,8 +10,8 @@
 namespace swift {
 namespace code {
 
-ClassDecl::ClassDecl(DeclContext* ns, std::string name) :
-    parent(ns), name(name) {
+ClassDecl::ClassDecl(DeclContext* ns, std::string name, std::vector<Type> inherit) :
+    parent(ns), name(name), inherit(inherit) {
 }
 
 ClassDecl::~ClassDecl() {
@@ -24,8 +24,20 @@ ClassDecl* ClassDecl::createClassDecl(DeclContext* ns,
   return cd;
 }
 
+ClassDecl* ClassDecl::createClassDecl(DeclContext* ns,
+    const std::string& name,
+    std::vector<Type> inherit) {
+  ClassDecl* cd = new ClassDecl(ns, name, inherit);
+  ns->addDecl(cd);
+  return cd;
+}
+
 const std::string& ClassDecl::getName() const {
   return name;
+}
+
+std::vector<Type>& ClassDecl::getInherit() {
+  return inherit;
 }
 
 // For Printer

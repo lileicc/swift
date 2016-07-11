@@ -24,6 +24,9 @@ class OriginRefer : public swift::ir::Expr {
    */
   std::shared_ptr<Expr> getOriginArg() const;
 
+  virtual std::string toString();
+  void print(FILE* file, int indent) const;
+
  private:
   const OriginAttr* refer;
 };
