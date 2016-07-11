@@ -24,14 +24,8 @@ Arxiv Version: https://arxiv.org/abs/1606.09242 (arxiv)
 4. Run your final binary!
 
 ### Armadillo Setup for OS X:
-1. install armadillo library
-```
-brew install armadillo
-```
-2. link C++ libraries for OS X
-```
-xcode-select --install
-```
+1. install armadillo library: ```brew install armadillo```
+2. link C++ libraries for OS X: ```xcode-select --install```
 
 ### Armadillo Setup for Windows:
 Download the VC++ solution config file from the armadillo webpage
