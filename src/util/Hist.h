@@ -410,7 +410,7 @@ public:
     }
 
     if (filename != "") {
-      saveRealValue(filename, table.back().first)
+      saveRealValue(filename, table.back().first);
     }
     clear();
   }
