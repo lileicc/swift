@@ -1013,47 +1013,122 @@ void MHTranslator::transAllQuery(
 }
 
 void MHTranslator::transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr, int n) {
-  // Register Printing Hist Class
-  std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
-  // In MCMC framework, Hist does not need Logorithm computation
-  std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(false) };
-  if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
-    auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
-    std::string tyName = ty->getRefer()->getName();
-    initArgs.push_back(new code::StringLiteral(tyName));
-    if (ty->getRefer()->getInstNames().size() > 0) {
-      initArgs.push_back(new code::BinaryOperator(NULL,
-        new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+  printf("Translating MH query!\n");
+  // for-loop in query
+  if (qr->hasForLoop()) {
+    // Register Printing Hist Class
+    std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+    std::vector<code::Expr*> args;
+    args.push_back(transExpr(qr->getVar()));
+    args.push_back(new code::IntegerLiteral(1));
+    code::Stmt* evalSt = code::CallExpr::createMethodCall(
+        answervarname, HISTOGRAM_ADD_METHOD_NAME, args);
+    code::Stmt* printSt = code::CallExpr::createMethodCall(
+        answervarname, HISTOGRAM_PRINT_METHOD_NAME,
+        std::vector<code::Expr*> { new code::StringLiteral(qr->str()) });
+    if (qr->getCond() != nullptr) {
+        printf("Cond: %s\n", qr->getCond()->toString().c_str());
+        evalSt = new code::IfStmt(transExpr(qr->getCond()), evalSt);
+        printSt = new code::IfStmt(transExpr(qr->getCond()), printSt);
     }
-  }
-  // if double, push another initial argument to the Histogram constructor
-  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
-    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
-  }
+    for (int k = (int)qr->getArgs().size() - 1; k >= 0; --k) {
+      auto ty = dynamic_cast<const ir::NameTy*>(qr->getArg(k)->getTyp());
+      printf("Type: %s\n", ty->toString().c_str());
+      assert(ty != NULL);
+      code::Expr* loop_n = NULL;
+      if (ty->getRefer()->getNumberStmtSize() == 0) {
+        loop_n = new code::IntegerLiteral(ty->getRefer()->getPreLen());
+        printf("Lit: %zu\n", ty->getRefer()->getPreLen());
+      } else {
+        std::string getnumvarfunname = getGetterFunName(getVarOfNumType(ty->toString()));
+        loop_n = new code::CallExpr(new code::Identifier(getnumvarfunname));
+      }
+      assert(loop_n != NULL);
+      evalSt = createForeachLoop(qr->getArg(k)->getVarName(), loop_n, evalSt, false, true);
+      printSt = createForeachLoop(qr->getArg(k)->getVarName(), loop_n, printSt, false, true);
+    }
+    printf("Query val: %s\n", qr->getVar()->toString().c_str());
+    printf("Query val2: %s\n", qr->getVar()->getTyp()->toString().c_str());
+    printf("Get arg 1: %s\n", qr->getVar()->toString().c_str());
 
-  code::Expr* initvalue = new code::CallClassConstructor(
-      code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
-            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
-          initArgs);
-  code::VarDecl::createVarDecl(
-      coreNs, answervarname,
-      code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
-            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
-      initvalue);
-  std::vector<code::Expr*> args;
-  args.push_back(transExpr(qr->getVar()));
-  args.push_back(new code::IntegerLiteral(1));
-  fun->addStmt(
-      code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
-                                       args));
-  // add print this result in print()
-  // :::=> answer_id.print("query expr");
-  corePrint->addStmt(
-      code::CallExpr::createMethodCall(answervarname,
-                                       HISTOGRAM_PRINT_METHOD_NAME,
-                                       std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
+    // Register Printing Hist Class
+    // std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+    // In MCMC framework, Hist does not need Logorithm computation
+    std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(false) };
+    if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
+      auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
+      std::string tyName = ty->getRefer()->getName();
+      initArgs.push_back(new code::StringLiteral(tyName));
+      if (ty->getRefer()->getInstNames().size() > 0) {
+        initArgs.push_back(new code::BinaryOperator(NULL,
+          new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+      }
+    }
+    // if double, push another initial argument to the Histogram constructor
+    if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+      initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+    }
+
+    code::Expr* initvalue = new code::CallClassConstructor(
+        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
+              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+            initArgs);
+    code::VarDecl::createVarDecl(
+        coreNs, answervarname,
+        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
+              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+        initvalue);
+    fun->addStmt(evalSt);
+    corePrint->addStmt(printSt);
+    // corePrint->addStmt(
+    //     code::CallExpr::createMethodCall(answervarname,
+    //                                      HISTOGRAM_PRINT_METHOD_NAME,
+    //                                      std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
+  } else {
+    // Register Printing Hist Class
+    std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+    // In MCMC framework, Hist does not need Logorithm computation
+    std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(false) };
+    if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
+      auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
+      std::string tyName = ty->getRefer()->getName();
+      initArgs.push_back(new code::StringLiteral(tyName));
+      if (ty->getRefer()->getInstNames().size() > 0) {
+        initArgs.push_back(new code::BinaryOperator(NULL,
+          new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+      }
+    }
+    // if double, push another initial argument to the Histogram constructor
+    if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+      initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+    }
+
+    code::Expr* initvalue = new code::CallClassConstructor(
+        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
+              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+            initArgs);
+    code::VarDecl::createVarDecl(
+        coreNs, answervarname,
+        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
+              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+        initvalue);
+    std::vector<code::Expr*> args;
+    args.push_back(transExpr(qr->getVar()));
+    args.push_back(new code::IntegerLiteral(1));
+    fun->addStmt(
+        code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
+                                         args));
+    // add print this result in print()
+    // :::=> answer_id.print("query expr");
+    corePrint->addStmt(
+        code::CallExpr::createMethodCall(answervarname,
+                                         HISTOGRAM_PRINT_METHOD_NAME,
+                                         std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
+  }
 }
 
 void MHTranslator::transAllEvidence(
