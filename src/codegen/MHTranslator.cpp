@@ -1108,7 +1108,7 @@ void MHTranslator::transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query
     }
     // HACK FOR NOW: Acquire the name of the variable through string parsing
     std::string variableName = qr->str().substr(0, qr->str().find("("));
-    printExprVec.push_back(new code::StringLiteral(variableName + "(" + typeArgs + ")\\n"));
+    printExprVec.push_back(new code::StringLiteral(variableName + "(" + typeArgs + ")"));
     for (int i = 0; i < argName.size(); i++) {
         printExprVec.push_back(new code::Identifier(argName[i]));
     }
