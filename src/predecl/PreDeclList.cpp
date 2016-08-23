@@ -44,6 +44,9 @@ const GeometricDistrDecl PreDeclList::geometricDistr =
 const InvGammaDistrDecl PreDeclList::invGammaDistr =
     InvGammaDistrDecl();
 
+const InvWishartDistrDecl PreDeclList::invWishartDistr =
+    InvWishartDistrDecl();
+
 const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
     MultivarGaussianDistrDecl();
 

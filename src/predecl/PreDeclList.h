@@ -14,6 +14,7 @@
 #include "GaussianDistrDecl.h"
 #include "GeometricDistrDecl.h"
 #include "InvGammaDistrDecl.h"
+#include "InvWishartDistrDecl.h"
 #include "MultivarGaussianDistrDecl.h"
 #include "MultinomialDistrDecl.h"
 #include "PoissonDistrDecl.h"
@@ -65,6 +66,7 @@ public:
   static const GaussianDistrDecl gaussianDistr;
   static const GeometricDistrDecl geometricDistr;
   static const InvGammaDistrDecl invGammaDistr;
+  static const InvWishartDistrDecl invWishartDistr;
   static const MultivarGaussianDistrDecl multivargaussianDistr;
   static const MultinomialDistrDecl multinomialDistr;
   static const PoissonDistrDecl poissonDistr;
