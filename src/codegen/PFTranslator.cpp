@@ -139,6 +139,12 @@ code::Stmt* PFTranslator::createForLoopEvidence(const std::shared_ptr<ir::Eviden
   return st;
 }
 
+code::Expr* PFTranslator::createPtrMethodCall(code::Expr* ptr, std::string method_name, std::vector<code::Expr*> args) {
+  code::Expr* ret = new code::BinaryOperator(ptr, new code::Identifier(method_name), code::OpKind::BO_POINTER);
+  ret = new code::CallExpr(ret, args);
+  return ret;
+}
+
 // Special Utils for Liu-West Filter
 std::set<std::string> PFTranslator::obsFuncStore = std::set<std::string>();
 const std::string PFTranslator::DOUBLE_PERTURB_FUN_NAME = "__perturb";
@@ -1992,8 +1998,17 @@ void PFTranslator::transAllQuery(
   coreClsInit->addStmt(new code::CallExpr(new code::Identifier(TMP_PRINT_INIT_FUNC_NAME)));
 
   // generate all the queries
-  std::vector<std::vector<code::Stmt*> > queryFuncs(model->getTempLimit() + 1);
-  std::vector<std::vector<code::Stmt*> > printFuncs(model->getTempLimit() + 1);
+  int vectorSize = model->getTempLimit() + 1;
+  for (auto qr : queries) {
+    if (qr->hasForLoop()) {
+      vectorSize = ModelTimeLimit + 1;
+      break;
+    }
+  }
+  // std::vector<std::vector<code::Stmt*> > queryFuncs(model->getTempLimit() + 1);
+  // std::vector<std::vector<code::Stmt*> > printFuncs(model->getTempLimit() + 1);
+  std::vector<std::vector<code::Stmt*> > queryFuncs(vectorSize);
+  std::vector<std::vector<code::Stmt*> > printFuncs(vectorSize);
 
   int index = 0;
   for (auto qr : queries) {
@@ -2033,62 +2048,261 @@ void PFTranslator::transAllQuery(
 void PFTranslator::transQuery(std::vector<std::vector<code::Stmt*> >& queryFuncs,
                                std::vector<std::vector<code::Stmt*> >& printFuncs,
                                std::shared_ptr<ir::Query> qr, int n) {
-  // Register Printer Class
-  std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
-  std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) };
-  if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
-    auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
-    std::string tyName = ty->getRefer()->getName();
-    initArgs.push_back(new code::StringLiteral(tyName));
-    if (ty->getRefer()->getInstNames().size() > 0) {
-      initArgs.push_back(new code::BinaryOperator(NULL,
-        new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+  if (qr->hasForLoop()) {
+    printf("yolo swaggo\n");
+    // The timestep this query should be processed
+    int id = 0;
+    bool quantifyAll = false;
+    auto var = qr->getVar();
+    if (std::dynamic_pointer_cast<ir::FunctionCall>(var) != nullptr) {
+      auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(var);
+      if (fun->isTemporal() && std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg()) != nullptr) {
+        // Assume that the Timestep for each query is a fixed value
+        //  >> This should be checked in Semant
+        id = std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg())->getValue();
+      } else {
+        if (!fun->isTemporal()) {
+          // id = model->getTempLimit();
+          id = ModelTimeLimit;
+        } else {
+          quantifyAll = true;
+        }
+      }
+      printf("Temporal? %d\n", fun->isTemporal());
     }
-  }
-  // if double, push another initial argument to the Histogram constructor
-  if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
-    initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
-  }
+    printf("Timestep: %d\n", id);
+    printf("Quantify All: %d\n", quantifyAll);
 
-  code::Expr* initvalue = new code::CallClassConstructor(
-      code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+    // Register Printer Class
+    std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+    std::string buffername = "buffer" + std::to_string(n);
+    std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) };
+    if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
+      auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
+      std::string tyName = ty->getRefer()->getName();
+      initArgs.push_back(new code::StringLiteral(tyName));
+      if (ty->getRefer()->getInstNames().size() > 0) {
+        initArgs.push_back(new code::BinaryOperator(NULL,
+          new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+      }
+    }
+    // if double, push another initial argument to the Histogram constructor
+    if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+      initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+    }
+
+    code::Expr* initvalue = new code::CallClassConstructor(
+        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
+              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+            initArgs);
+    // Perform initialization of Histogram DynamicTable
+    std::vector<std::string> argName;
+    std::vector<int> argDim;
+    for (int k = 0; k <= (int)qr->getArgs().size() - 1; k++) {
+      auto ty = dynamic_cast<const ir::NameTy*>(qr->getArg(k)->getTyp());
+      assert(ty != NULL);
+      // Resize each dimension in Hist DynamicTable
+      int len = ty->getRefer()->getPreLen();
+      tempQueryInit->addStmt(
+            code::CallExpr::createMethodCall(
+            answervarname, DYNAMICTABLE_RESIZE_METHOD_NAME,
+            std::vector<code::Expr*>{new code::IntegerLiteral(k), new code::IntegerLiteral(len)}
+            )
+        );
+      argName.push_back(qr->getArg(k)->getVarName());
+      argDim.push_back(len);
+      printf("First storage parsing name/dim: %s %d\n", qr->getArg(k)->getVarName().c_str(), len);
+    }
+    // quantifyAll HACK #1: push timestep to args, include ALL timesteps
+    if (quantifyAll) {
+        argName.push_back("timestep");
+        argDim.push_back(ModelTimeLimit);
+        tempQueryInit->addStmt(
+              code::CallExpr::createMethodCall(
+              answervarname, DYNAMICTABLE_RESIZE_METHOD_NAME,
+              std::vector<code::Expr*>{new code::IntegerLiteral(argName.size() - 1),
+                                       new code::IntegerLiteral(ModelTimeLimit)}
+              )
+          );
+    }
+
+    // Implicitly assuming fixed dimensions for query vars
+    code::CompoundStmt* context = &tempQueryInit->getBody();
+    code::Expr* lhs = new code::Identifier(answervarname);
+    std::vector<code::Expr*> histArgs;
+    for (size_t i = 0; i < argName.size(); ++i) {
+      auto body = new code::CompoundStmt();
+      auto f_loop = new code::ForStmt(
+        new code::DeclStmt(new code::VarDecl(NULL,argName[i],INT_TYPE,new code::IntegerLiteral(0))),
+        new code::BinaryOperator(new code::Identifier(argName[i]),new code::IntegerLiteral(argDim[i]), code::OpKind::BO_LT),
+        new code::BinaryOperator(new code::Identifier(argName[i]), NULL, code::OpKind::UO_INC),
+        body);
+      context->addStmt(f_loop);
+      context = body;
+      // create multi-index
+      lhs = new code::ArraySubscriptExpr(lhs, new code::Identifier(argName[i]));
+      // create multi-argument list
+      histArgs.push_back(new code::Identifier(argName[i]));
+      printf("Hist parsing types/dim: %s %d\n", argName[i].c_str(), argDim[i]);
+    }
+    context->addStmt(
+      new code::BinaryOperator(
+        lhs,
+        new code::NewExpr(initvalue),
+        code::OpKind::BO_ASSIGN));
+
+    // Declare Histogram Storage
+    code::Type histType =
+      code::Type(HISTOGRAM_CLASS_NAME,
+        std::vector<code::Type>( {
           (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
-            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
-          initArgs);
-  code::VarDecl::createVarDecl(
-      coreNs, answervarname,
-      code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-          (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
-            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
-      initvalue);
-  // The timestep this query should be processed
-  int id = 0;
-  auto var = qr->getVar();
-  if (std::dynamic_pointer_cast<ir::FunctionCall>(var) != nullptr) {
-    auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(var);
-    if (fun->isTemporal() && std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg()) != nullptr) {
-      // Assume that the Timestep for each query is a fixed value
-      //  >> This should be checked in Semant
-      id = std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg())->getValue();
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) }), false, true);
+    // quantifyAll HACK #1: push timestep to args, include ALL timesteps
+    if (quantifyAll) {
+      code::VarDecl::createVarDecl(coreNs, answervarname,
+        code::Type(DYNAMICTABLE_CLASS_NAME,
+          std::vector<code::Type>{histType, code::Type(std::to_string(qr->getArgs().size() + 1))}));
+    } else {
+      code::VarDecl::createVarDecl(coreNs, answervarname,
+        code::Type(DYNAMICTABLE_CLASS_NAME,
+          std::vector<code::Type>{histType, code::Type(std::to_string(qr->getArgs().size()))}));
     }
-    else {
-      if (!fun->isTemporal())
-        id = model->getTempLimit();
+
+    std::vector<code::Expr*> args;
+    args.push_back(transExpr(qr->getVar()));
+    args.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
+    code::Stmt* evalSt = createPtrMethodCall(
+                    lhs, HISTOGRAM_ADD_METHOD_NAME, args);
+    code::Stmt* printSt = new code::CompoundStmt();
+    std::vector<code::Expr*> printExprVec = std::vector<code::Expr*>( {
+                    new code::Identifier(buffername)});
+    std::string typeArgs = "";
+    for (int k = 0; k <= (int)qr->getArgs().size() - 1; k++) {
+        typeArgs += qr->getArg(k)->getTyp()->toString() + "[%d], ";
     }
+    typeArgs += "@%d"; // timestep at end
+    // HACK FOR NOW: Acquire the name of the variable through string parsing
+    std::string variableName = qr->str().substr(0, qr->str().find("("));
+    printExprVec.push_back(new code::StringLiteral(variableName + "(" + typeArgs + ")"));
+    for (int i = 0; i < argName.size(); i++) {
+        printExprVec.push_back(new code::Identifier(argName[i]));
+    }
+    ((code::CompoundStmt *) printSt)->addStmt(
+        new code::CallExpr(
+            new code::Identifier("sprintf"), printExprVec));
+    ((code::CompoundStmt *) printSt)->addStmt(
+        createPtrMethodCall(
+            lhs, HISTOGRAM_PRINT_METHOD_NAME,
+            std::vector<code::Expr*> { new code::Identifier(buffername) }));
+
+    // generate eval and print for-loops
+    for (int k = (int)qr->getArgs().size() - 1; k >= 0; --k) {
+      auto ty = dynamic_cast<const ir::NameTy*>(qr->getArg(k)->getTyp());
+      printf("Type: %s\n", ty->toString().c_str());
+      assert(ty != NULL);
+      code::Expr* loop_n = NULL;
+      if (ty->getRefer()->getNumberStmtSize() == 0) {
+        loop_n = new code::IntegerLiteral(ty->getRefer()->getPreLen());
+        printf("Lit: %zu\n", ty->getRefer()->getPreLen());
+      } else {
+        std::string getnumvarfunname = getGetterFunName(getVarOfNumType(ty->toString()));
+        loop_n = new code::CallExpr(new code::Identifier(getnumvarfunname));
+      }
+      assert(loop_n != NULL);
+      evalSt = createForeachLoop(qr->getArg(k)->getVarName(), loop_n, evalSt, false, true);
+      printSt = createForeachLoop(qr->getArg(k)->getVarName(), loop_n, printSt, false, true);
+    }
+
+    printf("eval stmt: %s\n", qr->getVar()->toString().c_str());
+    // quantifyAll HACK #2: if quantifyAll, then run a for-loop through all queryFuncs
+    if (quantifyAll) {
+      for (int i = 0; i < ModelTimeLimit; i++) {
+        code::Expr* timestepSt =
+            new code::BinaryOperator(
+                  new code::Identifier("int timestep"),
+                  new code::IntegerLiteral(i),
+                  code::OpKind::BO_ASSIGN);
+        // TODO: declare timestep variable locally, then use, hella hacky
+        printf("Quantifying %d\n", i);
+        queryFuncs[i].push_back(timestepSt);
+        queryFuncs[i].push_back(evalSt);
+        // Declare char buffer[256] before nested for loop
+        printFuncs[i].push_back(new code::DeclStmt(
+            new code::VarDecl(
+                NULL,
+                buffername + "[256]",
+                code::Type("char"))));
+        printFuncs[i].push_back(timestepSt);
+        printFuncs[i].push_back(printSt);
+      }
+    } else {
+      queryFuncs[id].push_back(evalSt);
+      printFuncs[id].push_back(new code::DeclStmt(
+          new code::VarDecl(
+              NULL,
+              buffername + "[256]",
+              code::Type("char"))));
+      printFuncs[id].push_back(printSt);
+    }
+  } else {
+    // Register Printer Class
+    std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+    std::vector<code::Expr*> initArgs{ new code::BooleanLiteral(COMPUTE_LIKELIHOOD_IN_LOG) };
+    if (dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp()) != nullptr) {
+      auto ty = dynamic_cast<const ir::NameTy*>(qr->getVar()->getTyp());
+      std::string tyName = ty->getRefer()->getName();
+      initArgs.push_back(new code::StringLiteral(tyName));
+      if (ty->getRefer()->getInstNames().size() > 0) {
+        initArgs.push_back(new code::BinaryOperator(NULL,
+          new code::Identifier(getInstanceStringArrayName(tyName)), code::OpKind::UO_ADDR));
+      }
+    }
+    // if double, push another initial argument to the Histogram constructor
+    if (qr->getVar()->getTyp()->toString() == ir::IRConstString::DOUBLE) {
+      initArgs.push_back(new code::IntegerLiteral(config->getIntValue("N_HIST_BUCKETS")));
+    }
+
+    code::Expr* initvalue = new code::CallClassConstructor(
+        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
+              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+            initArgs);
+    code::VarDecl::createVarDecl(
+        coreNs, answervarname,
+        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
+              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+        initvalue);
+    // The timestep this query should be processed
+    int id = 0;
+    auto var = qr->getVar();
+    if (std::dynamic_pointer_cast<ir::FunctionCall>(var) != nullptr) {
+      auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(var);
+      if (fun->isTemporal() && std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg()) != nullptr) {
+        // Assume that the Timestep for each query is a fixed value
+        //  >> This should be checked in Semant
+        id = std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg())->getValue();
+      }
+      else {
+        if (!fun->isTemporal())
+          id = model->getTempLimit();
+      }
+    }
+
+    std::vector<code::Expr*> args;
+    args.push_back(transExpr(qr->getVar()));
+    args.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
+    queryFuncs[id].push_back(code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
+      args));
+
+    // add print this result in print()
+    // :::=> answer_id.print("query expr");
+    printFuncs[id].push_back(
+        code::CallExpr::createMethodCall(answervarname,
+                                         HISTOGRAM_PRINT_METHOD_NAME,
+                                         std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
   }
-
-  std::vector<code::Expr*> args;
-  args.push_back(transExpr(qr->getVar()));
-  args.push_back(new code::Identifier(WEIGHT_VAR_REF_NAME));
-  queryFuncs[id].push_back(code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
-    args));
-
-  // add print this result in print()
-  // :::=> answer_id.print("query expr");
-  printFuncs[id].push_back(
-      code::CallExpr::createMethodCall(answervarname,
-                                       HISTOGRAM_PRINT_METHOD_NAME,
-                                       std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
 }
 
 code::Expr* PFTranslator::transConstSymbol(

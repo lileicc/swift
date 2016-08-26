@@ -1651,14 +1651,14 @@ void Semant::transQuery(absyn::Query* nq) {
   }
   else {// Special Case: function call
     auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(ptr);
-    if (fun != nullptr && fun->isTemporal()) {
-      if (std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg()) == nullptr) {
-        error(nq->line, nq->col,
-          "Illegal Timestep Argument in query expression!\
-                     We currently only accept fixed timestep as argument for temporal variables.");
-        return;
-      }
-    }
+    // if (fun != nullptr && fun->isTemporal()) {
+    //   if (std::dynamic_pointer_cast<ir::TimestepLiteral>(fun->getTemporalArg()) == nullptr) {
+    //     error(nq->line, nq->col,
+    //       "Illegal Timestep Argument in query expression!\
+    //                  We currently only accept fixed timestep as argument for temporal variables.");
+    //     return;
+    //   }
+    // }
     if (vds.size() == 0) {
         model->addQuery(std::make_shared<ir::Query>(ptr, nq->getExpr()->toString()));
     }
