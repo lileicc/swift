@@ -1605,13 +1605,49 @@ void Semant::transEvidence(absyn::Evidence* ne) {
 }
 
 void Semant::transQuery(absyn::Query* nq) {
+  // special check for for-loop in query statement
+  std::vector<std::shared_ptr<ir::VarDecl> > vds;
+  std::shared_ptr<ir::Expr> cond = nullptr;
+  if (nq->getVarDecls().size() > 0) { // has for loops
+    vds = transVarDecls(nq->getVarDecls(), true);
+    // add local variables
+    for (auto&v : vds) add_local_var(v);
+
+    // parse condition expression
+    if (nq->getCond() != NULL) {
+      auto cd = nq->getCond();
+      cond = transExpr(cd);
+      if (cond == nullptr) {
+        error(cd->line, cd->col, "Illegal expression in the condition of the for-loop!");
+      }
+      else {
+        if (cond->getTyp() != tyFactory.getTy(ir::IRConstString::BOOL)) {
+           cond = nullptr;
+           error(cd->line, cd->col, "Condition expression must return BOOL!");
+        }
+      }
+    }
+  }
+
   auto ptr = transExpr(nq->getExpr());
+  // remove local variables
+  if (vds.size() > 0) {
+    for (auto&v : vds) del_local_var(v);
+  }
+
   if (!isCardAll(ptr)
       && (std::dynamic_pointer_cast<ir::FunctionCall>(ptr) == nullptr)) {
     /* General Case: Arbitrary Expr
     TODO: check if we need to build a internal Void Function Call to represent this expr
       */
-    model->addQuery(std::make_shared<ir::Query>(ptr, nq->getExpr()->toString(), true));
+    if (vds.size() == 0) {
+      model->addQuery(std::make_shared<ir::Query>(ptr, nq->getExpr()->toString(), true));
+    }
+    else {
+      auto query = std::make_shared<ir::Query>(ptr, vds, nq->getExpr()->toString(), true, cond);
+      query->processTemporal(tyFactory.getTimestepTy());
+      model->addQuery(query);
+    }
   }
   else {// Special Case: function call
     auto fun = std::dynamic_pointer_cast<ir::FunctionCall>(ptr);
@@ -1623,7 +1659,14 @@ void Semant::transQuery(absyn::Query* nq) {
         return;
       }
     }
-    model->addQuery(std::make_shared<ir::Query>(ptr, nq->getExpr()->toString()));
+    if (vds.size() == 0) {
+        model->addQuery(std::make_shared<ir::Query>(ptr, nq->getExpr()->toString()));
+    }
+    else {
+      auto query = std::make_shared<ir::Query>(ptr, vds, nq->getExpr()->toString(), false, cond);
+      query->processTemporal(tyFactory.getTimestepTy());
+      model->addQuery(query);
+    }
   }
 }
 
