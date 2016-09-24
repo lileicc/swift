@@ -34,7 +34,6 @@ private:
   MultivarGaussian mvg;
   Gamma g;
   bool is_gen_ok, is_likeli_ok, is_loglikeli_ok;
-  const double logPI;
 };
 
 } /* namespace random */

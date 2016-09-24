@@ -13,8 +13,7 @@ namespace swift {
 namespace random {
 
 InvWishart::InvWishart()
-  : is_gen_ok(false), is_likeli_ok(false), is_loglikeli_ok(false),
-    logPI(std::log(PI)) {
+  : is_gen_ok(false), is_likeli_ok(false), is_loglikeli_ok(false) {
 }
 
 InvWishart::~InvWishart() {
@@ -37,17 +36,13 @@ void InvWishart::init(const arma::mat& _scale, int _freeDeg) {
   dimFactor = 1 / (pow(2, freeDeg * d * 0.5) * multivarGamma(d, freeDeg * 0.5));
   logDimFactor = -log(2) * freeDeg * d * 0.5 -
                  logMultivarGamma(d, freeDeg * 0.5);
-  normConst = pow(arma::det(scale), freeDeg * 0.5) * dimFactor;
-  logNormConst = std::log(arma::det(scale)) * 0.5 + logDimFactor;
 
-  retvec.set_size(d, d);
   mvg.init(arma::zeros<arma::mat>(d, 1), arma::inv_sympd(scale));
   g.init(d);
 }
 
 double InvWishart::likeli(const arma::mat& x) {
   if (!is_likeli_ok) {
-    g.init(d);
     dimFactor = 1 / (pow(2, freeDeg * d * 0.5) *
                      multivarGamma(d, freeDeg * 0.5));
     normConst = pow(arma::det(scale), freeDeg * 0.5) * dimFactor;
@@ -60,7 +55,6 @@ double InvWishart::likeli(const arma::mat& x) {
 
 double InvWishart::loglikeli(const arma::mat& x) {
   if (!is_loglikeli_ok) {
-    g.init(d);
     logDimFactor = -log(2) * freeDeg * d * 0.5 -
                    logMultivarGamma(d, freeDeg * 0.5);
     logNormConst = std::log(arma::det(scale)) * 0.5 + logDimFactor;
@@ -73,7 +67,6 @@ double InvWishart::loglikeli(const arma::mat& x) {
 arma::mat InvWishart::gen() {
   if (!is_gen_ok) {
     retvec.set_size(d, d);
-    mvg.init(arma::zeros<arma::mat>(d, 1), arma::inv_sympd(scale));
     is_gen_ok = true;
   }
 

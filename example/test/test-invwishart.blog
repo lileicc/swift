@@ -1,0 +1,11 @@
+/**
+ * Basic test for InverseWishart distribution.
+ */
+
+fixed RealMatrix mean = [0.0; 0.0; 0.0];
+fixed RealMatrix cov = [400.0, 256.0, 144.0; 256.0, 256.0, 196.0; 144.0, 196.0, 324.0];
+random RealMatrix Variance ~ InvWishart(cov, 4);
+random RealMatrix Intensity ~ MultivarGaussian(mean, Variance);
+
+obs Intensity = [0.0; 0.0; 0.0];
+query Variance; // In expectation, Variance should equal the value of cov
