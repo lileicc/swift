@@ -32,8 +32,6 @@ void InvWishart::init(const arma::mat& _scale, int _freeDeg) {
   is_likeli_ok = false;
   is_loglikeli_ok = false;
 
-  // Initialize distributions
-  mvg.init(arma::zeros<arma::mat>(d, 1), arma::inv_sympd(scale));
   g.init(d);
 }
 
@@ -63,6 +61,7 @@ double InvWishart::loglikeli(const arma::mat& x) {
 arma::mat InvWishart::gen() {
   if (!is_gen_ok) {
     retvec.set_size(d, d);
+    mvg.init(arma::zeros<arma::mat>(d, 1), arma::inv_sympd(scale));
     is_gen_ok = true;
   }
 
