@@ -32,11 +32,7 @@ void InvWishart::init(const arma::mat& _scale, int _freeDeg) {
   is_likeli_ok = false;
   is_loglikeli_ok = false;
 
-  // Set constants
-  dimFactor = 1 / (pow(2, freeDeg * d * 0.5) * multivarGamma(d, freeDeg * 0.5));
-  logDimFactor = -log(2) * freeDeg * d * 0.5 -
-                 logMultivarGamma(d, freeDeg * 0.5);
-
+  // Initialize distributions
   mvg.init(arma::zeros<arma::mat>(d, 1), arma::inv_sympd(scale));
   g.init(d);
 }
