@@ -1,8 +1,8 @@
 /*
  * PrecisionGaussian.cpp
  *
- *  Created on: Sept 15, 2014
- *      Author: yiwu
+ *  Created on: May 12 2016
+ *      Author: tonyduan
  */
 
 #include <cmath>
@@ -14,7 +14,7 @@ namespace random {
 
 PrecisionGaussian::PrecisionGaussian()
   : dist(0.0,1.0),
-    is_gen_ok(false), is_like_ok(false), is_loglike_ok(false),
+    is_gen_ok(false),
     sqrt2PI(std::sqrt(2*PI)), log2PI(std::log(2*PI)) {
 }
 
@@ -31,8 +31,6 @@ void PrecisionGaussian::init(const arma::mat& _mean, const arma::mat& _inv_cov) 
   assert(mean.n_rows == inv_cov.n_rows && inv_cov.n_cols == inv_cov.n_rows);
 
   is_gen_ok = false;
-  is_like_ok = true;
-  is_loglike_ok = true;
 
   // Variables for computing cpd
   k = mean.n_rows;
