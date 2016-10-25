@@ -175,18 +175,18 @@ double TruncatedGauss::gen_trunc01(double l, double r) {
   double x;
   if (l == 0) {
     if (r >= 2) {
-      while(x = fabs(dist(engine)) && x > r);
+      while(x = fabs(dist(engine)), x > r);
       return x;
     }
   } else 
   if (r == 0){
     if (l <= -2) {
-      while(x = -fabs(dist(engine)) && x < l);
+      while(x = -fabs(dist(engine)), x < l);
       return x;
     }
   } else
   if (l <= -2 && r >= 2) {
-    while(x = dist(engine) && (x < l || x > r));
+    while(x = dist(engine), (x < l || x > r));
     return x;
   }
   // using inverse cdf function
