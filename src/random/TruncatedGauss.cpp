@@ -173,19 +173,19 @@ void TruncatedGauss::init(double mean, double var, double _l, double _r) {
 double TruncatedGauss::gen_trunc01(double l, double r) {
   // rejection sampling
   double x;
-  if (l == 0) {
-    if (r >= 2) {
+  if (l >= 0) {
+    if (mid_cdf > 0.46) { // MAGIC Number by yiwu
       while(x = fabs(dist(engine)), x > r);
       return x;
     }
   } else 
-  if (r == 0){
-    if (l <= -2) {
+  if (r <= 0){
+    if (mid_cdf > 0.46) { // MAGIC Number by yiwu
       while(x = -fabs(dist(engine)), x < l);
       return x;
     }
   } else
-  if (l <= -2 && r >= 2) {
+  if (mid_cdf > 0.92) { // MAGIC Number by yiwu
     while(x = dist(engine), (x < l || x > r));
     return x;
   }
