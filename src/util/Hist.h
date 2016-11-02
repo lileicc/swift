@@ -283,7 +283,7 @@ private:
     }
 
     if (isLogarithm) {
-      if (bucket[k] > 1) bucket[k] = w;
+      if (bucket[k] < -1e100) bucket[k] = w;
       else bucket[k] = logsum(bucket[k], w);
     }
     else {
@@ -299,7 +299,7 @@ private:
     det = (hi - lo) / n;
     bucketFixed = true;
     bucket.resize(n);
-    std::fill(bucket.begin(), bucket.end(), isLogarithm ? 2 : 0);
+    std::fill(bucket.begin(), bucket.end(), isLogarithm ? -1e150 : 0);
     for (auto& p : table)
       add_to_bucket(p.first, p.second);
     table.clear();
@@ -400,7 +400,7 @@ public:
     double cur = lo;
     for (int i = 0; i < n; ++i) {
       if (isLogarithm)
-        bucket[i] = (bucket[i] > 1 ? 0 : std::exp(bucket[i] - logsum_wei));
+        bucket[i] = (bucket[i] < -1e100 ? 0 : std::exp(bucket[i] - logsum_wei));
       else
         bucket[i] /= sum_wei;
 #ifndef NO_PRINT
