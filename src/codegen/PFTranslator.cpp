@@ -1108,6 +1108,10 @@ code::Expr* PFTranslator::transExpr(std::shared_ptr<ir::Expr> expr,
       res = new code::BinaryOperator(mat_norm, new code::FloatingLiteral(ZERO_EPS), code::OpKind::BO_LEQ);
     } else
       res = new code::BinaryOperator(new code::Identifier(valuevar), res, code::OpKind::BO_EQU);
+
+    if (COMPUTE_LIKELIHOOD_IN_LOG)
+      res = new code::CallExpr(new code::Identifier(LOG_EQUAL_FUN_NAME),
+        std::vector<code::Expr*>{res, new code::BooleanLiteral(true)});
   }
 
   // TODO translate other expression
