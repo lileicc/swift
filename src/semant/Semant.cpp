@@ -9,6 +9,7 @@
 
 #include "Semant.h"
 
+#include<cassert>
 #include<iostream>
 #include <memory>
 #include <utility>
@@ -1611,7 +1612,16 @@ void Semant::transQuery(absyn::Query* nq) {
   if (nq->getVarDecls().size() > 0) { // has for loops
     vds = transVarDecls(nq->getVarDecls(), true);
     // add local variables
-    for (auto&v : vds) add_local_var(v);
+    for (auto&v : vds) {
+        // ensure that variables have fixed dimensions
+        auto ty = dynamic_cast<const ir::NameTy*>(v->getTyp());
+        assert(ty != NULL);
+        if (ty->getRefer()->getPreLen() < 1) {
+            error(nq->line, nq->col, "for-loop variable dimensions must be fixed!");
+        }
+        std::cout << "var decl: " << v->toString() << " " << ty->getRefer()->getPreLen() << "\n";
+        add_local_var(v);
+    }
 
     // parse condition expression
     if (nq->getCond() != NULL) {

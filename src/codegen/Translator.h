@@ -305,6 +305,10 @@ protected:
     bool isVarDefined = false, bool isLess = true);
   static code::ForStmt* createForeachLoop(std::string loop_var, code::Expr* loop_n, code::Stmt* body = NULL,
     bool isVarDefined = false, bool isLess = true);
+  static code::Stmt* createMultiArgForeachLoop(
+    std::vector<std::string>& argName, std::vector<int> argDim, code::Stmt* body);
+  // Util functions for initializing histogram variables
+  static code::Expr* get_var_name_with_args(std::string name, std::vector<std::string>& args);
 
 
   static const std::string KEYWORD_THIS;

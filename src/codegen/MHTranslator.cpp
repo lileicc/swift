@@ -1083,33 +1083,14 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
       argName.push_back(qr->getArg(k)->getVarName());
       argDim.push_back(len);
     }
-    // Implicitly assuming fixed dimensions for query vars
+
     code::CompoundStmt* context = &coreStorageInit->getBody();
-    code::Expr* lhs = new code::Identifier(answervarname); // lhs duplicated
-    code::Expr* lhs2 = new code::Identifier(answervarname);
-    code::Expr* lhs3 = new code::Identifier(answervarname);
-    std::vector<code::Expr*> histArgs;
-    for (size_t i = 0; i < argName.size(); ++i) {
-      auto body = new code::CompoundStmt();
-      auto f_loop = new code::ForStmt(
-        new code::DeclStmt(new code::VarDecl(NULL,argName[i],INT_TYPE,new code::IntegerLiteral(0))),
-        new code::BinaryOperator(new code::Identifier(argName[i]),new code::IntegerLiteral(argDim[i]), code::OpKind::BO_LT),
-        new code::BinaryOperator(new code::Identifier(argName[i]), NULL, code::OpKind::UO_INC),
-        body);
-      context->addStmt(f_loop);
-      context = body;
-      // create multi-index
-      lhs = new code::ArraySubscriptExpr(lhs, new code::Identifier(argName[i]));
-      lhs2 = new code::ArraySubscriptExpr(lhs2, new code::Identifier(argName[i]));
-      lhs3 = new code::ArraySubscriptExpr(lhs3, new code::Identifier(argName[i]));
-      // create multi-argument list
-      histArgs.push_back(new code::Identifier(argName[i]));
-    }
-    context->addStmt(
-      new code::BinaryOperator(
-        lhs,
+    code::Stmt* initHistStmt = new code::BinaryOperator(
+        get_var_name_with_args(answervarname, argName),
         new code::NewExpr(initvalue),
-        code::OpKind::BO_ASSIGN));
+        code::OpKind::BO_ASSIGN);
+    initHistStmt = createMultiArgForeachLoop(argName, argDim, initHistStmt);
+    context->addStmt(initHistStmt);
 
     // Declare Histogram Storage
     code::Type histType =
@@ -1125,7 +1106,7 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
     args.push_back(transExpr(qr->getVar()));
     args.push_back(new code::IntegerLiteral(1));
     code::Stmt* evalSt = createPtrMethodCall(
-        lhs2, HISTOGRAM_ADD_METHOD_NAME, args);
+        get_var_name_with_args(answervarname, argName), HISTOGRAM_ADD_METHOD_NAME, args);
     code::Stmt* printSt = new code::CompoundStmt();
     std::vector<code::Expr*> printExprVec = std::vector<code::Expr*>( {
         new code::Identifier(buffername)});
@@ -1146,30 +1127,15 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
             new code::Identifier("sprintf"), printExprVec));
     ((code::CompoundStmt *) printSt)->addStmt(
         createPtrMethodCall(
-            lhs3, HISTOGRAM_PRINT_METHOD_NAME,
+            get_var_name_with_args(answervarname, argName), HISTOGRAM_PRINT_METHOD_NAME,
             std::vector<code::Expr*> { new code::Identifier(buffername) }));
     if (qr->getCond() != nullptr) {
         evalSt = new code::IfStmt(transExpr(qr->getCond()), evalSt);
         printSt = new code::IfStmt(transExpr(qr->getCond()), printSt);
     }
     // generate eval and print for-loops
-    for (int k = (int)qr->getArgs().size() - 1; k >= 0; --k) {
-      auto ty = dynamic_cast<const ir::NameTy*>(qr->getArg(k)->getTyp());
-      assert(ty != NULL);
-      code::Expr* loop_n = NULL; // loop_n duplicated
-      code::Expr* loop_n2 = NULL;
-      if (ty->getRefer()->getNumberStmtSize() == 0) {
-        loop_n = new code::IntegerLiteral(ty->getRefer()->getPreLen());
-        loop_n2 = new code::IntegerLiteral(ty->getRefer()->getPreLen());
-      } else {
-        std::string getnumvarfunname = getGetterFunName(getVarOfNumType(ty->toString()));
-        loop_n = new code::CallExpr(new code::Identifier(getnumvarfunname));
-        loop_n2 = new code::CallExpr(new code::Identifier(getnumvarfunname));
-      }
-      assert(loop_n != NULL);
-      evalSt = createForeachLoop(qr->getArg(k)->getVarName(), loop_n, evalSt, false, true);
-      printSt = createForeachLoop(qr->getArg(k)->getVarName(), loop_n2, printSt, false, true);
-    }
+    evalSt = createMultiArgForeachLoop(argName, argDim, evalSt);
+    printSt = createMultiArgForeachLoop(argName, argDim, printSt);
 
     fun->addStmt(evalSt);
     corePrint->addStmt(new code::DeclStmt(

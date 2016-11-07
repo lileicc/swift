@@ -1931,5 +1931,22 @@ code::ForStmt* Translator::createForeachLoop(std::string loop_var, std::string l
   return createForeachLoop(loop_var, new code::Identifier(loop_n), body, isVarDefined, isLess);
 }
 
+code::Stmt* Translator::createMultiArgForeachLoop(std::vector<std::string>& loop_vars, std::vector<int> argDim, code::Stmt* body) {
+  code::Stmt* retStmt = body;
+  for (int k = (int)loop_vars.size() - 1; k >= 0; --k) {
+    retStmt = createForeachLoop(loop_vars[k],
+      new code::IntegerLiteral(argDim[k]), retStmt, false, true);
+  }
+  return retStmt;
+}
+
+code::Expr* Translator::get_var_name_with_args(std::string name, std::vector<std::string>& args) {
+  code::Expr* var = new code::Identifier(name);
+  for (size_t i = 0; i < args.size(); ++i) {
+    var = new code::ArraySubscriptExpr(var, new code::Identifier(args[i]));
+  }
+  return var;
+}
+
 } /* namespace codegen */
 } /* namespace swift */
