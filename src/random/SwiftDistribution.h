@@ -28,6 +28,7 @@ public:
 protected:
   static std::default_random_engine engine;
   const long double PI = 3.141592653589793238L;
+  const long double logPI = std::log(PI);
 };
 
 //template<typename T>

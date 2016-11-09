@@ -39,13 +39,13 @@ int Discrete::gen(_RD& rd) {
 
 int Discrete::gen() {
   if(!is_dist_ok) {
-    /*
-     Note: In VS2013, we have to rewrite the last line with the following code
-     
+#if (_MSC_VER >= 1500)
+    // Note: In VS2013, we have to rewrite the last line with the following code
     auto lis = std::initializer_list<double>(weights.data(), weights.data() + weights.size());
     dist = std::discrete_distribution<int>(lis);
-     */
+#else
     dist = std::discrete_distribution<int>(weights.begin(), weights.end());
+#endif
     is_dist_ok = true;
   }
   return gen(engine);

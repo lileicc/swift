@@ -44,6 +44,9 @@ const GeometricDistrDecl PreDeclList::geometricDistr =
 const InvGammaDistrDecl PreDeclList::invGammaDistr =
     InvGammaDistrDecl();
 
+const InvWishartDistrDecl PreDeclList::invWishartDistr =
+    InvWishartDistrDecl();
+
 const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
     MultivarGaussianDistrDecl();
 
@@ -55,6 +58,8 @@ const PoissonDistrDecl PreDeclList::poissonDistr =
 
 const PrecisionGaussianDistrDecl PreDeclList::precisiongaussianDistr =
     PrecisionGaussianDistrDecl();
+const TruncatedGaussDistrDecl PreDeclList::truncatedGaussDistr =
+    TruncatedGaussDistrDecl();
 
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();

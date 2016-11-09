@@ -68,6 +68,8 @@ inline std::string toString(const std::vector<int>& v) {
 // NOTE this function cannot handle infinity
 template<typename T>
 inline T logsum(T a, T b) {
+  if (a < -1e100) return b;
+  if (b < -1e100) return a;
   if (a == b) {
     return a + log(2);
   } else if (a > b) {

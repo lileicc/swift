@@ -32,13 +32,13 @@ void Categorical::init(const std::map<int, double>& ws) {
       i++;
     }
   }
-  /*
-   Note: In VS2013, we have to rewrite the last line with the following code
-   
+#if (_MSC_VER >= 1500)
+  // Note: In VS2013, we have to rewrite the last line with the following code
   auto lis = std::initializer_list<double>(weights.data(), weights.data() + weights.size());
   dist = std::discrete_distribution<int>(lis);
-   */
+#else
   dist = std::discrete_distribution<int>(weights.begin(), weights.end());
+#endif
 }
 
 void Categorical::init(std::vector<int> val, std::vector<double> wei) {
@@ -52,13 +52,13 @@ void Categorical::init(std::vector<int> val, std::vector<double> wei) {
     values_to_indic[val[i]] = i;
     log_weights.push_back(std::log(wei[i]));
   }
-  /*
-  Note: In VS2013, we have to rewrite the last line with the following code
-  
+#if (_MSC_VER >= 1500)
+  // Note: In VS2013, we have to rewrite the last line with the following code
   auto lis = std::initializer_list<double>(weights.data(), weights.data() + weights.size());
   dist = std::discrete_distribution<int>(lis);
-   */
+#else
   dist = std::discrete_distribution<int>(weights.begin(), weights.end());
+#endif
 }
 
 template<typename _RD>
