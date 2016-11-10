@@ -1948,5 +1948,23 @@ code::Expr* Translator::get_var_name_with_args(std::string name, std::vector<std
   return var;
 }
 
+code::Expr* Translator::printer(std::string qr_string, std::vector<std::string>& vecstr_names,
+                                std::vector<std::string>& arg_names) {
+    assert(vecstr_names.size() == arg_names.size());
+    code::Expr* outstr = new code::StringLiteral(qr_string + ", " + arg_names[0] + " = ");
+    for (int i = 0; i < arg_names.size(); i++) {
+        if (i > 0) {
+            code::Expr* first = new code::StringLiteral(", " + arg_names[i] + " = ");
+            outstr = new code::BinaryOperator(outstr, first, code::OpKind::BO_PLUS);
+        }
+
+        code::Expr* vecstr = new code::ArraySubscriptExpr(
+            new code::Identifier(vecstr_names[i]),
+            new code::Identifier(arg_names[i]));
+        outstr = new code::BinaryOperator(outstr, vecstr, code::OpKind::BO_PLUS);
+    }
+    return outstr;
+}
+
 } /* namespace codegen */
 } /* namespace swift */

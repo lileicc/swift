@@ -1062,12 +1062,10 @@ void MHTranslator::transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query
 }
 
 void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr, int n, code::Expr* initvalue) {
-    // TODO: Fix the problem with expressions getting used multiple times
-    // Currently, the lhs and loop_n expressions are duplicated to get around this problem.
     std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
     std::string buffername = "buffer" + std::to_string(n);
     // Perform initialization of Histogram DynamicTable
-    std::vector<std::string> argName;
+    std::vector<std::string> argName, vecstr_names;
     std::vector<int> argDim;
     for (int k = 0; k <= (int)qr->getArgs().size() - 1; k++) {
       auto ty = dynamic_cast<const ir::NameTy*>(qr->getArg(k)->getTyp());
@@ -1080,6 +1078,7 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
             std::vector<code::Expr*>{new code::IntegerLiteral(k), new code::IntegerLiteral(len)}
             )
         );
+      vecstr_names.push_back(getInstanceStringArrayName(ty->toString()));
       argName.push_back(qr->getArg(k)->getVarName());
       argDim.push_back(len);
     }
@@ -1108,27 +1107,12 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
     code::Stmt* evalSt = createPtrMethodCall(
         get_var_name_with_args(answervarname, argName), HISTOGRAM_ADD_METHOD_NAME, args);
     code::Stmt* printSt = new code::CompoundStmt();
-    std::vector<code::Expr*> printExprVec = std::vector<code::Expr*>( {
-        new code::Identifier(buffername)});
-    std::string typeArgs = qr->getArg(0)->getTyp()->toString() + "[%d]";
-    for (int k = 1; k <= (int)qr->getArgs().size() - 1; k++) {
-        typeArgs += ", " + qr->getArg(k)->getTyp()->toString() + "[%d]";
-    }
 
-    // TODO: Find a new way to acquire just the query variable
-    // HACK FOR NOW: Acquire the name of the variable through string parsing
-    std::string variableName = qr->str().substr(0, qr->str().find("("));
-    printExprVec.push_back(new code::StringLiteral(variableName + "(" + typeArgs + ")\\n"));
-    for (int i = 0; i < argName.size(); i++) {
-        printExprVec.push_back(new code::Identifier(argName[i]));
-    }
-    ((code::CompoundStmt *) printSt)->addStmt(
-        new code::CallExpr(
-            new code::Identifier("sprintf"), printExprVec));
+    code::Expr* argstr = printer(qr->str(), vecstr_names, argName);
     ((code::CompoundStmt *) printSt)->addStmt(
         createPtrMethodCall(
             get_var_name_with_args(answervarname, argName), HISTOGRAM_PRINT_METHOD_NAME,
-            std::vector<code::Expr*> { new code::Identifier(buffername) }));
+            std::vector<code::Expr*> { argstr })); // fix this thing
     if (qr->getCond() != nullptr) {
         evalSt = new code::IfStmt(transExpr(qr->getCond()), evalSt);
         printSt = new code::IfStmt(transExpr(qr->getCond()), printSt);
@@ -1138,11 +1122,11 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
     printSt = createMultiArgForeachLoop(argName, argDim, printSt);
 
     fun->addStmt(evalSt);
-    corePrint->addStmt(new code::DeclStmt(
-        new code::VarDecl(
-            corePrint,
-            buffername + "[256]",
-            code::Type("char"))));
+    // corePrint->addStmt(new code::DeclStmt(
+    //     new code::VarDecl(
+    //         corePrint,
+    //         buffername + "[256]",
+    //         code::Type("char"))));
     corePrint->addStmt(printSt);
 }
 
