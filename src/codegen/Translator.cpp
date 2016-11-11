@@ -576,8 +576,8 @@ void Translator::checkConstValue(std::shared_ptr<ir::FuncDefn> fd) {
 bool Translator::checkFixedFunNeedMemo(std::shared_ptr<ir::FuncDefn> fd, std::vector<int>& dims) {
   if (!fd->isFixed() || fd->argSize() == 0) return false;
   dims.clear();
-  if (fd->isTemporal())
-    dims.push_back(model->getMarkovOrder() + 1);
+  // NOTE: do not memoize for any temporal models at the current moment
+  if (fd->isTemporal()) return false;
   for (auto& a : fd->getArgs()) {
     auto nt = dynamic_cast<const ir::NameTy*>(a->getTyp());
     if (nt == NULL) {
