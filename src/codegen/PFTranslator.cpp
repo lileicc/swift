@@ -877,7 +877,10 @@ code::FunctionDecl* PFTranslator::transFixedFun(
     retExpr = transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody()));
   }
   else {
-    code::VarDecl::createVarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()));
+    if (dims.size() == 0) { // did not do memorization
+      fixedfun->addStmt(new code::DeclStmt(
+        new code::VarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()))));
+    }
     fixedfun->addStmt(
       transClause(fd->getBody(), VALUE_VAR_REF_NAME));
     retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
