@@ -576,8 +576,8 @@ void Translator::checkConstValue(std::shared_ptr<ir::FuncDefn> fd) {
 bool Translator::checkFixedFunNeedMemo(std::shared_ptr<ir::FuncDefn> fd, std::vector<int>& dims) {
   if (!fd->isFixed() || fd->argSize() == 0) return false;
   dims.clear();
-  if (fd->isTemporal())
-    dims.push_back(model->getMarkovOrder() + 1);
+  // NOTE: do not memoize for any temporal models at the current moment
+  if (fd->isTemporal()) return false;
   for (auto& a : fd->getArgs()) {
     auto nt = dynamic_cast<const ir::NameTy*>(a->getTyp());
     if (nt == NULL) {
@@ -663,8 +663,10 @@ code::FunctionDecl* Translator::transFixedFun(
     retExpr = transExpr(std::dynamic_pointer_cast<ir::Expr>(fd->getBody()));
   }
   else {
-    if (dims.size() == 0) // did not do memorization
-      code::VarDecl::createVarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()));
+    if (dims.size() == 0) { // did not do memorization
+      fixedfun->addStmt(new code::DeclStmt(
+        new code::VarDecl(fixedfun, VALUE_VAR_REF_NAME, mapIRTypeToCodeType(fd->getBody()->getTyp()))));
+    }
     fixedfun->addStmt(
       transClause(fd->getBody(), VALUE_VAR_REF_NAME));
     retExpr = new code::Identifier(VALUE_VAR_REF_NAME);
