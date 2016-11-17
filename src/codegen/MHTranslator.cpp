@@ -1063,7 +1063,6 @@ void MHTranslator::transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query
 
 void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr, int n, code::Expr* initvalue) {
     std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
-    std::string buffername = "buffer" + std::to_string(n);
     // Perform initialization of Histogram DynamicTable
     std::vector<std::string> argName, vecstr_names;
     std::vector<int> argDim;
@@ -1112,7 +1111,7 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
     ((code::CompoundStmt *) printSt)->addStmt(
         createPtrMethodCall(
             get_var_name_with_args(answervarname, argName), HISTOGRAM_PRINT_METHOD_NAME,
-            std::vector<code::Expr*> { argstr })); // fix this thing
+            std::vector<code::Expr*> { argstr }));
     if (qr->getCond() != nullptr) {
         evalSt = new code::IfStmt(transExpr(qr->getCond()), evalSt);
         printSt = new code::IfStmt(transExpr(qr->getCond()), printSt);
@@ -1122,11 +1121,6 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
     printSt = createMultiArgForeachLoop(argName, argDim, printSt);
 
     fun->addStmt(evalSt);
-    // corePrint->addStmt(new code::DeclStmt(
-    //     new code::VarDecl(
-    //         corePrint,
-    //         buffername + "[256]",
-    //         code::Type("char"))));
     corePrint->addStmt(printSt);
 }
 
