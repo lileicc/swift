@@ -23,6 +23,7 @@ Configuration::Configuration() {
   setValue("N_PF_PARTICLES", 1000);
   setValue("MAX_TIMESTEP", -1);
   setValue("N_BURN_IN_SAMPLES", -1);
+  setValue("N_INTERVAL_SAMPLES", -1);
   setValue("N_HIST_BUCKETS", 20);
   setValue("MODEL_OUT_FILENAME", "");
   // Sampler Options

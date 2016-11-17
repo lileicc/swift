@@ -30,6 +30,7 @@ const std::string MHTranslator::ActiveListName = "_active_list";
 const std::string MHTranslator::RoundCounterVarName = "_tot_round";
 const std::string MHTranslator::TotalRoundVarName = "_TOT_LOOP";
 const std::string MHTranslator::BurnInVarName = "_BURN_IN";
+const std::string MHTranslator::IntervalVarName = "_MCMC_INTERVAL";
 
 // BayesVar Method Name
 const std::string MHTranslator::MCMC_Global_MHAlgo_MethodName = "mh_parent_resample_arg";
@@ -410,6 +411,10 @@ MHTranslator::MHTranslator() {
   if (burnInNum < 0) {
     burnInNum = iterNum / 2;
   }
+  intervalNum = config->getIntValue("N_INTERVAL_SAMPLES");
+  if (intervalNum < 0) {
+    intervalNum = 1;
+  }
   coreQuery = code::FunctionDecl::createFunctionDecl(coreNs,CoreQueryFuncName,VOID_TYPE);
   coreStorageInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreStorageInitFuncName, VOID_TYPE);
   coreWorldInit = code::FunctionDecl::createFunctionDecl(coreNs, CoreWorldInitFuncName, VOID_TYPE);
@@ -590,6 +595,9 @@ void MHTranslator::transGlobalConstant() {
   coreNs->addDecl(
     new code::VarDecl(coreNs,
     BurnInVarName, INT_CONST_TYPE, new code::IntegerLiteral(burnInNum)));
+  coreNs->addDecl(
+    new code::VarDecl(coreNs,
+    IntervalVarName, INT_CONST_TYPE, new code::IntegerLiteral(intervalNum)));
   coreNs->addDecl(
     new code::VarDecl(coreNs,
     RoundCounterVarName, INT_TYPE, new code::IntegerLiteral(-burnInNum)));
@@ -1003,6 +1011,15 @@ void MHTranslator::transAllQuery(
   coreQuery->addStmt(new code::BinaryOperator(new code::Identifier(RoundCounterVarName),NULL,code::OpKind::UO_INC));
   coreQuery->addStmt(new code::IfStmt(
     new code::BinaryOperator(new code::Identifier(RoundCounterVarName),new code::IntegerLiteral(0),code::OpKind::BO_LEQ),
+    new code::ReturnStmt()));
+  /* interval between MCMC
+   * if (tot_round % _MCMC_interval != 0) return;
+   */
+  coreQuery->addStmt(new code::IfStmt(
+    new code::BinaryOperator(
+        new code::BinaryOperator(new code::Identifier(RoundCounterVarName),
+                                 new code::Identifier(IntervalVarName),code::OpKind::BO_MOD),
+        new code::IntegerLiteral(0), code::OpKind::BO_NEQ),
     new code::ReturnStmt()));
 
   cur_context = NULL;

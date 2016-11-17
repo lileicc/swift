@@ -28,8 +28,10 @@ int main(int argc, char** argv) {
         << "\t            [-e LWSampler |" << std::endl
         << "\t                ParticleFilter [--particle <number of particles, default = 1000>]" << std::endl
         << "\t                               [--timestep <number of timesteps, default = maximum timestep literal detected in the model>] |" << std::endl
-        << "\t                MHSampler [--burn-in <number of burn-in samples, default = number samples / 2>] |" << std::endl
-        << "\t                GibbsSampler [--burn-in <number of burn-in samples, default = number samples / 2>] ]" << std::endl
+        << "\t                MHSampler [--burn-in <number of burn-in samples, default = number samples / 2>]" << std::endl
+        << "\t                          [--interval <number of samples between recorded samples, default = 1>] |" << std::endl
+        << "\t                GibbsSampler [--burn-in <number of burn-in samples, default = number samples / 2>]" << std::endl
+        << "\t                             [--interval <number of samples between recorded samples, default = 1>] ]" << std::endl
         << "\t            [--ir <filename for printing ir>]" << std::endl
         << "\t            [--hist-buckets <number of buckets for histograms, default = 20>]" << std::endl
         << "\t            [--model-output <model output filename> ]" << std::endl
@@ -98,6 +100,13 @@ int main(int argc, char** argv) {
       int burn_in;
       if(sscanf(argv[i + 1], "%d", &burn_in) == 1 && burn_in > 0) {
         config->setValue("N_BURN_IN_SAMPLES", burn_in);
+        ++ i;
+      }
+    }
+    if (strcmp(argv[i], "--interval") == 0 && i + 1 < argc && argv[i+1]) {
+      int interval;
+      if(sscanf(argv[i + 1], "%d", &interval) == 1 && interval > 0) {
+        config->setValue("N_INTERVAL_SAMPLES", interval);
         ++ i;
       }
     }

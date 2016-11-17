@@ -39,6 +39,7 @@ protected:
   analyzer::ContigAnalyzer* contig_analyzer;
 
   int burnInNum; // default 500000 (see Configuration)
+  int intervalNum; // default 1 (see Configuration)
 
   // All the bayesVar to declare
   std::map<std::string, code::ClassDecl*> bayesVars;
@@ -67,6 +68,7 @@ protected:
   static const std::string RoundCounterVarName;
   static const std::string TotalRoundVarName;
   static const std::string BurnInVarName;
+  static const std::string IntervalVarName;
 
   // BayesVar Sampler Method Name
   static const std::string MCMC_Global_MHAlgo_MethodName;
