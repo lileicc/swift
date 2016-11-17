@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <random>
 #include <array>
+#include "armadillo"
 
 namespace swift {
 
@@ -159,6 +160,18 @@ public:
   virtual std::string getname() { return ""; }
 };
 
+/* check_equals functions */
+template<class Tp>
+bool check_equals(Tp a, Tp b) {
+  return a == b;
+}
+
+template<>
+bool check_equals(arma::mat a, arma::mat b) {
+  return arma::approx_equal(a, b, "absdiff", 1e-10);
+}
+
+
 template<class Tp>
 Tp& BayesVar<Tp>::getcache_arg(BayesVar* cur_node) {
   if (cur_node->is_active)
@@ -229,7 +242,7 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
     cur_node->val = nxt_val;
     // First is associated with observations
     // check observations
-    if (nxt_val != old_val) {
+    if (!check_equals(nxt_val, old_val)) {
       if (!cur_node->check_obs()) {
         w = 10000;
         continue;
@@ -245,7 +258,7 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
       // *IMPORTANT* *TODO* :
       //   when this is a contigent var, some new var might be cached!!!!
     }
-    if (nxt_val == old_val) {
+    if (check_equals(nxt_val, old_val)) {
       w -= std::log(active_n);
       basic = w;
     }
@@ -266,7 +279,7 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
   nxt_val = values[std::lower_bound(all_weis.begin(), all_weis.end(), loc) - all_weis.begin()];
 
   cur_node->val = old_val;
-  if (nxt_val == old_val) return ;
+  if (check_equals(nxt_val, old_val)) return ;
 
   cur_node->update_obs(false);
   if (contig.size() > 0) {
@@ -310,7 +323,7 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
   cur_node->is_cached = _cur_loop; // mark cache_flag
   Tp nxt_val = cur_node->cache_val;
   cur_node->is_active = true;
-  if (nxt_val == old_val) return ;
+  if (check_equals(nxt_val, old_val)) return ;
 
   cur_node->val = nxt_val;
 
@@ -363,7 +376,7 @@ void BayesVar<Tp>::mh_symmetric_resample_arg(BayesVar* cur_node, std::function<T
   auto& child = cur_node->child;
   Tp old_val = cur_node->val;
   Tp nxt_val = g(old_val); // propose a new value based on the current state
-  if (nxt_val == old_val) return ;
+  if (check_equals(nxt_val, old_val)) return ;
 
   double old_w = 0;
   for (auto&c : child)

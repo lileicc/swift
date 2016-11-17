@@ -65,11 +65,15 @@ arma::mat InvWishart::gen() {
     is_gen_ok = true;
   }
 
-  retvec.zeros();
-  for (int i = 0; i < freeDeg; i++) {
-    arma::mat temp = mvg.gen();
-    retvec += temp * temp.t();
-  }
+  arma::vec s;
+  do {
+    retvec.zeros();
+    for (int i = 0; i < freeDeg; i++) {
+      arma::mat temp = mvg.gen();
+      retvec += temp * temp.t();
+    }
+    s = arma::svd(retvec);
+  } while (s[0] > 1e3 * s[d - 1]);
 
   return arma::inv_sympd(retvec);
 }

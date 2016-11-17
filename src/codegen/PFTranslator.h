@@ -320,6 +320,7 @@ protected:
   static code::Expr* createVarPlusDetExpr(std::string varName, int det = 0);
   static bool isTemporalType(code::Type ty);
   static code::Expr* tempTableEntryRefer(std::string table, int ts = -1);
+  static code::Expr* createPtrMethodCall(code::Expr* ptr, std::string method_name, std::vector<code::Expr*> args);
 
   // generating for-loop for evidence
   code::Stmt* createForLoopEvidence(const std::shared_ptr<ir::Evidence>& evi, code::Stmt* st);

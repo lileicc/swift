@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
         printf(" <%s>", inp[i]);
       printf("\n");
    }
-    delete program;
+    // delete program;
     delete prt;
   }
 
