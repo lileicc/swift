@@ -72,11 +72,8 @@ public:
   static const MultivarGaussianDistrDecl multivargaussianDistr;
   static const MultinomialDistrDecl multinomialDistr;
   static const PoissonDistrDecl poissonDistr;
-<<<<<<< HEAD
   static const PrecisionGaussianDistrDecl precisiongaussianDistr;
-=======
   static const TruncatedGaussDistrDecl truncatedGaussDistr;
->>>>>>> b2202e0b4b820da8912508827395bde54fd01b79
   static const UniformChoiceDistrDecl uniformChoiceDistr;
   static const UniformIntDistrDecl uniformIntDistr;
   static const UniformRealDistrDecl uniformRealDistr;
