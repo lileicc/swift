@@ -1036,36 +1036,12 @@ void MHTranslator::transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query
           (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
-  // Everything same up until here
-  if (qr->hasForLoop()) {
-    transForloopQueryHelper(fun, qr, n, initvalue);
-  } else {
-    code::VarDecl::createVarDecl(
-        coreNs, answervarname,
-        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
-            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
-              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
-        initvalue);
-    std::vector<code::Expr*> args;
-    args.push_back(transExpr(qr->getVar()));
-    args.push_back(new code::IntegerLiteral(1));
-    fun->addStmt(
-        code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
-                                         args));
-    // add print this result in print()
-    // :::=> answer_id.print("query expr");
-    corePrint->addStmt(
-        code::CallExpr::createMethodCall(answervarname,
-                                         HISTOGRAM_PRINT_METHOD_NAME,
-                                         std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
-  }
-}
 
-void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr, int n, code::Expr* initvalue) {
-    std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+  // For use in for-loop case
+  std::vector<std::string> argName, vecstr_names;
+  std::vector<int> argDim;
+  if (qr->hasForLoop()) {
     // Perform initialization of Histogram DynamicTable
-    std::vector<std::string> argName, vecstr_names;
-    std::vector<int> argDim;
     for (int k = 0; k <= (int)qr->getArgs().size() - 1; k++) {
       auto ty = dynamic_cast<const ir::NameTy*>(qr->getArg(k)->getTyp());
       assert(ty != NULL);
@@ -1099,15 +1075,30 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
     code::VarDecl::createVarDecl(coreNs, answervarname,
       code::Type(DYNAMICTABLE_CLASS_NAME,
          std::vector<code::Type>{histType, code::Type(std::to_string(qr->getArgs().size()))}));
+  } else {
+    // Declare stand-alone Histogram
+    code::VarDecl::createVarDecl(
+        coreNs, answervarname,
+        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
+              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+        initvalue);
+  }
 
-    std::vector<code::Expr*> args;
-    args.push_back(transExpr(qr->getVar()));
-    args.push_back(new code::IntegerLiteral(1));
-    code::Stmt* evalSt = createPtrMethodCall(
+  std::vector<code::Expr*> args;
+  args.push_back(transExpr(qr->getVar()));
+  args.push_back(new code::IntegerLiteral(1));
+  code::Stmt* evalSt = NULL;
+  code::Stmt* printSt = NULL;
+  if (qr->hasForLoop()) {
+    // generate operators on DynamicTable of Histograms
+    // eval: _answer_id[x][y][t]->add(<args>);
+    // print: _answer_id[x][y][t]->print("query expr (x, y, t)");
+    evalSt = createPtrMethodCall(
         get_var_name_with_args(answervarname, argName), HISTOGRAM_ADD_METHOD_NAME, args);
-    code::Stmt* printSt = new code::CompoundStmt();
+    printSt = new code::CompoundStmt();
 
-    code::Expr* argstr = printer(qr->str(), vecstr_names, argName);
+    code::Expr* argstr = query_string_with_args(qr->str(), vecstr_names, argName);
     ((code::CompoundStmt *) printSt)->addStmt(
         createPtrMethodCall(
             get_var_name_with_args(answervarname, argName), HISTOGRAM_PRINT_METHOD_NAME,
@@ -1119,9 +1110,16 @@ void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_
     // generate eval and print for-loops
     evalSt = createMultiArgForeachLoop(argName, argDim, evalSt);
     printSt = createMultiArgForeachLoop(argName, argDim, printSt);
+  } else {
+    evalSt = code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME, args);
+    // add print this result in print()
+    // :::=> answer_id.print("query expr");
+    printSt = code::CallExpr::createMethodCall(answervarname, HISTOGRAM_PRINT_METHOD_NAME,
+      std::vector<code::Expr*> { new code::StringLiteral(qr->str()) });
+  }
 
-    fun->addStmt(evalSt);
-    corePrint->addStmt(printSt);
+  fun->addStmt(evalSt);
+  corePrint->addStmt(printSt);
 }
 
 void MHTranslator::transAllEvidence(

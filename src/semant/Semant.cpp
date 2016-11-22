@@ -1619,7 +1619,6 @@ void Semant::transQuery(absyn::Query* nq) {
         if (ty->getRefer()->getPreLen() < 1) {
             error(nq->line, nq->col, "for-loop variable dimensions must be fixed!");
         }
-        std::cout << "var decl: " << v->toString() << " " << ty->getRefer()->getPreLen() << "\n";
         add_local_var(v);
     }
 

@@ -1948,8 +1948,15 @@ code::Expr* Translator::get_var_name_with_args(std::string name, std::vector<std
   return var;
 }
 
-code::Expr* Translator::printer(std::string qr_string, std::vector<std::string>& vecstr_names,
-                                std::vector<std::string>& arg_names) {
+/* Formats input query string with names of arguments
+ *  example: QueryVar(Arg1 a, Arg2 b), a = <arg1 name>, b = <arg2 name>
+ * @param  qr_string: Query string
+ * @param  vecstr_names: Names of vecstr vector where enumerated names of arg1, arg2, etc... are stored
+ * @param  arg_names: Names of arguments arg1, arg2, etc... themselves ({"a", "b"} for the above example)
+ * Returns: Pointer to the full statement as an Expr object
+ */
+code::Expr* Translator::query_string_with_args(std::string qr_string, std::vector<std::string>& vecstr_names,
+                                               std::vector<std::string>& arg_names) {
     assert(vecstr_names.size() == arg_names.size());
     code::Expr* outstr = new code::StringLiteral(qr_string + ", " + arg_names[0] + " = ");
     for (int i = 0; i < arg_names.size(); i++) {
