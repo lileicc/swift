@@ -9,7 +9,7 @@ if [[ ! -f example/$1.blog ]] ; then
     exit
 fi
 
-./swift -i example/$1.blog -o src/$fname.cpp --model-output data
+./swift -e MHSampler -n 10000 -i example/$1.blog -o src/$fname.cpp --model-output data
 
 cd src
 

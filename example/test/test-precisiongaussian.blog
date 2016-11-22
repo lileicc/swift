@@ -1,0 +1,19 @@
+/**
+* Simple test for PrecisionGaussian model.
+*/
+
+fixed RealMatrix mean = [0.0;0.0];
+fixed RealMatrix cov_inv = [2.28571, -1.71429; -1.71429, 2.28571];
+fixed RealMatrix cov = [1.0, 0.75 ; 0.75, 1.0];
+
+Random RealMatrix r ~ PrecisionGaussian(mean, cov_inv);
+Random RealMatrix q ~ MultivarGaussian(mean, cov);
+
+Random Boolean check1 ~ if r[0] < 0 then true else false;
+Random Boolean check2 ~ if q[0] < 0 then true else false;
+
+obs check1 = false;
+obs check2 = false;
+
+query r[0];
+query q[0];

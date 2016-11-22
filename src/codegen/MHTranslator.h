@@ -230,6 +230,7 @@ protected:
   */
   virtual void transAllQuery(std::vector<std::shared_ptr<ir::Query>> queries);
   void transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr, int n);
+  void transForloopQueryHelper(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr, int n, code::Expr* initvalue);
 
   /**
   * translate all evidences

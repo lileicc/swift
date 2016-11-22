@@ -1,18 +1,25 @@
-fixed Real x = 1;
+/*fixed Real x = 1;
 fixed Real y = 0;
 fixed Real z = -1;
 fixed RealMatrix A = [x,y,z];
 fixed RealMatrix B = [x;y;z];
-fixed RealMatrix W = [1,0.0,0;0.0,1,0;0.0,0,1];
+fixed RealMatrix W = [1,0.0,0;0.0,1,0;0.0,0,1];*/
+fixed RealMatrix Q = [1.0,2.0,3.0;4.0,5.0,6.0;7.0,8.0,9.0];
 
-fixed Real scale(Real k) = A * transpose(A) * k;
+fixed RealMatrix W = [2.0;4.0;6.0];
 
-random RealMatrix C ~ MultivarGaussian(B,W);
-random RealMatrix D ~ MultivarGaussian([3.0;3.0;3.0],W);
+/*fixed Real scale(Real k) = A * transpose(A) * k;*/
 
-obs D = vstack(2,2,2);
+/*random RealMatrix C ~ MultivarGaussian(B,W);*/
+/*random RealMatrix D ~ MultivarGaussian([3.0;3.0;3.0],W);*/
 
-query scale(1.5);
-query C[0];
-query D[0] + (B * A)[0][0];
-query C;
+/*obs D = vstack(2,2,2);*/
+
+/*query scale(1.5);*/
+/*query C[0];*/
+/*query D[0] + (B * A)[0][0];*/
+/*query C;*/
+
+/*query Q[0][0];*/
+/*query Q[0];*/
+query W * W;

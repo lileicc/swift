@@ -2,8 +2,8 @@
 * Simple test for DiagGaussian model.
 */
 
-fixed RealMatrix mean = [0.0;0.0;0.0];
-fixed RealMatrix cov = [1.0;1.0;1.0];
+fixed RealMatrix mean = [0.0;0.0];
+fixed RealMatrix cov = [1.0;1.0];
 
 Random RealMatrix r ~ DiagGaussian(mean, cov);
 

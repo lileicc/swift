@@ -35,7 +35,7 @@ public:
   virtual void mcmc_resample() = 0;
   virtual double getlikeli() = 0;
   virtual double getcachelikeli() = 0;
-  // degenerate all edges from its parent when we erase this var OR 
+  // degenerate all edges from its parent when we erase this var OR
   //   one of its contingent vars changes val
   virtual void remove_edge() {};
   // generate all edges from its parent when this node is instantiated
@@ -152,7 +152,7 @@ public:
   virtual void mh_parent_resample_arg(BayesVar* curnode); // MH with parental proposal
   // MH with symmetric proposal g()
   // i.e. g(x->y) = g(y->x)
-  virtual void mh_symmetric_resample_arg(BayesVar* curnode, std::function<Tp(Tp)> g); 
+  virtual void mh_symmetric_resample_arg(BayesVar* curnode, std::function<Tp(Tp)> g);
   virtual void conjugacy_analysis(Tp& nxt_val) {}; // to be filled later for conjugacy analysis
   virtual void conjugate_gibbs_resample_arg(BayesVar* curnode);
 
@@ -271,7 +271,7 @@ void BayesVar<Tp>::gibbs_resample_arg(BayesVar* cur_node) {
   cur_node->update_obs(false);
   if (contig.size() > 0) {
     backup = contig;
-    
+
     for (auto&c : backup) {
       c->remove_edge();
     }
@@ -324,7 +324,7 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
   cur_node->is_active = true;
 
   cur_node->clear_cache();
-  
+
 
   double alpha = std::min(1.0, std::exp(nxt_w - old_w));
   double loc = uni_r_dist(engine);
@@ -349,7 +349,7 @@ void BayesVar<Tp>::mh_parent_resample_arg(BayesVar* cur_node) {
       for (auto&c : backup) {
         c->active_edge();
       }
-    } else 
+    } else
        cur_node->val = nxt_val;
 
     cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
@@ -383,7 +383,7 @@ void BayesVar<Tp>::mh_symmetric_resample_arg(BayesVar* cur_node, std::function<T
   cur_node->is_active = true;
 
   cur_node->clear_cache();
-  
+
 
   double alpha = std::min(1.0, std::exp(nxt_w - old_w));
   double loc = uni_r_dist(engine);
@@ -408,7 +408,7 @@ void BayesVar<Tp>::mh_symmetric_resample_arg(BayesVar* cur_node, std::function<T
       for (auto&c : backup) {
         c->active_edge();
       }
-    } else 
+    } else
        cur_node->val = nxt_val;
 
     cur_node->update_obs(true); // TODO: in open-world, if there are some new var instantiated, we need to ensure support!
@@ -648,7 +648,7 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
       u->update_obs(false); // TODO: to support general evidence contigency!
       if (u->contig.size() > 0) {
         backup = u->contig;
-        
+
         for (auto&c : backup) {
           c->remove_edge();
         }
@@ -667,7 +667,7 @@ void NumberVar::mh_parent_resample_numvar_arg(NumberVar* cur_node) {
     cur_node->update_obs(false);
     if (contig.size() > 0) {
       backup = contig;
-      
+
       for (auto&c : backup) {
         c->remove_edge();
       }

@@ -1036,24 +1036,148 @@ void MHTranslator::transQuery(code::FunctionDecl* fun, std::shared_ptr<ir::Query
           (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
             BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
           initArgs);
-  code::VarDecl::createVarDecl(
-      coreNs, answervarname,
-      code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+  // Everything same up until here
+  if (qr->hasForLoop()) {
+    transForloopQueryHelper(fun, qr, n, initvalue);
+  } else {
+    code::VarDecl::createVarDecl(
+        coreNs, answervarname,
+        code::Type(HISTOGRAM_CLASS_NAME, std::vector<code::Type>( {
+            (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
+              BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
+        initvalue);
+    std::vector<code::Expr*> args;
+    args.push_back(transExpr(qr->getVar()));
+    args.push_back(new code::IntegerLiteral(1));
+    fun->addStmt(
+        code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
+                                         args));
+    // add print this result in print()
+    // :::=> answer_id.print("query expr");
+    corePrint->addStmt(
+        code::CallExpr::createMethodCall(answervarname,
+                                         HISTOGRAM_PRINT_METHOD_NAME,
+                                         std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
+  }
+}
+
+void MHTranslator::transForloopQueryHelper(code::FunctionDecl* fun, std::shared_ptr<ir::Query> qr, int n, code::Expr* initvalue) {
+    // TODO: Fix the problem with expressions getting used multiple times
+    // Currently, the lhs and loop_n expressions are duplicated to get around this problem.
+    std::string answervarname = ANSWER_VAR_NAME_PREFIX + std::to_string(n);
+    std::string buffername = "buffer" + std::to_string(n);
+    // Perform initialization of Histogram DynamicTable
+    std::vector<std::string> argName;
+    std::vector<int> argDim;
+    for (int k = 0; k <= (int)qr->getArgs().size() - 1; k++) {
+      auto ty = dynamic_cast<const ir::NameTy*>(qr->getArg(k)->getTyp());
+      assert(ty != NULL);
+      // Resize each dimension in Hist DynamicTable
+      int len = ty->getRefer()->getPreLen();
+      coreStorageInit->addStmt(
+            code::CallExpr::createMethodCall(
+            answervarname, DYNAMICTABLE_RESIZE_METHOD_NAME,
+            std::vector<code::Expr*>{new code::IntegerLiteral(k), new code::IntegerLiteral(len)}
+            )
+        );
+      argName.push_back(qr->getArg(k)->getVarName());
+      argDim.push_back(len);
+    }
+    // Implicitly assuming fixed dimensions for query vars
+    code::CompoundStmt* context = &coreStorageInit->getBody();
+    code::Expr* lhs = new code::Identifier(answervarname); // lhs duplicated
+    code::Expr* lhs2 = new code::Identifier(answervarname);
+    code::Expr* lhs3 = new code::Identifier(answervarname);
+    std::vector<code::Expr*> histArgs;
+    for (size_t i = 0; i < argName.size(); ++i) {
+      auto body = new code::CompoundStmt();
+      auto f_loop = new code::ForStmt(
+        new code::DeclStmt(new code::VarDecl(NULL,argName[i],INT_TYPE,new code::IntegerLiteral(0))),
+        new code::BinaryOperator(new code::Identifier(argName[i]),new code::IntegerLiteral(argDim[i]), code::OpKind::BO_LT),
+        new code::BinaryOperator(new code::Identifier(argName[i]), NULL, code::OpKind::UO_INC),
+        body);
+      context->addStmt(f_loop);
+      context = body;
+      // create multi-index
+      lhs = new code::ArraySubscriptExpr(lhs, new code::Identifier(argName[i]));
+      lhs2 = new code::ArraySubscriptExpr(lhs2, new code::Identifier(argName[i]));
+      lhs3 = new code::ArraySubscriptExpr(lhs3, new code::Identifier(argName[i]));
+      // create multi-argument list
+      histArgs.push_back(new code::Identifier(argName[i]));
+    }
+    context->addStmt(
+      new code::BinaryOperator(
+        lhs,
+        new code::NewExpr(initvalue),
+        code::OpKind::BO_ASSIGN));
+
+    // Declare Histogram Storage
+    code::Type histType =
+      code::Type(HISTOGRAM_CLASS_NAME,
+        std::vector<code::Type>( {
           (qr->getVar()->getTyp()->getTyp() == ir::IRConstant::BOOL ?
-            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) })),
-      initvalue);
-  std::vector<code::Expr*> args;
-  args.push_back(transExpr(qr->getVar()));
-  args.push_back(new code::IntegerLiteral(1));
-  fun->addStmt(
-      code::CallExpr::createMethodCall(answervarname, HISTOGRAM_ADD_METHOD_NAME,
-                                       args));
-  // add print this result in print()
-  // :::=> answer_id.print("query expr");
-  corePrint->addStmt(
-      code::CallExpr::createMethodCall(answervarname,
-                                       HISTOGRAM_PRINT_METHOD_NAME,
-                                       std::vector<code::Expr*> { new code::StringLiteral(qr->str()) }));
+            BOOL_TYPE : mapIRTypeToCodeType(qr->getVar()->getTyp())) }), false, true);
+    code::VarDecl::createVarDecl(coreNs, answervarname,
+      code::Type(DYNAMICTABLE_CLASS_NAME,
+         std::vector<code::Type>{histType, code::Type(std::to_string(qr->getArgs().size()))}));
+
+    std::vector<code::Expr*> args;
+    args.push_back(transExpr(qr->getVar()));
+    args.push_back(new code::IntegerLiteral(1));
+    code::Stmt* evalSt = createPtrMethodCall(
+        lhs2, HISTOGRAM_ADD_METHOD_NAME, args);
+    code::Stmt* printSt = new code::CompoundStmt();
+    std::vector<code::Expr*> printExprVec = std::vector<code::Expr*>( {
+        new code::Identifier(buffername)});
+    std::string typeArgs = qr->getArg(0)->getTyp()->toString() + "[%d]";
+    for (int k = 1; k <= (int)qr->getArgs().size() - 1; k++) {
+        typeArgs += ", " + qr->getArg(k)->getTyp()->toString() + "[%d]";
+    }
+
+    // TODO: Find a new way to acquire just the query variable
+    // HACK FOR NOW: Acquire the name of the variable through string parsing
+    std::string variableName = qr->str().substr(0, qr->str().find("("));
+    printExprVec.push_back(new code::StringLiteral(variableName + "(" + typeArgs + ")\\n"));
+    for (int i = 0; i < argName.size(); i++) {
+        printExprVec.push_back(new code::Identifier(argName[i]));
+    }
+    ((code::CompoundStmt *) printSt)->addStmt(
+        new code::CallExpr(
+            new code::Identifier("sprintf"), printExprVec));
+    ((code::CompoundStmt *) printSt)->addStmt(
+        createPtrMethodCall(
+            lhs3, HISTOGRAM_PRINT_METHOD_NAME,
+            std::vector<code::Expr*> { new code::Identifier(buffername) }));
+    if (qr->getCond() != nullptr) {
+        evalSt = new code::IfStmt(transExpr(qr->getCond()), evalSt);
+        printSt = new code::IfStmt(transExpr(qr->getCond()), printSt);
+    }
+    // generate eval and print for-loops
+    for (int k = (int)qr->getArgs().size() - 1; k >= 0; --k) {
+      auto ty = dynamic_cast<const ir::NameTy*>(qr->getArg(k)->getTyp());
+      assert(ty != NULL);
+      code::Expr* loop_n = NULL; // loop_n duplicated
+      code::Expr* loop_n2 = NULL;
+      if (ty->getRefer()->getNumberStmtSize() == 0) {
+        loop_n = new code::IntegerLiteral(ty->getRefer()->getPreLen());
+        loop_n2 = new code::IntegerLiteral(ty->getRefer()->getPreLen());
+      } else {
+        std::string getnumvarfunname = getGetterFunName(getVarOfNumType(ty->toString()));
+        loop_n = new code::CallExpr(new code::Identifier(getnumvarfunname));
+        loop_n2 = new code::CallExpr(new code::Identifier(getnumvarfunname));
+      }
+      assert(loop_n != NULL);
+      evalSt = createForeachLoop(qr->getArg(k)->getVarName(), loop_n, evalSt, false, true);
+      printSt = createForeachLoop(qr->getArg(k)->getVarName(), loop_n2, printSt, false, true);
+    }
+
+    fun->addStmt(evalSt);
+    corePrint->addStmt(new code::DeclStmt(
+        new code::VarDecl(
+            corePrint,
+            buffername + "[256]",
+            code::Type("char"))));
+    corePrint->addStmt(printSt);
 }
 
 void MHTranslator::transAllEvidence(

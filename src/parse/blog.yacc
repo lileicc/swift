@@ -874,6 +874,42 @@ value_evidence:
 query_stmt:
   QUERY expression 
   { $$ = new Query(curr_line, curr_col, $2); }
+  | QUERY expression FOR type_var_lst
+  {
+    if ($4 != NULL) {
+      $$ = new Query(curr_line, curr_col, $2,
+                   *((vector<VarDecl>*)$4));
+      // delete $2;
+      delete $4;
+    }
+    else {
+      $$ = new Query(curr_line, curr_col, $2);
+      yyerror("invalid *for-loop* in query statement");
+    }
+  }
+  | QUERY expression FOR type_var_lst COLON expression
+  {
+    if ($4 != NULL && $6 != NULL) {
+      $$ = new Query(curr_line, curr_col, $2,
+                   *((vector<VarDecl>*)$4),
+                   $6);
+      // delete $2;
+      delete $4;
+    }
+    else {
+      $$ = new Query(curr_line, curr_col, $2);
+      if ($4 != NULL) delete $4;
+      yyerror("invalid *for-loop* in query statement");
+    }
+  }
+| QUERY error FOR type_var_lst
+  {
+    yyerror("invalid query for");
+  }
+| QUERY error FOR type_var_lst COLON expression
+  {
+    yyerror("invalid query for colon");
+  }
 | QUERY error
   {
     yyerror("invalid query");
