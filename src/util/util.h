@@ -369,8 +369,6 @@ void saveRealValue(std::string filename, double value) {
   fout.close();
 }
 
-
-
 ///////// Utils for Perturbation in Liu-West Filter /////////
 // Perturbation for Double variable #func#
 #define rho (0.97)
