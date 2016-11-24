@@ -18,8 +18,8 @@
 #include "MultivarGaussianDistrDecl.h"
 #include "MultinomialDistrDecl.h"
 #include "PoissonDistrDecl.h"
-#include "TruncatedGaussDistrDecl.h"
 #include "PrecisionGaussianDistrDecl.h"
+#include "TruncatedGaussDistrDecl.h"
 #include "UniformChoiceDistrDecl.h"
 #include "UniformIntDistrDecl.h"
 #include "UniformRealDistrDecl.h"
@@ -72,8 +72,8 @@ public:
   static const MultivarGaussianDistrDecl multivargaussianDistr;
   static const MultinomialDistrDecl multinomialDistr;
   static const PoissonDistrDecl poissonDistr;
-  static const TruncatedGaussDistrDecl truncatedGaussDistr;
   static const PrecisionGaussianDistrDecl precisiongaussianDistr;
+  static const TruncatedGaussDistrDecl truncatedGaussDistr;
   static const UniformChoiceDistrDecl uniformChoiceDistr;
   static const UniformIntDistrDecl uniformIntDistr;
   static const UniformRealDistrDecl uniformRealDistr;

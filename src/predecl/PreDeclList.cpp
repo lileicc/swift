@@ -56,11 +56,11 @@ const MultinomialDistrDecl PreDeclList::multinomialDistr =
 const PoissonDistrDecl PreDeclList::poissonDistr =
     PoissonDistrDecl();
 
-const TruncatedGaussDistrDecl PreDeclList::truncatedGaussDistr =
-    TruncatedGaussDistrDecl();
-
 const PrecisionGaussianDistrDecl PreDeclList::precisiongaussianDistr =
     PrecisionGaussianDistrDecl();
+
+const TruncatedGaussDistrDecl PreDeclList::truncatedGaussDistr =
+    TruncatedGaussDistrDecl();
 
 const UniformChoiceDistrDecl PreDeclList::uniformChoiceDistr =
     UniformChoiceDistrDecl();
