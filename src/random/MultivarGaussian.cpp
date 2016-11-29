@@ -34,8 +34,6 @@ void MultivarGaussian::init(const arma::mat& _mean, const arma::mat& _cov) {
   is_like_ok = false;
   is_loglike_ok = false;
 
-
-
   // Variables for computing cpd
   k = mean.n_rows;
   inv_cov = arma::inv_sympd(cov); // Assume it is positive definite!

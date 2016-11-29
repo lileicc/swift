@@ -41,6 +41,8 @@ PreDeclFactory::PreDeclFactory() {
       &predecl::PreDeclList::poissonDistr;
   decls[predecl::PreDeclList::truncatedGaussDistr.getName()] =
     &predecl::PreDeclList::truncatedGaussDistr;
+  decls[predecl::PreDeclList::precisiongaussianDistr.getName()] =
+      &predecl::PreDeclList::precisiongaussianDistr;
   decls[predecl::PreDeclList::uniformIntDistr.getName()] =
     &predecl::PreDeclList::uniformIntDistr;
   decls[predecl::PreDeclList::uniformRealDistr.getName()] =

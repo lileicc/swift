@@ -56,6 +56,9 @@ const MultinomialDistrDecl PreDeclList::multinomialDistr =
 const PoissonDistrDecl PreDeclList::poissonDistr =
     PoissonDistrDecl();
 
+const PrecisionGaussianDistrDecl PreDeclList::precisiongaussianDistr =
+    PrecisionGaussianDistrDecl();
+
 const TruncatedGaussDistrDecl PreDeclList::truncatedGaussDistr =
     TruncatedGaussDistrDecl();
 
@@ -94,7 +97,7 @@ const std::vector<std::string> PreDeclList::matConstructFuncList{ "eye", "zeros"
 const MatrixConstructFuncDecl PreDeclList::onesFuncDecl =
     MatrixConstructFuncDecl("ones"); // Should be mannually register in PredeclFunctory
 // function from matrix to real
-const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "norm", "cond", "log_det"};
+const std::vector<std::string> PreDeclList::matRealFuncList{ "trace", "det", "norm", "cond", "log_det", "accu"};
 const MatrixRealFuncDecl PreDeclList::asScalarFuncDecl =
     MatrixRealFuncDecl("as_scalar"); // Should be mannually register in PredeclFunctory
 // function from matrix to int
