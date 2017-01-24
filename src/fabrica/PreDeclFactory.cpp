@@ -31,12 +31,20 @@ PreDeclFactory::PreDeclFactory() {
     &predecl::PreDeclList::geometricDistr;
   decls[predecl::PreDeclList::diaggaussianDistr.getName()] =
     &predecl::PreDeclList::diaggaussianDistr;
+  decls[predecl::PreDeclList::invWishartDistr.getName()] =
+    &predecl::PreDeclList::invWishartDistr;
   decls[predecl::PreDeclList::multivargaussianDistr.getName()] =
     &predecl::PreDeclList::multivargaussianDistr;
+  decls[predecl::PreDeclList::laplaceDistr.getName()] =
+    &predecl::PreDeclList::laplaceDistr;
   decls[predecl::PreDeclList::multinomialDistr.getName()] =
     &predecl::PreDeclList::multinomialDistr;
   decls[predecl::PreDeclList::poissonDistr.getName()] =
       &predecl::PreDeclList::poissonDistr;
+  decls[predecl::PreDeclList::truncatedGaussDistr.getName()] =
+    &predecl::PreDeclList::truncatedGaussDistr;
+  decls[predecl::PreDeclList::precisiongaussianDistr.getName()] =
+      &predecl::PreDeclList::precisiongaussianDistr;
   decls[predecl::PreDeclList::uniformIntDistr.getName()] =
     &predecl::PreDeclList::uniformIntDistr;
   decls[predecl::PreDeclList::uniformRealDistr.getName()] =

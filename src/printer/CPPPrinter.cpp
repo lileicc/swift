@@ -240,8 +240,9 @@ void CPPPrinter::print(code::Code* prog) {
   fprintf(file, "#include \"random/Gaussian.h\"\n");
   fprintf(file, "#include \"random/Gamma.h\"\n");
   fprintf(file, "#include \"random/Geometric.h\"\n");
-  fprintf(file, "#include \"random/Poisson.h\"\n");
   fprintf(file, "#include \"random/InvGamma.h\"\n");
+  fprintf(file, "#include \"random/Poisson.h\"\n");
+  fprintf(file, "#include \"random/TruncatedGauss.h\"\n");
   fprintf(file, "#include \"random/UniformChoice.h\"\n");
   fprintf(file, "#include \"random/UniformInt.h\"\n");
   fprintf(file, "#include \"random/UniformReal.h\"\n");
@@ -267,9 +268,11 @@ void CPPPrinter::print(code::Code* prog) {
       fprintf(file, "#include \"random/DiagGaussian.h\"\n");
       fprintf(file, "#include \"random/Dirichlet.h\"\n");
       fprintf(file, "#include \"random/Discrete.h\"\n");
+      fprintf(file, "#include \"random/InvWishart.h\"\n");
       fprintf(file, "#include \"random/MultivarGaussian.h\"\n");
       fprintf(file, "#include \"random/MultivarGaussianIndep.h\"\n");
       fprintf(file, "#include \"random/Multinomial.h\"\n");
+      fprintf(file, "#include \"random/PrecisionGaussian.h\"\n");
       fprintf(file, "#include \"random/UniformVector.h\"\n");
       fprintf(file, "#include \"util/Hist_matrix.h\"\n");
       fprintf(file, "#include \"util/util_matrix.h\"\n");

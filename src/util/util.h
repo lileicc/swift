@@ -68,6 +68,8 @@ inline std::string toString(const std::vector<int>& v) {
 // NOTE this function cannot handle infinity
 template<typename T>
 inline T logsum(T a, T b) {
+  if (a < -1e100) return b;
+  if (b < -1e100) return a;
   if (a == b) {
     return a + log(2);
   } else if (a > b) {
@@ -361,14 +363,11 @@ void saveRealValue(std::string filename, double value) {
     std::cerr << "[ Run-Time Error ] >> Failed to save real value at < " + filename + " >!"<<std::endl;
     std::exit(0);
   }
-  
   fout.setf(std::ios::fixed);
   fout.precision(10);
   fout << value << std::endl;
   fout.close();
 }
-
-
 
 ///////// Utils for Perturbation in Liu-West Filter /////////
 // Perturbation for Double variable #func#
