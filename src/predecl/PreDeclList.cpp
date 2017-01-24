@@ -47,6 +47,9 @@ const InvGammaDistrDecl PreDeclList::invGammaDistr =
 const InvWishartDistrDecl PreDeclList::invWishartDistr =
     InvWishartDistrDecl();
 
+const LaplaceDistrDecl PreDeclList::laplaceDistr =
+    LaplaceDistrDecl();
+
 const MultivarGaussianDistrDecl PreDeclList::multivargaussianDistr =
     MultivarGaussianDistrDecl();
 
