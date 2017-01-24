@@ -1,0 +1,16 @@
+type Data;
+type Step;
+distinct Data D[10];
+distinct Step S[3];
+
+fixed RealMatrix A = randn(3, 10);
+
+random Real mu ~ Gaussian(0, 1);
+
+random Real B(Data d, Step t) ~ Gaussian(mu, 1);
+
+random Real C(Data d, Step t) ~ Gaussian(B(d, t), 1);
+
+obs C(d, t) = A[toInt(t)][toInt(d)] for Step t, Data d;
+
+query B(d, t) for Step t, Data d;
