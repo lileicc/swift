@@ -39,7 +39,7 @@ Download the VC++ solution config file from the armadillo webpage
 Note if you are using visual studio under Windows, please compile inside visual studio to obtain the final binary (step 3).
 
 ### Pre-Compiled Binaries
-Check the pre-compiled executable file for swift in the [bin](bin/) folder.
+Check the pre-compiled executable file for swift in the [binary](binary/) folder.
 
 ### Documentation
 Swift inherits all the syntax from BLOG with some extentions. Detailed documentations are under development. Please firstly check models under "example" directory to have a first impression. You can also check the documentations for BLOG for basic usage (http://bayesianlogic.github.io/pages/documentation.html).
