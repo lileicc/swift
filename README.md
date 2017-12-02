@@ -1,4 +1,4 @@
-# swift
+# Swift
 A compiler for BLOG probabilistic programming language (http://bayesianlogic.github.io/).
 
 ### Check the paper: 
